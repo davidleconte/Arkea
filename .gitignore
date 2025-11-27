@@ -1,0 +1,103 @@
+# =============================================================================
+# .gitignore pour POC Migration HBase → HCD
+# =============================================================================
+
+# Logs
+*.log
+*.log.*
+logs/
+**/logs/
+hcd-1.2.3/logs/
+binaire/hcd-1.2.3/logs/
+
+# Données HCD
+hcd-data/
+**/hcd-data/
+*.db
+*.crc32
+*.txt
+*.sstable
+
+# Checkpoints Spark
+/tmp/spark-checkpoints/
+spark-checkpoints/
+**/checkpoint/
+
+# Fichiers compilés
+*.class
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+target/
+build/
+dist/
+*.egg-info/
+
+# Archives temporaires
+*.tar.gz.tmp
+*.tgz.tmp
+*.zip.tmp
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-*
+.project
+.classpath
+.settings/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Fichiers de sauvegarde
+*.bak
+*.backup
+*~
+*.orig
+
+# Fichiers de test temporaires
+/tmp/test_*
+*.tmp
+
+# Variables d'environnement locales (si sensibles)
+.env
+.env.local
+*.key
+*.pem
+*.cert
+
+# Fichiers de données sensibles
+*.csv
+*.json
+!package.json
+!tsconfig.json
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Fichiers de cache
+.cache/
+*.cache
+
+# Fichiers de lock
+*.lock
+*.pid
+
+# Fichiers de configuration locaux
+*.local
+config.local.*
+
+
+

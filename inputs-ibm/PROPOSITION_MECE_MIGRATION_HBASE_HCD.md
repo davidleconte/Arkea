@@ -1,0 +1,1560 @@
+
+
+# **Proposition MECE pour la migration d’HBase vers IBM HCD/SAI**
+
+## **Axe Technologique**
+
+### **Constats actuels**
+
+L’infrastructure HBase actuelle d’Arkéa est déployée en mode Hadoop (HDFS) sur une version ancienne (HBase 1.1.2 sur HDP 2.6.4). En production, deux instances logiques HBase tournent sur le même cluster Hadoop, en plus d’une instance mutualisée hors-prod. Chaque nœud HBase est un serveur physique du cluster assurant à la fois le rôle de DataNode HDFS (avec réplication x3) et de RegionServer HBase pour le temps réel. Cette architecture apporte un service de lecture/écriture distribué, exploité pour des usages opérationnels critiques (Domirama, catégorisation, BIC, EDM). Cependant, elle s’appuie sur une pile lourde (HDFS, Yarn, ZooKeeper…) désormais en fin de vie, nécessitant un effort important de maintenance.
+
+HBase fournit des fonctionnalités spécifiques dont Arkéa a tiré parti pour répondre aux exigences de performance et de fiabilité :
+
+* **Gestion du cycle de vie des données (TTL)** : certaines tables/Colonnes Families ont un TTL pour purger automatiquement les données anciennes (par ex. \~10 ans sur la CF *category* de Domirama), ce qui évite d’avoir à gérer manuellement la suppression des enregistrements périmés. De même, BIC utilise un TTL de 2 ans pour limiter l’horizon de la timeline client.
+
+* **Lecture sélective efficace** : utilisation de *Bloom filters* au niveau Row+Col pour accélérer les scans avec filtres de valeur. En combinaison avec des *ValueFilter*, cela permet de scanner d’importants volumes en limitant les E/S aux seules colonnes pertinentes, par exemple pour ne retourner que les opérations ayant un certain attribut.
+
+* **Comptage distribué atomique** : emploi des compteurs HBase via l’opération `INCREMENT` pour maintenir des statistiques (feedback catégorie, etc.) en garantissant l’atomicité. Ce mécanisme de *cell counter* simplifie l’agrégation concurrente de données (pas de collisions ni de verrous côté client).
+
+* **Multi-version et gestion des timestamps** : HBase stocke par conception plusieurs versions d’une cellule. Arkéa exploite cette caractéristique dans la catégorisation : le batch écrit toujours avec un timestamp fixe alors que les corrections clients sont écrites avec l’horodatage courant, ce qui permet de conserver les deux valeurs sans écrasement. Cette astuce de temporalité des cellules garantit qu’une recatégorisation manuelle par un client n’est pas perdue lors d’un rechargement batch.
+
+* **Scans distribués et ingestion massive** : la plateforme a dû développer un outil custom (`hbase-tools`) pour merger les petites régions et compacter les HFiles, ainsi qu’une librairie maison facilitant les *FullScan Batch* en parallélisant les scans (2 mappeurs par RegionServer au lieu de 1 par fichier de région). Cela indique que les scans globaux de tables (pour exports, analyses) sont un besoin régulier. Par ailleurs, le mécanisme de *bulk load* d’HBase (génération d’HFiles puis chargement) est utilisé pour insérer rapidement de gros volumes (ex : chargements MapReduce de Domirama et de catégorisation).
+
+En termes de performance, le moteur HBase assure le temps réel avec des accès directs par clé et des scans séquentiels rapides sur de larges plages de lignes. Néanmoins, certaines opérations restent coûteuses : par exemple Domirama, pour restituer les opérations d’un client, effectue un SCAN complet des 10 ans d’historique à chaque connexion afin de construire un index de recherche Solr en mémoire. Ce procédé, bien que fonctionnel, charge notablement le système (surtout si de nombreux clients se connectent simultanément) et révèle l’absence d’indexation secondaire native dans HBase. De plus, la version âgée de la stack signifie que l’installation pourrait souffrir de limitations technologiques (pas d’intégration native avec le cloud ou l’IA, support éditeur terminé, etc.), ce qui motive la recherche d’un remplaçant.
+
+### **Enjeux de la migration**
+
+**Garantir les performances et la disponibilité :** un défi majeur sera d’atteindre au minimum les mêmes performances qu’HBase, tant en écriture qu’en lecture, tout en améliorant la latence de certaines requêtes. La nouvelle solution devra absorber un flux d’ingestion soutenu (par ex. événements BIC temps réel) et fournir des réponses rapides pour des scans de larges historiques (ex : 10 ans d’opérations à afficher instantanément). L’architecture cible doit assurer une haute disponibilité sans point de contention unique (actuellement, HBase s’appuie sur un Master unique pour la coordination, même s’il y a des mécanismes de failover). Il faudra veiller à la résilience en cas de panne d’un nœud ou de surcharge d’une partition de données.
+
+**Répliquer les fonctionnalités clés d’HBase :** chaque usage spécifique exploité devra trouver un équivalent dans IBM HCD/SAI, ou être repensé :
+
+* *TTL* : la purge automatique des données expirées est impérative pour respecter les rétentions (ex : 10 ans, 2 ans). Il faudra que la nouvelle base gère nativement l’expiration des données ou qu’on mette en place des tâches de nettoyage sans dégrader les performances.
+
+* *Scans avec filtres* : la capacité de lire des plages de données en filtrant par valeur (ex : opérations d’un type donné, interactions sur un canal donné) devra être conservée. Or, dans les bases type Cassandra, les requêtes sont généralement basées sur la clé primaire. L’introduction d’index secondaires ou d’une autre stratégie (données dénormalisées supplémentaires) est un enjeu pour éviter des parcours complets de données qui seraient rédhibitoires en production.
+
+* *Incréments atomiques* : il faudra pouvoir implémenter les compteurs distribués (pour les feedbacks de catégorisation, etc.) sans perdre l’atomicité ni l’efficacité. Toute approximation ou non-atomicité pourrait fausser des statistiques sensibles.
+
+* *Horodatage et versionnement* : la nouvelle base ne gère peut-être pas le multi-versioning de la même façon. Si on a besoin de conserver deux versions distinctes (batch vs correction manuelle), il faudra le simuler via le modèle de données (par ex., stocker la valeur auto et la valeur ajustée séparément).
+
+* *Bulk load / migrations* : transférer potentiellement des milliards de lignes d’un système à l’autre est un défi logistique. Il faudra des outils de migration capables de lire HBase (via MapReduce ou Spark par ex.) et d’écrire dans HCD en minimisant le downtime. De plus, à l’avenir, il faudra pouvoir charger efficacement de gros volumes (par ex. en cas de ré-initiation d’une table, ou chargement d’historique).
+
+**Refonte de l’architecture** : on ne peut pas se contenter d’un *lift-and-shift* car HBase et Cassandra (sur lequel est basé HCD) ont des architectures différentes. Il faudra redéfinir le partitionnement des données, les clés, et possiblement introduire de la dénormalisation pour compenser l’absence de jointures ou scans globaux faciles. L’enjeu est d’obtenir une conception *scalable* et *elastic* : pouvoir ajouter des nœuds facilement en cas d’augmentation de volume, ce qui avec HBase/HDFS pouvait nécessiter de rééquilibrer manuellement les régions. Dans le nouveau système, la distribution de données devra se faire de manière plus automatique, tout en évitant les écueils (clés mal réparties causant des *hotspots*, etc.).
+
+**Continuité du service et fiabilité :** la migration doit se faire sans perturbation majeure pour les utilisateurs finaux. Cela implique potentiellement une période de double-écriture ou de synchronisation entre HBase et HCD pour éviter toute perte de données. Il faudra orchestrer des bascules progressives et tester intensivement pour s’assurer que le nouveau système répond correctement avant de désactiver HBase. Durant la cohabitation, la cohérence des données entre les deux stores doit être assurée. Par ailleurs, la fiabilité du nouveau système doit être éprouvée : HBase étant CP (consistant et partition-tolérant) dans le théorème CAP, il offre des lectures à jour une fois la donnée écrite. Cassandra (AP par défaut) offre la disponibilité et la partition-tolérance, mais la consistance est paramétrable (via le *Consistency Level*). Un enjeu sera de configurer HCD/Cassandra de sorte que les cas exigeant une forte consistance (ex : lecture immédiate d’une donnée fraîchement écrite, comme une recatégorisation) se comportent correctement du point de vue applicatif.
+
+**Intégration écosystème et IA :** à moyen terme, Arkéa souhaite intégrer davantage d’IA et de recherche avancée sur ces données. Le nouvel environnement doit donc non seulement remplacer HBase, mais aussi s’insérer dans une architecture plus large potentiellement gérée par IBM (Watsonx par ex.). Un enjeu est de s’assurer que les outils analytiques (Spark, outils BI) pourront facilement interroger la nouvelle base ou consommer ses données. De plus, la possibilité d’exploiter des fonctionnalités d’AI (telles que la vectorisation et le *semantic search* sur les données client) doit être ouverte. Cela demande de vérifier que HCD/SAI peut stocker et requêter des embeddings vectoriels ou s’interfacer avec des modèles ML aisément.
+
+**Coût total de possession :** bien que la migration vise une réduction de coûts, il faut prendre en compte **tous** les aspects : le coût du logiciel (licence HCD/DataStax éventuelle), le coût humain (formation, développement de la migration), et l’évolution des coûts d’infrastructure (peut-on réduire le nombre de serveurs ou leur taille ? économiser du stockage via une meilleure efficacité ?). Il sera crucial de dimensionner correctement la nouvelle plateforme pour éviter les surcoûts (par exemple, ne pas sur-provisionner inutilement) tout en gardant de la marge pour la croissance. L’enjeu est de prouver qu’à volume et usage égal, HCD permettra des économies par rapport à HBase : moins de maintenance manuelle, moins de ressources gaspillées, meilleur usage du matériel.
+
+### **Propositions de migration vers HCD/SAI**
+
+**Adoption d’une base unifiée moderne :** Il est proposé de migrer vers IBM **Hyper-Converged Data Store (HCD)**, solution bâtie sur Apache Cassandra 4.x, offrant une approche cloud-native pour gérer des données opérationnelles, analytiques et l’IA sur une plateforme unifiée. HCD élimine la dépendance à HDFS en stockant les données de façon distribuée sur les nœuds Cassandra eux-mêmes, ce qui supprime le besoin d’un cluster Hadoop distinct. Chaque nœud HCD gère son stockage et la réplication des données (facteur configurable, typiquement 3 pour rester aligné sur la sécurité actuelle) de manière automatique. Cette architecture simplifiée, sans NameNode central ni RegionServer séparé, devrait réduire la complexité opérationnelle et améliorer la résilience (tous les nœuds sont égaux, pas de *single point of failure*). En exploitant l’infrastructure hyperconvergée, Arkéa pourra **réduire les coûts et la charge opérationnelle** liés à la gestion du stockage distribué traditionnel.
+
+**Dimensionnement et déploiement :** on instaurera un **unique cluster Cassandra/HCD** englobant les deux périmètres HBase précédents (Domirama/catégorisation d’une part, BIC/EDM d’autre part), en définissant par exemple deux *keyspaces* pour cloisonner les données par domaine applicatif. Le fait de consolider sur un seul cluster permettra de mieux mutualiser les ressources tout en appliquant des règles de limitation au besoin (par ex., limiter la part de CPU consommée par les requêtes analytiques pour ne pas impacter les usages temps réel). HCD supporte les déploiements flexibles y compris en conteneurs ou machines virtuelles – on pourra donc envisager un déploiement sur l’infrastructure existante ré-allouée ou sur une plateforme Kubernetes (IBM prévoit la gestion via Mission Control pour opérer HCD en cluster Kubernetes notamment). Une telle approche facilitera l’administration (console unifiée) et les évolutions futures (scaling horizontale par ajout de pods/nœuds).
+
+**Performances et refonte technique :** le nouveau modèle de données (détaillé plus loin) visera à **maximiser les lectures par clé de partition** (pattern primaire de Cassandra), afin que les consultations fréquentes (historique d’un client, timeline interactions d’un client) se fassent via une requête localisée sur un nœud, équivalente à un accès indexé. On profitera du tri par clé de clustering pour conserver l’ordre chronologique inverse ou naturel selon les besoins sans coût supplémentaire. Pour les **écritures**, Cassandra excelle dans le traitement en masse grâce à son mécanisme de journalisation et d’écriture séquentielle sur disque (log-structured storage). On veillera à choisir une stratégie de compaction appropriée (par ex. *Time Window Compaction* pour les données à TTL comme les interactions BIC, afin d’effacer proprement les expirations par fenêtre temporelle). Cela garantira des latences maîtrisées même en présence de forts volumes de tombstones dus aux TTL.
+
+**Indexation secondaire via SAI :** l’introduction de **Storage-Attached Indexing (SAI)** constitue un atout central de la solution. SAI est un moteur d’index distribué profondément intégré à Cassandra, qui **offre une palette étendue de fonctionnalités d’indexation** auparavant impossibles ou inefficaces sur Cassandra. En particulier, il permet :
+
+* des recherches par valeurs sur n’importe quelle colonne, y compris des colonnes de texte tokenisées (recherche full-text simple), des colonnes numériques avec conditions de range, ou des colonnes faisant partie de collections. Par exemple, on pourra créer un index SAI sur le libellé d’opération (*text*) afin d’autoriser des requêtes du type *« trouver toutes les opérations contenant le mot-clé “loyer” »* sans parcours exhaustif de la table – le moteur SAI localisera directement les partitions concernées. De même, un index sur la catégorie permettra de retrouver rapidement toutes les opérations catégorisées “Alimentation” pour un client (ou globalement), ce qui était lourd via HBase. SAI peut combiner plusieurs filtres (AND/OR) dans une requête, ce qui **évite de maintenir manuellement plusieurs tables dérivées** pour chaque cas d’interrogation complexe.
+
+* des performances d’indexation optimisées : SAI mutualise les structures d’index sous-jacentes et réduit l’empreinte disque, tout en s’intégrant au cycle de vie des données (snapshots, compactions, expiration TTL) sans ajout de complexité opérationnelle. D’après la documentation, SAI offre le meilleur compromis en Cassandra en termes de fonctionnalités et de coût, surpassant les anciens index secondaires en efficacité et en usage disque. Son usage **réduira la nécessité de lectures full-scan**, améliorant drastiquement la performance des requêtes de recherche et soulageant la charge globale du cluster.
+
+Concrètement, la **synergie HCD+SAI** permettra d’atteindre les objectifs de performance et de simplification :
+
+* *Amélioration de la recherche* : Plutôt que de scanner 10 ans de données à chaque connexion client pour indexer en mémoire, le système pourra interroger directement l’index SAI persistant. Par exemple, lors d’une recherche d’opérations par mot-clé ou critère, une requête CQL avec filtre sur la colonne correspondante exploitera SAI pour renvoyer uniquement les lignes pertinentes, **éliminant le besoin de construire un index Solr éphémère côté application**. Le temps de réponse en sera réduit et constant, et le calcul déporté sur le cluster évitera de consommer du CPU sur les serveurs applicatifs.
+
+* *Réduction de la complexité de data model* : Là où auparavant on dupliquait des données ou créait des tables ad hoc pour supporter certains filtres (par ex., HBase *domirama-meta-categories* utilisé comme fourre-tout pour éviter des petites tables), SAI autorisera une conception plus *schéma* : on peut maintenir plus de données dans une même table et interroger par différents critères sans pénalité extrême. **Cela respecte le principe MECE** en évitant la prolifération de tables redondantes pour couvrir tous les cas d’usage.
+
+* *Maintien des TTL et purge auto* : Cassandra prend en charge nativement le TTL par cellule/ligne. On pourra donc configurer pour chaque table une *durée de vie par défaut* (`default_time_to_live`) équivalente aux TTL HBase actuels (par ex. 315360000 s ≈ 10 ans) de sorte que toute insertion expire automatiquement passé ce délai. SAI est conçu pour gérer l’expiration sans ré-indexations coûteuses (les index sont purgés au fil des suppressions/compactions). Ainsi, les objectifs de **rétention de données** seront atteints de manière transparente et fiable, sans tâches batch de purge.
+
+* *Compteurs atomiques* : Cassandra offre un type de données compteur qui assure des incréments atomiques distribués, ce qui remplacera l’usage de `INCREMENT` d’HBase pour les feedbacks. Chaque opération d’incrément en Cassandra est gérée via un mécanisme optimiste et résilient, garantissant au final la cohérence des totaux. Il faudra configurer ces compteurs avec un *Consistency Level* renforcé (QUORUM) pour minimiser le risque d’anomalies (compteurs Cassandra étant *eventually consistent*). Dans l’ensemble, on **préservera la sémantique des compteurs HBase** dans la nouvelle solution.
+
+**Consistance et contraintes ACID :** Même si Cassandra n’est pas ACID multi-lignes, on peut s’en accommoder par design. Les cas d’usage HBase touchent principalement des opérations idempotentes sur des lignes individuelles (writes de transactions, updates de catégories ou incréments). Ce schéma correspond bien à Cassandra. Pour s’assurer qu’une lecture post-écriture voit la donnée la plus à jour (forte consistance quand nécessaire, par ex. confirmation immédiate d’une recatégorisation au client), on choisira un *Consistency Level* de lecture de QUORUM conjugué à des écritures QUORUM également, ce qui dans un cluster RF=3 garantit qu’une lecture attend au moins l’application de l’écriture sur la majorité des réplicas. Ainsi, on obtient un comportement proche du mode consistant d’HBase, tout en profitant de la disponibilité élevée de Cassandra (lectures/écritures tolérant la perte d’un nœud). Pour les opérations non critiques on pourra user de CL plus faibles (ex : le batch qui incrémente des compteurs pourrait être EVENTUAL pour de meilleures perf, si quelques unités d’écart temporaires sont acceptables).
+
+**Outils de migration et d’intégration :** Durant la migration, on exploitera des outils robustes. IBM HCD s’accompagne de DataStax Bulk Loader (DSBulk), un utilitaire capable de charger des fichiers CSV/JSON massivement en parallèle dans Cassandra – idéal pour ingérer un export d’HBase. On pourra également mobiliser Apache Spark avec le connecteur Cassandra (ou les fonctionnalités analytiques de DSE) pour orchestrer la migration des données avec transformation de schéma si besoin. Pour l’ingestion continue de données en provenance de Kafka (cas BIC/EDM), HCD/Cassandra propose des connecteurs et API de streaming (DataStax a un **Kafka connector** qui pourra simplifier la reprise des flux en écrivant directement dans Cassandra). Ces intégrations **moderniseront l’exploitation** en remplaçant Pig et les jobs MapReduce par des technologies plus actuelles, tout en assurant l’ingestion temps réel.
+
+**Intégration de l’IA et analytics avancés :** La plateforme HCD ouvre la voie à l’**intégration native de l’intelligence artificielle** dans les données opérationnelles. Elle permet de stocker et rechercher des **vecteurs** (embeddings) aux côtés des données tabulaires traditionnelles. Arkéa pourra ainsi, à terme, enrichir ses tables de transactions ou d’interactions avec des vecteurs représentant le contexte sémantique (par ex. un vecteur de description pour chaque opération bancaire). SAI sait indexer ces vecteurs pour faire de la **recherche par similarité** (ex : retrouver les interactions similaires à un modèle donné, pour un assistant virtuel du conseiller). Combiné avec la plateforme Watsonx d’IBM, cela permettra des cas d’usage de *Retrieval-Augmented Generation* (RAG) – par exemple, un chatbot conseiller qui interroge en temps réel la base d’interactions \+ transactions vectorisée pour formuler une réponse pertinente. En somme, la migration prépare une **infrastructure “AI-ready”** où les données clients pourront être exploitées par des algorithmes de ML sans nécessiter de pipelines complexes d’export vers un data lake séparé. L’environnement HCD supportant simultanément les charges transactionnelles et analytiques, Arkéa gagnera en agilité pour développer ces nouvelles applications AI sur sa donnée interne.
+
+Enfin, du point de vue **exploitation pure**, la solution HCD apporte des outils pour simplifier la vie de l’administrateur : par exemple **Mission Control** (console de gestion cloud) pour déployer, monitorer et patcher les clusters de manière centralisée, ce qui standardisera l’administration comparé aux scripts ad-hoc actuels sur HBase. Les opérations lourdes comme l’ajout d’un nœud ou la sauvegarde des données seront plus automatisées (Cassandra gère automatiquement le *resharding* des données d’un nouveau nœud, et la *streaming replication* copie aussi les index SAI sans requérir de reconstruction manuelle). Globalement, en adoptant HCD/SAI, Arkéa obtiendra une infrastructure moderne alignée sur ses objectifs : **réduire les coûts** (moins de composants à maintenir, meilleure efficacité disque grâce à SAI), **améliorer les performances** (indexation avancée, latences constantes, passage à l’échelle horizontal aisé), **simplifier l’exploitation** (moins de tuning artisanal, outillage IBM/DataStax) et **préparer l’intégration de l’IA** (données directement exploitables pour le machine learning).
+
+## **Axe Données**
+
+### **Constats actuels**
+
+Les schémas de données actuels dans HBase ont été conçus sur mesure pour chaque projet, en exploitant la grande flexibilité du modèle *NoSQL wide-column* d’HBase. Les principaux ensembles de données sont :
+
+* **Domirama – Transactions historiques** : stocke les opérations sur comptes chèques des clients sur 10 ans. La table principale `domirama` (namespace B997X04) contient une **ligne par opération**, la clé étant composée de : le code SI (entité bancaire), le numéro de contrat (compte) et un identifiant binaire combinant numéro d’opération \+ date pour obtenir un tri antichronologique. Ainsi, les lignes d’un même compte sont contiguës et classées du plus récent au plus ancien. Deux *Column Families* sont définies : `data` (données métier) et `meta` (métadonnées éventuelles). Les données de l’opération sont stockées de manière compacte : l’enregistrement COBOL est sérialisé en binaire base64, avec plusieurs colonnes (qualifiers) pour différents *copies* ou fragments de l’enregistrement. L’écriture des opérations se fait par lots quotidiens : les données extraites du système de core banking (tenue de compte) sont préparées sous PIG puis injectées dans HBase via un job MapReduce (les Puts HBase sont effectués dans la phase reduce via l’API Java). En lecture, lors de la connexion client, l’application effectue un SCAN de toutes les opérations du client pour en construire un index de recherche en mémoire (basé sur Solr). Il n’y a pas de TTL sur les données de transactions elles-mêmes (la rétention 10 ans est gérée par la limite de scan côté appli, et la table *domirama-budget* mentionnée serait obsolète).
+
+* **Catégorisation des opérations** : extension du projet Domirama pour assigner automatiquement une catégorie aux libellés d’opérations, avec personnalisation possible par le client. Par simplicité et performance, **aucune nouvelle table** n’a été créée : le projet a ajouté une *Column Family* `category` à la table existante `domirama`, en réutilisant **exactement le même design de clé** que les transactions. Pour chaque opération (chaque ligne), cette CF stocke la ou les catégories et infos associées. Le format des données diffère : un objet Thrift sérialisé en binaire est stocké dans une colonne, et **plusieurs colonnes dynamiques** supplémentaires sont ajoutées pour dupliquer certaines propriétés du POJO Thrift. Ces colonnes redondantes permettent de filtrer les opérations par critère (par ex. filtrer toutes les opérations dont la catégorie auto \= “loisirs”) directement via un Scan \+ ValueFilter, le tout optimisé par un Bloomfilter ROWCOL sur cette CF. La CF category a un **TTL d’environ 3653 jours (10 ans)** afin que les catégorisations expirent en même temps que l’opération correspondante. En écriture, deux modes : un batch MapReduce fait du *bulkload* initial (chargement massif des catégories calculées) et, en parallèle, l’API permet au client de *corriger* la catégorie d’une opération (ex : changer une opération catégorisée “Divers” en “Salaire”) en faisant un PUT direct dans HBase. Pour éviter qu’un rerun du batch n’écrase les corrections client, le batch écrit toujours ses catégories avec un timestamp fixe (ex : epoch constant) tandis que le PUT client utilise le timestamp temps réel ; de ce fait, la valeur client (timestamp plus élevé) « gagne » et n’est pas écrasée lors d’un *replay*. En lecture, l’application de catégorisation interroge en temps réel HBase via des SCAN filtrés sur valeurs (ex : récupérer toutes les opérations d’un client déjà catégorisées « loisirs » pour lister au client). On note qu’une table auxiliaire `domirama-budget` existait possiblement, mais elle est devenue obsolète (peut-être remplacée par cette intégration directe).
+
+* **BIC – Base d’Interaction Client** : projet marketing visant à stocker **toutes les interactions** entre la banque et ses clients sur l’ensemble des canaux (web, agence, RDV, mail, SMS, etc.), afin de fournir aux conseillers une timeline historique de 2 ans pour chaque client ou foyer. HBase contient ces événements dans la table `bi-client` (il existe une table équivalente `bi-prospect` pour les prospects). **Clé de ligne** : code entité (EFS), identifiant client, date de l’interaction au format YYYYMMDD, et code du canal, complétés d’un identifiant technique garantissant l’unicité (peut-être un compteur ou UUID). Ce design de clé groupant client et date assure que toutes les interactions d’un client sont rangées ensemble et triées par date. Plusieurs Column Families aux noms lettre (`A`, `C`, `E`, `M`) sont définies : elles contiennent chacune des attributs extraits de l’événement, avec pour certaines un *VERSIONS=2* (peut-être pour conserver la dernière modification de certains champs). Les interactions sont stockées en JSON (texte) dans une colonne principale, et **en parallèle des colonnes dynamiques “normalisées”** répètent certains champs du JSON (par ex. type d’interaction, résultat, etc.). Cela vise le même but qu’en catégorisation : pouvoir filtrer les interactions via SCAN sur ces colonnes indexées en Bloomfilter (ROWCOL). L’alimentation se fait en **temps réel via Kafka** : un consumer Tomcat (module *bic-event*) consomme les événements et les écrit immédiatement dans HBase. En complément, un batch MapReduce permet le *bulkload* pour injecter éventuellement des interactions historiques ou retraiter des données en masse. La lecture se fait soit en temps réel via une API (module *bic\_backend*) qui scanne les interactions d’un client avec éventuellement des filtres de valeur (par ex. ne montrer que les interactions agence), soit en batch pour des besoins d’export : un job *bic-unload* extrait régulièrement les nouvelles interactions et les stocke en HDFS au format ORC pour alimenter d’autres outils analytiques. Un TTL est appliqué (2 ans) sur ces données afin de purger automatiquement les interactions \> 24 mois.
+
+* **EDM – Environnement de Données Marketing** : projet marketing complémentaire à BIC. EDM calcule quotidiennement des indicateurs de connaissance client de façon batch, tout en recevant en temps réel certains événements métier pour affiner ces indicateurs à la volée. HBase sert ici de *store* pour **tous les événements “non-interactions”** (par opposition à BIC) et comme accès aux indicateurs calculés en batch, pour permettre une consolidation dynamique et le déclenchement d’actions en temps réel. En pratique, EDM utilise le **même cluster HBase que BIC** et un design d’architecture identique. On peut donc en déduire que la structure de table EDM est semblable : probablement une table partitionnée par entité/client ou par type d’événement, stockant des JSON d’événements (ex : transactions ou alertes divers) sur 2 ans également. Les détails ne sont pas explicités dans le document, mais on sait qu’il y a des modules *edm-event* et *edm-hbase*, suggérant une séparation du code d’ingestion et de consultation/traitement. On peut supposer que les événements EDM sont aussi écrits en temps réel (peut-être via Kafka également) et qu’HBase est interrogé pour récupérer à la volée l’historique de ces événements lors du calcul en temps réel d’indicateurs. En somme, EDM et BIC forment un écosystème convergent où HBase stocke différents types d’enregistrements temporels liés aux clients.
+
+* **Table *domirama-meta-categories*** : table HBase dédiée aux données de configuration et de suivi du moteur de catégorisation. Elle illustre un usage astucieux d’HBase pour éviter la multiplication de petites tables : au lieu de créer une table par besoin (feedback, règles custom, etc.), plusieurs **espaces de clés distincts** cohabitent dans `domirama-meta-categories` pour des usages variés. Par exemple, une clé commençant par `ACCEPT` stocke l’acceptation par le client de l’affichage d’une catégorie suggérée (suivie d’identifiants de compte et de transaction), une clé `OPPOSITION` marque les opérations opposées à la catégorisation, `HISTO_OPPOSITION` pour l’historique de ces oppositions, `CUSTOM_RULE` pour les règles de catégorisation spécifiques définies par le client, `SALARY_DECISION` pour les décisions tagguées salaire, etc.. Chaque “famille” de clés est préfixée différemment, mais stockée dans cette unique table avec trois CF (`config`, `cpt_customer`, `cpt_engine`). Les CF `cpt_customer` et `cpt_engine` autorisent jusqu’à 50 versions, ce qui laisse penser qu’on y stocke des compteurs ou des historiques (tandis que `config` pourrait contenir des paramètres statiques). **Usages notables** : les feedbacks du moteur de catégorisation sont enregistrés ici. Par exemple, pour un libellé donné (`ANALYZE_LABEL`), on conserve les différentes catégories qui lui ont été attribuées par l’IA ou les clients, ainsi que le nombre d’occurrences de chacune via des compteurs HBase. Ceci est implémenté par des **colonnes dynamiques pour chaque catégorie** rencontrée, la valeur de la colonne étant le compteur d’occurrences. Les incréments et décréments atomiques d’HBase sont utilisés intensivement pour mettre à jour ces distributions de catégories en temps réel dans le batch ou l’API. Ce modèle colonnes étendues permet d’obtenir facilement la **distribution globale** des catégories pour un format de libellé particulier, ce qui sert à ajuster le moteur ou analyser sa pertinence. Enfin, certaines clés de cette table stockent possiblement des données sans compteur, par exemple les règles custom (peut-être stockées sous forme de sérialisé ou de flags booléens).
+
+En résumé, Arkéa a exploité la **flexibilité schéma-less d’HBase** pour optimiser chaque cas : données compactées et triées pour Domirama, ajout de colonnes dynamiques pour introduire de nouvelles fonctionnalités sans refonte (catégorisation), utilisation de plusieurs CF pour séparer logiquement les infos ou gérer des *versions* distinctes (ex CF meta vs data, CF A/C/E/M dans BIC), détournement d’une table unique pour stocker des jeux de données hétérogènes (meta-categories). Cette souplesse a un revers : la structure effective des données est complexe à appréhender globalement, et fortement couplée aux traitements (beaucoup de logique dans les applis pour interpréter ou filtrer ces colonnes dynamiques, ou pour composer/décomposer les clés). **La migration exige une refonte du modèle de données** pour s’aligner sur les bonnes pratiques Cassandra, tout en conservant la richesse fonctionnelle obtenue avec HBase.
+
+### **Enjeux de la migration (Données)**
+
+**Transformation de schéma – de HBase à Cassandra :** Cassandra (et donc HCD) impose un schéma de table défini à l’avance (colonnes fixes, types définis), contrairement à HBase qui autorise des colonnes arbitraires par famille. L’un des défis majeurs sera de **traduire les “colonnes dynamiques”** et les multiples CF utilisés en un schéma Cassandra normalisé. On devra déterminer quelles informations méritent une colonne explicite, lesquelles peuvent être stockées sous forme plus compacte (JSON ou blob), et comment représenter les structures aujourd’hui implicites (par exemple, les préfixes de clés dans *domirama-meta-categories* doivent devenir soit des tables séparées, soit un champ clé type pour filtrer). Il faudra veiller à **ne rien oublier des données actuelles** lors de la refonte, car chaque élément stocké dans HBase répond à un besoin métier décrit dans le document.
+
+**Partitionnement et clés primaires :** La réussite en Cassandra repose sur le choix judicieux des *partition keys* et *clustering keys*. HBase, via la clé de ligne, a déjà instauré un certain ordre (par ex. clé \= client+date). Cependant, dans Cassandra, la clé primaire est divisée entre partition et clustering, ce qui influence la distribution sur les nœuds et l’efficacité des requêtes. Enjeux spécifiques :
+
+* **Taille des partitions** : on doit éviter des partitions trop volumineuses qui dégraderaient les performances (lecture séquentielle trop longue, risques de timeouts ou de saturer un nœud). Par exemple, un client très actif sur 10 ans pourrait avoir des dizaines de milliers d’opérations. Cassandra peut supporter des partitions de cette taille, mais s’il y a des cas extrêmes (ex : un compte technique avec des millions d’opérations), il faudrait peut-être partitionner par sous-clés (par ex. inclure l’année ou un hash supplémentaire dans la partition). Trouver le bon compromis est essentiel.
+
+* **Accès aux données par clé** : chaque type de requête fréquente doit correspondre à un accès efficace par clé. Actuellement, *toutes* les requêtes critiques sont soit un accès direct par clé exacte (ex : get une opération précise, ce qui est rare) soit par plage de clés (ex : toutes les opérations d’un client, toutes les interactions d’un client). Cassandra excelle dans les requêtes “partition \= X” qui retournent toutes les lignes de cette partition ; cela correspond bien aux cas d’usage centrés client (par ex., *timeline* de client \= toutes les interactions pour client X). En revanche, Cassandra ne permet pas directement “toutes les lignes où colonne Y \= Z” sans index. Avec SAI (ou des tables d’indexation manuelles), on peut compenser, mais il faut identifier **quelles requêtes globales ou multi-partitions** existent. Le document mentionne des exports batch par fenêtre temporelle (unload ORC avec *STARTROW/STOPROW/TIMERANGE* sur HBase), ce qui équivaut à “donne-moi toutes les données nouvelles sur la dernière période”. Dans Cassandra, une telle extraction horizontale est peu aisée sans index sur la date ou une table spécifique partitionnée par date. Il faudra anticiper ces besoins et éventuellement **ajouter des tables de support** (par ex. une table *interactions\_by\_date* partitionnée par date pour les exports, ou bien utiliser Spark pour parcourir les partitions).
+
+**Représentation des données complexes :** Certains choix HBase devront être reproduits différemment :
+
+* *Multi-version/écrasement conditionnel* : Cassandra ne versionne pas les cellules. La dernière écriture l’emporte. Dans le cas de la catégorisation, on veut éviter qu’une recatégorisation manuelle soit écrasée par le batch. **Proposition** : stocker deux colonnes, p.ex. `cat_auto` et `cat_user`. Le batch écrit `cat_auto` (valeur suggérée) et n’altère jamais `cat_user`. Le client, lui, écrit dans `cat_user` s’il effectue une correction. Ainsi, les deux valeurs coexistent et l’application peut décider laquelle afficher (priorité à cat\_user s’il est non nul). On maintient donc la logique métier sans avoir besoin de multi-version temporel.
+
+* *Colonnes dynamiques pour compteurs* : Dans *domirama-meta-categories*, la ligne `ANALYZE_LABEL:libelléX` pouvait avoir N colonnes différentes (une par catégorie rencontrée pour ce libellé, valeur \= compteur). Cassandra n’autorise pas de *créer dynamiquement des nouvelles colonnes* (elles doivent être définies au schéma), mais on peut modéliser ce cas par des **lignes multiples** plutôt que des colonnes multiples. **Proposition** : utiliser une clé composite avec le libellé comme partition et la catégorie comme clé de clustering, de sorte que chaque (libellé, catégorie) devienne une ligne (valeur \= compteur). Ainsi, ajouter une nouvelle catégorie pour un libellé consiste juste à insérer une nouvelle ligne dans la partition correspondante, ce que Cassandra gère aisément. Cette approche respecte le même résultat logique (on peut récupérer la distribution complète d’un libellé via toutes les lignes de la partition) sans nécessiter de modifier le schéma pour chaque nouvelle catégorie. On adoptera une stratégie similaire pour ICS\_DECISION, SALARY\_DECISION, etc., en adaptant la clé (par ex. partition \= ICS code, clustering \= décision).
+
+* *Colonnes dynamiques pour attributs JSON* : Dans BIC, HBase stocke des colonnes “normalisées” extraites du JSON d’interaction afin de filtrer (ex : `channel:RDV=true` pour repérer si canal \= RDV). En Cassandra, on peut prévoir **des colonnes explicites pour les champs majeurs** (ex : `canal`, `type_interaction`, `sous_type`, `resultat`...). Cela fige le schéma mais ces champs sont a priori connus et limités (on peut les recenser à partir du code existant). Ceux qu’on ne juge pas utiles en requête pourront rester uniquement dans le JSON stocké, interprété côté client au besoin. Cassandra permet aussi d’enregistrer le JSON complet (en texte ou en utilisant le type `JSON` de CQL qui n’est qu’une validation format), ce qui conservera l’information complète. On perd la possibilité de requêter facilement un champ non-indéxé, mais souvent ce n’est pas nécessaire côté base opérationnelle.
+
+* *Plusieurs Column Families \-\> plusieurs tables* : HBase utilise des CF pour séparer certaines données. En Cassandra, il n’y a pas d’analogue direct (une table correspond grossièrement à une CF \+ family keyspace). Si des CF contiennent des données optionnelles ou faiblement liées, on peut envisager de les isoler en tables séparées pour éviter d’alourdir la table principale. Par exemple, Domirama CF `meta` pourrait correspondre à une table secondaire si son usage est très différent (mais le doc ne détaille pas son contenu). Idem pour les CF `E`, `M` de BIC : selon leur usage, on peut soit tout regrouper dans une table interactions avec colonnes correspondantes, soit créer deux tables si certaines interactions seulement ont les champs E ou M. Il faut évaluer le *schéma effectif* des données pour trancher, sachant que multiplier les tables dans Cassandra est envisageable mais a aussi un coût (chaque table \= memtable, threads de compaction, etc.). L’approche généralement conseillée est de **regrouper autant que possible** dans une même table tant que cela n’entraîne pas de gros problèmes de sparsité ou de volumétrie, car les requêtes multi-table sont plus complexes.
+
+* *Données binaires COBOL, Thrift* : Ces blobs pourront être conservés tels quels (type `BLOB` en CQL). Cela minimise l’effort de conversion. Cependant, on pourrait en profiter pour évoluer vers des formats plus standards (JSON, Avro…) pour de futurs développements. Néanmoins, si ces données ne sont utilisées qu’en opaque (juste restituées telles quelles aux consommateurs), les migrer inchangées est prudent. Il faudra juste adapter la façon dont elles sont encodées/décodées (Cassandra BLOB attend du base64 ou hex, mais les drivers gèrent l’objet binaire).
+
+**Indexation vs. dénormalisation :** En modélisation Cassandra classique, on duplique souvent des données dans plusieurs tables pour supporter différents accès (par ex. une table par dimension de requête). Ici, on a la **chance de disposer de SAI** qui peut nous éviter une explosion du nombre de tables. Néanmoins, il faut rester vigilant : SAI, bien que puissant, ne remplace pas une table de projection lorsque la requête attendue retourne un très grand volume de résultats. Par exemple, pour l’export *batch* de toutes les interactions d’une journée (i.e. *STARTROW/STOPROW* sur date), on pourrait soit :
+
+* Créer une table `interactions_by_date` avec partition \= date, clustering \= client, contenant en valeur la liste des interactions (ou plutôt chaque interaction en ligne). Cela permettrait de récupérer tout le volume d’un jour en une requête partition-key (très efficace pour extraction journalière). Mais cela double le stockage des interactions (on stocke deux fois chaque événement, une fois par client, une fois par date).
+
+* S’appuyer sur SAI en indexant la colonne date dans la table `interactions_by_client`. Alors, une requête *WHERE date \= 20231124* scannera l’index global pour renvoyer toutes les partitions ayant ce date – ce qui revient à un parcours potentiellement important aussi. L’efficacité dépendra du pourcentage d’interactions ce jour-là par rapport au total. SAI est conçu pour être scalable, donc c’est envisageable, mais il faudra tester l’impact.
+
+Il y a donc un **arbitrage** à faire entre usage des index secondaires et création de tables dérivées. Le mieux est de recenser les besoins d’accès transverses : si l’export global par date est la seule grosse requête, on peut initialement le traiter par un job Spark qui scanne avec l’index (ou même fait un scan complet cluster, vu que c’est batch hors ligne) – sans ajouter de table. En revanche, si des accès agrégés plus fréquents sont nécessaires (ex : “nombre d’interactions de type X la semaine dernière”), il pourrait être utile de maintenir des compteurs agrégés par type et date dans une table dédiée, ou d’offrir ces requêtes via un outil analytique à côté (Watsonx.data par ex.). L’enjeu est de **garder le modèle “Collectively Exhaustive” mais sans sur-complexifier** avec trop de redondance. SAI nous aide en couvrant plusieurs patterns de filtres dans une seule table, ce qui simplifie le modèle de données comparé à une approche Cassandra traditionnelle.
+
+**Migration de données et qualité :** Sur le plan pratique, migrer les données des tables HBase vers Cassandra demande de bien gérer la correspondance de clés et la transformation de format éventuelle. Un enjeu sera de **reconstruire les clés primaires Cassandra** à partir des *rowkeys* HBase (souvent concaténées). Par exemple, la clé HBase de Domirama est binaire composite ; il faudra la découper en (accountId, opId+date) pour insérer dans Cassandra. Cela exige de connaître précisément le format de concaténation (taille fixe des champs, etc.). De même, les colonnes HBase dynamiques devront être converties en structures différentes – par ex., pour les compteurs de catégories par libellé, il faudra parcourir toutes les colonnes d’une ligne HBase et pour chacune insérer une ligne Cassandra correspondante. On aura donc un travail de transformation ETL non trivial. La **qualité des données** doit être strictement conservée : il faudra vérifier qu’aucune donnée n’est perdue ou altérée (notamment bien gérer l’encodage des caractères dans les JSON, la conversion des timestamps HBase éventuellement présents, etc.). Il s’agit d’une migration one-shot potentiellement volumineuse (plusieurs To de données si on cumule 10 ans de transactions, interactions de 2 ans pour \~4.5 millions de clients, etc.). La planification de cette migration doit prévoir du temps pour effectuer des vérifications (comparer des agrégats avant/après, recompter le nombre d’enregistrements par partition, etc.).
+
+Enfin, il faudra prendre garde à la **gestion de l’historique** : les données HBase les plus anciennes (10 ans) doivent-elles vraiment être migrées dans le nouveau système ? Si la conservation réglementaire impose 10 ans, oui. Mais c’est peut-être l’occasion de n’en migrer qu’une partie et de garder le reste dans un stockage froid. Néanmoins, vu qu’HBase les a déjà, sans doute veut-on tout basculer pour pouvoir éteindre HBase. Dans ce cas, bien s’assurer que Cassandra supportera la charge (stockage et performance) de ces données historiques. Cassandra compresse généralement bien les données, et comme HCD utilise un format moderne, on peut espérer une empreinte disque raisonnable.
+
+### **Propositions de migration (Données)**
+
+**Nouveau schéma cible dans Cassandra :** On propose de structurer les données en plusieurs tables correspondantes aux domaines fonctionnels, en respectant l’organisation MECE (chaque table ayant un but exclusif, plus de mélange hétérogène), tout en minimisant leur nombre (pas de duplication inutile). Les principales tables Cassandra seraient :
+
+* **Table `operations_by_account` (Domirama)** – stocke les opérations bancaires par compte sur 10 ans.
+
+  * **Clé primaire** : `(entite_id, compte_id)` comme **partition key**, garantissant que toutes les opérations d’un compte donné résident sur le même nœud. Clustering key : `date_op` (éventuellement un timestamp complet pour distinguer jusqu’à la milliseconde si besoin) suivi de `numero_op` (ou un identifiant séquentiel) pour assurer l’unicité et le tri. On pourra spécifier un ordre de tri DESC sur `date_op` de sorte que les lectures renvoient les opérations de la plus récente à la plus ancienne sans tri supplémentaire.
+
+  * **Colonnes principales** : `operation_data` (blob binaire contenant l’enregistrement COBOL encodé base64, comme actuellement), `montant` (si extrait pour faciliter des filtres par montant par ex), `libelle` (libellé texte si disponible ou décodable, pour chercher par mot-clé), `date_valeur` etc. – on peut ajouter quelques champs décodés utiles.
+
+  * **Colonnes de catégorisation** : intégrer ici les résultats de catégorisation au lieu d’avoir une CF séparée. Par ex : `cat_auto` (texte code catégorie attribuée automatiquement), `cat_confidence` (score du moteur si disponible), `cat_user` (catégorie modifiée par le client, ou null si pas de modif), `cat_date_user` (date de modification par client, ou null). On peut aussi stocker un booléen `cat_validée` pour indiquer si le client a accepté la catégorisation proposée (ce qui correspond aux clés ACCEPT dans meta-categories). Ainsi, chaque opération porte sa catégorisation actuelle (issue du batch ou corrigée). On **applique le TTL 10 ans** également sur ces colonnes pour qu’elles expirent en même temps que l’opération.
+
+  * **Indexation** : créer un index SAI sur `libelle` pour la recherche plein texte de transactions (tokenisation simple), un index sur `cat_auto` et `cat_user` pour permettre des recherches par catégorie (ex : lister toutes les opérations d’un compte dans telle catégorie), et éventuellement sur `montant` si l’application veut faire des filtres par tranche de montant. On prendra soin d’activer l’option de **recherche textuelle insensible à la casse et avec normalisation unicode** pour le libellé si nécessaire, afin de gérer les différences d’accents/majuscules dans les libellés.
+
+  * **Comparaison avec HBase** : cette table unifie ce qui était deux CF (`data` et `category`) en un même ensemble cohérent. Chaque opération est une entité enrichie de sa catégorisation. Ça simplifie la cohérence (plus de risque de désynchronisation CF) et la lecture (une seule requête obtient tout). Le coût en écriture est similaire (on écrira un peu plus de colonnes par ligne, mais c’est négligeable).
+
+* **Table `category_feedback` (remplacement de domirama-meta-categories partiel)** – en réalité, ce sera un **ensemble de tables** pour séparer les types de données actuellement mélangés :
+
+  * *Feedback global par libellé* : table `label_category_counts` avec clé primaire `(type_op, sens_op, libelle_simplifie)` comme partition, et `categorie` en clustering. Colonne `count` (counter). Cette table contiendra ce qui était stocké dans les lignes `ANALYZE_LABEL` et `SALARY_DECISION` de meta-categories, c’est-à-dire la distribution de catégories pour un format de libellé particulier (distingué éventuellement par type de transaction et sens débit/crédit). Chaque fois que le moteur assigne une catégorie à un libellé ou que le client la modifie, on incrémente/décrémente le compteur correspondant. Cassandra counters supporteront ces opérations concurrentes. Pas de TTL ici, ces stats peuvent s’accumuler tant qu’elles restent pertinentes (sinon on peut imaginer les réinitialiser après X années si besoin).
+
+  * *Feedback par code ICS* : si `ICS_DECISION` correspond à la distribution des décisions du moteur par code ICS (un code classification interne), on crée de même une table `ics_category_counts` partitionnée par `(type_op, sens_op, code_ics)` et cluster par `decision` (ou catégorie adoptée), avec un counter.
+
+  * *Acceptation/opposition client* : ces informations binaire (le client a/na pas validé une catégorisation) peuvent être directement portées dans la table opérations (`cat_validée` mentionné plus haut) pour l’acceptation, et possiblement un champ `cat_opposee` (booléen) pour marquer qu’une proposition de catégorie a été rejetée. Cependant, dans HBase ils stockaient aussi l’historique des oppositions (HISTO\_OPPOSITION) avec possiblement un compteur du nombre de fois où le moteur a insisté et le client a refusé. Cet historique peut être aussi consolidé en counters ou dans une table `category_opposition_history` si jugé utile. Étant de faible volume, on peut aussi décider de ne pas maintenir un tel historique détaillé dans la base opérationnelle et le traiter en aval (ex: logs).
+
+  * *Règles personnalisées client* : les `CUSTOM_RULE` semblent indiquer des catégories manuelles spécifiques à un client (ex : le client a défini que tout libellé contenant “CVS” est “Courses”). Si c’est le cas, ces règles personnalisées pourraient être stockées dans une table dédiée, par exemple `custom_category_rules` partitionnée par `customer_id` et contenant en colonnes la règle (ex: motif textuel, catégorie cible). Alternativement, on pourrait continuer à utiliser un fichier de config ou autre. Vu que c’est très spécifique, une table Cassandra peut le gérer (et on indexera éventuellement le motif pour recherche).
+
+  * *Config moteur* : la CF `config` de meta-categories (non détaillée) pourrait contenir des paramètres du moteur de catégorisation. S’ils sont peu volumineux, un stockage dans Cassandra est possible (table `category_engine_config` clé unique, ou on pourrait même les mettre dans un configmap hors base). On gardera la solution simple, en créant une table si nécessaire pour que tout soit dans HCD.
+
+* En isolant ainsi les concepts, on respecte **Mutually Exclusive** – chaque table a un rôle clair (stats globales, règles, etc.), ce qui facilite la maintenance. Bien sûr, cela multiplie légèrement le nombre de tables par rapport à la situation HBase (qui en avait une multi-usages), mais le découpage reste raisonnable et correspond aux différentes responsabilités.
+
+* **Table `interactions_by_client` (BIC)** – pour stocker les interactions clients sur 2 ans.
+
+  * **Clé primaire** : `(entite_id, client_id)` en partition, puis `(date_interaction, id_interaction)` en clustering. Ici on peut utiliser un timestamp complet pour date\_interaction (incluant heure/min/sec) afin de bien trier par date/heure réelle. `id_interaction` sera un identifiant unique de l’événement (s’il était déjà unique globalement, on peut l’utiliser, sinon un simple incrémenteur ou UUID). Le champ `canal` n’est **pas** inclus dans la clé primaire car on veut généralement récupérer toutes les interactions d’un client indépendamment du canal, et on souhaite parcourir par date. (Dans HBase, canal faisait partie de la rowkey, mais probablement pour l’unicité seulement). En Cassandra on assure l’unicité avec l’id technique, donc canal devient juste un attribut, ce qui évite de *fragmenter* les données par canal et de compliquer les scans par date.
+
+  * **Colonnes** : `canal` (ex: WEB/AGENCE), `type_interaction` (login, prise RDV, envoi mail…), `details` (JSON complet de l’événement si on souhaite le stocker tel quel), et tout autre champ pertinent (par ex. un booléen `reponse_client` si l’interaction est une campagne à laquelle le client a répondu, etc., selon les besoins). Comme pour opérations, on peut extraire quelques champs du JSON en colonnes pour faciliter de futurs filtres. Par exemple, si on sait que les conseillers filtrent souvent la timeline pour ne voir que les interactions “RDV en agence”, on pourrait indexer `type_interaction` ou `canal`. Cependant, vu que l’accès se fait partition par client (quelques dizaines d’éléments), filtrer côté appli n’est pas coûteux. L’index SAI serait utile plutôt pour des requêtes globales (ex: “combien de RDV en agence ont eu lieu tel jour” – mais c’est plus une question analytique que l’application conseillers ne posera pas en direct). On peut donc initialement ne pas mettre d’index secondaire sur `type_interaction` ou `canal`, et gérer ces filtres en mémoire après avoir récupéré la partition.
+
+  * **TTL** : configurer `default_time_to_live = 730 jours` (\~2 ans) sur cette table, de sorte que toute interaction insérée sera automatiquement supprimée passé 2 ans. Cela reproduit exactement la politique BIC. Cassandra prendra en charge la purge via tombstones, et avec une compaction adaptée, la suppression sera efficace.
+
+  * **Comparaison HBase** : on n’a plus besoin de quatre CF A/C/E/M – toutes les infos sont dans une seule table. Les versions multiples ne sont pas reconduites car peu justifiées (si une interaction est mise à jour, on écrase l’ancienne – HBase conservait 2 versions peut-être pour garder la version initiale et mise à jour, mais on peut considérer que ce n’est pas nécessaire à stocker indéfiniment). Si toutefois le marketing veut tracer les modifications d’une interaction, on pourrait gérer cela en application (ex: log de changement).
+
+* **Table `events_by_client` (EDM)** – structure semblable pour les événements temps réel hors interactions sur 2 ans.
+
+  * **Clé primaire** : `(entite_id, client_id)` en partition (si ces événements se rattachent à un client, ce qui est probable pour faire la “consolidation à la volée” évoquée). Si certains événements ne sont pas liés à un client (ex: info macro), on pourrait alors partitionner par type d’événement. Néanmoins, étant un complément de BIC, on peut supposer qu’ils concernent aussi le client (ex: usage carte bleue, flux externes…).
+
+  * **Clustering** : `(date_event, id_event)` similaire à interactions.
+
+  * **Colonnes** : `type_event` (ex: transaction CB, alerte risque…), `payload` (JSON ou blob contenant détails), etc.
+
+  * **TTL** : 2 ans également, sauf exigence différente.
+
+  * Cela aligne EDM sur la même logique que BIC, permettant éventuellement de fusionner les deux en consultation (afficher une timeline unifiée interactions+événements en tri par date, en agrégeant deux requêtes ou en stockant ensemble – on pourrait aussi décider de stocker interactions et events dans une seule table pour unifier dès l’écriture, mais ça complexifie peut-être plus qu’autre chose, selon si les types diffèrent beaucoup). A minima, on les garde séparés pour correspondre aux contextes projet distincts.
+
+* **Table `prospect_interactions`** – similaire à interactions\_by\_client mais pour prospects. Selon l’usage, on pourrait aussi décider d’intégrer prospects et clients dans la même table avec un champ type (mais garder séparé est plus propre si ce sont des volumes moindres, et ça évite d’avoir des collisions d’IDs entre univers prospect/client). Cette table aurait partition `(entite_id, prospect_id)`. TTL 2 ans également.
+
+Ce découpage couvre toutes les données mentionnées dans l’état des lieux, chaque table ayant un rôle défini : opérations (avec catégories) ; interactions ; événements ; feedbacks/compteurs ; règles/config. **Chaque axe est ainsi collectivement exhaustif** par rapport aux données HBase initiales, sans redondance entre tables. On notera que certaines données très peu volumiques (ex: config moteur) pourraient même sortir de la base NoSQL et aller dans un petit stockage type base SQL ou fichier, mais pour consistance on peut tout mettre dans Cassandra.
+
+**Stratégies d’accès avec SAI et dénormalisation ciblée :** Grâce au schéma ci-dessus, les accès courants sont directs :
+
+* Historique d’un compte client : `SELECT * FROM operations_by_account WHERE entite_id=? AND compte_id=?` renverra immédiatement la liste des opérations (décodée via driver en objets). Pas besoin de post-tri car on stocke dans l’ordre désiré.
+
+* Recherche d’opérations par mot-clé ou critère : `SELECT * FROM operations_by_account WHERE entite_id=? AND compte_id=? AND libelle CONTAINS 'loyer' ALLOW FILTERING` profitera de l’index SAI sur libelle pour ne scanner que les lignes pertinentes. On peut même envisager d’autoriser des requêtes multi-comptes ou globales pour l’analyse (ex: *toutes les opérations contenant 'loyer' sur la banque*), mais celles-ci seront restrictives (réservées aux admins/datalab). L’important est que pour le besoin fonctionnel (recherche au sein du compte du client connecté), ça sera quasi-instantané grâce à l’index local, au lieu du calcul Solr précédent.
+
+* Filtrage par catégorie : on pourra soit récupérer toutes les ops d’un compte puis filtrer côté app (puisque 10 ans d’un compte c’est gérable en mémoire pour un client unique), soit utiliser un index SAI sur `cat_auto` pour *pré-filtrer* si c’est plus efficace (ex: afficher que les opérations de catégorie “Courses”). SAI supporte les requêtes combinées (on pourrait mettre `WHERE entite_id=? AND compte_id=? AND cat_auto='Courses'`, le tout étant géré par l’index sur cat\_auto).
+
+* Timeline interactions conseiller : `SELECT * FROM interactions_by_client WHERE entite_id=? AND client_id=?` renvoie les interactions triées par date, directement exploitables. Filtrer par canal ou type se fera côté front (d’autant que \~2 ans de données client ce n’est pas énorme – s’il y a \~100 interactions on peut tout ramener). On peut prévoir un paramètre de date si l’appli veut n’afficher que X derniers mois, Cassandra permet `AND date_interaction >= '2023-01-01'` sur la clustering key tant qu’on donne la partition, ce qui évite aussi de ramener toute la partition.
+
+* Exports par date (batch unload) : Deux approches : 1\) Utiliser Spark. On peut écrire un job Spark SQL qui fait `SELECT * FROM interactions_by_client WHERE date_interaction >= last_export_date` – grâce à l’index SAI sur date (si configuré), ou même sans index en lisant full mais Spark parallélisera par token range. Spark Cassandra Connector sait lire efficacement en parallèle l’ensemble des partitions. C’est acceptable pour un usage offline. 2\) Si on veut optimiser, on peut créer une table d’indexation journalière, mais cela double le volume. Probablement inutile si l’on a Spark. On favorisera donc Spark pour parcourir toutes les nouvelles données et écrire un ORC.
+
+* Requêtes globales ad-hoc (ex : *quel est le top 5 des catégories dépensées par tous les clients le mois dernier*) – ces questions sortent un peu du cadre opérationnel, mais si elles se posent, on pourra soit utiliser Spark sur Cassandra (intégré via DataStax Enterprise Analytics) ou bien tirer parti de la compatibilité Watsonx.data, qui peut requêter Cassandra comme source NoSQL pour de l’analytics. Ainsi, on éviterait d’avoir à dumper en ORC et on interrogerait directement en place. Dans tous les cas, le nouveau modèle doit permettre ces exploitations analytiques sans pénaliser l’opérationnel, d’où l’importance de configurer nos index prudemment (on pourrait limiter les index global sur très gros volumes si pas nécessaires quotidiennement).
+
+**Migration des données :** Pour passer de l’ancien schéma au nouveau, on procédera par étapes contrôlées :
+
+* **Extraction** : utiliser des jobs MapReduce ou idéalement Spark pour lire chaque table HBase. Spark, via l’API Hadoop InputFormat, peut lire HBase par scans distribués. On implémentera un mapping : par exemple, un job Spark lit `domirama` (toutes les colonnes) et construit pour chaque ligne les colonnes correspondantes de `operations_by_account`. Il devra parser la rowkey HBase binaire en ses composants (code SI, compte, opId+date) et remplir les champs CQL. Les colonnes `category:` seront lues aussi : on distinguera la valeur Thrift (pour cat\_auto) et les colonnes dynamiques (peut-être `catFlags:something`) – probablement pas nécessaires si leur info est déjà couverte par cat\_auto/user. On utilisera le driver DataStax Spark-Cassandra pour insérer en batch dans la table Cassandra. Comme Cassandra est très rapide en écriture séquentielle, on peut atteindre des milliers de writes/sec par nœud, la phase d’insertion sera limitée principalement par la vitesse de lecture d’HBase.
+
+* **Synchronisation** : durant l’extraction (qui peut prendre plusieurs heures pour 10 ans de données), de nouvelles opérations ou interactions continueront d’arriver dans HBase. Il faudra soit arrêter temporairement les flux le temps de la bascule (peut-être envisageable si on choisit un week-end et qu’on informe les utilisateurs d’une indisponibilité planifiée), soit avoir un mécanisme pour rattraper le delta. Un mécanisme de *change capture* pourrait consister à utiliser les WAL HBase ou une réplication HBase \-\> Cassandra en streaming si possible. Plus simplement, on peut refaire un second passage sur les plages de dates très récentes pour capturer les dernières opérations non prises dans le premier dump. Étant donné que Domirama et catégorisation sont alimentés batch la nuit, on peut planifier la migration juste après un batch, puis arrêter le batch suivant tant que la bascule n’est pas finie. Pour BIC, le flux Kafka peut être dupliqué (Kafka permet plusieurs consumers) : on peut mettre en place un consumer temporaire qui écrit dans Cassandra en parallèle de HBase pour ne rien manquer durant la transition.
+
+* **Validation** : une fois les données initiales chargées, il sera crucial de valider. On comparera par exemple le nombre total d’opérations par compte entre HBase et Cassandra (on peut requêter HBase pour compter ou utiliser les snapshots HBase). On vérifiera des échantillons : pour quelques clients, lister les opérations HBase vs Cassandra et comparer les montants, catégories, etc. Idem pour interactions. Toute divergence devra être résolue avant de passer en production. On peut aussi faire tourner les deux systèmes en double écriture quelque temps et s’assurer que les nouvelles données sont bien identiques dans les deux.
+
+* **Optimisation** : après migration, surveiller le volume final. Cassandra va créer des SSTables optimisées, probablement plus compactes que les HFiles HBase (grâce à la compression LZ4/Zstd par défaut). SAI indexera en arrière-plan les nouvelles données (ou on peut construire les index SAI après coup en batch). On veillera à configurer les *bloom filter FP chance* appropriées et la taille des index pour un bon compromis RAM/rapidité.
+
+En parallèle, on profitera de la migration pour **nettoyer ou archiver ce qui peut l’être** : par exemple, si la table `domirama-budget` est obsolète, on ne la migre pas, ce qui allège le volume. On peut décider que certaines catégories de données ancillaires (ex: plus vieux que 10 ans déjà) ne sont pas reprises, avec accord métier. Moins de données \= migration plus rapide et base cible plus légère.
+
+Pour finir, toutes ces transformations seront documentées précisément afin d’assurer la traçabilité. On garantit ainsi qu’**aucune fonctionnalité ne sera perdue** : chaque champ utile du monde HBase aura son endroit dans le monde Cassandra. Le nouveau modèle, tout en étant plus structuré, garde la logique des anciens : regroupement par client/compte, tri temporel, TTL pour purge, etc., mais apporte plus de **clarté** (schéma explicite) et de **possibilités de requêtes** grâce à SAI (filtrage direct plutôt que parcourir en code). Ce modèle de données modernisé sera plus facile à faire évoluer (ajout d’une colonne \= simple alter table, au lieu de changer le code pour ajouter une CF ou une colo dyn. dans HBase) et s’intègre dans l’écosystème Cassandra/Watsonx pour d’autres usages (ex: **Vector data type** de Cassandra : on pourrait stocker un embedding vector\<128\> d’un libellé en colonne additionnelle et SAI permettrait des requêtes de similarité cosinus dessus – ouvrant la porte à de la recherche intelligente). Cela illustre comment le **design de données repensé** non seulement répond aux enjeux actuels de migration, mais crée aussi des opportunités d’innovation.
+
+## **Axe Applicatif**
+
+### **Constats actuels**
+
+Plusieurs applications et traitements batch exploitent HBase au sein de l’écosystème Arkéa, chacun étant plus ou moins *couplé* à la couche de données HBase :
+
+* **Domirama (application client web/mobile)** : c’est le service permettant à un client de consulter ses opérations historiques et de faire des recherches. Actuellement, lorsqu’un client se connecte, l’application va interroger HBase pour récupérer toutes les opérations du compte et construit un index de recherche en mémoire (via Solr) pour permettre des filtres par mot-clé ou critères. Cette logique est probablement implémentée côté serveur (dans *domirama-leaf* ou *domirama-root* mentionnés) puis transmise à l’interface web. Le délai de réponse dépend donc du temps de scan HBase \+ construction index, ce qui peut être sensible si un client a 10 ans d’historique. L’expérience utilisateur en dépend : on peut imaginer que la première recherche est un peu lente mais ensuite l’index en mémoire permet des recherches instantanées jusqu’à déconnexion. L’application Domirama intègre également les catégories de dépenses : elle appelle l’API de catégorisation pour enrichir l’affichage (par ex. montrer les libellés avec leur catégorie et permettre de changer une catégorie). Si le client change une catégorie, un appel en écriture est fait vers HBase (via *categorizationapi*) pour enregistrer la correction.
+
+* **Batch Domirama (insertion ops)** : une partie backend tourne quotidiennement (ou périodiquement) pour charger les nouvelles opérations dans HBase. C’est réalisé via PIG et MapReduce. Cette brique est purement technique, sans interaction utilisateur directe, mais critique pour que les données à jour soient présentes chaque jour. Un éventuel rattrapage d’historique est aussi fait par ce biais en cas de réinitialisation.
+
+* **Service de Catégorisation (moteur IA \+ API)** : on distingue le moteur de catégorisation en lui-même (probablement un job batch ou une librairie de scoring qui analyse les libellés et produit des catégories suggérées, stockées ensuite via *categorizationjar* ou *domirama-category*) et l’API exposition (*categorizationapi*) qui permet au front d’accéder aux catégories et d’envoyer des corrections clients. Le moteur tourne peut-être périodiquement sur l’ensemble des nouvelles opérations (d’où l’usage du batch *bulkLoad* pour écrire les résultats en masse). L’API, elle, doit en temps réel lire la catégorie d’une opération (scan filtré sur la table domirama cf category) et écrire une mise à jour en cas de correction (PUT HBase avec timestamp). L’application client utilise cette API pour afficher les bonnes catégories et appliquer immédiatement les changements demandés par le client.
+
+* **BIC backend (application conseiller)** : c’est l’application consultée par les conseillers bancaires. Elle appelle HBase via *bic\_backend* pour récupérer la timeline des interactions client sur 2 ans. Typiquement, le conseiller ouvre la fiche client, et l’application interroge la table BIC avec la clé du client pour obtenir les interactions, puis les affiche triées. Il peut y avoir des filtres (par ex. n’afficher que les interactions de type RDV, etc.), réalisés soit par des paramètres de la requête HBase (via un ValueFilter sur la colonne canal/type) soit en filtrant après avoir tout ramené (vu le volume modéré par client, c’est possible). Le backend fournit probablement aussi des services de recherche ou de comptage (ex: voir s’il y a eu tel type d’interaction, etc.). Par ailleurs, *bic\_backend* peut servir à insérer des interactions manuellement enregistrées par le conseiller (ex: “appel téléphonique passé le …”) – s’ils ont prévu cette feature, ce serait un PUT HBase direct.
+
+* **Consumers temps réel BIC/EDM** : *bic-event* et *edm-event* sont des applications (exécutées dans des conteneurs Tomcat d’après le doc) qui consomment en continu des messages Kafka et les insèrent dans HBase. Cela implique du code Java qui utilise l’API HBase (via le client ou Rest, mais plus probablement le client Java) pour mettre à jour la table `bi-client` ou la table d’événements. Ces composants doivent être robustes pour tenir la charge et assurer éventuellement la réessence en cas d’échec (Kafka permet de rejouer). Ils utilisent sans doute la librairie utilitaire Arkéa `com.arkea.commons.hbase` pour gérer le pooling de connexions et l’écriture efficace.
+
+* **Batch BIC unload** : *bic-unload* est un job (peut-être MapReduce ou Spark) qui périodiquement scanne HBase pour les nouvelles interactions et les exporte en ORC sur HDFS. Ce job utilise la fonctionnalité FullScan optimisée (2 mappers par RS) via la librairie Arkéa, en fixant un *STARTROW/STOPROW* et *TIMERANGE* pour n’extraire que la fenêtre incrémentale nécessaire. Les ORC générés servent probablement à alimenter le Data Lake marketing ou à conserver un historique exhaustif au-delà de 2 ans.
+
+* **Traitements EDM** : EDM combine batch et temps réel. Il y a sûrement un gros job quotidien calculant des indicateurs (stockés possiblement en base relationnelle ou ailleurs), mais la partie HBase d’EDM sert pour les événements “non-interactions”. Donc *edm-event* consomme Kafka et écrit les events dans HBase, tandis que *edm-hbase* pourrait être un module qui lit ces events pour déclencher des actions (ex: dès qu’un événement X arrive, l’application va chercher dans HBase les indicateurs batch du client et éventuellement d’autres events, puis décider d’une action). On peut imaginer un mécanisme de type *trigger applicatif*, où l’arrivée d’un event en Kafka \-\> écrit en HBase \-\> puis *edm-hbase* le lit (ou reçoit un signal) \-\> fait une logique et peut-être écrit un nouveau event (re-poussé dans Kafka ou autre). Cela signifie des **lectures multi-tables** (ex: lire interactions \+ événements \+ indicateurs du client) en temps réel. HBase assurait ces lectures par clé (client) assez rapidement, mais pas de façon jointe (chaque table séparément). L’application devait ensuite consolider.
+
+**Couplage aux APIs HBase** : De manière générale, ces composants applicatifs sont **fortement couplés à HBase**. Ils utilisent le client Java HBase (lib Thrift ou REST n’est pas mentionnée, donc on suppose usage direct du client high-level). La présence d’une lib utilitaire interne confirme que les développeurs ont encapsulé des patterns HBase (ex: connexion, scans par range, etc.). Le code applicatif contient probablement des détails HBase comme la construction manuelle des *Get/Put/Scan*, l’utilisation de *ResultScanner*, la gestion des batchs de résultats, etc. Toute cette couche devra être refondue pour Cassandra, car l’API est différente (CQL via drivers). Cela signifie une charge de travail non négligeable en développement et test.
+
+**Performance et contraintes actuelles côté applicatif :** Certaines limitations de la solution actuelle peuvent impacter les applications :
+
+* L’indexation Solr à la volée dans Domirama apporte de la flexibilité de recherche, mais au prix d’un délai de chargement. Les utilisateurs finaux (clients) subissent possiblement un temps d’attente lors de l’accès à l’historique (surtout ceux ayant beaucoup d’opérations). Une amélioration sur ce point serait bienvenue pour l’expérience utilisateur (objectif de performance).
+
+* Les conseillers sur BIC ont peut-être parfois des ralentissements si la table interactions est volumineuse sur certains clients entreprises (ex: un client pro avec de multiples interactions quotidiennes). Toutefois c’est limité à 2 ans, donc probablement acceptable.
+
+* La fiabilité : HBase 1.1.2 étant ancien, on peut craindre des incidents (region server qui tombe, nécessité de compactions manuelles…). Si un region server est en pause ou lent, l’application le ressent par des timeouts. Cela a peut-être déjà provoqué des indisponibilités sporadiques de certains services (même si non explicitement mentionné).
+
+* **Fonctionnalités non exploitées** : On note que Arkéa a dû développer elle-même certaines fonctionnalités (merging regions, etc.), ce qui signifie que l’outil de base ne fournissait pas tout. Dans Cassandra, certains de ces soucis n’existent pas (pas de concept de petites régions à merger – partitions statiques sur tokens).
+
+**Impact sur exploitation/opérations** : du point de vue exploitation applicative, avoir des batchs Pig/MR et des consumers Tomcat indique un environnement hétérogène (Hadoop \+ appli J2EE). Le débogage est complexe (ex: un job Pig qui échoue, c’est moins maîtrisé qu’un Spark). Les déploiements de code (MapReduce jar, Pig script) sont sans doute orchestrés par Oozie ou Azkaban vu le contexte Hadoop – ce sont des couches en plus à maintenir. En cas de problème de données, les équipes doivent souvent analyser des logs HBase, relancer des scans manuellement, etc. Tout cela demande une expertise particulière.
+
+En somme, les applications actuelles ont été bâties autour d’HBase, et en changer va nécessiter un **effort de refactoring important**, mais apporte l’opportunité de **simplifier l’architecture logicielle** (par ex., moins de code custom pour pallier l’absence d’index, potentiellement moins de batchs complexes).
+
+### **Enjeux de la migration (Applicatif)**
+
+**Refonte du code d’accès aux données :** Le passage à Cassandra implique de remplacer toutes les interactions directes avec HBase par des appels CQL/driver Cassandra. Ceci impactera :
+
+* Les *DAO* ou classes d’accès aux données dans chaque application/service. Par exemple, là où on faisait `hTable.get(scan)` il faudra faire des requêtes paramétrées via le driver (session.execute(query, params)). Le paradigme change de “navigate in big table” à “query by key/index”.
+
+* La logique de traitement associée aux requêtes : certaines choses réalisées côté appli devront peut-être se faire via des requêtes plus riches. Ex: Domirama n’aura plus besoin de construire un index Solr en Java ; à la place, l’appli peut directement interroger le cluster pour chaque recherche. Cela simplifie le code mais demande d’orchestrer possiblement plusieurs petites requêtes au lieu d’une grosse initiale (chaque nouvelle recherche de mot-clé sera une requête SAI). L’enjeu est de gérer le *paging* des résultats côté interface si besoin (Cassandra peut retourner pages de résultats pour éviter de surcharger la mémoire).
+
+* Le traitement des résultats diffère : avec HBase on recevait des `Result` qu’on transformait (chaque colonne etc.), avec Cassandra on aura des objets plus typés (Row) ou même on peut mapper direct sur des entités via Object Mapping. Il faudra adapter la transformation JSON, la reconstitution des objets.
+
+**Maintien des fonctionnalités équivalentes :** on doit veiller à ne pas régresser sur ce que les utilisateurs peuvent faire. Points d’attention :
+
+* La **recherche de transactions** par libellé ou autres critères doit toujours être offerte, mais idéalement de façon plus transparente (sans délai initial). Le backend Domirama devra offrir un endpoint de recherche qui interroge Cassandra SAI en direct. Il faudra vérifier que les capacités de SAI couvrent bien les besoins (par ex., si l’appli autorisait la recherche par *partie de mot* ou avec opérateurs, est-ce faisable ? SAI permet la recherche de texte tokenisé et des opérateurs AND/OR, ce qui devrait suffire pour la plupart des besoins de recherche simple). Au pire, si certaines fonctions avancées manquent (typiquement, *wildcard* ou *fuzzy search*), on pourrait brancher un moteur de recherche externe (Solr/Elasticsearch) indexant en parallèle les données. Mais cela ajouterait de la complexité; on privilégiera SAI seul si possible.
+
+* **Exactitude de la catégorisation** : Il faut s’assurer que les règles de priorité batch vs manuel soient bien reproduites. Avec le nouveau schéma (colonne cat\_user), le code de lecture devra être modifié pour d’abord vérifier cat\_user non nul, sinon prendre cat\_auto. Auparavant, HBase gérait ça implicitement via versions/timestamps. C’est un changement de logique pour l’application categorizationAPI, mais simple à implémenter.
+
+* **Atomicité des mises à jour multi-colonnes** : en HBase, la notion de transaction est absente mais ce n’était pas gênant car les updates sont souvent une colonne à la fois. Dans Cassandra aussi, on fera de préférence des updates unitaires (ex: incrément de compteur isolé). S’il fallait mettre à jour deux tables de façon coordonnée (ex: écrire une opération et incrémenter un compteur global), on perdrait l’atomicité cross-table. Cependant, on peut recourir à des *batch statements* de Cassandra (qui offrent une atomicité locale si c’est dans la même partition) ou simplement accepter un léger délai (compteur mis à jour après coup asynchrone, ce qui est souvent suffisant pour des stats globales).
+
+* **Fonctionnalités nouvelles** : la migration ne doit pas en enlever, mais peut en ajouter. Il faudra peut-être exposer de nouveaux endpoints pour tirer parti d’HCD. Par exemple, les conseillers pourraient vouloir rechercher dans la timeline un mot (actuellement pas possible facilement). Avec SAI, on pourrait permettre “rechercher une interaction contenant X” sur 2 ans. C’est un plus, mais chaque nouvelle fonctionnalité doit être validée avec les utilisateurs et testée. On préférera dans un premier temps reproduire l’existant à l’identique (même output, même contraintes), puis dans un second temps introduire ces améliorations pour ne pas tout compliquer d’un coup.
+
+**Adaptation des pipelines batch/stream :** Au-delà des API en lecture/écriture, la migration concerne aussi les *jobs* et *consumers* :
+
+* Les scripts PIG et jobs MapReduce Java devront être remplacés. PIG n’est plus guère utilisé ; on passera aux **jobs Spark** ou à des programmes plus simples. Par exemple, l’étape de préparation des données Domirama (transformation COBOL \-\> format HBase) pourrait devenir un job Spark lisant les fichiers COBOL (ou les données de la base source), transformant via une librairie (ou à défaut on peut encapsuler le programme PIG existant dans une couche Spark). Ensuite l’écriture se ferait via Spark vers Cassandra (connecteur DataStax). Cela supprime la complexité HDFS/HFile du bulkload HBase et utilise une technologie plus standard en 2025 (Spark). Les développeurs PIG devront être formés Spark, mais c’est une transition logique dans le monde BigData actuel.
+
+* Les consumers Kafka (bic-event, edm-event) peuvent être simplifiés grâce à des **connecteurs Kafka-Cassandra** existants. Plutôt que de maintenir un war Tomcat qui consomme puis put HBase, on pourrait déployer le Kafka Connector provided by DataStax (ou du projet open-source) qui ingère directement les messages dans Cassandra via CQL. Celui-ci est paramétrable (on lui donne le topic, la table cible, le mapping des champs). Avantage : moins de code maison, plus de fiabilité (géré par la communauté/IBM). Sinon, on peut migrer le code existant en remplaçant la partie “HBase put” par “Cassandra session.execute(INSERT…)”. Cette dernière voie implique de gérer la réessai, etc., mais le driver Cassandra est assez robuste et sans doute plus facile d’usage que HBase (pas de problème de connexions épuisées si on réutilise un Session partagé, etc.).
+
+* Les batchs d’export (bic-unload) se feront via Spark comme déjà évoqué, ou potentiellement on pourrait les rendre inutiles si Watsonx ou un outil permet d’interroger Cassandra pour le besoin d’analyse. Néanmoins, par prudence on implémentera une solution d’export Spark vers ORC ou Parquet pour conserver le même flux pour les outils existants en aval.
+
+**Phases de transition double écriture/lecture :** Durant la migration, il se peut qu’on doive faire tourner un temps deux systèmes en parallèle. Par exemple, pour Domirama, on peut d’abord migrer la table mais garder l’appli pointant sur HBase jusqu’à validation, puis basculer. Cela implique que pendant ce laps de temps, les nouvelles opérations arrivant soient écrites sur HBase (pour l’ancien) et sur Cassandra (pour tester le nouveau). Gérer la double écriture peut se faire au niveau du batch d’alimentation (il peut écrire aux deux), ou en exploitant une exportation finale de delta. Pareil pour BIC : on peut faire consommer Kafka vers deux cibles. L’enjeu applicatif est que **les développeurs devront maintenir temporairement des branches parallèles** de code – l’une parlant à HBase, l’autre à Cassandra. Ou écrire un code capable de cibler l’un ou l’autre en configuration (ex: un drapeau de feature flag “useCassandra” qui permet de basculer). C’est délicat mais faisable, et limite les divergences : on peut déployer le même code en prod (pointant HBase) et en préprod (pointant Cassandra) et comparer les outputs.
+
+**Formation et appropriation** : Du point de vue des équipes dev, il y aura une **montée en compétence** sur Cassandra. Ils devront apprendre les bons patterns (par ex., éviter les requêtes avec ALLOW FILTERING sans index adéquat car ça peut faire des scans complets, comprendre comment gérer la pagination des résultats, etc.). L’équipe Data Office, qui était experte HBase, va devoir transférer son expertise sur la modélisation Cassandra. C’est un enjeu d’accompagnement (on le traitera dans la partie organisationnelle).
+
+**Tests et QA** : Il faudra adapter les tests unitaires et d’intégration. Si des tests automatiques existaient (par ex. tests sur la lib DAO HBase), ils devront pointer vers une instance Cassandra (peut-être embarquée ou un container) pour valider le nouveau DAO. La QA devra revalider toutes les fonctionnalités : affichage correct des historiques, filtres fonctionnels, performance acceptable. On devra particulièrement surveiller :
+
+* La cohérence des données après migration (ex: une opération catégorisée dans HBase doit l’être pareil dans Cassandra).
+
+* Les performances initiales : vérifier que la première connexion client post-migration ne prend pas plus de temps qu’avant (voire moins).
+
+* La charge supportée : simuler de multiples conseillers ou clients en simultané pour s’assurer que Cassandra tient la charge sans optimisation manquante.
+
+* Les points extrêmes : gros client avec 10 ans d’opérations intensives – vérifier qu’une requête ne time-out pas. Idem, un jour de pointe sur BIC où beaucoup d’événements arrivent en rafale – s’assurer que les consommateurs Kafka-\>Cassandra suivent le rythme (sinon prévoir un scaling horizontal, plus facile qu’avec HBase car il suffira d’ajouter des nœuds ou partitions Kafka).
+
+**Expérience utilisateur et changement éventuel** : Normalement, la migration n’est pas censée impacter l’UX hormis en mieux (rapidité accrue, nouvelles possibilités). On fera attention à ce que **les résultats retournés soient identiques**. Par ex., l’ordre de tri des recherches, la façon dont sont gérés les majuscules ou caractères spéciaux dans la recherche de libellé (Solr avait peut-être une certaine logique de tokenisation, SAI en aura une autre) – il faudra ajuster pour que le client ne soit pas perturbé (ou le documenter si recherche un peu différente, en mieux idéalement). Pour le conseiller, la timeline devrait sembler inchangée mais potentiellement plus réactive. Il faudra informer si des petites différences existent (par ex., avant on ne montrait que 100 interactions max pour performance, maintenant on peut en montrer 200 ? Ce genre de détails).
+
+En résumé, l’enjeu applicatif est **d’assurer une transition fluide du point de vue fonctionnel**, tout en profitant de l’occasion pour éliminer des complexités (plus besoin de Solr embed, plus besoin de Pig, etc.). C’est une grosse mise à niveau technique pour le code, qui devra être bien gérée pour éviter les régressions.
+
+### **Propositions de migration (Applicatif)**
+
+**Abstraction et couches d’accès aux données :** Pour faciliter la transition, il est recommandé d’introduire une couche d’abstraction dans les applications qui ne l’ont pas encore. Par exemple, définir des interfaces pour les services de stockage (ex: `OperationRepository`, `InteractionRepository`) avec des implémentations HBase et Cassandra. Ainsi, pendant la migration, on peut basculer l’implémentation par configuration. Dans la pratique, vu l’ampleur du changement, on peut aussi décider de **forker le code** : garder la version HBase stable, et développer en parallèle une version Cassandra. Cela évite de polluer le code de conditions, mais nécessite de maintenir deux bases de code temporairement. Selon les ressources de développement disponibles, on choisira l’approche adaptée. Quoi qu’il en soit, l’utilisation du **driver DataStax** sera la pierre angulaire côté Cassandra. On utilisera le driver Java Async moderne (DataStax 4.x) qui fournit un thread-safe Session pour exécuter des requêtes préparées. On veillera à tirer parti de ses fonctionnalités : pooling efficace, asynchronisme (pour ne pas bloquer des threads Tomcat lors de scans longs, on peut déclencher la requête asynchro et continuer), et gestion des pages (le driver peut automatiquement enchaîner les pages de gros resultset, ce qui sera utile pour parcourir 10 ans d’opés sans saturer la mémoire).
+
+**Mise à jour des composants Domirama** :
+
+* **Backend recherche** : remplacer la construction d’index Solr par des requêtes SAI. Concrètement, lors de l’ouverture de l’espace “Recherche d’opérations” par le client, au lieu de déclencher un scan complet, on ne fera rien initialement (ou on chargera seulement les X dernières opérations pour l’affichage initial). Puis quand le client tape un mot-clé, l’application effectuera une requête `SELECT * FROM operations_by_account WHERE entite_id=? AND compte_id=? AND libelle CONTAINS ?` pour chercher les opérations correspondantes. Si l’utilisateur filtre par montant ou catégorie, on ajoutera ces conditions (grâce à SAI qui supporte AND, on peut combiner : libelle CONTAINS “loyer” AND montant \> 500€ AND cat\_auto \= “Habitation”, par exemple). On renvoie le résultat au front. Ainsi, **on passe d’un mode pré-calcul intensif à un mode requêtage à la demande**. L’UX devrait y gagner (pas de temps mort initial, juste un léger délai par recherche, potentiellement moins d’une seconde). Si nécessaire pour confort, on peut garder en cache locale du navigateur ou du serveur les derniers résultats pour ne pas requêter à chaque frappe, mais c’est de l’optimisation applicative classique.
+
+* **Affichage simple des opérations** : sur la page “liste des opérations récentes”, aujourd’hui l’appli doit forcément scanner les N dernières (1 an par ex). Avec Cassandra, on peut directement demander les N dernières (via `LIMIT` sur la requête partition triée desc). Donc on simplifiera la logique de pagination côté serveur en utilisant les capacités de Cassandra (on peut page automatiquement 50 par 50 par ex).
+
+* **API de catégorisation** : adapter l’API de lecture pour qu’elle utilise la table `operations_by_account` (ou une vue appropriée) plutôt que de scanner la CF category. Comme proposé, on stocke cat\_auto et cat\_user dans la table opérations ; donc l’API de catégorisation pourra simplement fetch la ligne de l’opération (clé \= compte \+ opId) via une requête primaire et lire ces colonnes. Avant, elle faisait un scan filtré par clé d’opération ou récupérait la ligne Domirama puis allait dans CF category – plus complexe. En Cassandra, une requête suffira (ou l’opération sera peut-être déjà chargée par l’appel principal de Domirama s’il la transmet). Pour l’**update** (lorsqu’un client recatégorise), l’API fera un `UPDATE operations_by_account SET cat_user='NouvelleCat', cat_validée=true WHERE entite_id=? AND compte_id=? AND date_op=? AND numero_op=?`. C’est une requête paramétrée toute simple. On veillera à la faire avec CL=QUORUM pour que le changement soit vu immédiatement. C’est plus direct que l’ancienne logique HBase (construire un Put avec timestamp etc.).
+
+* **Batch catégorisation** : au lieu d’un MapReduce qui génère des HFiles, on pourra faire un job Spark périodique qui lit la source de vérité (peut-être le data lake avec les libellés ou un DB) et calcule les catégories via un modèle ML, puis écrit dans Cassandra. Si le volume quotidien est gérable, on pourrait même envisager de rendre ce calcul événementiel (par ex: à l’arrivée d’une nouvelle opération, déclencher la catégorisation à la volée via un appel à un service ML). Watsonx.ai ou un microservice ML interne pourrait être sollicité en temps réel plutôt que tout calculer en batch. Cela donnerait une catégorisation instantanée pour chaque transaction. C’est un changement d’architecture possible grâce à la **capacité temps réel de Cassandra** qui peut supporter ce mode (chaque insert d’opération pourrait entraîner une update de cat\_auto peu après). Néanmoins, dans un premier temps, on peut conserver un batch de fin de journée pour peupler cat\_auto des nouvelles opés, et faire du temps réel seulement pour les corrections (client).
+
+**Mise à jour des composants BIC/EDM** :
+
+* **Consumer Kafka** : comme évoqué, utiliser un Kafka Connector Cassandra ou adapter le code existant. Un point technique à surveiller est la **gestion du taux** : Cassandra supporte de très hauts débits en écriture, mais il faut configurer le cluster et le connector pour ne pas submerger un nœud. DataStax fournit des outils pour le *back-pressure*. On configurera aussi la taille des batch Cassandra (peut-être regrouper par 100 messages avant d’insérer, ce que fait le connector). L’objectif est de maintenir ou augmenter l’actuel débit d’ingestion.
+
+* **Backend conseiller** : la partie qui interroge la timeline du client pointera sur `interactions_by_client` au lieu d’HBase. La requête se transformera en un simple SELECT avec partition key, très efficient. On doit adapter la conversion des données (plus besoin de gérer des versions, plus de multi-CF – tout vient d’une table). Le tri est assuré côté DB. Pour de la recherche ou filtrage (ex: chercher “email” dans les interactions du client, si on veut implémenter cela), on pourrait utiliser SAI sur `details` JSON ou sur un champ type, mais ce n’est pas un besoin mentionné.
+
+* **Batch unload** : sera remplacé par un job Spark planifié (peut-être via Airflow ou autre orchestrateur moderne, au lieu d’Oozie). Ce job pourra utiliser par exemple *DataStax DSBulk* en interne ou le Spark Cassandra connector. On utilisera la clause de *token range* pour paralléliser : on peut faire tourner par ex. 10 tâches Spark, chacune lisant un segment de hash de partitions, filtrant sur la date \> last\_export. Cassandra n’a pas l’équivalent exact de *Timerange* sur un timestamp interne, donc on utilisera soit l’index SAI sur date (ex: `WHERE date_interaction >= X`) pour pré-filtrer, ou on fera le filtre dans Spark après lecture brute (ce qui est moins efficace). On testera SAI global sur date – s’il est trop lent, on adoptera la stratégie *table par date* ou Spark full scan.
+
+* **Traitement temps réel EDM** : l’appli qui déclenche des événements en réaction devra être adaptée pour lire les données depuis Cassandra. Par exemple, si un event “transaction à l’étranger” arrive dans events\_by\_client, *edm-hbase* (devenu *edm-cassandra*) va :
+
+  1. lire dans Cassandra les indicateurs du client (soit stockés dans Cassandra aussi, ou dans un data mart séparé – selon architecture cible. On pourrait envisager de stocker certains indicateurs calculés quotidiennement dans Cassandra pour usage rapide).
+
+  2. lire possiblement la dernière interaction du client (depuis interactions\_by\_client).
+
+  3. en déduire une action et la publier.  
+      Tout ceci se fait via quelques requêtes partition key, très rapides. Au lieu d’utiliser l’API HBase, ce sera via le driver Cassandra. On pourrait aussi imaginer d’utiliser **Stargate** (une API REST/GraphQL sur Cassandra) si on voulait uniformiser l’accès, mais ce serait une couche supplémentaire pas forcément nécessaire pour nos besoins actuels.
+
+* **Parallelisme et load balancing** : dans Cassandra, on a l’avantage de pouvoir envoyer les requêtes à n’importe quel nœud (le driver routant automatiquement au coordinateur optimal, potentiellement direct sur la replica responsable via *token-aware load balancing*). Cela peut simplifier l’écriture du code multi-thread (le driver gère en interne). Dans HBase, on avait possiblement à gérer des scans parallèles manuellement (d’où l’InputFormat custom). Maintenant, Spark ou le driver se chargera de distribuer. L’application conseillers ou client peut faire plusieurs requêtes en parallèle (le driver gère jusqu’à un certain nombre en pipeline). Par exemple, si on veut paralléliser la récupération de plusieurs comptes du client, on peut envoyer 5 requêtes simultanées sans souci.
+
+**Tests et validation** :
+
+* Avant mise en prod, on effectuera des tests de non-régression fonctionnelle rigoureux. On peut par exemple **dupliquer des requêtes** en production silencieusement : c’est-à-dire, sur une requête réelle d’un conseiller, on fait la requête Cassandra en parallèle (en arrière-plan) et on compare la réponse HBase vs Cassandra (sans la montrer au conseiller). Cela pendant la phase pilote assure que le nouveau système renvoie bien la même chose. Un tel mécanisme (shadow read) nécessite un peu de code en plus mais est précieux pour détecter des écarts.
+
+* Pour Domirama, c’est plus difficile en shadow (car l’expérience diffère un peu du fait qu’on ne construit plus d’index local). On fera plutôt des tests en lab avec des datasets copiés de prod.
+
+* On invitera éventuellement un panel de conseillers ou de clients à essayer la nouvelle version (A/B testing interne) pour s’assurer que tout est correct et qu’ils ne perçoivent pas de problème.
+
+**Améliorations potentielles grâce à l’IA** : Une fois la migration effectuée et les apps stabilisées, Arkéa pourra enrichir ses applications :
+
+* Intégrer du **Machine Learning en temps réel** : ex. un modèle de catégorisation plus avancé (basé sur NLP) déployé sur Watsonx.ai pourrait être appelé pour chaque nouvelle transaction ou interaction, afin de fournir une recommandation ou une next best action. Cassandra stockant déjà toutes les données récentes, le modèle peut y accéder via une simple requête (ou via une extraction régulière d’embeddings).
+
+* **Personnalisation conseillers** : L’application BIC pourrait utiliser les vecteurs d’interactions stockés dans Cassandra pour trouver des profils similaires et suggérer des offres ou alertes (en comparant les embeddings vecteurs via la fonctionnalité de *vector search* de Cassandra). Par exemple, trouver que le comportement d’un client correspond à un pattern de churn et alerter le conseiller.
+
+* **Nouvelles fonctionnalités clients** : Sur mobile, on pourrait ajouter une recherche globale du type “Combien ai-je dépensé en restaurants cette année ?” – le backend pourrait alors utiliser la table opérations et l’index catégorie pour calculer cela à la volée, ou éventuellement maintenir un cumul en table de stats. Ce genre de question, relevant de l’IA (NLP), s’intègre bien si les données sont accessibles et indexables, ce qui sera le cas.
+
+* **Simplification technique** : Moins visible pour l’utilisateur final mais bénéfique, la base Cassandra servira d’**unique source** accessible tant par les applications opérationnelles que par les outils analytiques (via Spark, Trino, etc.). Cela peut permettre à terme de retirer l’étape d’export ORC, ou de la remplacer par une simple vue dans Watsonx.data qui joint les données opérationnelles aux données du data lake, réduisant la latence entre opérationnel et analytique.
+
+En conclusion, du point de vue applicatif, la migration vers HCD/SAI va :
+
+* **Simplifier le code** (moins de contournements, API plus haut niveau via CQL, suppression des composants legacy type Pig, Oozie…),
+
+* **Améliorer la réactivité** (recherches plus rapides, accès directs),
+
+* **Faciliter les évolutions** (ajout d’un champ ou d’un nouveau filtre \= ajouter une colonne \+ index, sans refondre tout ou écrire un coprocessor comme sur HBase),
+
+* **Permettre l’innovation** (intégration aisée de moteurs ML, API GraphQL/Stargate possible pour exposer les données de manière moderne, etc.).
+
+Il faudra investir l’effort de refactoring et de test pour y parvenir, mais une fois en place, la maintenance applicative devrait s’en trouver allégée, alignée sur des technologies standards 2025 (Java/Spring \+ Cassandra) pour lesquelles il est plus facile de trouver des compétences que pour PIG/HBase 1.1.2.
+
+## **Axe Organisationnel**
+
+### **Constats actuels**
+
+Le système HBase actuel est le fruit d’une évolution interne impliquant plusieurs équipes (Data Office, BI & Analytics, Marketing…). L’exploitation est assurée par l’équipe Big Data (Hadoop) et les développements spécifiques par des équipes projet. On note :
+
+* Une **dette technique** due à l’ancienneté de la plateforme : HDP 2.6.4/HBase 1.1.2 sont des versions dépassées, potentiellement hors support officiel. Cela peut poser des problèmes de sécurité (correctifs non appliqués) et rend difficile l’accès à de nouvelles fonctionnalités (il faudrait upgrader radicalement pour bénéficier de HBase 2.x ou 3.x, ce qui n’a pas été fait). Le maintien en l’état est risqué et contraignant.
+
+* La **gestion des coûts** du cluster Hadoop : Soit Arkéa paye un support (Cloudera/Hortonworks) pour HDP – ce qui, pour une version aussi ancienne, est peu probable ou très cher –, soit elle maintient tout en interne. Dans les deux cas, les coûts humains sont significatifs (exploitation manuelle de composants, surveiller HDFS, etc.). De plus, si le cluster Hadoop n’héberge que HBase, on a une infrastructure partiellement sous-utilisée (YARN, etc., peut-être inutiles sauf pour Pig/MR). C’est une dépense d’énergie (serveurs) et d’effort pour une utilisation assez ciblée. L’objectif de réduction des coûts pointe notamment ceci.
+
+* **Organisation des équipes** : Il semble y avoir une certaine séparation par usage : deux instances HBase signifient possiblement deux groupes de tables pour deux ensembles projet (Domirama+Catégorisation vs BIC+EDM). Peut-être chaque instance est gérée par une équipe distincte (ex: Data Office gère Domirama, Marketing gère BIC). Cela a pu créer des silos de compétences, même si la base technologique était commune.
+
+* **Compétences et ressources** : Arkéa dispose en interne d’experts HBase (ils ont développé des outils custom, cf. Laurent Morin etc.). Toutefois, ces compétences “Hadoop” deviennent rares sur le marché et il est plus facile de trouver des compétences NoSQL Cassandra ou cloud. Garder HBase pourrait poser des problèmes de staffing à terme.
+
+* **Processus actuels** : le déploiement de nouvelles versions applicatives se fait peut-être via des outils Hadoop (ex: déployer un nouveau JAR MapReduce ou un consumer Kafka, etc.). L’intégration CI/CD avec ces technos legacy est moins fluide qu’avec des conteneurs ou du cloud-native. On voit qu’ils hébergent du code sur GitLab (liens *gitlark.s.arkea.com*), signe que la modernisation est en cours côté dev (utilisation de Git, peut-être CI Jenkins). Migrer vers une stack plus récente permettra sans doute d’adopter pleinement l’intégration continue (ex: déployer des microservices Spring Boot pour consommer Kafka au lieu de Tomcat sur VM, etc.).
+
+* **Contraintes réglementaires** : Arkéa, en tant que banque, est soumise à des régulations sur la donnée (confidentialité, conservation…). HBase sur HDP était sans doute dans un environnement contrôlé (peut-être On-Premise uniquement). Le passage à une nouvelle techno doit respecter ces contraintes (par ex: si HCD est déployé sur Kubernetes, veiller à la sécurité, etc.). La conservation de 10 ans de données implique probablement des audits réguliers. Une migration de données de ce volume devra être documentée pour prouver aux auditeurs que rien n’a été perdu.
+
+* **Interdépendances** : D’autres systèmes chez Arkéa consomment peut-être les données d’HBase (hors le périmètre direct des applications listées). Par exemple, des exports ORC vont alimenter un Data Lake sur Hadoop ou des tables Hive pour BI. Il faudra ajuster ces flux. De plus, s’ils envisagent de couper Hadoop, il faut s’assurer que rien d’autre d’important ne l’utilise (Spark jobs BI, etc., pourraient tourner sur cette infra). Le document ne mentionne pas d’autres usages, donc on suppose HBase était le principal composant.
+
+* **Attentes stratégiques** : L’objectif d’**intégration IA** et le fait qu’IBM soit impliqué (IBM vend HCD/SAI dans une optique WatsonX) suggèrent qu’au niveau direction, il y a une volonté d’aller vers plus d’AI. Cela implique un alignement de la DSI sur une stratégie plus *cloud/open source/IA-first*. Organisitionnellement, cela peut signifier de nouvelles collaborations (avec une future équipe Data Science par ex.), et de privilégier des solutions évolutives plutôt que maintenues juste parce qu’historiques.
+
+### **Enjeux de la migration (Organisationnel)**
+
+**Gestion de projet et conduite du changement :** Migrer l’écosystème HBase vers HCD est un projet transversal impliquant équipes techniques (admin Hadoop, dev back-end, dev big data), équipes métiers (marketing, digital, etc.), et un fournisseur (IBM). Les enjeux de pilotage sont importants :
+
+* **Calendrier et coordination** : Il faut planifier la migration par phases sans interrompre le service aux utilisateurs finaux. Chaque phase (par ex migration BIC, puis Domirama) devra être soigneusement orchestrée, avec des fenêtres de bascule potentiellement en dehors des heures ouvrées. La coordination entre équipes doit être fluide : les développeurs effectuent les changements applicatifs, les ops mettent en place le cluster HCD, les métiers testent et valident que les fonctionnalités sont inchangées.
+
+* **Communication interne** : Informer clairement toutes les parties prenantes (conseillers, support client, etc.) sur d’éventuels impacts (courtes indisponibilités planifiées, changements dans les applis s’il y en a). Gérer les attentes est clé, surtout que l’objectif IA peut créer beaucoup d’espoir, il faudra expliquer que c’est un premier pas technique avant de voir des features AI tangibles.
+
+* **Formation et appropriation des outils** : Le personnel technique doit être formé à Cassandra/HCD, comme évoqué. C’est un investissement, mais indispensable pour que l’équipe existante puisse opérer la nouvelle plateforme. Sans cela, Arkéa dépendrait entièrement d’IBM ou de consultants externes, ce qui n’est pas souhaitable à long terme. L’enjeu est donc de monter rapidement en compétence, via des formations officielles DataStax/IBM, du mentoring (peut-être garder un expert IBM sur site pendant quelques semaines de mise en route), et de la pratique sur un environnement test.
+
+* **Redéfinition des rôles** : L’admin Hadoop va devenir admin Cassandra. Les procédures d’exploitation vont changer (plus de HDFS balancer, mais on aura du nodetool repair, etc.). Il faudra adapter les fiches d’exploitation, les astreintes (peut-être moins de risques de gros incidents type NameNode down, mais il faudra surveiller d’autres choses : saturation d’un nœud, etc.). Le monitoring aussi change : exit Ambari/Hortonworks, entrée OpsCenter ou Grafana Prometheus pour Cassandra. L’équipe devra assimiler ces outils et les intégrer dans leur supervision globale.
+
+* **Impact financier à court terme** : La migration aura des coûts initiaux : achat de licences HCD/DataStax (sauf si open source, mais IBM va probablement vendre un abonnement support Watsonx.data Premium), prestation IBM pour accompagnement, nouveaux éventuels serveurs ou cloud. Pendant la transition, on devra peut-être doubler certaines infrastructures (HBase \+ Cassandra en parallèle) ce qui momentannément augmente les coûts. Justifier cela auprès de la direction financière nécessite de mettre en avant le ROI sur 2-3 ans : réduction d’OPEX (moins de maintenance, moins de serveurs au final, moins de pannes), et plus-value fonctionnelle (donc potentiels gains business via l’IA ou une satisfaction client accrue).
+
+* **Gestion du risque** : Migrer un système critique comporte un risque de régression ou de panne. Organisationnellement, il faut préparer un **plan de secours** : par ex, si après migration Domirama on constate un problème majeur, comment revient-on en arrière (sachant que si on a arrêté HBase ou divergé les données, le retour peut être complexe). Peut-être conserver un backup complet d’HBase jusqu’à validation complète, et s’assurer qu’on peut redéployer une version HBase en dernier recours. Ce genre de worst-case plan doit être clair pour la direction (même si on espère ne pas en arriver là).
+
+* **Silos et mutualisation** : En passant sur une seule plateforme, il faudra s’assurer que les deux communautés de départ (SI banque vs marketing) collaborent sur la gouvernance des données communes. Par exemple, prioriser la ressource cluster si un usage vient à en impacter un autre. Cassandra permet éventuellement de séparer par datacenter logique ou limiter certaines requêtes, mais surtout, il faut une gouvernance humaine : qui “possède” le cluster, qui décide du schéma (une évolution de schéma pourrait toucher plusieurs usages), etc. On pourra instituer un comité *NoSQL Data Store* interne, avec des représentants de chaque entité, pour valider les évolutions et surveiller les usages.
+
+* **Conformité et sécurité** : Le nouveau système doit être validé par l’IT Risk et sécurité d’Arkéa. Points à traiter : chiffrement des données au repos (HDFS avait la réplication, Cassandra peut chiffrer les SSTables si besoin), chiffrement des communications (HBase probablement tournait en interne non chiffré, Cassandra peut aussi être interne seulement, mais si sur cloud ou k8s, penser à SSL/TLS entre nodes), contrôle d’accès : HBase utilisait peut-être la simple auth Kerberos du cluster Hadoop; Cassandra a son propre système de rôles et permissions. Il faudra définir des rôles (par ex: un rôle pour l’appli Domirama ne peut lire/écrire que sur keyspace Domirama; un rôle pour marketing a accès en lecture globale pour analytics, etc.). La DSI sécurité exigera sans doute un audit de configuration avant mise en production. Ce travail doit être anticipé pour éviter de retarder la go-live.
+
+* **Décommissionnement du cluster Hadoop** : Une fois la migration validée, Arkéa pourra éteindre le cluster HBase/HDFS. Il faudra planifier ce démantèlement : s’assurer qu’aucune autre application n’en dépend (ex: s’il y avait des stockages HDFS annexes ou d’autres tables HBase non mentionnées). Libérer ces machines permettra des économies (énergie, support, licences). Si les machines sont réutilisées pour Cassandra, on fera une transition sans trop de gaspillage. Sinon, on pourra réduire la taille du cluster global.
+
+**Capitaliser sur IBM/Watsonx** : IBM est partie prenante (via participants Mark Crystal, David Leconte, etc. dans la diffusion du doc). Arkéa va donc bénéficier du support IBM. Organisationnellement, c’est un changement : on passe d’un système open-source auto-géré à une solution soutenue par un grand éditeur. Il faudra gérer cette relation (contrat de service, SLA support, etc.). L’avantage, c’est d’avoir un interlocuteur en cas de problème (IBM/DataStax) ce qui réduira la charge sur les équipes internes pour résoudre les bugs bas niveau. L’inconvénient, c’est une possible dépendance et un coût. Néanmoins, si IBM accompagne aussi la mise en place de cas d’usage AI (via Watsonx), cela peut valider l’investissement. L’enjeu est donc de **tirer profit de ce partenariat** : demander l’expertise IBM sur la migration (services pro), sur l’optimisation (tunings), et peut-être sur la formation (IBM peut organiser des ateliers techniques pour l’équipe Arkéa).
+
+### **Propositions (Organisationnel)**
+
+**Découpage du projet en phases gérables :** Adopter une approche agile par lots pour la migration, afin de réduire les risques et de montrer des résultats rapidement. On peut s’inspirer de l’ordre suivant :
+
+1. **Phase 0 – Infrastructure & Préparation** : Installer le cluster Cassandra/IBM HCD dans un environnement de test, valider son fonctionnement de base. Parallèlement, former les équipes clés (administrateurs, développeurs référents) via des workshops IBM. Préparer le plan de schéma (tel que décrit dans l’axe Données) et faire valider par tous que ce schéma couvre bien les besoins. Mettre en place les outils de supervision (brancher Cassandra à la stack de monitoring Arkéa). Critère de succès : cluster HCD prêt en DEV, équipe formée aux rudiments, schéma finalisé.
+
+2. **Phase 1 – Prototype sur périmètre réduit (pilote)** : On choisit un périmètre à faible impact pour commencer. Par exemple, **EDM** pourrait être un bon candidat : c’est essentiellement interne, moins visible par les utilisateurs finaux, et très similaire à BIC. On migre la table d’événements EDM et son consumer Kafka. On déploie en parallèle l’app *edm-event* modifiée pour écrire sur Cassandra, tout en la laissant écrire aussi sur HBase (pour double assurance). On teste la lecture des événements via la nouvelle base pour les quelques services concernés. Cela validera la chaîne temps réel sur Cassandra. Une fois stable, on coupe l’écriture dans HBase pour EDM. Succès \= events bien stockés dans HCD, pas de perte, performances conformes.
+
+3. **Phase 2 – Migration BIC** : C’est critique pour les conseillers mais gérable car usage interne. On migre les interactions 2 ans, on adapte *bic-event* consumer et *bic-backend* service. Stratégie de déploiement : sur une journée pilote, on bascule un groupe de test de conseillers sur l’appli connectée à Cassandra (le reste continue sur l’ancienne). On recueille feedback, on ajuste si nécessaire (ex: augmenter la capacité cluster si latence un peu haute). Ensuite, on planifie un week-end pour arrêt bref de *bic-backend*, migration finale (derniers deltas), puis on relance tout sur Cassandra. On surveille étroitement lors de la reprise lundi. Une fois validé, on arrête le cluster HBase correspondant (instance BIC). Succès \= conseillers ne voient pas la différence ou constatent une amélioration (chargement timeline plus rapide).
+
+4. **Phase 3 – Migration Domirama & Catégorisation** : C’est le plus délicat car client final impacté. On fera cohabiter un temps l’ancien et le nouveau. Par exemple, déployer la nouvelle version d’application Domirama connectée à Cassandra pour les employés testant en interne ou un petit pourcentage de clients amicaux (A/B testing). Vérifier que les fonctionnalités (consultation opérations, recherche, catégorisation) fonctionnent impeccablement. Notamment, bien valider la cohérence des données de catégorisation (par ex. un client qui avait modifié des catégories avant/après migration voit toujours son choix respecté). Une fois la confiance acquise, communiquer aux clients une courte interruption de service (par ex. la nuit) pour finaliser la bascule – migrer les dernières transactions du jour et mettre à jour les pointeurs. Ensuite, ouvrir la nouvelle version pour tout le monde. Prévoir un support renforcé pour les premières 24h (au cas où des clients signalent un bug). Succès \= aucune plainte notable, et peut-être même retours positifs si la recherche est plus rapide.
+
+5. **Phase 4 – Décommissionnement & Optimisation** : Arrêter proprement les restes d’HBase/Hadoop (sauvegarder éventuellement les données sur un stockage d’archive au cas où). Libérer les ressources ou les réallouer au cluster Cassandra si besoin d’augmenter (peut-être ajouter des nœuds pour absorber Domirama si volumétrie plus forte). Optimiser le cluster (ajuster GC, parallélisme, etc. avec l’expérience en vraie charge). Mettre à jour tous les processus de supervision (se focaliser sur le nouvel environnement). Ce sera aussi le moment de finaliser la documentation (nouveau schéma, procédures d’urgence, etc.) et de tenir une rétrospective sur le projet.
+
+Chaque phase se conclura par un **go/no-go** formel avec les parties prenantes (IT et métier). Ainsi, on peut décider de retarder la bascule Domirama si BIC a révélé des soucis inattendus, etc. Ce phasage limite aussi l’impact en cas de problème : on aurait affecté d’abord les usages internes avant les clients externes.
+
+**Formation et support technique** : Il est conseillé de faire encadrer la migration par des experts IBM/DataStax surtout pour les phases de design et tuning. On peut contracter du **support premium** sur les premiers mois de prod HCD afin d’avoir des ingénieurs disposés en cas d’incident critique (SLA). Parallèlement, initier des sessions de formation :
+
+* **Formation Dev** : formation aux concepts Cassandra (data model, requêtes, usage du driver asynchrone, gestion des erreurs, bonnes pratiques d’indexation). Idéalement, un atelier de co-développement où on refait une partie du code ensemble (ex: recoder une portion du consumer Kafka avec un expert).
+
+* **Formation Ops** : formation aux outils (nodetool, cqlsh, OpsCenter), comment interpréter les métriques, comment réaliser un ajout/retrait de nœud, patcher le cluster, restaurer une backup.
+
+* **Documentation interne** : mettre à jour le wiki/Sharepoint technique avec les infos sur la nouvelle plateforme, les contacts support IBM, etc. Préparer des cheatsheets pour les opérations courantes (ex: “comment purger une table”, “comment augmenter RF”, etc.).
+
+**Optimisation des coûts et infrastructures** :
+
+* **Réutilisation du matériel** : Si le cluster HBase tournait sur N serveurs physiques, on peut installer Cassandra sur ces mêmes machines (après formatage). Cassandra étant plus gourmand en CPU que HBase (car gère calcul de partition, compression, etc.) mais HBase avait la charge HDFS, globalement c’est comparable. Donc on s’attend à pouvoir tenir la charge sur un nombre de serveurs similaire ou légèrement moindre. Par exemple, si on avait 6 data nodes, on peut démarrer 6 nodes Cassandra. Éventuellement, pour absorber Domirama \+ BIC ensemble, on en ajoutera 2-3 pour être safe. Mais l’**empreinte globale** en devrait pas exploser. Ainsi, on ne rachète pas de serveurs et on arrête possiblement des composants lourds (NameNode/ResourceManager nodes) qui ne sont plus nécessaires, libérant ces machines ou permettant de les reconvertir en nœuds Cassandra additionnels.
+
+* **Licences logicielles** : On pourra cesser de payer la souscription Hortonworks si c’était le cas. À la place, il y aura possiblement une licence DataStax Enterprise ou IBM Watsonx.data Premium. Il faudra négocier au mieux avec IBM pour que ce coût soit compensé par les services rendus (peut-être fait partie d’un deal global Watsonx pour Arkéa, ce qui dilue le coût). On peut aussi envisager une approche open-source pure (Apache Cassandra 4 \+ Astra Hub open source), mais vu qu’IBM est là, on capitalisera sur leur offre supportée pour la sécurité et l’intégration AI.
+
+* **Coûts opérationnels** : Grâce à la simplification (moins de micro-gestion de compactions, plus de *self-healing* automatique de données), on peut s’attendre à libérer du temps ingénieur. Par exemple, les tâches de monitoring manuel de régions HBase et les interventions de tuning peuvent disparaitre. Ce temps récupéré pourra être investi dans des tâches à plus forte valeur (comme développer les fonctionnalités AI ou améliorer les services). On pourra mesurer ce gain au fil du temps.
+
+* **Plan de capacité** : On établira un plan de croissance de la nouvelle base : en volumétrie, vérifier que sur 5-10 ans (si la banque grandit, si on stocke plus de données notamment avec l’AI qu’on pourrait vouloir garder plus que 2/10 ans pour entraînements historiques), le cluster Cassandra pourra évoluer. Cassandra scale bien en ajoutant des nœuds linéairement, donc on doit juste prévoir l’emplacement (on-prem cluster ou cloud). Cette élasticité évitera d’avoir à investir massivement upfront : on pourra ajouter chaque année 1-2 nœuds selon l’usage. Ce mode de scaling granulaire est un argument de coût (on n’a pas à sur-provisionner aujourd’hui pour dans 5 ans).
+
+**Gouvernance des données et synergies** :
+
+* Mettre en place un **Data Steward** (ou référent) pour le domaine clients/ops qui supervise la cohérence entre Domirama, BIC, EDM sur la nouvelle plateforme. Par exemple, s’assurer que si on ajoute une colonne “segment client” dans interactions\_by\_client, on en discute avec tous ceux qui utilisent ces données. Ce steward pourrait animer un comité mensuel BigData où on examine l’utilisation du cluster, les nouvelles demandes, etc. Cela favorise une approche collective plutôt que chaque équipe isolée.
+
+* **Exploiter Watsonx.data** : Organisationnellement, rapprocher l’équipe BI/Analytics qui bossait sur les ORC exportés de l’équipe qui gère maintenant Cassandra. Avec Watsonx.data, IBM propose un *lakehouse* où on peut faire des jointures entre données structuré/NoSQL et Data Lake. L’idée serait de peut-être connecter la base HCD comme une source de données virtuelle pour les analystes, qui pourraient interroger via SQL sans extraire. On pourrait faire une session de travail IBM/Arkéa pour identifier ces synergies (ex: plus besoin d’exporter ORC si on peut brancher Cognos ou autre direct sur Cassandra via Trino/Presto). Ça peut réduire la duplication de données et donc les coûts de stockage et d’ETL.
+
+* **Focus sur IA** : Une fois la migration technique terminée, on recommande de lancer rapidement (T+3 mois après migration) un **projet IA pilote** exploitant le nouveau socle. Par exemple, entraîner un modèle de classification de dépenses plus sophistiqué (réseau de neurones) et l’intégrer au flux de catégorisation. Ou développer un petit chatbot pour les conseillers qui, en langage naturel, interroge les données d’interactions (en utilisant Watson Assistant \+ données Cassandra). L’idée est de concrétiser l’investissement en montrant aux métiers un **POC tangible d’IA** sur leurs données opérationnelles. Cela aidera à emporter l’adhésion et à justifier la transition.
+
+* **Communication externe** : Arkéa pourra communiquer (sous forme d’étude de cas avec IBM) sur le fait qu’elle modernise son infrastructure big data pour mieux servir ses clients et intégrer de l’IA. C’est aussi un bénéfice image et innovation.
+
+**Gestion du support et de la maintenance** :
+
+* Élaborer dès le début un **plan de support** pour la nouvelle plateforme. Par exemple, définir qui est appelé en premier en cas de problème (N1: équipe exploitation interne, N2: expert Cassandra interne, N3: IBM support). Rappeler que IBM offre potentiellement un support 24/7 sur HCD – s’assurer d’y souscrire si requis pour la criticité (les services bancaires clients tournent 24/7).
+
+* Mettre en place des **SLAs internes** pour les applications (par ex: temps de réponse médian des requêtes Domirama, etc.) et monitorer qu’ils sont bien tenus sur la nouvelle infra.
+
+* Prévoir des **tests de reprise désastre** sur Cassandra : simuler la perte d’un nœud, voire de deux, voir comment l’équipe réagit (restauration, reprotection des données). Cassandra peut tolérer 1 nœud sur RF=3 sans impact (CL=QUORUM continue de fonctionner), mais il faut tout de même remplacer le nœud rapidement. L’équipe doit être entraînée à ces manœuvres (ajouter un nœud de remplacement et remouver l’ancien, etc.).
+
+En somme, la recommandation organisationnelle est de traiter cette migration non comme une simple substitution d’outil, mais comme une **occasion de moderniser les pratiques**. Cela implique : pilotage de projet rigoureux, investissement humain (formation, conduite du changement), et alignement stratégique (préparer l’exploitation de la valeur ajoutée, notamment l’IA). Si ces axes sont bien gérés, Arkéa pourra retirer un maximum de bénéfices de cette migration, au-delà du simple remplacement de HBase. C’est un pas vers une organisation plus agile, data-driven et innovante, en adéquation avec les objectifs exprimés.
+
+# **Refonte de l’architecture Domirama avec IBM Hyper-Converged Database (HCD)**
+
+La table **Domirama** actuelle (HBase) peut être migrée vers IBM **Hyper-Converged Database** 1.2 en exploitant pleinement Cassandra et ses nouvelles capacités (CQL, indexeurs de texte, API Data, recherche vectorielle). Ci-dessous, nous détaillons une proposition technique, **fonctionnelle et performante**, couvrant tous les aspects de la refonte : modélisation des données en CQL, remplacement de l’indexation Solr/scan par les analyzers CQL et/ou la vectorisation, exposition des données via l’API Data, ingestion batch moderne, utilisation du TTL pour la purge, et stratégie d’indexation (clé primaire et colonnes).
+
+## **Modélisation des données avec CQL (Cassandra)**
+
+Pour migrer **Domirama** vers HCD, il faut repenser la **structure de la table** HBase en schéma Cassandra. Actuellement, chaque ligne HBase représente une **opération client** unique, identifiée par une clé composée de *code SI* (entité organisationnelle/source système), *numéro de contrat* (compte client) et d’un **identifiant binaire combinant date et numéro d’opération** pour assurer l’unicité et l’ordre antichronologique. Les données de l’opération sont stockées en **Cobol encodé Base64**, réparties sur plusieurs *column qualifiers* (chaque *qualifier* correspondant à un “type de copy” Cobol, c’est-à-dire probablement différentes vues ou segments du record Cobol).
+
+En Cassandra (HCD), on définira une **table CQL** équivalente, structurée ainsi :
+
+* **Clé primaire** : on utilisera un **Primary Key composite** pour refléter la clé HBase. Concrètement, le *code SI* et le *numéro de contrat* constitueront ensemble la **clé de partition** (partition key), de sorte que toutes les opérations d’un même contrat soient regroupées dans une partition dédiée. Puis, l’identifiant d’opération (date+num op) servira de **colonne de clustering**, assurant l’ordre intra-partition (on pourra le stocker sous forme de type temps \+ numéro ou d’un type `TIMEUUID` qui combine timestamp et unicité). On pourra spécifier un **ordre de clustering décroissant** sur la date, afin de ranger les opérations du plus récent au plus ancien dans chaque partition (reproduisant l’ordre antichronologique souhaité). Cela permettra de **récupérer rapidement l’historique complet d’un client** ou une plage temporelle via une simple requête CQL avec *partition key* \= client et conditions de range sur la date (Cassandra supporte nativement les filtres de *clustering* comme `WHERE date >= X AND date <= Y` sur une partition donnée).
+
+* **Colonnes de données** : les champs actuellement encodés en Base64 (données COBOL) doivent idéalement être **normalisés en colonnes typées**. Pour tirer parti des capacités de requête et d’indexation de HCD, il est recommandé de **décoder le blob COBOL** et de stocker les attributs importants dans des colonnes distinctes (par exemple : montant, libellé d’opération, catégorie, etc.). Chaque *“type de copy”* Cobol utilisé en HBase peut correspondre à une colonne Cassandra. S’il y a un nombre fixe et connu de “copies” (par exemple copie principale, copie enrichie, méta-données), on définira une colonne par type (de type `text` ou `blob` selon la nature). Dans le cas où les qualifiers seraient très dynamiques ou nombreux, on pourrait recourir à une colonne de type *map* ou *JSON* pour stocker les éléments de données variables, mais cela complexifie la recherche. **Idéalement**, on profite de cette refonte pour **modéliser en schéma** les données COBOL : par exemple, extraire le libellé d’opération dans une colonne `libelle text`, le montant dans une colonne `montant decimal`, etc., afin de pouvoir filtrer et indexer ces champs directement.
+
+* **Familles de colonnes HBase** : HBase séparait possiblement les données en familles (`data`, `meta`, etc.). En Cassandra, il n’y a pas de notion de familles séparées – on peut regrouper toutes les colonnes nécessaires dans la même table, ou éventuellement créer plusieurs tables si certains ensembles de colonnes ont un cycle de vie ou un usage très différent. Ici, on peut envisager **une seule table Domirama** combinant les données opérationnelles et les métadonnées (par exemple une colonne `categorie` ou `annotation` pour ce qui relevait de la family meta). La **catégorisation des opérations** (projet additionnel mentionné) qui avait ajouté une family HBase supplémentaire pourra être intégrée soit par des colonnes additionnelles (ex: colonne `categorie_auto` pour la catégorie calculée, colonne `categorie_client` pour la personnalisation client, etc.), soit par une table à part si besoin. Dans la plupart des cas, regrouper ces informations dans la table principale est plus simple vu qu’elles partagent la même clé d’opération.
+
+* **TTL et versions** : En HBase, chaque cell avait une éventuelle version (timestamp) et un TTL de 10 ans pour la purge automatique des vieilles opérations. En Cassandra, on tirera parti du **TTL au niveau table ou colonnes** (voir section dédiée au TTL). On n’utilisera pas de versioning multi-version (Cassandra ne conserve qu’une version par défaut, sauf en utilisant du time series modeling explicite). La mention *“Pas d’utilisation de la temporalité des cellules”* dans HBase signifie que Domirama n’exploitait pas les multiples versions HBase, donc une simple table Cassandra suffira (chaque opération est stockée une seule fois, écrasée si rechargée).
+
+Cette modélisation en CQL permet de **conserver la sémantique** “une ligne \= une opération” tout en bénéficiant de la structure partition/clustering de Cassandra pour une *scalabilité horizontale*. Chaque partition (client) peut être distribuée sur le cluster, assurant un bon équilibrage, et la lecture de l’historique d’un client se fait localement sur la ou les quelques machines portant sa partition (clés de partition bien choisies). En résumé, on aura :
+
+`CREATE TABLE domirama (`  
+   `code_si text,`   
+   `contrat text,`  
+   `op_id timeuuid,         -- ou date + numéro concaténés`  
+   `date_op timestamp,      -- date de l’opération (pour requêtes temporelles)`  
+   `type_op text,           -- exemples de colonnes extraites du blob COBOL`  
+   `libelle text,`  
+   `montant decimal,`  
+   `categorie_auto text,    -- catégorie assignée automatiquement (proj. catégorisation)`  
+   `categorie_client text,  -- catégorie modifiée par le client`  
+   `copy1 blob,             -- données brutes encodées (si on souhaite garder l’enregistrement COBOL complet)`  
+   `copy2 text,             -- etc.`  
+   `...`   
+   `PRIMARY KEY ((code_si, contrat), op_id)`  
+`) WITH CLUSTERING ORDER BY (op_id DESC);`
+
+*(Remarque : on pourrait aussi utiliser `(code_si, contrat)` comme partition key et `date_op` \+ `num_op` en clustering pour un tri par date. L’important est de garder toutes les opérations d’un client ensemble et triées. On ne met **pas** de grandes chaînes texte dans la clé primaire, afin de pouvoir les indexer secondairement pour la recherche full-text, cf. section indexation.)*
+
+## **Recherche full-text intégrée avec CQL analyzers (remplacement de Solr \+ scan)**
+
+Dans l’architecture actuelle, la recherche plein-texte dans l’historique d’un client est accomplie en deux temps : (1) un **scan complet** des opérations HBase d’un client lors de sa connexion, pour construire un **index Solr en mémoire** (contenant les textes indexés), puis (2) lorsqu’un mot-clé est recherché, interrogation de cet index en mémoire pour obtenir les clés d’opérations correspondantes, et enfin **MultiGet HBase** pour récupérer les enregistrements à afficher. Cette approche, bien qu’efficace à l’époque pour pallier l’absence d’indexation native d’HBase, entraîne une latence élevée au login (scan des 10 ans d’historique) et de la complexité (maintien d’un index Solr en mémoire).
+
+Avec HCD/Cassandra, on peut **éliminer ces scans et l’index externe** en utilisant les **index secondaires intégrés** de Cassandra, en particulier la fonctionnalité d’**indexation attachée au stockage (SAI)** avec *analyzers* pour texte. HCD 1.2 (basé sur Cassandra 5.x) supporte en effet les **requêtes full-text en CQL** via un opérateur dédié `:` qui s’appuie sur des index SAI analytiques[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/tutorials/use-analyzers-with-cql.html#:~:text=To%20enable%20analyzer%20operations%20using,SAI%29%20that%20are%20analyzed). En pratique, on créera sur les colonnes textuelles pertinentes (par ex. le libellé d’opération, ou d’autres champs descriptifs) des **index SAI** configurés avec un **analyzer Lucene** approprié (standard, français, etc). Par exemple :
+
+`CREATE CUSTOM INDEX idx_libelle`   
+`ON domirama(libelle)`   
+`USING 'org.apache.cassandra.index.sai.StorageAttachedIndex'`   
+`WITH OPTIONS = {`  
+  `'index_analyzer': '{`  
+      `"tokenizer": {"name": "standard"},`  
+      `"filters": [{"name": "lowercase"}, {"name": "french"}]`  
+  `}'`  
+`};`
+
+Cette commande crée un index full-text sur la colonne `libelle`, utilisant le tokenizer standard et, disons, un filtre de langue française (stopwords, stemming français, etc. – Cassandra/HCD intègre les analyzers Lucene Solr, y compris spécifiques à Lucene 9.8 comme *FrenchAnalyzer*[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/tutorials/use-analyzers-with-cql.html#:~:text=Built)[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/tutorials/use-analyzers-with-cql.html#:~:text=Language)). On peut ajuster la configuration JSON pour inclure, par exemple, un filtre de racinisation (*porterStem* ou *FrenchLightStem* pour gérer les pluriels, féminins, etc.), ou un filtre ASCII, etc. comme disponible dans Lucene[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/tutorials/use-analyzers-with-cql.html#:~:text=Built)[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/tutorials/use-analyzers-with-cql.html#:~:text=apostrophe%2C%20wordDelimiterGraph%2C%20portugueseLightStem%2C%20latvianStem%2C%20dropIfFlagged%2C,czechStem%2C%20norwegianMinimalStem%2C%20englishMinimalStem%2C%20norwegianLightStem%2C%20germanMinimalStem). L’essentiel est que l’index va **pré-analyser** chaque valeur de `libelle` lors de l’insertion (tokenisation, normalisation) et stocker un index inversé distribué.
+
+**Requête full-text en CQL** : Une fois l’index créé, on peut interroger directement la table Cassandra avec une clause `WHERE colonne : 'terme'`. L’opérateur `:` signifie une recherche de *terme* sur l’index textuel (par opposition à `=` qui exigerait une correspondance exacte)[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/tutorials/use-analyzers-with-cql.html#:~:text=SAI%20supports%20both%20,operators%2C%20but%20they%20behave%20differently). Par exemple, pour chercher les opérations dont le libellé contient le mot “chèque” et “impayé” (dans n’importe quel ordre) pour un client donné, on exécuterait :
+
+`SELECT * FROM domirama`   
+`WHERE code_si = 'X' AND contrat = '12345'`   
+  `AND libelle : 'chèque' AND libelle : 'impayé';`
+
+Cette requête retourne directement les lignes correspondantes, **sans scan complet** : le moteur Cassandra utilise l’index SAI sur `libelle` pour trouver efficacement les partitions/ligne contenant ces termes (filtrant d’abord la partition du client via la clé de partition, puis appliquant l’index sur cette partition). **Aucun Solr externe** n’est requis : l’index est **intégré au stockage** (« Storage-Attached Index ») et réparti sur les nœuds du cluster, ce qui permet une **recherche distribuée et scalable en temps réel**. Contrairement aux index secondaires traditionnels de Cassandra, les SAI offrent de bien meilleures performances : *« SAI utilise un mécanisme efficace réduisant drastiquement la quantité de données scannées lors d’une requête, permettant des récupérations beaucoup plus rapides et moins d’I/O, idéales pour des réponses basse latence »*[cassandra.apache.org](https://cassandra.apache.org/_/blog/Apache-Cassandra-5.0-Features-Storage-Attached-Indexes.html#:~:text=). En d’autres termes, au lieu de scanner 10 ans d’opérations en RAM, la requête s’exécute en cluster en ne lisant que les index pertinents sur chaque nœud, ce qui est **bien plus performant et passe à l’échelle** (même sur des volumes importants). De plus, SAI supporte une **large palette de requêtes** (recherches de préfixe/suffixe, requêtes numériques par comparaison, opérateurs booléens, etc.) bien au-delà des index Cassandra 3.x[cassandra.apache.org](https://cassandra.apache.org/_/blog/Apache-Cassandra-5.0-Features-Storage-Attached-Indexes.html#:~:text=One%20of%20the%20drawbacks%20of,solution%20for%20various%20use%20cases) – on pourra par exemple chercher un fragment du libellé grâce à un tokenizer n-gram si nécessaire (ex: “chéq” pourrait retrouver “chèque”), ou faire des requêtes de plage sur des montants si on indexe la colonne `montant`.
+
+**Remplacement complet de Solr** : Ainsi, la logique existante Solr+scan se traduit nativement par : une simple requête CQL effectue le travail que faisait l’index Solr en mémoire. En outre, Cassandra permet de retourner directement les résultats (colonnes demandées) sans étape de MultiGet séparée – on peut sélectionner toutes les colonnes nécessaires dans la même requête. On pourra donc, lors de la connexion d’un client, soit *ne rien précharger du tout* (attendre la première requête de recherche de l’utilisateur et la résoudre à la volée via CQL), soit éventuellement précharger juste les N dernières opérations (par ex. les 3 mois récents) pour affichage initial, mais **sans index en mémoire** – le besoin de construire un index temporaire disparaît. Ceci **réduit drastiquement la charge au login** et simplifie l’architecture (moins de composants à maintenir).
+
+**Note de conception** : Il faudra veiller à **ne pas inclure les colonnes textuelles indexées dans la clé primaire**. En effet, Cassandra exige que la colonne faisant l’objet d’un index SAI avec analyzer **ne soit pas une colonne de partition ou de clustering**[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/tutorials/use-analyzers-with-cql.html#:~:text=,configured%20on%20the%20SAI%20index). Dans notre modèle, des champs comme `libelle` ou `categorie` seront des colonnes “ordinaires” (non clés) précisément pour cette raison. La clé primaire restera centrée sur (code\_si, contrat, op\_id) pour la localisation des données, et les champs textuels seront indexés séparément par SAI.
+
+En résumé, HCD offre ici une **solution de recherche full-text “built-in”** équivalente à Solr. On bénéficie en prime de la **mise à jour en temps réel** des index lors des écritures : dès qu’une opération est insérée via CQL ou l’API, son libellé est indexé et **immédiatement disponible à la recherche** (plus besoin de recréer un index à chaque connexion). La documentation officielle souligne que *« le Data API \[d’HCD\] s’appuie sur la scalabilité, les performances et l’indexation en temps réel de Cassandra »*[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html#:~:text=The%20Data%20API%20provides%20an,to%20support%20GenAI%20application%20development), ce qui illustre que ces capacités de recherche sont nativement intégrées au moteur.
+
+## **Recherche vectorielle pour requêtes sémantiques avancées (Vector Search)**
+
+En plus de la recherche par mots-clés exacts, HCD 1.2 introduit une fonctionnalité moderne de **recherche vectorielle** qui pourrait améliorer encore l’expérience de recherche client à terme. La recherche vectorielle consiste à représenter du texte (par exemple, le libellé d’une opération) par un *embedding* numérique (un vecteur de nombres flottants) capturant son **sens sémantique**, puis à effectuer des recherches par similarité entre vecteurs. HCD est explicitement *« conçu pour les applications de recherche vectorielle (recherche sémantique, GenAI, etc.), tout en supportant aussi les applications NoSQL traditionnelles »*[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/get-started/hcd-introduction.html#:~:text=Vector%20search%20applications%20with%20HCD). On peut donc stocker, aux côtés des données tabulaires, un vecteur pour chaque opération et interroger la base pour trouver les opérations “semantiquement proches” d’une requête donnée.
+
+**Utilité dans Domirama** : la recherche vectorielle pourrait par exemple permettre aux clients de rechercher des opérations de manière plus “intelligente”. Par exemple, une requête en langage naturel comme *"paiement carte supermarché"* pourrait être convertie en vecteur et renvoyer les opérations correspondantes même si le libellé exact diffère (ex: “CB Carrefour City”). Cela dépasse la correspondance de mots exacte, en capturant le sens (achats supermarché). De même, elle pourrait aider à regrouper des opérations similaires (toutes les opérations liées à l’alimentation, etc.), fournissant un **axe de recherche sémantique** supplémentaire par rapport au simple plein-texte.
+
+**Mise en œuvre** : Concrètement, on ajouterait à la table Domirama une colonne de type vecteur, par ex. `embeddings vector<float, N>`, où *N* est la dimension du vecteur d’embedding choisi (typiquement 128, 256… selon le modèle NLP utilisé). HCD supporte nativement le type `VECTOR<FLOAT, N>` pour stocker ces vecteurs[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/tutorials/vector-search-with-cql.html#:~:text=CREATE%20TABLE%20IF%20NOT%20EXISTS,id%2C%20created_at%29)[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/tutorials/vector-search-with-cql.html#:~:text=comment%20text%2C%20comment_vector%20VECTOR%20,created_at%20timestamp). On créerait ensuite un **index SAI** sur cette colonne vectorielle pour activer la recherche par similarité (approximate nearest neighbors). Par exemple :
+
+`ALTER TABLE domirama ADD embedding VECTOR<FLOAT, 256>;`  
+`CREATE CUSTOM INDEX idx_embedding ON domirama(embedding)`   
+`USING 'StorageAttachedIndex';`
+
+Cela indexe les vecteurs via l’algorithme ANN (Approximate Nearest Neighbor) intégré. Lorsqu’un client effectue une recherche sémantique, le workflow serait : la requête utilisateur (texte) est d’abord transformée en vecteur (via un modèle de language, ex. un petit modèle d’embedding pré-entraîné pour le français bancaire), puis une requête CQL sélectionne les opérations aux vecteurs les plus proches. Cassandra fournit pour cela une syntaxe spéciale dans la clause ORDER BY : `... ORDER BY embedding ANN OF [v1, v2, ..., vN] LIMIT K`. Par exemple, une requête pourrait ressembler à :
+
+`SELECT contrat, date_op, libelle, montant`   
+`FROM domirama`   
+`WHERE code_si = 'X'  -- on peut restreindre à un client donné si souhaité`  
+`ORDER BY embedding ANN OF [0.12, 0.5, ..., -0.03]`   
+`LIMIT 5;`
+
+Ici, `[0.12, 0.5, ..., -0.03]` est le vecteur correspondant à la requête de l’utilisateur, et la requête retournera les 5 opérations dont l’`embedding` est le plus similaire (distance minimale)[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/tutorials/vector-search-with-cql.html#:~:text=ORDER%20BY%20comment_vector%20ANN%20OF,LIMIT%203). HCD utilise en interne un index ANN efficace (basé sur l’algorithme **JACCARD / HNSW** appelé JVector) pour trouver ces voisins proches. On note que *« la recherche vectorielle utilise l’Approximate Nearest Neighbor qui donne dans la plupart des cas des résultats quasi aussi bons que la recherche exacte, avec une **scalabilité bien supérieure** »*[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/tutorials/vector-search-with-cql.html#:~:text=Vector%20search%20utilizes%20Approximate%20Nearest,KNN). Cela signifie qu’on peut interroger des millions de vecteurs rapidement, sans parcourir l’ensemble des données.
+
+Comme pour le full-text, cette recherche est **distribuée et temps réel**. Les embeddings étant stockés dans la base, pas besoin d’un moteur externe type FAISS – on interroge Cassandra directement en CQL.
+
+**Combinaison vector \+ mot-clé** : HCD permet même de **combiner** recherche vectorielle et filtrage textuel. Par exemple, on peut demander les opérations sémantiquement proches d’une certaine intention et qui contiennent un mot précis : `WHERE libelle : 'loyer' ORDER BY embedding ANN OF [...] LIMIT 5`[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/tutorials/use-analyzers-with-cql.html#:~:text=Alternatively%2C%20you%20can%20filter%20these,hiking). Ceci utilise l’index analyzers **en conjonction** avec l’ANN – d’abord on filtre les opérations contenant “loyer”, puis parmi celles-ci on trouve les plus proches du vecteur requête. Cette capacité de *hybrid search* est unique et pourrait répondre à des cas d’usage pointus (recherche fine dans un sous-ensemble thématique).
+
+**Résumé** : Dans un premier temps, la priorité est sans doute la recherche plein-texte classique (remplacer Solr). La **recherche vectorielle** est une brique optionnelle mais prometteuse pour la refonte “à terme” (comme mentionné dans le document, l’idée est d’“améliorer le Search” et les capacités full-text de Datastax). L’intégration d’un vecteur d’embedding par opération est facilitée par HCD et ouvre la voie à des fonctionnalités de recherche **sémantique/IA** innovantes sans infrastructure supplémentaire.
+
+## **Exposition des données via la Data API HCD**
+
+IBM HCD propose, en plus des drivers Cassandra classiques, une **API Data** moderne (orientée HTTP) pour accéder aux données. L’idée est de simplifier l’accès aux microservices ou applications web sans nécessiter de driver binaire ou de connexion CQL directe. Cette API s’appuie sur le projet Stargate de DataStax, fournissant des endpoints REST/JSON et GraphQL pour interagir avec la base.
+
+Concrètement, lors de la refonte Domirama, on pourra remplacer les appels actuels à l’API HBase (ou aux services exposant HBase) par des **requêtes HTTP vers l’API Data** d’HCD. Par exemple, une application front-end pourrait faire une requête GET sur `/api/rest/v2/keyspaces/domirama/...?where={"code_si": "...", "contrat": "...", ...}` ou utiliser un appel GraphQL pour interroger les opérations. L’API Data gère l’authentification via token (schéma `Cassandra:base64(user):base64(pass)` dans les headers) et redirige les requêtes vers le cluster. D’après la documentation, *« le Data API constitue un point d’entrée pour développer des applications avec HCD (...). Il exploite la scalabilité, la performance et l’indexation temps réel de Cassandra »*[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html#:~:text=The%20Data%20API%20provides%20an,to%20support%20GenAI%20application%20development), ce qui garantit que l’utilisation de l’API HTTP n’enlève rien aux performances sous-jacentes – on retrouve la même vitesse qu’avec un driver direct, avec le confort du REST.
+
+**Cas d’usage Domirama** : Au login d’un client, l’application pourrait appeler l’API Data pour récupérer, par exemple, les X dernières opérations (via une requête CQL en REST) afin d’afficher le relevé initial. Pour la fonction de recherche, le front-end pourrait appeler un endpoint spécifique avec le mot-clé de recherche, lequel serait traduit en requête CQL (`SELECT ... WHERE libelle : 'mot' ...`). L’API Data renverra les résultats en JSON, prêts à être consommés. Cela évite d’avoir à exposer directement Cassandra au front (pas de driver dans le navigateur ou de connexion depuis le client lourd), tout passe par HTTPS via cette gateway.
+
+HCD fournit des **clients Data API** dans plusieurs langages pour faciliter ces appels (Python, Java, TypeScript, etc.), ou on peut consommer directement les endpoints HTTP[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/manage/operations/connection-methods-comparison.html#:~:text=Data%20API)[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/manage/operations/connection-methods-comparison.html#:~:text=Clients). Par exemple, un service Java pourrait utiliser le client officiel (`astra-db-java` adapté HCD) pour interroger la base sans écrire de code bas-niveau de gestion de sessions CQL.
+
+En résumé, l’**exposition REST** via Data API permettra à Arkéa de **simplifier l’architecture applicative** : on peut imaginer que le backend fournisse des endpoints recherche aux applications clientes en se contentant d’appeler la Data API derrière. On tire profit des mêmes requêtes CQL optimisées, avec une couche d’accès unifiée. Cela s’intègre bien dans une architecture microservices ou Cloud, et c’est sécurisé (token d’auth, contrôle de roles).
+
+*(Note:* L’API Data supporte aussi les opérations d’écriture, voir section suivante – potentiellement utile pour ingestion batch via HTTP si on le souhaite, mais d’autres outils sont disponibles.)\*
+
+## **Ingestion batch et flux d’écriture (remplacement de MapReduce/Pig)**
+
+Dans l’existant, l’alimentation de la table Domirama se fait par **lots (batch)** : un job PIG (MapReduce Hadoop) traite les données de la « tenue de solde » (probablement issues du système source mainframe) et ensuite écrit dans HBase via l’API (dans la phase reduce). Cette approche MapReduce fonctionnait avec HBase, mais dans le nouvel environnement HCD on va privilégier des méthodes plus modernes et performantes, **sans dépendance à Hadoop**.
+
+Plusieurs options s’offrent pour le chargement batch dans Cassandra :
+
+* **Apache Spark** : C’est le remplaçant naturel de Hadoop MapReduce pour le traitement distribué. Arkéa pourrait **réécrire le job Pig** sous forme d’un job Spark (par exemple en PySpark ou Scala). Spark dispose d’un **connecteur Cassandra** (DataStax Cassandra Connector) très performant qui permet d’écrire en parallèle sur tous les nœuds du cluster. Il s’intègre nativement avec HCD : *« Apache Spark se connecte de façon transparente aux tables HCD pour des analyses avancées »*[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/manage/operations/connection-methods-comparison.html#:~:text=Apache%20Spark). On pourrait ainsi lire les données source (depuis HDFS, des fichiers, ou tout autre système) via Spark, les transformer (parsing COBOL vers colonnes) puis utiliser `spark-cassandra-connector` pour sauver dans la table `domirama`. Spark gèrera le partitionnement en fonction de la clé de partition, assurant un **chargement distribué massivement parallèle**, bien plus rapide qu’un MapReduce 1.x classique. L’avantage est aussi de rester dans l’écosystème Big Data maîtrisé (Spark étant couramment utilisé pour remplacer Pig/Hadoop).
+
+* **DataStax Bulk Loader (DSBulk)** : DataStax fournit un outil dédié pour les importations/exportations massives. C’est un utilitaire en ligne de commande (`dsbulk`) capable de lire des fichiers CSV/JSON ou de se connecter à une source, et d’insérer les données dans Cassandra très rapidement. HCD 1.2 met en avant DSBulk comme moyen de *« charger des téraoctets de données de manière sécurisée et fiable avec peu ou pas de downtime »*[docs.datastax.com](https://docs.datastax.com/en/data-migration/index.html#:~:text=Bulk,no%20downtime%2C%20securely%20and%20reliably). Pour Domirama, si les données journalières peuvent être exportées en fichiers (CSV par exemple), DSBulk permettrait de les charger en batch sans avoir à coder un job complexe. On pourrait planifier l’exécution de `dsbulk load` chaque nuit avec les nouveaux enregistrements. Cet outil gère le parallélisme, les taux de throttle, les erreurs, etc., et il est optimisé pour Cassandra. La doc HCD indique d’ailleurs qu’on peut *« charger les données dans HCD via l’API Data ou via DataStax Bulk Loader (DSBulk) »*[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/get-started/hcd-introduction.html#:~:text=Load%20data). DSBulk est donc une excellente option pour migrer les données historiques (initial load des 10 ans) et pour ingérer les batches quotidiens.
+
+* **Data API / Drivers** : Il est tout à fait possible aussi d’utiliser directement l’API Data ou un driver Cassandra pour insérer les données, par exemple en écrivant un script Python qui lit les données source et fait des appels REST (ou des `INSERT` via driver) en boucle. Cependant, pour de gros volumes (plusieurs milliards de lignes sur 10 ans), cela serait moins efficace que Spark ou DSBulk. L’API Data convient mieux pour des écritures en continu ou de plus petits lots. On pourrait l’utiliser en complément, par exemple pour des opérations unitaires ou correctives (comme l’application de catégorisation cliente qui faisait des PUT HBase timestampés – cela pourrait devenir de simples appels API Data de mise à jour CQL).
+
+En terme de performance, Cassandra supporte très bien les **écritures batch en masse**. L’architecture distribuée fait que les opérations d’insertion se font en parallèle sur toutes les partitions. Il faudra calibrer le cluster (nombre de nœuds, CPU, I/O) pour encaisser la volumétrie, mais en général Cassandra excelle en écriture séquentielle (les SSTables). De plus, HCD offre des options de migration sans interruption si nécessaire (Zero Downtime Migration tools), mais comme ici on change de techno, on procédera probablement par une migration initiale (reprise des 10 ans depuis HBase \-\> HCD via un job dédié) puis bascule des flux alimentant HBase vers HCD.
+
+**Remplacement du MapReduce** : On recommande donc de **remplacer le job Pig** par un **job Spark** équivalent. Spark permet aussi de se connecter directement à HBase si besoin pour extraire les données existantes (via Hadoop InputFormat HBase), qu’on pourrait ensuite écrire dans Cassandra – utile pour la migration initiale. Post-migration, le pipeline d’alimentation régulier depuis le SI métier pourrait aussi être refait en Spark, ou via une chaîne Kafka \+ microservice, etc., selon l’architecture cible. Notons que DataStax propose un **connecteur Kafka** pour Cassandra, donc si les opérations clients sont produites sous forme de messages, on pourrait insérer en temps réel via Kafka Connect. Cependant, cela sortirait du cadre purement batch/Pig, c’est une éventualité d’architecture plus temps réel.
+
+Enfin, HCD étant compatible avec tous les drivers Cassandra, les applications existantes (Java, etc.) pourraient aussi directement utiliser le driver Cassandra 4.x natif pour insérer/mettre à jour les opérations en base.
+
+Pour récapituler les options d’ingestion dans HCD : la documentation suggère soit *« itérer des insertions via l’API Data, un client ou des scripts CQL »* (approprié à du semi-batch ou continu), soit utiliser *« DataStax Bulk Loader (DSBulk) »* pour du bulk massif[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/manage/operations/connection-methods-comparison.html#:~:text=Migration%20and%20bulk%20loading). Étant donné l’existant Pig MR, la solution Spark/DSBulk offre le meilleur compromis de **performance** et de **maintenabilité**.
+
+## **Gestion du TTL et purge automatique**
+
+La table HBase Domirama utilise un **TTL** (time-to-live) pour la purge automatique des anciennes données (on parle de 10 ans d’historique exploitable, et un réplica Elasticsearch sur 13 mois). Il est impératif de reproduire ce comportement dans Cassandra afin que les opérations dépassant la rétention soient automatiquement supprimées sans nécessiter de batch de nettoyage.
+
+Heureusement, Cassandra gère nativement le TTL sur les données. Chaque insertion peut spécifier un TTL en secondes, ou on peut définir un **TTL par défaut au niveau de la table** via l’option `default_time_to_live`. Lorsqu’un TTL est atteint, la donnée est marquée expirée (tombstone) puis collectée lors du compaction. Selon la doc *« Les colonnes et tables supportent une expiration TTL en secondes. Une fois expirées, les données sont marquées avec un tombstone et nettoyées par compaction »*[docs.datastax.com](https://docs.datastax.com/en/cql-oss/3.3/cql/cql_using/useExpire.html#:~:text=Use%20time,in%20a%20column%20or%20table). On pourra donc, lors de la création de la table Domirama sous HCD, ajouter par exemple `WITH default_time_to_live = 315576000;` (ce qui correspond à 10 ans en secondes) pour aligner la politique de rétention. Avec un TTL par défaut, **toute ligne insérée sera automatiquement supprimée** après 10 ans sans action manuelle. La doc précise que *« on peut définir default\_time\_to\_live dans CREATE TABLE pour que toutes les colonnes expirent après la durée donnée »*[docs.datastax.com](https://docs.datastax.com/en/cql-oss/3.3/cql/cql_using/useExpire.html#:~:text=Setting%20a%20TTL%20for%20a,table).
+
+Si Arkéa souhaite affiner (par ex. si certaines colonnes/family avaient des TTL différents), on peut aussi gérer le TTL par colonnes individuellement à l’insertion (`INSERT ... USING TTL ...`). Mais dans ce cas d’usage, il semble que toutes les opérations partagent la même durée de conservation, donc le TTL global de table convient parfaitement.
+
+Cassandra garantira qu’**aucune opération expirée depuis plus de TTL secondes n’est renvoyée aux requêtes** (après la période `gc_grace_seconds` de 10 jours maximum pour propagation des tombstones[docs.datastax.com](https://docs.datastax.com/en/cql-oss/3.3/cql/cql_using/useExpire.html#:~:text=Data%20expires%20once%20it%20exceeds,automatically%20remove%20the%20tombstone%20data)). La purge est donc **automatique et continue**, comme c’était le cas avec HBase (HBase supprimait physiquement les données expirées lors des compactions majeures, de façon similaire).
+
+À noter, si la politique de rétention devait changer (par ex. passer à 13 mois pour tout centraliser sur Cassandra au lieu d’Elastic), il suffira de modifier `default_time_to_live` ou les TTL des nouvelles écritures. Cassandra permet cette souplesse (on peut *ALTER TABLE* pour ajuster default TTL).
+
+En résumé, la **fonctionnalité TTL de HBase est pleinement reproduite dans Cassandra** via le TTL table/colonne. On garde les avantages : purge sans surcharge (pas de script batch de suppression), stockage limité aux X dernières années automatiquement, cohérence forte (les tombstones sont pris en compte par le moteur de requête pour ne pas renvoyer de données expirées).
+
+## **Stratégie d’indexation et optimisation des requêtes**
+
+Dans cette refonte, il est crucial de définir **quelles colonnes seront indexées et comment**, afin d’assurer des performances optimales en lecture. On distingue deux types d’indexation : par la clé primaire et via les index secondaires (SAI).
+
+**Indexation par la clé (Primary Key)** – Dans Cassandra, la **clé primaire** sert d’index natif pour les requêtes d’accès direct. Dans notre modèle, la partition key `(code_si, contrat)` permet de *pointer directement* vers toutes les opérations d’un client. Une requête telle que `SELECT * FROM domirama WHERE code_si='X' AND contrat='12345'` ira **directement** sur le nœud concerné et renverra toutes les opérations (c’est l’équivalent d’un **Get range** dans HBase par clé préfixe). C’est très efficace si on a besoin de récupérer l’historique complet d’un client (par ex. au moment d’afficher un relevé complet). La seconde partie de la clé (clustering par `op_id`/date) est triée et permet des **sous-sélections par range** – par exemple `... AND date_op >= '2025-01-01' AND date_op < '2026-01-01'` exploitera l’ordre pour ne lire qu’une portion de la partition, ce qui évite tout scan inutile. Ces accès par clé sont de complexité O(log N) ou mieux, et Scalability horizontale, donc **excellents en performance**.
+
+Aussi, la clé primaire inclut *code SI* afin que si Domirama agrège plusieurs SI, on ne mélange pas les clés identiques entre entités (et cela contribue à une bonne distribution de partitions). Si jamais une partition (un contrat) devenait trop volumineuse (ex: \> trop de millions de lignes), on pourrait envisager de la *sharder* en incluant par exemple l’année dans la clé de partition (pour couper l’historique en 10 partitions d’un an chacune). Cependant, sauf cas extrême, un client n’aura probablement pas des millions d’opérations – Cassandra peut gérer des partitions de quelques centaines de milliers de lignes sans souci. On monitorera néanmoins la taille des partitions pour éviter des *partitions trop larges* (\>\> 100 Mo). Si nécessaire, la clé peut évoluer (par ex. partition \= client \+ année). Mais dans un premier temps, garder tout par client rend les développements plus simples (accès direct par client).
+
+**Indexation secondaire (SAI)** – Ce sont les index supplémentaires que nous créons pour les besoins de recherche et de filtrage **sur des colonnes non incluses dans la clé primaire**. Voici les index SAI envisagés :
+
+* **Index texte sur libellé** : comme détaillé plus haut, un index SAI avec analyzer sur la colonne `libelle` pour la recherche full-text (mots du libellé). On choisira un analyzer en fonction des besoins linguistiques (probablement *French* pour gérer accents, etc.). Cet index permettra des requêtes `libelle : 'mot'` ou `libelle : 'mot1' AND libelle : 'mot2'` pour retrouver les opérations contenant ces termes[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/tutorials/use-analyzers-with-cql.html#:~:text=SELECT%20,val%20%3A%20%27running). C’est le remplacement direct de l’index Solr.
+
+* **Index texte sur d’autres champs** : si d’autres colonnes textuelles méritent une recherche plein texte – par exemple un champ `libelle_categorie` ou `notes` – on peut aussi les indexer de la même façon. Chaque index est indépendant, mais on peut combiner dans la requête plusieurs conditions (comme un AND sur deux colonnes différentes, Cassandra filtrera par chaque index et croisera les résultats).
+
+* **Index sur les colonnes numériques ou catégorielles** : Cassandra permet aussi d’indexer des colonnes non-textuelles avec SAI. Par exemple, si on souhaite permettre la recherche par **montant** (saisir un montant et trouver toutes les opérations correspondantes), on pourrait créer un index SAI sur `montant`. Les SAI supportent très bien les *range queries* sur numériques[cassandra.apache.org](https://cassandra.apache.org/_/blog/Apache-Cassandra-5.0-Features-Storage-Attached-Indexes.html#:~:text=One%20of%20the%20drawbacks%20of,solution%20for%20various%20use%20cases). Toutefois, si l’usage typique est de rechercher un montant précis ou une fourchette, on peut aussi s’appuyer sur des requêtes par partition (si on partitionnait par période par ex.) ou sur un simple filtrage en post-traitement. L’ajout d’un index numérique se justifierait surtout si on veut interroger par montant **sans fournir le client** (ex: “trouve-moi toutes les opérations \> 10000 €” globalement – ce qui n’est sans doute pas un cas métier courant, car en général on cherche dans un compte, pas globalement). De même, pour une colonne catégorielle comme `categorie_auto` (par ex. “loisirs”, “alimentation”), on peut soit la mettre en clustering secondaire si on a souvent besoin de lister tous les contrats ayant une catégorie donnée (peu probable), soit créer un petit index SAI dessus pour faire des filtres du type `WHERE categorie_auto = 'Loisirs'` éventuellement combinés à d’autres critères. Cassandra sait bien gérer ce genre de requêtes avec SAI, car l’index stocke pour chaque valeur la liste des clés correspondantes *de façon distribuée*.
+
+* **Index vectoriel** : si on implémente la recherche vectorielle, il faut indexer la colonne `embedding` avec SAI (ANN index). Nous avons montré la commande à utiliser[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/tutorials/vector-search-with-cql.html#:~:text=Create%20the%20custom%20index%20called,SAI). Une fois en place, on pourra exécuter les requêtes `ORDER BY embedding ANN OF [...]` qui retourneront les voisins les plus proches.
+
+En terme de charges, chaque index SAI consomme un peu de stockage et mémoire, mais ils sont **attachés au cycle SSTable** donc optimisés. Ils augmentent légèrement le coût en écriture (doivent indexer en arrière-plan chaque insertion) et en stockage (quelques % supplémentaires[cassandra.apache.org](https://cassandra.apache.org/_/blog/Apache-Cassandra-5.0-Features-Storage-Attached-Indexes.html#:~:text=)), mais en contrepartie **accélèrent énormément les lectures** hors clé primaire. Étant donné l’objectif d’améliorer le search, ce compromis est justifié.
+
+**Multi-index et filtrage combiné** : On pourra exploiter plusieurs index dans une même requête. Par exemple, une recherche complexe pourrait demander *“opérations contenant ‘loyer’ de plus de 500€ l’année dernière”*. Cela se traduirait en CQL par quelque chose comme :
+
+`SELECT * FROM domirama`   
+`WHERE code_si='X' AND contrat='12345'`  
+  `AND libelle : 'loyer'`   
+  `AND montant > 500`   
+  `AND date_op >= '2024-01-01' AND date_op < '2025-01-01';`
+
+Ici, on combine : filtre par partition (client), filtre full-text (index SAI sur libelle), filtre numérique (soit via index SAI sur montant s’il existe, soit via parcourt de la partition puisque la partition est limitée à ce client), et filtre range sur date (possible grâce au clustering de date). Cassandra saura utiliser l’index texte pour réduire l’ensemble, éventuellement l’index montant s’il est disponible pour éviter de parcourir toute l’année, et ne lira in fine que les entrées correspondantes. Ce type de requête serait coûteux sur HBase (impossible sans tout balayer ou maintenir un index secondaire externalisé), alors qu’ici il est géré de façon distribuée et optimisée.
+
+**En synthèse**, la stratégie d’indexation est :
+
+* **Clé primaire** pour accès direct par client et tri temporel (cas d’usage principal : obtenir historique ou plage).
+
+* **Index SAI texte** sur les champs textuels utiles à la recherche (libellé, éventuellement d’autres) pour remplacer Solr et offrir du full-text avec analyzers (recherche rapide de mots, tokenisation, etc.).
+
+* **Index SAI vectoriel** sur l’embedding si on déploie la recherche sémantique (pour requêtes ANN).
+
+* **Index SAI classiques** sur quelques champs de filtrage si besoin (montant, catégorie) – à évaluer selon les fonctionnalités offertes au client (ex: recherche par montant exact pourrait aussi être faite via full-text si le montant est transformé en texte dans le libellé, mais c’est moins propre).
+
+Grâce à ces index, toutes les requêtes nécessaires (recherche par mot-clé, recherche thématique, filtres numériques) pourront être satisfaites **sans scan complet**, en temps réel. DataStax souligne que SAI *« supporte une large gamme de types de requêtes complexes »*[cassandra.apache.org](https://cassandra.apache.org/_/blog/Apache-Cassandra-5.0-Features-Storage-Attached-Indexes.html#:~:text=One%20of%20the%20drawbacks%20of,solution%20for%20various%20use%20cases), ce qui donne confiance dans la capacité de HCD à couvrir les besoins actuels **et futurs** (nouvelles features de recherche).
+
+Enfin, notons que la **table Domirama** dans HCD pourrait aussi être *répliquée* vers un moteur d’analyse si besoin (par ex. on pourrait connecter Spark ou DSE Analytics pour faire des analyses historiques, ou alimenter Elasticsearch pour certains usages spécifiques si on voulait garder un index externe pour d’autres types de requêtes, bien que cela semble redondant désormais). Mais la vision cible est que HCD devienne le **système central** pour ces données d’opérations, combinant stockage scalable, recherche full-text native et capacités AI.
+
+## **Conclusion**
+
+En adoptant IBM HCD 1.2, Arkéa peut refondre Domirama sur une base Cassandra moderne offrant **haute performance et fonctionnalités enrichies**. La table d’opérations est restructurée en schéma CQL efficace, les recherches plein texte sont traitées nativement par les index analyzers (éliminant Solr en mémoire), la recherche peut même évoluer vers du sémantique vectoriel, l’accès aux données est simplifié via l’API Data HTTP, les flux d’ingestion batch sont modernisés (Spark/DSBulk au lieu de MapReduce), le TTL assure la rétention automatique comme avant, et une stratégie d’indexation complète garantit des **requêtes rapides** pour tous les cas d’usage (clé, texte, AI). L’ensemble est appuyé par la documentation officielle HCD et les capacités disponibles en novembre 2025\. Cette refonte technique permettra à terme d’améliorer significativement l’expérience de recherche des clients (recherche instantanée sur 10 ans d’opérations, possibilités de requêtes avancées), tout en simplifiant l’architecture (moins de composants ad-hoc) et en assurant l’évolutivité pour les années à venir. Les *« capacités de search full-text de Datastax »* autrefois envisagées comme "un plus" deviendront ainsi le cœur du nouveau Domirama, pour un SI Big Data Arkéa à la pointe.
+
+**Sources :** Documentation DataStax/IBM HCD et Cassandra : CQL analyzers[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/tutorials/use-analyzers-with-cql.html#:~:text=2,option%20and%20stemming%20enabled)[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/tutorials/use-analyzers-with-cql.html#:~:text=SELECT%20,val%20%3A%20%27running), vector search[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/tutorials/vector-search-with-cql.html#:~:text=Create%20the%20custom%20index%20called,SAI)[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/tutorials/vector-search-with-cql.html#:~:text=Vector%20search%20utilizes%20Approximate%20Nearest,KNN), Data API[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html#:~:text=The%20Data%20API%20provides%20an,to%20support%20GenAI%20application%20development)[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/manage/operations/connection-methods-comparison.html#:~:text=Data%20API), DSBulk/Spark[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/manage/operations/connection-methods-comparison.html#:~:text=Migration%20and%20bulk%20loading)[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/manage/operations/connection-methods-comparison.html#:~:text=Apache%20Spark), TTL[docs.datastax.com](https://docs.datastax.com/en/cql-oss/3.3/cql/cql_using/useExpire.html#:~:text=Use%20time,in%20a%20column%20or%20table)[docs.datastax.com](https://docs.datastax.com/en/cql-oss/3.3/cql/cql_using/useExpire.html#:~:text=Setting%20a%20TTL%20for%20a,table), Apache Cassandra SAI [cassandra.apache.org](https://cassandra.apache.org/_/blog/Apache-Cassandra-5.0-Features-Storage-Attached-Indexes.html#:~:text=)[cassandra.apache.org](https://cassandra.apache.org/_/blog/Apache-Cassandra-5.0-Features-Storage-Attached-Indexes.html#:~:text=One%20of%20the%20drawbacks%20of,solution%20for%20various%20use%20cases), Document interne Arkéa (Domirama HBase).
+
+# **Refonte de domirama-meta-categories sous IBM HCD (Cassandra)**
+
+## **Modèle de données CQL refondu et séparation des usages (MECE)**
+
+Au lieu d’une unique table HBase aux *rowkeys* préfixées, nous proposons de créer plusieurs tables Cassandra, une par type de données, pour une séparation claire (**MECE** : Mutuellement Exclusifs, Collectivement Exhaustifs). Chaque nouvelle table aura un schéma fixe adapté, éliminant les colonnes dynamiques d’HBase au profit de colonnes CQL définies dès la création. Cassandra supporte sans problème plusieurs tables (quelques-unes ne posent pas de souci de performances), ce qui permet de ne plus mélanger des “keyspaces” logiques dans une seule table comme en HBase. Cette séparation améliore la maintenabilité et la lisibilité : chaque table correspond à une responsabilité fonctionnelle précise, sans logique implicite de préfixes. De plus, grâce à l’indexation SAI, on n’a plus besoin de *designs* complexes pour requêter selon différents critères, ce qui simplifie le modèle de données global[docs.datastax.com](https://docs.datastax.com/en/cql/hcd/develop/indexing/sai/sai-faq.html#:~:text=SAI%20also%20makes%20data%20modeling,it%20any%20way%20you%20want).
+
+**Tables proposées (une par usage)** :
+
+* **ACCEPTATION\_CLIENT** – Représente l’acceptation de l’affichage/catégorisation par le client. Clé primaire composée `(code_efs, no_contrat, no_pse)` pour identifier de manière unique l’entité client (code entité \+ contrat \+ personne). On peut stocker un indicateur booléen ou une date d’acceptation (ex. colonne `accepted_at TIMESTAMP`). La présence d’une ligne indique que le client a accepté la fonctionnalité. *(En HBase, une clé préfixée `ACCEPT:` marquait cette acceptation.)*
+
+* **OPPOSITION\_CATEGORISATION** – Indique qu’un client s’oppose à la catégorisation automatique. Clé primaire `(code_efs, no_pse)`. Une colonne booléenne `opposed` (ou la simple existence de la ligne) marque l’opposition en cours. *(Correspond à HBase `OPPOSITION:` code\_efs:pse.)*
+
+* **HISTORIQUE\_OPPOSITION** – Historise les changements d’opposition d’un client. Pour conserver chaque événement (activation/désactivation de l’opposition), on utilise une clé primaire comprenant l’identifiant client et un identifiant d’événement ou horodatage unique. Par exemple, `PRIMARY KEY((code_efs, no_pse), horodate)` avec `horodate` en *clustering key* (type `TIMEUUID` pour garantir l’unicité et l’ordre chronologique). Chaque ligne détaille un changement (ex. colonnes `status` – *opposé* ou *autorisé*, et `timestamp` de l’action). Cette table remplace l’usage des multi-versions HBase (VERSIONS=50) pour l’historique : au lieu de stocker 50 versions d’une cellule, on insère une nouvelle ligne par événement. Cela offre une traçabilité équivalente, sans recours au versioning HBase.
+
+* **FEEDBACK\_PAR\_LIBELLE** – Table de “feedback” entre moteur et clients par libellé d’opération (HBase prefix `ANALYZE_LABEL`). Clé primaire proposée : `PRIMARY KEY((type_operation, sens_operation, libelle_simplifie), categorie)` où *libellé simplifié* désigne le texte normalisé de l’opération, et *categorie* (code de catégorie assignée) est une clé de clustering. Chaque combinaison de libellé \+ type \+ sens forme une partition regroupant toutes les catégories assignées à ce libellé. Deux colonnes compteur (`counter`) tiennent le nombre de fois où l’opération a été classée dans chaque catégorie : par exemple `count_engine` pour le nombre de catégorisations proposées par le moteur, et `count_client` pour le nombre d’affectations finales par les clients. **Important** : Cassandra impose que toutes les colonnes non-clé d’une table de compteurs soient de type counter[docs.datastax.com](https://docs.datastax.com/en/cql/hcd/develop/column-create.html#:~:text=,either%20increment%20or%20decrement%20it). Nous définissons donc *uniquement* des compteurs dans cette table (pas d’autres données non-compteur mélangées), ce qui est conforme aux règles Cassandra[docs.datastax.com](https://docs.datastax.com/en/cql/hcd/develop/column-create.html#:~:text=,either%20increment%20or%20decrement%20it). Ainsi, chaque ligne (partition par libellé, identifiée en clustering par une *categorie*) aura deux compteurs : l’un incrémenté à chaque attribution de catégorie par le moteur, l’autre à chaque correction par le client. Par exemple:
+
+`CREATE TABLE feedback_par_libelle (`  
+    `type_operation text,`  
+    `sens_operation text,`  
+    `libelle_simplifie text,`  
+    `categorie text,`  
+    `count_engine counter,`  
+    `count_client counter,`  
+    `PRIMARY KEY ((type_operation, sens_operation, libelle_simplifie), categorie)`  
+`);`
+
+*(Cette structure reproduit la distribution des catégories « affectées globalement à un format d’opération » mentionnée dans HBase. Au lieu de colonnes dynamiques par catégorie dans HBase, on utilise ici une clé de clustering `categorie` pour représenter chaque colonne dynamique comme une ligne distincte, ce qui évite d’altérer le schéma pour chaque nouvelle catégorie.)*
+
+* **FEEDBACK\_PAR\_ICS** – Similaire à la précédente, pour les retours par code ICS (HBase prefix `ICS_DECISION`). Clé primaire `(type_operation, sens_operation, code_ics, categorie)` et compteurs `count_engine` / `count_client` par catégorie. On obtient ainsi, pour chaque code ICS et type d’opération, la distribution des catégories assignées (moteur vs final).
+
+* **REGLES\_PERSONNALISEES** – Table des règles de catégorisation personnalisées client (HBase prefix `CUSTOM_RULE`). Ici, chaque règle étant identifiée par un triplet *(type d’opération, sens, libellé)* spécifique à un client ou entité, nous pouvons utiliser `PRIMARY KEY((code_efs), type_operation, sens_operation, libelle_simplifie)` – c’est-à-dire partitionner par client (code\_efs), et différencier les règles en clustering par type, sens et libellé. Les colonnes stockées pourraient être, par exemple, la catégorie cible à appliquer (`categorie_cible text`), un indicateur actif/inactif, etc. S’il peut y avoir plusieurs règles par même libellé pour un client, on inclurait un identifiant de règle supplémentaire dans la clé. Ce schéma remplace l’utilisation de colonnes qualificatives dynamiques dans HBase (où chaque qualifier représentait possiblement une règle). Désormais, chaque règle est une ligne explicite, ce qui simplifie la lecture et la modification via CQL.
+
+* **DECISIONS\_SALAIRES** – Table pour la méthode de catégorisation des libellés marqués *“salaire”* (HBase prefix `SALARY_DECISION`). Ici le libellé de l’opération est la clé primaire (ex. `PRIMARY KEY(libelle_simplifie)`), éventuellement avec un préfixe si d’autres clés sont pertinentes. On peut stocker la méthode appliquée (par ex. colonne `methode_utilisee` : *règle spéciale*, *modèle ML*…), un indicateur booléen ou tout méta-donnée nécessaire. Cette table de configuration reste petite et pourrait aussi être partitionnée par type de méthode si besoin.
+
+**Justifications techniques** : En isolant les données par thème, on respecte la logique métier (une table par usage) tout en évitant les écueils HBase (plusieurs *keyspaces* dans une table). Cassandra n’a pas le surcoût d’HBase pour de « petites tables », il est donc sain de répartir en 6–7 tables. Chaque table a un schéma fixe documenté, ce qui évite les colonnes dynamiques non maîtrisées. On obtient une séparation nette des responsabilités : par exemple, les règles client n’interfèrent plus avec les feedbacks de catégorisation, etc. Cela facilite les évolutions (modifier le schéma d’une table n’impacte pas les autres domaines) et les contrôles d’accès – on pourrait par exemple autoriser certaines équipes à ne consulter que la table des feedbacks sans exposer les règles client. Enfin, ce *data model* garantit une **exhaustivité sans chevauchement** (MECE) : chaque enregistrement HBase trouve sa nouvelle place unique en Cassandra, sans duplication inutile.
+
+## **Gestion des compteurs distribués (feedbacks)**
+
+HBase utilisait des compteurs atomiques (INCREMENT) sur des colonnes dynamiques pour accumuler les feedbacks de catégorisation. Dans HCD (Cassandra), nous exploitons le type **counter** de Cassandra pour implémenter ces compteurs de manière distribuée. Chaque compteur Cassandra est mis à jour via une requête `UPDATE ... SET col = col + 1` (ou \-1 le cas échéant) plutôt que par lecture/écriture manuelle. On crée des tables dédiées ne comportant que des colonnes de type counter (conformément aux restrictions Cassandra[docs.datastax.com](https://docs.datastax.com/en/cql/hcd/develop/column-create.html#:~:text=,either%20increment%20or%20decrement%20it)) – comme illustré avec `count_engine` et `count_client` dans *FEEDBACK\_PAR\_LIBELLE*. Les compteurs Cassandra sont **eventually consistent** : ils offrent de bonnes performances et atomicité *dans le contexte d’une partition donnée*, mais ne garantissent pas une synchronisation forte instantanée entre nœuds (une légère divergence temporaire est possible en cas d’écriture concurrente, résolue à terme). Cela est généralement acceptable pour des statistiques agrégées de feedback. En pratique, en utilisant le niveau de consistance LOCAL\_QUORUM pour les updates, on assure une convergence rapide et une lecture cohérente locale.
+
+La manipulation des compteurs via l’API CQL est simple : par exemple un batch d’incréments pourrait s’écrire:
+
+`BEGIN COUNTER BATCH`  
+  `UPDATE feedback_par_libelle`   
+    `SET count_engine = count_engine + 1`   
+    `WHERE type_operation='CB' AND sens_operation='DEBIT'`  
+      `AND libelle_simplifie='AMAZON' AND categorie='E_COMMERCE';`  
+  `UPDATE feedback_par_libelle`   
+    `SET count_client = count_client + 1`   
+    `WHERE type_operation='CB' AND sens_operation='DEBIT'`  
+      `AND libelle_simplifie='AMAZON' AND categorie='E_COMMERCE';`  
+`APPLY BATCH;`
+
+Ce mécanisme d’UPDATE incrémente directement la valeur existante, sans nécessiter de lecture préalable. Cassandra gère en interne l’agrégation des deltas de compteur. On note que, contrairement à HBase, il n’y a plus de multi-version par incrément : le compteur stocke la somme courante. Si un décrément est requis, Cassandra le permet aussi (on pourrait par exemple décrémenter un compteur si un feedback est annulé). L’absence de VERSIONS multiples n’est pas gênante ici, car **le besoin fonctionnel est le total courant** (distribution des catégories) et non l’historique de chaque incrément individuel.
+
+*Points d’attention techniques* : les compteurs Cassandra ne peuvent pas être mélangés avec d’autres types dans la même table[docs.datastax.com](https://docs.datastax.com/en/cql/hcd/develop/column-create.html#:~:text=,either%20increment%20or%20decrement%20it). Nous en avons tenu compte en isolant les compteurs dans leurs propres tables ou partitions. De plus, on ne peut pas appliquer de TTL sur un compteur[docs.datastax.com](https://docs.datastax.com/en/cql/hcd/develop/column-create.html#:~:text=,index%20on%20a%20counter%20column), ni l’indexer secondairement (SAI ne supporte pas les colonnes counter). Cela ne pose pas de problème dans notre cas d’usage (on indexe plutôt les clés de partition ou catégories, voir section SAI). Enfin, pour assurer une comptabilisation correcte, il faut éviter les mises à jour *concurrentes trop fréquentes* sur un même enregistrement à des niveaux de consistance faibles – dans la majorité des scénarios, le QUORUM et le mécanisme de résolution de conflits de Cassandra garantiront la fiabilité des compteurs.
+
+## **Indexation secondaire et recherches (Storage-Attached Indexing)**
+
+**Recherche par colonnes non-clé** : L’un des atouts de HCD 1.2 est **Storage-Attached Indexing (SAI)**, qui permet de créer des index secondaires efficaces sur n’importe quelle colonne[docs.datastax.com](https://docs.datastax.com/en/cql/hcd/develop/indexing/sai/sai-faq.html#:~:text=written%20to%20achieve%20the%20goal,the%20creation%20of%20secondary%20indexes)[docs.datastax.com](https://docs.datastax.com/en/cql/hcd/develop/indexing/sai/sai-faq.html#:~:text=SAI%20makes%20it%20possible%20to,any%20column%20in%20the%20table). Cela simplifie les requêtes hors clé primaire sans multiplier les tables de dénormalisation. Dans notre modèle, on exploitera SAI pour améliorer la flexibilité des lectures :
+
+* **Index sur les libellés d’opération** : Bien que la table *FEEDBACK\_PAR\_LIBELLE* soit conçue pour accéder rapidement à un libellé précis (clés partition \= type, sens, libellé), on peut vouloir effectuer des recherches partielles ou insensibles à la casse sur les libellés. En effet, un utilisateur pourrait chercher tous les libellés contenant un mot-clé, ou on pourrait vouloir normaliser les comparaisons. Avec SAI, on peut créer un index en spécifiant un analyseur de texte (par ex. *case\_insensitive*). Par exemple, la commande CQL suivante créerait un index SAI sur la colonne `libelle_simplifie` de la table *DECISIONS\_SALAIRES* en ignorant la casse et les accents :
+
+`CREATE CUSTOM INDEX lib_index ON decisions_salaires(libelle_simplifie)`   
+`USING 'StorageAttachedIndex'`   
+`WITH OPTIONS = {'case_sensitive': 'false', 'normalize': 'true', 'ascii': 'true'};`
+
+Cet index stocke les termes normalisés directement dans les fichiers SSTables, ce qui autorise des requêtes du type `WHERE libelle_simplifie CONTAINS 'salaire'` ou une recherche par préfixe sur les libellés. Les index SAI texte s’appuient sur une structure trie optimisée en mémoire et sur disque, permettant des correspondances par préfixe ou contenant, sans parcourir toutes les lignes[docs.datastax.com](https://docs.datastax.com/en/cql/hcd/develop/indexing/sai/sai-faq.html#:~:text=%2A%20Equality%20and%20non,and%20supports%20simple%20token%20skipping).
+
+* **Index sur champs numériques (type, code ICS)** : Les colonnes *type\_operation* et *sens\_operation*, si elles ne font pas partie de la clé de partition d’une table donnée, peuvent être indexées SAI pour exécuter des filtres. Par exemple, si on souhaitait lister *tous* les feedbacks (tous libellés confondus) pour un `type_operation='VIREMENT'`, on pourrait créer un index SAI sur *type\_operation*. Cassandra SAI sait indexer même une composante de clé de partition composite[docs.datastax.com](https://docs.datastax.com/en/cql/hcd/develop/indexing/sai/sai-faq.html#:~:text=SAI%20makes%20it%20possible%20to,any%20column%20in%20the%20table) : ainsi, si *type\_operation* fait partie d’une partition, on peut quand même indexer seulement cette colonne pour permettre des requêtes globales par type. De même, *code\_ics* (numérique) peut être indexé, permettant des filtres du type `WHERE code_ics = 1234` ou des recherches de *range* si pertinent. Les index SAI sur des types numériques utilisent une structure kd-tree en arrière-plan pour des filtrages efficaces par inégalités[docs.datastax.com](https://docs.datastax.com/en/cql/hcd/develop/indexing/sai/sai-faq.html#:~:text=%2A%20Equality%20and%20non,and%20supports%20simple%20token%20skipping).
+
+* **Index vectoriel (données vectorielles)** : HCD 1.2 introduit aussi la possibilité de faire de la *similarity search* vectorielle sur des embeddings grâce à SAI. Si cela s’avérait pertinent à l’avenir (par exemple pour améliorer la catégorisation via des vecteurs sémantiques de libellés d’opérations), on peut stocker des embeddings en colonne de type `VECTOR<FLOAT, N>` (où *N* est la dimension)[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/get-started/vector-concepts.html#:~:text=To%20support%20vector%20search%20in,embedding%20model%20that%20you%20use). Cassandra peut alors utiliser un index SAI de type *JVector* pour effectuer des recherches de voisins approchants (*Approximate Nearest Neighbors*) dans l’espace vectoriel[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/get-started/vector-concepts.html#:~:text=SAI%20uses%20the%20JVector%20Approximate,All%20data). En pratique, cela signifie qu’on pourrait, par exemple, trouver les libellés les plus “semblables” à un libellé donné en termes de contexte sémantique (utilité potentielle : suggérer une catégorisation par analogie avec des opérations similaires). Bien que cette fonctionnalité dépasse le besoin immédiat de simple refonte, elle est disponible dans HCD pour des cas d’usage IA/LLM plus avancés. *(À noter : SAI vectoriel privilégie la rapidité sur l’exactitude parfaite, en s’appuyant sur un algorithme ANN inspiré de DiskANN[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/get-started/vector-concepts.html#:~:text=Cassandra,Nearest%20Neighbor%20%28KNN%29%20searches)[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/get-started/vector-concepts.html#:~:text=SAI%20uses%20the%20JVector%20Approximate,All%20data).)*
+
+**Requêtes et performance** : L’usage de SAI doit être judicieux. Chaque index secondaire introduit un surcoût en écriture (indexation supplémentaire à chaque insertion). Cependant, SAI a été conçu pour être peu coûteux en stockage et en maintenance, bien plus que les index secondaires traditionnels de Cassandra[docs.datastax.com](https://docs.datastax.com/en/cql/hcd/develop/indexing/sai/sai-faq.html#:~:text=For%20developers%2C%20SAI%20removes%20several,primary%20key%20columns)[docs.datastax.com](https://docs.datastax.com/en/cql/hcd/develop/indexing/sai/sai-faq.html#:~:text=What%20is%20the%20disk%20footprint,overhead%20for%20SAI%20indexes). De plus, il supporte de multiples index par table, y compris sur des collections si nécessaire[docs.datastax.com](https://docs.datastax.com/en/cql/hcd/develop/indexing/sai/sai-faq.html#:~:text=The%20supported%20types%20are%3A%20,TIMEUUID%2C%20TINYINT%2C%20UUID%2C%20VARCHAR%2C%20VARINT). Grâce à SAI, nous pouvons **éviter de créer des tables dédiées à certains patterns de requête** – par exemple une table alternative pour requêter par libellé ou type – car l’index suffit dans les cas où l’accès direct par clé primaire n’est pas possible[docs.datastax.com](https://docs.datastax.com/en/cql/hcd/develop/indexing/sai/sai-faq.html#:~:text=SAI%20also%20makes%20data%20modeling,it%20any%20way%20you%20want)[docs.datastax.com](https://docs.datastax.com/en/cql/hcd/develop/indexing/sai/sai-faq.html#:~:text=For%20developers%2C%20SAI%20removes%20several,primary%20key%20columns). En somme, la combinaison d’un bon *data model* (clés bien choisies) avec SAI pour les accès secondaires nous donne le meilleur compromis entre performance et flexibilité de lecture.
+
+## **API d’accès aux données (Data API REST/GraphQL)**
+
+Pour exposer ces données aux consommateurs (applications temps réel et batchs), IBM HCD fournit la **Data API** basée sur Stargate. Cette API unifiée offre des endpoints REST et GraphQL pour manipuler les données Cassandra sans forcément utiliser directement CQL ou un driver bas niveau. Concrètement, la Data API sert de point d’entrée applicatif vers HCD[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html#:~:text=The%20Data%20API%20provides%20an,to%20support%20GenAI%20application%20development), ce qui simplifie le développement : on peut envoyer des requêtes HTTP (ou utiliser des clients fournis en Python, Java, etc.) pour effectuer des opérations CRUD.
+
+**Accès REST** : La Data API REST permet d’accéder aux tables comme à des ressources JSON. Par exemple, on pourra faire un `GET` sur une URL du type `/api/rest/v2/keyspaces/Domirama/feedback_par_libelle/type=X&sens=Y&libelle=Z` pour récupérer la distribution d’un libellé, ou un `PUT`/`POST` pour insérer une nouvelle ligne (ajout d’une règle personnalisée, par ex.). L’API prend en charge l’authentification (token) et se charge de convertir ces appels en opérations CQL correspondantes. Un avantage est la possibilité d’intégrer facilement ces appels dans des workflows HTTP (microservices, etc.) sans gestion complexe de cluster côté client.
+
+**Accès GraphQL** : En alternative, Stargate expose un endpoint GraphQL sur le schéma des données. Cela signifie qu’on peut écrire des requêtes GraphQL comme `query { feedback_par_libelle(type_operation:"CB", sens_operation:"DEBIT", libelle_simplifie:"AMAZON") { categorie, count_engine, count_client } }` pour obtenir le détail des catégories et compteurs d’un libellé, ou des mutations pour les mettre à jour. GraphQL apporte un typage fort et la possibilité de ne sélectionner que certains champs. HCD (via Stargate) supporte pleinement ces APIs Document, REST, GraphQL et gRPC sur Cassandra[docs.datastax.com](https://docs.datastax.com/en/home/documentation-list.html#:~:text=The%20Stargate%20Document%2C%20REST%2C%20GraphQL%2C,GraphQL%2C%20and%20gRPC%20API%20documentation), garantissant une intégration souple. Pour notre besoin, les deux principaux usages seront REST et GraphQL.
+
+**Opérations d’écriture (PUT/INCREMENT)** : La Data API permet d’effectuer les insertions et mises à jour, y compris les incréments de compteurs. Par exemple, via le client Python DataStax, on peut appeler une méthode `client.increment("feedback_par_libelle", {... primary key ...}, "count_engine", 1)` qui sous-jacent exécutera le CQL d’update. En GraphQL, les mutations autorisent l’incrément sur un type counter – Stargate fournit pour cela une directive ou un champ spécial pour indiquer qu’il faut ajouter au lieu d’écraser. Ainsi, une mutation GraphQL pourrait ressembler à :
+
+`mutation {`  
+  `updateFeedbackParLibelle(`  
+    `value: { count_engine: { increment: 1 } }`  
+    `options: { consistency: LOCAL_QUORUM }`  
+    `ifExists: true`  
+    `filter: { type_operation: { eq: "CB"}, sens_operation:{eq:"DEBIT"}, libelle_simplifie:{eq:"AMAZON"}, categorie:{eq:"E_COMMERCE"} }`  
+  `) {`  
+    `applied`  
+  `}`  
+`}`
+
+*Ceci illustre le principe*: on spécifie `increment: 1` sur le champ counter, et l’API se charge d’exécuter un incrément atomique côté Cassandra. De même, un `PUT` REST sur l’endpoint d’une ligne compteur pourra interpréter la modification comme un incrément (les Data API clients offrent probablement une méthode dédiée).
+
+**Exposition pour batchs** : Les traitements batch (MapReduce ou Spark, etc.) peuvent soit utiliser l’API Data de la même façon (appels REST/GraphQL en masse), soit se connecter directement en CQL natif via les drivers (selon les cas, le natif peut offrir plus de débit pour de très gros volumes). Néanmoins, pour les API temps réel (exposition aux frontaux web, services), utiliser la Data API apporte simplicité et sécurité (contrôle des accès, tokens, etc.).
+
+En résumé, l’API Data constitue une couche d’accès moderne et unifiée pour nos nouvelles tables. Elle exploite toute la **puissance de Cassandra en termes de scalabilité et performance** tout en masquant la complexité aux développeurs[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html#:~:text=The%20Data%20API%20provides%20an,to%20support%20GenAI%20application%20development). Grâce à elle, les opérations de lecture/écriture (y compris les incréments de feedback) pourront être effectuées via de simples appels HTTP, facilement intégrables dans les applications existantes.
+
+## **Considérations supplémentaires : versionnement, TTL et scalabilité**
+
+**Versionnement des données** : Cassandra ne conserve pas automatiquement plusieurs versions d’une cellule comme HBase (qui gardait jusqu’à 50 versions dans ce cas). Dans notre refonte, nous avons analysé le besoin réel de versioning : pour la plupart des usages, il s’agit soit de valeurs courantes (compteurs, indicateurs booléens) où l’historique complet n’est pas exploité, soit de besoins d’historique spécifiques (opposition). Pour ces derniers, nous avons proposé des schémas alternatifs (table d’historique dédiée). Cela signifie qu’on **renonce au multi-versioning automatique**, en échange d’un stockage explicite des événements quand il le faut. Par exemple, l’historique d’opposition est mieux géré par une table timestampée que par 50 versions d’une même cellule – on y gagne en clarté (chaque ligne \= un événement horodaté) et on ne risque pas de perdre des versions au-delà de 50\. Un point d’attention est la gestion des relectures batch vs actions temps réel : dans HBase, le batch utilisait un timestamp constant pour ne pas écraser les écritures plus récentes du client. Dans Cassandra, on n’a pas ce concept de version visible par requête ; la dernière écriture l’emporte. Il faudra donc s’assurer au niveau applicatif de ne pas écraser des changements utilisateurs par des batchs de réinitialisation. Plusieurs approches sont possibles : (i) écrire les batchs initiaux une seule fois puis utiliser des UPSERT conditionnels (e.g. `INSERT ... IF NOT EXISTS` pour ne pas toucher aux données déjà présentes), (ii) séparer physiquement les données *batch* et *client* (par exemple, avoir une colonne “proposition\_moteur” et une colonne “validation\_client” plutôt qu’une seule valeur que les deux écrasent tour à tour). Grâce à ces stratégies, la perte du multi-versioning ne remet pas en cause la fiabilité fonctionnelle.
+
+**Expiration des données (TTL)** : Cassandra offre la possibilité de définir un TTL (temps d’expiration) par écriture, ce qui n’existait pas nativement en HBase. Dans le contexte présent, on peut envisager d’utiliser des TTL si certaines données n’ont qu’une durée de vie limitée. Par exemple, si pour des raisons réglementaires on ne doit conserver les feedbacks détaillés que X années, on pourrait appliquer un TTL aux entrées de *HISTORIQUE\_OPPOSITION* ou aux compteurs de feedback au-delà d’une certaine période. Cependant, il faut noter que les compteurs ne supportent pas le TTL[docs.datastax.com](https://docs.datastax.com/en/cql/hcd/develop/column-create.html#:~:text=,index%20on%20a%20counter%20column) – ce qui est logique, on ne peut pas “expirer” partiellement un compteur sans fausser son total. En pratique, la plupart des données *domirama-meta-categories* sont censées persister tant que le client ou le système est actif, donc nous n’appliquerons probablement pas de TTL par défaut. C’est néanmoins un outil disponible pour, par exemple, **nettoyer automatiquement des anciennes règles personnalisées** obsolètes au bout de plusieurs années, si on le souhaite, ou expirer les oppositions historiques après N années. Cette fonctionnalité pourra être exploitée au cas par cas selon les besoins métiers de rétention.
+
+**Scalabilité et performance** : Le nouveau design s’appuie sur Apache Cassandra, donc hérite de sa scalabilité linéaire et de sa tolérance aux pannes. Chaque table est répartie dans le cluster par *partitions* (clés de partition définies dans le PRIMARY KEY). Nous avons veillé à choisir des clés de partition appropriées pour éviter tout **bottleneck** : par exemple, la clé de partition de *FEEDBACK\_PAR\_LIBELLE* inclut le libellé, le type et le sens, garantissant que les partitions restent de taille modérée (chaque partition regroupe un libellé donné – on n’a pas de partition gigantesque contenant *tous* les libellés ensemble). Les accès typiques (lecture d’un feedback pour un libellé précis, ou d’une règle pour un client donné) iront directement sur une partition unique, ce qui est optimal. En cas de recherche plus globale (ex: “tous les libellés de type X qui ont telle catégorie”), l’usage de SAI évite un scan complet et distribuera le traitement de la requête d’index sur l’ensemble du cluster, préservant la parallélisation.
+
+En termes de volumétrie, Cassandra peut stocker des **quantités de données très importantes sans limite pratique** autre que le matériel disponible[docs.datastax.com](https://docs.datastax.com/en/cql/hcd/develop/indexing/sai/sai-faq.html#:~:text=What%20is%20SAI%3F)[docs.datastax.com](https://docs.datastax.com/en/cql/hcd/develop/indexing/sai/sai-faq.html#:~:text=). Chaque table peut gérer des millions de lignes par nœud; la distribution des clés de partition par hachage assure que la charge est bien équilibrée entre les nœuds. Si la charge augmente (plus de clients, plus de transactions analysées), on peut ajouter des nœuds HCD pour augmenter la capacité – le système continue de fonctionner sans interruption grâce au design *shared-nothing* de Cassandra.
+
+**Maintenance et évolution** : En isolant les domaines, on facilite les modifications futures. Par exemple, ajouter un nouveau type de feedback (si demain on introduit un *feedback* par autre critère) se ferait par une nouvelle table sans impacter les existantes. De même, les mises à jour de schéma (ajout d’une colonne *methode\_utilisee* dans *DECISIONS\_SALAIRES*, etc.) sont gérables table par table. On bénéficie aussi des outils standards Cassandra/HCD pour l’administration : *nodetool* pour surveiller et réparer les données, stratégies de compaction configurables par table si besoin (une table de règles statiques peut utiliser *SizeTiered* compaction, tandis qu’une table de nombreux inserts comme *HISTORIQUE\_OPPOSITION* pourrait tirer profit d’une compaction *TimeWindow* si les données sont par nature temporelles, etc.). L’**observabilité** est aussi au rendez-vous, avec la possibilité de suivre par exemple les *latencies* et le taux d’usage de chaque table séparément.
+
+**Points d’attention** : La principale différence fonctionnelle réside dans la perte du multi-versioning automatique – bien pris en compte comme discuté. Il faudra aussi porter une attention à la cohérence des opérations multi-tables : ex. si un client annule une catégorisation, on mettra à jour à la fois la table de feedback et possiblement la table des règles ou d’opposition ; ces opérations ne sont pas transactionnelles *multi-table* dans Cassandra (pas de transaction ACID globale). Néanmoins, via l’API Data ou en utilisant des *batch log* CQL, on peut garantir une application groupée des changements sur un même nœud coordonnateur. Cassandra propose des *Lightweight Transactions* (compare-and-set) pour les cas nécessitant un séquencement strict, mais leur usage doit rester ponctuel pour ne pas dégrader les performances. Ici, la plupart des opérations (incréments, insertions d’événements) sont indépendantes et tolèrent un éventuel léger décalage, donc nous pouvons éviter les lourdeurs transactionnelles.
+
+En conclusion, la table HBase **domirama-meta-categories** est refondue en un ensemble cohérent de tables Cassandra dans IBM HCD 1.2, profitant du **modèle CQL** structuré, des **compteurs distribués** pour les feedbacks, de l’**indexation SAI** pour des requêtes flexibles, et de l’**API Data** (REST/GraphQL) pour une exposition simple aux consommateurs. Cette nouvelle architecture sera hautement scalable et maintenable, tout en répondant aux besoins fonctionnels identifiés – avec, en contrepartie, la nécessité d’adapter certaines logiques (multi-versioning, idempotence des batchs) à la philosophie Cassandra. Les choix proposés s’appuient sur la documentation officielle HCD 1.2 et les bonnes pratiques Cassandra, assurant une solution pérenne et performante pour Arkéa dans le cadre de la migration HBase ➞ HCD.[docs.datastax.com](https://docs.datastax.com/en/cql/hcd/develop/indexing/sai/sai-faq.html#:~:text=SAI%20also%20makes%20data%20modeling,it%20any%20way%20you%20want)[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html#:~:text=The%20Data%20API%20provides%20an,to%20support%20GenAI%20application%20development)
+
+**Sources :** Documentation DataStax HCD 1.2 (Cassandra/SAI/Data API)[docs.datastax.com](https://docs.datastax.com/en/cql/hcd/develop/column-create.html#:~:text=,either%20increment%20or%20decrement%20it)[docs.datastax.com](https://docs.datastax.com/en/cql/hcd/develop/indexing/sai/sai-faq.html#:~:text=written%20to%20achieve%20the%20goal,the%20creation%20of%20secondary%20indexes)[docs.datastax.com](https://docs.datastax.com/en/home/documentation-list.html#:~:text=The%20Stargate%20Document%2C%20REST%2C%20GraphQL%2C,GraphQL%2C%20and%20gRPC%20API%20documentation)[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/get-started/vector-concepts.html#:~:text=To%20support%20vector%20search%20in,embedding%20model%20that%20you%20use), Extrait “État de l’art HBase chez Arkéa” (usages actuels de *domirama-meta-categories*).
+
+# **Refonte de la table bi-client avec IBM Hyper-Converged Database (Cassandra)**
+
+## **Schéma de données proposé (Cassandra CQL)**
+
+Pour remplacer la table HBase `bi-client`, nous proposons une **table Cassandra** dédiée aux interactions clients. La clé primaire est conçue pour regrouper toutes les interactions d’un client et les trier par ordre chronologique. En CQL, le schéma peut ressembler à :
+
+`CREATE TABLE bic.client_interaction (`  
+    `client_id         text,                 -- Identifiant du client (clé de partition)`  
+    `interaction_id    timeuuid,             -- Identifiant unique de l'interaction, encodé temporellement`  
+    `type_interaction  text,                 -- Type d’interaction (ex: achat, réclamation, etc.)`  
+    `canal            text,                 -- Canal de l’interaction (ex: email, téléphone...)`  
+    `resultat         text,                 -- Résultat ou statut (ex: succès, échec, etc.)`  
+    `details          text,                 -- Détails libre ou description de l’interaction`  
+    `PRIMARY KEY ((client_id), interaction_id)`  
+`) WITH CLUSTERING ORDER BY (interaction_id DESC)`  
+  `AND default_time_to_live = 63072000;      -- TTL de 2 ans (en secondes)`
+
+**Justification des choix de clé** : la **clé de partition** est `client_id` afin de stocker toutes les interactions d’un même client ensemble, ce qui optimise la lecture de la timeline complète d’un client. La **clé de clustering** est un identifiant horodaté (`timeuuid`) qui garantit l’unicité de chaque interaction et permet le tri par date. L’ordre de clustering DESC assure que les interactions les plus récentes du client sont rangées en tête de partition, optimisant ainsi les lectures de timeline (l’application du conseiller verra directement les événements du plus récent au plus ancien). Le type `timeuuid` (UUID version 1 basé sur le temps) encode un timestamp dans l’identifiant et évite les collisions même si deux interactions surviennent à la même milliseconde. On pourrait alternativement utiliser un couple `(timestamp, uuid)` en clés de clustering, mais l’UUID temporel combine ces rôles.
+
+**Colonnes d’attributs** : les colonnes `type_interaction`, `canal`, `resultat` contiennent les attributs de chaque interaction (canal de contact, nature/type de l’action, résultat, etc.). La colonne `details` stocke des informations textuelles libres (par ex. le résumé ou contenu de l’interaction). Ce schéma statique remplace l’ancien schéma HBase à colonnes dynamiques : on n’a plus besoin de créer dynamiquement des qualifiers pour chaque attribut, tous les attributs pertinents sont des colonnes explicites, ce qui simplifie la maintenance et la compréhension du modèle de données.
+
+## **Indexation SAI pour filtrer par attributs (plus de colonnes dynamiques)**
+
+Pour permettre des **recherches efficaces par attributs** d’interaction (canal, type, résultat, etc.) sans recourir à des scans complets ou à des colonnes dynamiques, nous exploitons la fonctionnalité *Storage-Attached Indexing (SAI)* d’HCD/Cassandra. SAI fournit un moyen performant d’indexer des colonnes non clés, en stockant les index directement aux côtés des données sur le même moteur de stockage[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/tutorials/sai-quickstart.html#:~:text=Storage,numbers%20of%20rows%20and%20columns). Concrètement, nous créons des index secondaires SAI sur les colonnes filtrables :
+
+`CREATE CUSTOM INDEX ON bic.client_interaction (canal)`   
+  `USING 'StorageAttachedIndex';`  
+`CREATE CUSTOM INDEX ON bic.client_interaction (type_interaction)`   
+  `USING 'StorageAttachedIndex';`  
+`CREATE CUSTOM INDEX ON bic.client_interaction (resultat)`   
+  `USING 'StorageAttachedIndex';`
+
+*(On peut nommer explicitement chaque index, par ex. `ON bic.client_interaction (canal) USING 'StorageAttachedIndex' WITH OPTIONS = {...}` pour préciser les analyseurs, voir section suivante.)*
+
+Grâce à ces index SAI, on pourra interroger la table selon des critères sur ces attributs sans parcourir toutes les lignes. Par exemple : *« sélectionner toutes les interactions de type \= “Réclamation” et canal \= “Email” pour le client X »* sera efficace – le moteur Cassandra utilisera les index plutôt qu’un scan complet. SAI est conçu pour améliorer les performances de requêtes sur de larges tables en indexant de façon compacte et locale aux données[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/tutorials/sai-quickstart.html#:~:text=Storage,numbers%20of%20rows%20and%20columns). Il surpasse les anciens index secondaires de Cassandra en offrant notamment la possibilité de faire des recherches combinées plus riches (y compris des conditions OR, chose impossible auparavant)[community.ibm.com](https://community.ibm.com/HigherLogic/System/DownloadDocumentFile.ashx?DocumentFileKey=9084b18d-317c-47e5-8713-0ad48a4ffc9d&forceDialog=0#:~:text=Rich%20Database%20Indexes%20Enhanced%20SAI%2C,time%20recovery). En remplaçant les colonnes dynamiques HBase par des index SAI, on **réduit fortement la complexité** : plus besoin de coder des MapReduce ou des filtres spécifiques côté HBase pour trouver les interactions par critère, la base de données peut répondre directement aux requêtes filtrées.
+
+**Tri temporel et filtres combinés** : la clé de clustering étant temporelle, on peut naturellement restreindre une requête à une **plage de dates** pour un client (ex: `WHERE client_id = X AND interaction_id >= minTimeuuid('2025-01-01') AND interaction_id < maxTimeuuid('2025-02-01')`). De plus, SAI permet de combiner des filtres multi-colonnes. Si l’on souhaite filtrer **toutes** les interactions (tous clients) par type ou date, l’index SAI pourra aussi être utilisé de manière globale. Par exemple, une requête globale du genre *« toutes les interactions sur le canal SMS en 2025 »* peut s’appuyer sur un index SAI sur la date de l’interaction (si on ajoute éventuellement une colonne `date_jour` indexée) et sur le canal. Sans SAI, de telles requêtes nécessiteraient de parcourir l’ensemble des partitions ou de maintenir des tables d’index manuellement, ce qui n’est plus nécessaire ici. En somme, les index SAI offrent une flexibilité de requêtage proche de SQL classique tout en restant distribués et scalables dans Cassandra.
+
+## **Gestion du TTL et purge automatique des données (2 ans)**
+
+La conservation des interactions est limitée à **2 ans** afin de purger les anciennes données automatiquement. Cassandra prend en charge nativement le **Time-To-Live (TTL)** pour expirer les données. Nous définissons un TTL par défaut de 63072000 secondes (≈2 ans) au niveau de la table (`default_time_to_live = 63072000` dans le schéma ci-dessus). Ainsi, chaque interaction insérée expirera automatiquement une fois âgée de 2 ans : Cassandra la marquera expirée (tombstone) et la supprimera physiquement lors des compactions habituelles[docs.datastax.com](https://docs.datastax.com/en/cql-oss/3.3/cql/cql_using/useExpire.html#:~:text=Use%20time,in%20a%20column%20or%20table). Cette approche garantit une **purge continue** sans intervention manuelle ni jobs de nettoyage dédiés.
+
+Quelques points à noter :
+
+* Le TTL s’applique ici à la ligne entière (toutes colonnes de l’interaction). Dès que l’âge de l’interaction dépasse 2 ans, la ligne complète est éligible à suppression automatique.
+
+* Cette suppression automatique remplace l’ancienne gestion dans HBase où il fallait peut-être utiliser une TTL par colonne ou lancer des MapReduce de purge. On diminue ainsi la complexité opérationnelle.
+
+* La durée de 2 ans est configurée de manière centralisée et peut être modifiée via un simple **ALTER TABLE** si nécessaire, ce qui est plus souple qu’une configuration TTL côté HBase (souvent fixée dans la définition de la colonne/famille).
+
+En résumé, Cassandra/HCD gère en interne l’expiration des interactions après 2 ans, ce qui assure le respect de la politique de rétention sans effort supplémentaire de développement ou de maintenance[docs.datastax.com](https://docs.datastax.com/en/cql-oss/3.3/cql/cql_using/useExpire.html#:~:text=Use%20time,in%20a%20column%20or%20table).
+
+## **Exposition des données via une Data API pour les applications consommatrices**
+
+Pour permettre aux applications clientes (le backend des conseillers, les batchs d’analyse, etc.) d’accéder aux données sans complexité, on propose d’utiliser une **API de données** unifiée au-dessus de Cassandra. IBM HCD intègre la technologie DataStax Stargate (ou équivalent), qui offre des API **REST/GraphQL** sécurisées pour interagir avec la base sans écrire de requêtes CQL complexes. Par exemple, le backend du conseiller pourra appeler une API REST ou GraphQL du type `/clients/{id}/interactions` qui retourne la timeline du client en JSON, la Data API se chargeant en arrière-plan d’exécuter les requêtes CQL appropriées.
+
+Cette couche API présente plusieurs avantages :
+
+* **Simplification du développement** : les équipes front-end ou métiers consomment une API lisible (JSON/HTTP) sans se soucier du driver Cassandra ni du CQL. On réduit le couplage technologique.
+
+* **Sécurité et gouvernance** : l’API peut contrôler les accès, filtrer les champs retournés, appliquer des quotas, ce qui est plus difficile en accès direct base.
+
+* **Réutilisation** : la même API peut servir aux besoins temps réel (consultation par un conseiller) et aux besoins batch (extraction filtrée, endpoints spéciaux pour l’unload, etc.).
+
+Concrètement, HCD (basé sur Cassandra) permet ce type d’intégration. D’après la documentation DataStax, un **Data API Gateway** open-source (Stargate) peut être déployé pour exposer Cassandra via des API REST/JSON ou GraphQL standard[blog.ippon.tech](https://blog.ippon.tech/use-stargate-by-datastax-to-effortlessly-store-and-query-your-data#:~:text=gateway%20to%20abstract%20Cassandra,remove%20barriers%20of%20entry). Nous pourrions donc l’intégrer afin que, par exemple, `GET /clients/123/timeline?canal=Email` renvoie les interactions du client 123 sur le canal Email, en s’appuyant sur les index SAI en arrière-plan pour filtrer efficacement.
+
+Pour les besoins batchs ou analytiques, cette même API ou une variante pourrait offrir des **endpoints d’export** (ex: donner toutes les nouvelles interactions depuis une date donnée, voir section suivante) sans nécessiter que les jobs batch se connectent directement à Cassandra. Cela homogénéise l’accès aux données pour tous les consommateurs.
+
+## **Ingestion en temps réel depuis Kafka (bic-event) et intégration des flux**
+
+**Ingestion Kafka → Cassandra** : La nouvelle solution doit s’intégrer aux flux Kafka existants, notamment le topic `bic-event` qui véhicule en temps réel les interactions clients. Plutôt que d’écrire dans HBase, on branchera la consommation Kafka vers la table Cassandra. Pour ce faire, on peut utiliser le **DataStax Apache Kafka Connector**, un connecteur Kafka Connect prêt à l’emploi qui **synchronise automatiquement les messages d’un topic Kafka vers les lignes d’une table Cassandra**[docs.datastax.com](https://docs.datastax.com/en/kafka/doc/kafka/kafkaIntro.html#:~:text=DataStax%20Apache%20Kafka%E2%84%A2%20Connector%20is,in%20the%20following%20supported%20databases). Il suffit de le configurer pour mapper les champs de l’événement Kafka (JSON ou Avro) aux colonnes de `client_interaction`. Le connecteur gère l’écriture en batch asynchrone vers Cassandra, assurant un débit élevé d’ingestion. Alternativement, on peut développer un micro-service consumer Kafka sur mesure utilisant le driver Cassandra, mais le connecteur offre déjà des fonctionnalités robustes (tolérance aux pannes, reprise, etc.).
+
+Chaque événement `bic-event` consommé insérera une nouvelle ligne dans la table `client_interaction` correspondant à l’interaction. Grâce à Cassandra, ces inserts peuvent être gérés en **haute concurrence** et à grande échelle horizontalement. La latence d’écriture est basse (quelques millisecondes) et le modèle de données par partition client évite les contentions (les interactions de clients différents sont écrites sur des nœuds possiblement différents, et même pour un même client la structure en clustering temporel est append-only, optimisée pour l’écriture séquentielle).
+
+**Flux temps réel aux consommateurs** : Parallèlement à l’écriture en base, on peut conserver Kafka comme moyen de diffusion temps réel aux autres systèmes (par exemple, d’autres services pourraient consommer `bic-event` directement sans passer par la base, pour des notifications instantanées, etc.). L’introduction de Cassandra n’impacte pas ce schéma pub/sub : au contraire, elle sert de **stock durable et requêtable** des interactions, alors que Kafka peut rester la **pipeline** temps réel.
+
+En somme, l’architecture d’ingestion se simplifie : plus besoin d’un process spécifique d’alimentation HBase (qui pouvait nécessiter un MapReduce HBase ou un custom producer HBase). On branche Kafka Connect (ou un consumer maison) vers Cassandra. Cette approche réduit la latence (écriture immédiate au lieu d’éventuels micro-batchs) et la complexité (peu de code, configuration déclarative).
+
+## **Lecture en temps réel de la timeline client (backend conseiller)**
+
+Pour la **lecture temps réel** d’une timeline complète d’un client (par exemple lors de l’affichage de l’historique client à un conseiller), le modèle Cassandra proposé est très performant. Puisque toutes les interactions d’un client sont dans la même partition, il suffit d’une requête CQL ciblée par `client_id` pour les récupérer, triées par date descendante. Par exemple :
+
+`SELECT *`   
+`FROM bic.client_interaction`   
+`WHERE client_id = 'CLIENT123'`   
+`ORDER BY interaction_id DESC;`
+
+Cette requête ramenant quelques dizaines ou centaines d’interactions (période 2 ans) sera servie en **temps quasi-réel** (quelques millisecondes) étant donné que Cassandra accède directement aux données partitionnées sans scan global. On évite ainsi les parcours coûteux que nécessitait HBase (où il fallait scanner une range ou utiliser des filtres sur des colonnes, souvent peu efficaces). Le **SLA de lecture** pour le conseiller s’en trouve amélioré.
+
+Le backend conseiller peut accéder à ces données via l’API mentionnée plus haut. Par exemple, un appel API REST déclenchera en arrière-plan la requête CQL ci-dessus. Le format de réponse peut être adapté (JSON structuré) mais l’essentiel est que le temps de réponse sera rapide grâce au schéma de données optimisé.
+
+**Filtres temps réel par attribut** : si l’interface conseiller permet de filtrer la timeline (par exemple n’afficher que les interactions de type "réclamation"), l’API peut accepter des paramètres de filtre (`type=réclamation&canal=tel`…) et utiliser les index SAI correspondants pour ne renvoyer que les interactions éligibles. Cassandra supporte les requêtes avec conditions sur colonnes indexées SAI sans nécessiter le `client_id` dans la clause (on peut même envisager de chercher *tous* les événements d’un certain type, bien que dans le contexte conseiller ce soit toujours restreint à un client donné).
+
+**Pas de multi-version** : dans HBase, la table `bi-client` stockait deux versions par cellule (VERSIONS=2), probablement pour conserver un historique d’une mise à jour d’interaction. Dans notre refonte, ce besoin disparaît. Chaque interaction est un enregistrement immuable (on insère un nouvel événement au lieu de mettre à jour destructivement les anciennes valeurs). Si une interaction devait être mise à jour, elle **écraserait simplement** la ligne existante (Cassandra fait de l’upsert par clé primaire) et l’ancienne valeur serait supprimée lors de la compaction sans conserver de version antérieure accessible. Il n’y a donc plus de **coûts de stockage liés à la multi-version** ni de complexité de lecture (le conseiller voit toujours la version la plus à jour de chaque interaction). Ce choix d’éliminer le multi-versioning simplifie la logique métier et correspond souvent à la réalité des interactions client (celles-ci ne sont généralement pas mises à jour, plutôt complétées par de nouvelles interactions).
+
+## **Export batch des interactions (HDFS/ORC incrémental)**
+
+Pour les besoins analytiques ou l’alimentation du data lake (export HDFS au format ORC via le processus **bic-unload**), la nouvelle architecture offre plusieurs approches :
+
+* **Approche via Cassandra en lecture** : On peut réaliser un job Spark ou un utilitaire d’**unload** connecté à Cassandra afin d’extraire périodiquement les nouvelles interactions. Grâce au clustering par temps, il est facile de filtrer les données par **intervalle temporel**. Par exemple, un job quotidien peut se souvenir du dernier timestamp exporté et lancer une requête du type *« sélectionne toutes les interactions où `interaction_id` \> dernier\_timestamp\_export »* (en pratique, on utiliserait les fonctions `minTimeuuid`/`maxTimeuuid` sur la date de dernière exportation). Le connecteur Spark-Cassandra peut tirer parti de ce filtre de clustering pour éviter de parcourir les partitions inutiles. On pourrait également indexer la date (via SAI sur un champ date/jour) afin de faciliter une extraction par plage de dates sur l’ensemble des clients. Dans tous les cas, **plus besoin de MapReduce HBase** pour scanner l’intégralité de la table : l’export peut être incrémental et ciblé sur les seules nouvelles données.
+
+* **Approche via Kafka** : Une alternative moderne consiste à exploiter le fait que Kafka contient déjà le flux des interactions. On peut attacher un **Kafka Connect HDFS Sink** qui consomme le même topic `bic-event` et écrit les événements en ORC sur HDFS en temps quasi-réel (ou par micro-batches). Ainsi, chaque interaction est écrite simultanément dans Cassandra (pour l’accès temps réel) et sur HDFS (pour le stockage analytique), assurant une cohérence sans avoir à relire depuis la base. Cette approche élimine même le job batch d’export : le *bic-unload* pourrait être repensé comme ce pipeline temps réel Kafka→HDFS. Cependant, cela suppose que le format des événements Kafka est déjà exploitable pour constituer les ORC (schéma connu, etc.). Si une transformation est nécessaire, on peut l’intégrer dans le connecteur (Kafka Connect permet des Single Message Transforms) ou passer par un petit job Spark streaming.
+
+Quel que soit le choix, l’architecture HCD simplifie **grandement la chaîne d’export** : on profite de la donnée structurée et indexée, ce qui n’était pas le cas dans HBase où l’export nécessitait de parcourir toute la table (sauf à maintenir des index secondaires manuellement). Désormais, **l’incrémentalité** est possible et l’impact en production est moindre (des requêtes ciblées plutôt qu’un scan complet coûteux).
+
+De plus, la gestion du TTL 2 ans dans Cassandra garantit que les exports n’auront pas à traiter des données au-delà de la fenêtre requise : les interactions expirées n’existeront tout simplement plus en base ni dans Kafka (si la rétention Kafka est plus courte, HDFS conserve toutefois l’historique complet jusqu’à 2 ans via l’export).
+
+## **Extensions potentielles : recherche textuelle et sémantique avancée**
+
+Étant donné que la colonne `details` peut contenir du texte libre (par exemple le contenu d’un email, le résumé d’un appel, etc.), il peut être pertinent d’exploiter les capacités avancées de HCD pour la recherche plein-texte ou même la recherche sémantique dans ces détails d’interactions :
+
+* **Indexation textuelle avec analyseurs Lucene** : La fonctionnalité SAI d’HCD s’intègre avec des *analyseurs Lucene* pour permettre des recherches plein-texte sophistiquées[community.ibm.com](https://community.ibm.com/HigherLogic/System/DownloadDocumentFile.ashx?DocumentFileKey=9084b18d-317c-47e5-8713-0ad48a4ffc9d&forceDialog=0#:~:text=Rich%20Database%20Indexes%20Enhanced%20SAI%2C,time%20recovery). Nous pourrions créer un index SAI sur `details` en spécifiant un analyseur linguistique (par exemple pour ignorer la casse, la forme des mots, ou supporter le français). Ceci permettrait de faire des requêtes du type *« trouver toutes les interactions où le champ détails contient le mot 'réclamation' »* ou même des recherches par préfixe, racine, etc., directement en CQL. Par exemple, un conseiller pourrait rechercher tous les appels où le client mentionne un mot clé particulier. Avec un analyseur adapté, on pourrait également faire de la **recherche floue** ou par racine (stemming) dans les détails. C’est une amélioration notable par rapport à HBase où de telles recherches nécessitaient d’exporter les données vers un moteur externe (ElasticSearch, Solr…), alors qu’ici c’est **nativement possible dans la base**.
+
+* **Recherche vectorielle sémantique** : IBM HCD (basé sur DataStax) propose en option une fonctionnalité de **Vector Search**, c’est-à-dire la capacité d’indexer et comparer des vecteurs pour des recherches par similarité[community.ibm.com](https://community.ibm.com/HigherLogic/System/DownloadDocumentFile.ashx?DocumentFileKey=9084b18d-317c-47e5-8713-0ad48a4ffc9d&forceDialog=0#:~:text=Vector%20Search%20Add,1). Si cela s’avère pertinent (par exemple, analyse sémantique du contenu des interactions, détection d’interactions semblables, recommandation de réponses basées sur le contexte client, etc.), on pourrait générer pour chaque interaction un **embedding vectoriel** (par un modèle de langage entraîné sur les textes des interactions) et stocker ce vecteur dans la table ou une table annexe. Un index de type vecteur permettrait ensuite de trouver, par exemple, *« les interactions les plus similaires à la description X »* ou *« les clients ayant vécu une interaction similaire à celle-ci »* via des requêtes de *k-nearest neighbors*. Cette approche pourrait servir des cas d’usage d’IA générative ou d’assistance intelligente aux conseillers en retrouvant des cas analogues (principe de RAG, Retrieval-Augmented Generation)[community.ibm.com](https://community.ibm.com/HigherLogic/System/DownloadDocumentFile.ashx?DocumentFileKey=9084b18d-317c-47e5-8713-0ad48a4ffc9d&forceDialog=0#:~:text=Vector%20Search%20Add,1). Bien que cela dépasse le périmètre de la simple refonte de la table `bi-client`, il est intéressant de noter que la plateforme HCD est déjà pensée pour supporter ce genre de workloads IA/données (SAI gérant aussi la recherche vectorielle sur la même base de code)[community.ibm.com](https://community.ibm.com/HigherLogic/System/DownloadDocumentFile.ashx?DocumentFileKey=9084b18d-317c-47e5-8713-0ad48a4ffc9d&forceDialog=0#:~:text=%E2%97%8F%20SAI%20powered%20Vector%20Search,a%20separate%20SKU%20HCD%20Vector).
+
+**Impact architectural de ces extensions** : l’ajout d’une indexation texte ou vectorielle intégrerait principalement la **configuration** d’index supplémentaires. Par exemple, créer l’index SAI sur `details` avec un analyseur français, ou activer le module de recherche vectorielle (licence additionnelle) pour définir un index sur un champ vecteur. Le flux d’ingestion Kafka devrait alors inclure la génération de ces informations (p. ex. calcul de l’embedding via un micro-service ML lors de la consommation du message puis insertion dans Cassandra). Le backend conseiller pourrait exposer de nouvelles API de recherche (ex: *search interactions by text* ou *find similar interactions*). Cassandra étant distribué, ces recherches resteraient scalables, mais on surveillera l’impact sur les ressources (les index texte/vecteur consomment de l’espace et du CPU en écriture et requête). Néanmoins, la possibilité d’éviter un système externe dédié à la recherche est un **atout en termes de simplification** de l’architecture.
+
+## **Conclusion : Un modèle de données optimisé, performant et maintenable**
+
+En résumé, la refonte proposée de la table `bi-client` vers Cassandra (IBM HCD) apporte un schéma **clair et MECE** – chaque interaction client est stockée une seule fois, sans duplication ni colonnes semi-redondantes, et tous les attributs nécessaires sont couverts par le modèle (Mutuellement Exclusif Collectivement Exhaustif). Les bénéfices clés sont :
+
+* **Optimisation des lectures de timeline** : la partition par client et le tri temporel permettent d’obtenir l’historique complet d’un client très rapidement, avec les données déjà ordonnées comme attendu par les applications. On répond ainsi à l’objectif de restitution de timeline client en temps réel, même avec un volume important d’interactions par client.
+
+* **Requêtes filtrées efficaces** : l’utilisation des index SAI sur les attributs (canal, type, résultat, etc.) offre des temps de réponse courts pour des filtres autrefois coûteux. On élimine les colonnes dynamiques HBase et les scans MapReduce au profit de requêtes CQL directes, ce qui réduit la latence et la complexité du code. Cette solution est plus **performante** et **maintenable**, car déclarative (création d’index) plutôt que programmatique.
+
+* **Réduction de la complexité opérationnelle** : plus de jobs MapReduce pour filtrer ou purger, plus de gestion manuelle des TTL ou des versions. Cassandra applique automatiquement le TTL de 2 ans (purge continue des anciennes interactions), et le schéma évite le multi-versioning – simplifiant à la fois le stockage et la logique applicative (une interaction \= une ligne, état à jour). Le **coût de maintenance** s’en trouve réduit, et les erreurs liées à des données obsolètes ou en double sont éliminées.
+
+* **Scalabilité et résilience** : HCD/Cassandra apporte la tolérance aux pannes et le passage à l’échelle linéaire bien connu de Cassandra. On peut augmenter le cluster si le volume ou le débit augmente, sans remise en cause du schéma. Les données sont répliquées (facteur de réplication configurable) ce qui assure une haute disponibilité – avantage par rapport à HBase où la disponibilité dépendait du HDFS et du RegionServer maître.
+
+* **Intégration fluide dans l’architecture existante** : l’ingestion Kafka est préservée et même simplifiée via un connecteur standard, l’accès des applications est facilité via l’API de données, et l’export HDFS devient plus léger à orchestrer. Chaque composant consommateur (temps réel ou batch) dispose d’un accès plus direct et performant aux données d’interactions.
+
+En conclusion, le nouveau modèle de données **conforme à IBM HCD** remplace avantageusement la table HBase `bi-client` en répondant à tous les besoins exprimés : il garantit des **lectures rapides** de l’historique client, offre des **capacités de filtrage puissantes** via SAI (et potentiellement de recherche avancée texte/vectorielle), assure la **gestion automatique du cycle de vie** des données (TTL), et réduit la charge opérationnelle grâce à une architecture plus unifiée. Ces choix techniques sont justifiés par les capacités modernes de Cassandra/HCD et placent la base d’interactions clients dans une position robuste et évolutive pour les futures exigences.
+
+**Sources :** Les principes présentés s’appuient sur la documentation DataStax/IBM HCD (Cassandra) pour SAI[docs.datastax.com](https://docs.datastax.com/en/hyper-converged-database/1.2/tutorials/sai-quickstart.html#:~:text=Storage,numbers%20of%20rows%20and%20columns), les fonctionnalités étendues d’indexation et de recherche d’HCD[community.ibm.com](https://community.ibm.com/HigherLogic/System/DownloadDocumentFile.ashx?DocumentFileKey=9084b18d-317c-47e5-8713-0ad48a4ffc9d&forceDialog=0#:~:text=Rich%20Database%20Indexes%20Enhanced%20SAI%2C,time%20recovery)[community.ibm.com](https://community.ibm.com/HigherLogic/System/DownloadDocumentFile.ashx?DocumentFileKey=9084b18d-317c-47e5-8713-0ad48a4ffc9d&forceDialog=0#:~:text=Vector%20Search%20Add,1), la gestion du TTL par Cassandra[docs.datastax.com](https://docs.datastax.com/en/cql-oss/3.3/cql/cql_using/useExpire.html#:~:text=Use%20time,in%20a%20column%20or%20table), ainsi que l’usage du connecteur Kafka pour l’ingestion des données en temps réel[docs.datastax.com](https://docs.datastax.com/en/kafka/doc/kafka/kafkaIntro.html#:~:text=DataStax%20Apache%20Kafka%E2%84%A2%20Connector%20is,in%20the%20following%20supported%20databases).
+
+# **0\. Vue d’ensemble**
+
+## **POC1 – “Sans jars client”**
+
+* Objectif :
+
+  * Prouver que :
+
+    * Spark tourne localement,
+
+    * Spark écrit/lit dans Cassandra/HCD avec un schéma compatible Domirama,
+
+    * la détection de récurrence fonctionne sur ces données,
+
+  * sans aucune dépendance propriétaire Arkéa.
+
+* Données :
+
+  * Simple CSV d’opérations simulées mais structurées comme Domirama  
+     (`code_si`, `contrat`, `date`, `seq`, `libelle`, `montant`, `devise`).
+
+## **POC2 – “Avec jars client (SequenceFile \+ OperationDecoder)”**
+
+* Objectif :
+
+  * Remplacer le CSV par **les mêmes flux que la prod** :
+
+    * Lecture de SequenceFile,
+
+    * Décodage via `Y7XDOMIOperationDecoder` & co.
+
+  * Montrer que le pipeline Spark → Cassandra fonctionne **avec les vrais décoders**.
+
+Les deux POC partagent la même base (projet, schéma Cassandra, detection).  
+ POC2 remplace **juste** la couche d’entrée.
+
+---
+
+# **1\. Pré-requis communs sur ton Mac M3**
+
+## **1.1. Homebrew**
+
+Si pas déjà installé :
+
+`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
+
+## **1.2. Java 17, sbt, Spark**
+
+`brew install temurin@17`  
+`brew install sbt`  
+`brew install apache-spark`
+
+Configurer Java 17 dans la session :
+
+`export JAVA_HOME=$(/usr/libexec/java_home -v 17)`  
+`export PATH="$JAVA_HOME/bin:$PATH"`
+
+Tu peux ajouter ces lignes dans `~/.zshrc`.
+
+Vérification :
+
+`java -version           # doit annoncer Java 17`  
+`spark-shell --version   # doit annoncer Spark 3.x`
+
+## **1.3. Podman \+ Cassandra en conteneur**
+
+`brew install podman`  
+`podman machine init --cpus 4 --memory 8192 --disk-size 40`  
+`podman machine start`  
+`podman info`
+
+Lancer Cassandra :
+
+`podman run -d --name cassandra \`  
+  `-p 9042:9042 \`  
+  `-e CASSANDRA_CLUSTER_NAME=DomiramaCluster \`  
+  `-e CASSANDRA_DC=dc1 \`  
+  `docker.io/library/cassandra:4.1`
+
+Attendre 30–60 sec, puis :
+
+`podman logs cassandra | tail -n 20`
+
+## **1.4. Schéma Cassandra pour le POC**
+
+Dans Cassandra :
+
+`podman exec -it cassandra cqlsh`
+
+Puis :
+
+`CREATE KEYSPACE IF NOT EXISTS domirama_poc`  
+`WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};`
+
+`CREATE TABLE IF NOT EXISTS domirama_poc.operations (`  
+    `code_si   text,`  
+    `contrat   text,`  
+    `op_date   timestamp,`  
+    `op_seq    int,`  
+    `op_id     uuid,`  
+    `libelle   text,`  
+    `montant   decimal,`  
+    `devise    text,`  
+    `PRIMARY KEY ((code_si, contrat), op_date, op_seq)`  
+`) WITH CLUSTERING ORDER BY (op_date DESC, op_seq ASC);`
+
+`CREATE TABLE IF NOT EXISTS domirama_poc.recurrent_ops (`  
+    `code_si           text,`  
+    `contrat           text,`  
+    `libelle_norm      text,`  
+    `periodicite_jours int,`  
+    `occurrences       int,`  
+    `montant_moyen     decimal,`  
+    `first_date        timestamp,`  
+    `last_date         timestamp,`  
+    `PRIMARY KEY ((code_si, contrat), libelle_norm)`  
+`);`
+
+`EXIT;`
+
+Ce schéma est commun à POC1 et POC2.
+
+---
+
+# **2\. POC1 – Sans jars client (CSV → Spark → Cassandra)**
+
+## **2.1. Créer le projet**
+
+`mkdir -p ~/dev/domirama-spark-poc`  
+`cd ~/dev/domirama-spark-poc`
+
+`mkdir -p src/main/scala/com/arkea/domirama/model`  
+`mkdir -p src/main/scala/com/arkea/domirama/loader`  
+`mkdir -p src/main/scala/com/arkea/domirama/detector`  
+`mkdir -p project`
+
+### **`project/build.properties`**
+
+`echo 'sbt.version=1.10.0' > project/build.properties`
+
+### **`build.sbt` (POC1)**
+
+`// ~/dev/domirama-spark-poc/build.sbt`  
+`ThisBuild / scalaVersion := "2.12.18"`
+
+`lazy val root = (project in file("."))`  
+  `.settings(`  
+    `name := "domirama-spark-poc",`  
+    `version := "1.0.0-SNAPSHOT",`  
+    `libraryDependencies ++= Seq(`  
+      `"org.apache.spark" %% "spark-core" % "3.5.0" % "provided",`  
+      `"org.apache.spark" %% "spark-sql"  % "3.5.0" % "provided",`  
+      `"com.datastax.spark" %% "spark-cassandra-connector" % "3.5.0"`  
+    `)`  
+  `)`
+
+Pas de jars Arkéa ici.
+
+## **2.2. Case classes**
+
+### **`Operation.scala`**
+
+`// src/main/scala/com/arkea/domirama/model/Operation.scala`  
+`package com.arkea.domirama.model`
+
+`import java.sql.Timestamp`  
+`import java.util.UUID`  
+`import java.math.BigDecimal`
+
+`case class Operation(`  
+  `codeSi: String,`  
+  `contrat: String,`  
+  `opDate: Timestamp,`  
+  `opSeq: Int,`  
+  `opId: UUID,`  
+  `libelle: String,`  
+  `montant: BigDecimal,`  
+  `devise: String`  
+`)`
+
+### **`RecurrentOperation.scala`**
+
+`// src/main/scala/com/arkea/domirama/model/RecurrentOperation.scala`  
+`package com.arkea.domirama.model`
+
+`import java.sql.Timestamp`  
+`import java.math.BigDecimal`
+
+`case class RecurrentOperation(`  
+  `codeSi: String,`  
+  `contrat: String,`  
+  `libelleNorm: String,`  
+  `periodiciteJours: Int,`  
+  `occurrences: Int,`  
+  `montantMoyen: BigDecimal,`  
+  `firstDate: Timestamp,`  
+  `lastDate: Timestamp`  
+`)`
+
+## **2.3. CSV de test (simulé mais réaliste)**
+
+`mkdir -p data`
+
+`cat > data/operations.csv <<EOF`  
+`code_si,contrat,date_iso,seq,libelle,montant,devise`  
+`01,1234567890,2024-01-05T10:15:00Z,1,LOYER JANVIER,-800.00,EUR`  
+`01,1234567890,2024-02-05T10:15:00Z,2,LOYER FEVRIER,-800.00,EUR`  
+`01,1234567890,2024-03-05T10:15:00Z,3,LOYER MARS,-800.00,EUR`  
+`01,1234567890,2024-03-10T09:00:00Z,4,COFFEE SHOP,-3.50,EUR`  
+`EOF`
+
+## **2.4. Loader Spark CSV → Cassandra**
+
+### **`DomiramaSparkLoaderCsv.scala`**
+
+`// src/main/scala/com/arkea/domirama/loader/DomiramaSparkLoaderCsv.scala`  
+`package com.arkea.domirama.loader`
+
+`import com.arkea.domirama.model.Operation`  
+`import org.apache.spark.sql.{SparkSession, Dataset}`  
+`import java.sql.Timestamp`  
+`import java.time.Instant`  
+`import java.util.UUID`  
+`import java.math.BigDecimal`
+
+`object DomiramaSparkLoaderCsv {`
+
+  `def main(args: Array[String]): Unit = {`  
+    `val inputPath = if (args.nonEmpty) args(0) else "data/operations.csv"`
+
+    `val cassandraHost = sys.env.getOrElse("CASSANDRA_HOST", "127.0.0.1")`
+
+    `val spark = SparkSession.builder()`  
+      `.appName("DomiramaSparkLoaderCsv")`  
+      `.master("local[*]")`  
+      `.config("spark.cassandra.connection.host", cassandraHost)`  
+      `.getOrCreate()`
+
+    `import spark.implicits._`
+
+    `val raw = spark.read`  
+      `.option("header", "true")`  
+      `.option("inferSchema", "false")`  
+      `.csv(inputPath)`
+
+    `val ops: Dataset[Operation] = raw.map { row =>`  
+      `val codeSi  = row.getAs[String]("code_si")`  
+      `val contrat = row.getAs[String]("contrat")`  
+      `val dateIso = row.getAs[String]("date_iso")`  
+      `val seq     = row.getAs[String]("seq").toInt`  
+      `val libelle = row.getAs[String]("libelle")`  
+      `val montant = new BigDecimal(row.getAs[String]("montant"))`  
+      `val devise  = row.getAs[String]("devise")`
+
+      `val ts = Timestamp.from(Instant.parse(dateIso))`  
+      `val opId = UUID.randomUUID()`
+
+      `Operation(`  
+        `codeSi   = codeSi,`  
+        `contrat  = contrat,`  
+        `opDate   = ts,`  
+        `opSeq    = seq,`  
+        `opId     = opId,`  
+        `libelle  = libelle,`  
+        `montant  = montant,`  
+        `devise   = devise`  
+      `)`  
+    `}`
+
+    `ops.write`  
+      `.format("org.apache.spark.sql.cassandra")`  
+      `.options(Map(`  
+        `"keyspace" -> "domirama_poc",`  
+        `"table"    -> "operations"`  
+      `))`  
+      `.mode("append")`  
+      `.save()`
+
+    `spark.stop()`  
+  `}`  
+`}`
+
+## **2.5. Détection de récurrence Spark → Cassandra**
+
+### **`RecurrentDetectionSpark.scala`**
+
+`// src/main/scala/com/arkea/domirama/detector/RecurrentDetectionSpark.scala`  
+`package com.arkea.domirama.detector`
+
+`import com.arkea.domirama.model.{Operation, RecurrentOperation}`  
+`import org.apache.spark.sql.{SparkSession, Dataset, Encoder, Encoders}`  
+`import org.apache.spark.sql.functions._`  
+`import java.sql.Timestamp`  
+`import java.time.Duration`  
+`import java.util.Locale`  
+`import java.math.BigDecimal`
+
+`object RecurrentDetectionSpark {`
+
+  `case class OperationWithNorm(`  
+    `codeSi: String,`  
+    `contrat: String,`  
+    `opDate: Timestamp,`  
+    `opSeq: Int,`  
+    `opId: java.util.UUID,`  
+    `libelle: String,`  
+    `montant: BigDecimal,`  
+    `devise: String,`  
+    `libelleNorm: String`  
+  `)`
+
+  `case class RecKey(codeSi: String, contrat: String, libelleNorm: String)`
+
+  `def main(args: Array[String]): Unit = {`  
+    `val cassandraHost = sys.env.getOrElse("CASSANDRA_HOST", "127.0.0.1")`
+
+    `val spark = SparkSession.builder()`  
+      `.appName("DomiramaRecurrentDetection")`  
+      `.master("local[*]")`  
+      `.config("spark.cassandra.connection.host", cassandraHost)`  
+      `.getOrCreate()`
+
+    `import spark.implicits._`
+
+    `val fromDate = Timestamp.valueOf(`  
+      `java.time.LocalDate.now().minusMonths(12).atStartOfDay()`  
+    `)`
+
+    `val ops = spark.read`  
+      `.format("org.apache.spark.sql.cassandra")`  
+      `.options(Map("keyspace" -> "domirama_poc", "table" -> "operations"))`  
+      `.load()`  
+      `.filter(col("op_date") >= lit(fromDate))`  
+      `.as[Operation]`
+
+    `val opsWithNorm: Dataset[OperationWithNorm] = ops.map { o =>`  
+      `OperationWithNorm(`  
+        `o.codeSi,`  
+        `o.contrat,`  
+        `o.opDate,`  
+        `o.opSeq,`  
+        `o.opId,`  
+        `o.libelle,`  
+        `o.montant,`  
+        `o.devise,`  
+        `normalizeLabel(o.libelle)`  
+      `)`  
+    `}(Encoders.product[OperationWithNorm])`
+
+    `implicit val recKeyEncoder: Encoder[RecKey] = Encoders.product[RecKey]`  
+    `implicit val recOpEncoder: Encoder[RecurrentOperation] = Encoders.product[RecurrentOperation]`
+
+    `val recOps: Dataset[RecurrentOperation] =`  
+      `opsWithNorm`  
+        `.groupByKey(o => RecKey(o.codeSi, o.contrat, o.libelleNorm))`  
+        `.flatMapGroups { case (key, iter) =>`  
+          `val list = iter.toList.sortBy(_.opDate.getTime)`  
+          `if (list.size < 3) Iterator.empty`  
+          `else {`  
+            `val intervals = list.sliding(2).map {`  
+              `case Seq(a, b) =>`  
+                `Duration.between(a.opDate.toInstant, b.opDate.toInstant).toDays`  
+            `}.toList`
+
+            `if (intervals.isEmpty) Iterator.empty`  
+            `else {`  
+              `val avgInterval = intervals.map(_.toLong).sum.toDouble / intervals.size`  
+              `if (avgInterval < 20.0 || avgInterval > 40.0) Iterator.empty`  
+              `else {`  
+                `val total = list.map(_.montant).foldLeft(BigDecimal.ZERO)(_.add(_))`  
+                `val avgAmount = total.divide(BigDecimal.valueOf(list.size.toLong), BigDecimal.ROUND_HALF_UP)`  
+                `val firstDate = list.head.opDate`  
+                `val lastDate  = list.last.opDate`
+
+                `Iterator.single(`  
+                  `RecurrentOperation(`  
+                    `codeSi = key.codeSi,`  
+                    `contrat = key.contrat,`  
+                    `libelleNorm = key.libelleNorm,`  
+                    `periodiciteJours = Math.round(avgInterval).toInt,`  
+                    `occurrences = list.size,`  
+                    `montantMoyen = avgAmount,`  
+                    `firstDate = firstDate,`  
+                    `lastDate = lastDate`  
+                  `)`  
+                `)`  
+              `}`  
+            `}`  
+          `}`  
+        `}`
+
+    `recOps.write`  
+      `.format("org.apache.spark.sql.cassandra")`  
+      `.options(Map(`  
+        `"keyspace" -> "domirama_poc",`  
+        `"table"    -> "recurrent_ops"`  
+      `))`  
+      `.mode("append")`  
+      `.save()`
+
+    `spark.stop()`  
+  `}`
+
+  `private def normalizeLabel(libelle: String): String = {`  
+    `if (libelle == null) ""`  
+    `else libelle`  
+      `.toUpperCase(Locale.ROOT)`  
+      `.replaceAll("\\s+", " ")`  
+      `.trim`  
+  `}`  
+`}`
+
+## **2.6. Build & Run POC1**
+
+Build :
+
+`cd ~/dev/domirama-spark-poc`  
+`sbt clean package`
+
+Lancer le loader :
+
+`export CASSANDRA_HOST=127.0.0.1`
+
+`spark-submit \`  
+  `--class com.arkea.domirama.loader.DomiramaSparkLoaderCsv \`  
+  `--master local[*] \`  
+  `--packages com.datastax.spark:spark-cassandra-connector_2.12:3.5.0 \`  
+  `target/scala-2.12/domirama-spark-poc_2.12-1.0.0-SNAPSHOT.jar \`  
+  `data/operations.csv`
+
+Vérifie dans Cassandra :
+
+`podman exec -it cassandra cqlsh`
+
+`USE domirama_poc;`  
+`SELECT * FROM operations;`
+
+Lancer la détection :
+
+`spark-submit \`  
+  `--class com.arkea.domirama.detector.RecurrentDetectionSpark \`  
+  `--master local[*] \`  
+  `--packages com.datastax.spark:spark-cassandra-connector_2.12:3.5.0 \`  
+  `target/scala-2.12/domirama-spark-poc_2.12-1.0.0-SNAPSHOT.jar`
+
+Puis :
+
+`podman exec -it cassandra cqlsh`
+
+`USE domirama_poc;`  
+`SELECT * FROM recurrent_ops;`
+
+🎯 **Ce que POC1 démontre** :
+
+* Spark ↔ Cassandra OK sur ton Mac.
+
+* Le schéma Cassandra pour Domirama-like est valide.
+
+* Un flux “opérations → détection récurrence → table de récurrence” fonctionne.
+
+---
+
+# **3\. POC2 – Avec jars client (SequenceFile \+ OperationDecoder)**
+
+Quand Arkéa te fournit les jars privés (ou que tu les extrais d’un environnement existant), tu passes à POC2.
+
+## **3.1. Jars Arkéa à récupérer (minimum)**
+
+À partir de l’ivy domiramabatch, pour le décodage :
+
+* `com.arkea.commons.cobol-0.30.jar`
+
+* `com.arkea.cav.operationdecoder-0.6.3.jar`
+
+* `com.arkea.commons.thrift-1.6.6.jar` (probable)
+
+* `com.arkea.commons.hadoop-2.0.0.jar` (optionnel mais utile)
+
+* `cb2xml-1.01.1.jar` (open-source, récupérable publiquement)
+
+Tu les déposes dans le dossier `lib/` du projet :
+
+`cd ~/dev/domirama-spark-poc`  
+`mkdir -p lib`  
+`cp /chemin/vers/libs_arkea/*.jar lib/`
+
+Pas besoin de changer `build.sbt` : sbt inclut automatiquement les `lib/*.jar` comme `unmanagedJars`.
+
+## **3.2. Ajouter le loader SequenceFile**
+
+On garde POC1 tel quel, et on ajoute **un deuxième loader** basé sur SequenceFile \+ OperationDecoder.
+
+### **`DomiramaSparkLoaderSeq.scala`**
+
+`// src/main/scala/com/arkea/domirama/loader/DomiramaSparkLoaderSeq.scala`  
+`package com.arkea.domirama.loader`
+
+`import com.arkea.domirama.model.Operation`  
+`import com.arkea.cav.operationdecoder.copy.Y7XDOMIOperationDecoder`  
+`// adapter si tu utilises d’autres copies`
+
+`import org.apache.spark.sql.{SparkSession, Dataset}`  
+`import org.apache.spark.rdd.RDD`  
+`import org.apache.hadoop.io.BytesWritable`
+
+`import java.sql.Timestamp`  
+`import java.time.Instant`  
+`import java.util.UUID`  
+`import java.math.BigDecimal`
+
+`object DomiramaSparkLoaderSeq {`
+
+  `def main(args: Array[String]): Unit = {`  
+    `if (args.length < 1) {`  
+      `System.err.println("Usage: DomiramaSparkLoaderSeq <sequencefile_path>")`  
+      `System.exit(1)`  
+    `}`  
+    `val inputPath = args(0)`
+
+    `val cassandraHost = sys.env.getOrElse("CASSANDRA_HOST", "127.0.0.1")`  
+    `val fsDefault     = sys.env.getOrElse("HADOOP_FS_DEFAULTFS", "file:///")`
+
+    `val spark = SparkSession.builder()`  
+      `.appName("DomiramaSparkLoaderSeq")`  
+      `.master("local[*]")`  
+      `.config("spark.cassandra.connection.host", cassandraHost)`  
+      `.config("spark.hadoop.fs.defaultFS", fsDefault)`  
+      `.getOrCreate()`
+
+    `import spark.implicits._`
+
+    `val sc = spark.sparkContext`
+
+    `val seqRdd: RDD[(BytesWritable, BytesWritable)] =`  
+      `sc.sequenceFile[BytesWritable, BytesWritable](inputPath)`
+
+    `val opsRdd = seqRdd.flatMap { case (_, value) =>`  
+      `val bytes = value.copyBytes()`  
+      `try {`  
+        `val decoder = new Y7XDOMIOperationDecoder(bytes)`
+
+        `val codeSi   = decoder.getCdSi()`  
+        `val noPrdTds = decoder.getNoPrdTds()`  
+        `val contrat  =`  
+          `if (noPrdTds != null && noPrdTds.length > 0) noPrdTds.substring(1) else ""`
+
+        `val instant: Instant = decoder.getTTDate() match {`  
+          `case d: java.util.Date => d.toInstant`  
+          `case s: String =>`  
+            `val fmt = java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")`  
+            `val ld  = java.time.LocalDate.parse(s, fmt)`  
+            `ld.atStartOfDay(java.time.ZoneOffset.UTC).toInstant`  
+          `case other =>`  
+            `System.err.println(s"[WARN] TTDate inattendue: $other")`  
+            `Instant.now()`  
+        `}`  
+        `val opDate = Timestamp.from(instant)`
+
+        `val seq = try {`  
+          `decoder.getNoEnregistrement()`  
+        `} catch {`  
+          `case _: Throwable => 0`  
+        `}`
+
+        `val libelle = Option(decoder.getLibelle()).getOrElse("").trim`
+
+        `val montant = decoder.getMontant() match {`  
+          `case bd: java.math.BigDecimal     => bd`  
+          `case bd: BigDecimal               => bd`  
+          `case d: java.lang.Double          => BigDecimal.valueOf(d)`  
+          `case l: java.lang.Long            => BigDecimal.valueOf(l)`  
+          `case s: String                    => new BigDecimal(s)`  
+          `case other =>`  
+            `System.err.println(s"[WARN] Type montant inattendu: $other")`  
+            `BigDecimal.ZERO`  
+        `}`
+
+        `val devise  = Option(decoder.getDevise()).getOrElse("EUR")`  
+        `val opId    = UUID.randomUUID()`
+
+        `Some(Operation(`  
+          `codeSi   = codeSi,`  
+          `contrat  = contrat,`  
+          `opDate   = opDate,`  
+          `opSeq    = seq,`  
+          `opId     = opId,`  
+          `libelle  = libelle,`  
+          `montant  = montant,`  
+          `devise   = devise`  
+        `))`  
+      `} catch {`  
+        `case e: Exception =>`  
+          `System.err.println(s"[WARN] Erreur de décodage: ${e.getMessage}")`  
+          `None`  
+      `}`  
+    `}`
+
+    `val opsDs: Dataset[Operation] = opsRdd.toDS()`
+
+    `opsDs.write`  
+      `.format("org.apache.spark.sql.cassandra")`  
+      `.options(Map(`  
+        `"keyspace" -> "domirama_poc",`  
+        `"table"    -> "operations"`  
+      `))`  
+      `.mode("append")`  
+      `.save()`
+
+    `spark.stop()`  
+  `}`  
+`}`
+
+Les noms/méthodes (`getTTDate`, `getNoEnregistrement`, `getLibelle`, `getMontant`, `getDevise`) sont à ajuster selon la signature réelle de ton `Y7XDOMIOperationDecoder`.
+
+## **3.3. Build POC2**
+
+`cd ~/dev/domirama-spark-poc`  
+`sbt clean package`
+
+## **3.4. Lancer le loader SequenceFile**
+
+Avec un SequenceFile stocké localement :
+
+`export CASSANDRA_HOST=127.0.0.1`  
+`export HADOOP_FS_DEFAULTFS=file:///`
+
+`spark-submit \`  
+  `--class com.arkea.domirama.loader.DomiramaSparkLoaderSeq \`  
+  `--master local[*] \`  
+  `--packages com.datastax.spark:spark-cassandra-connector_2.12:3.5.0 \`  
+  `target/scala-2.12/domirama-spark-poc_2.12-1.0.0-SNAPSHOT.jar \`  
+  `/Users/<toi>/data/domirama/operations.seq`
+
+Puis vérifier dans Cassandra :
+
+`podman exec -it cassandra cqlsh`
+
+`USE domirama_poc;`  
+`SELECT * FROM operations;`
+
+La détection de récurrence Spark est **la même** que pour POC1 (tu relances `RecurrentDetectionSpark`).
+
+🎯 **Ce que POC2 prouve en plus** :
+
+* Tu ne pars plus d’un CSV jouet mais des **vrais flux Arkéa** (SequenceFile \+ OperationDecoder).
+
+* Le pipeline Spark → Cassandra est donc **iso sur la chaîne d’ingestion**, hormis que tu écris dans HCD au lieu d’HBase.
+
