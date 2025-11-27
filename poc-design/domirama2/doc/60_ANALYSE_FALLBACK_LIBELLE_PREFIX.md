@@ -341,3 +341,4 @@ def search_combined(code_si, contrat, search_term, limit=10):
 - Latence maximale = 2 requêtes (acceptable pour la tolérance aux typos)
 
 
+

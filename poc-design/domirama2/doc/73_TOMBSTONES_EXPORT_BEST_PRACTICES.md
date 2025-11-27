@@ -380,3 +380,4 @@ Le rapport markdown généré doit inclure :
 **✅ Documentation créée le 2025-11-26**
 
 
+

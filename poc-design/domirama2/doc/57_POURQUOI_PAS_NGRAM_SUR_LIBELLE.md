@@ -150,3 +150,4 @@ Si besoin de recherche partielle plus avancée, on peut :
 **Solution recommandée** : ✅ Colonne dérivée `libelle_prefix` (déjà implémentée)
 
 
+

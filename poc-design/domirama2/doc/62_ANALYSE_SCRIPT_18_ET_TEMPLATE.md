@@ -213,3 +213,4 @@ Pour chaque démonstration :
 3. Générer la version didactique : `18_demonstration_complete_v2_didactique.sh`
 
 
+

@@ -569,3 +569,4 @@ Chaque requête suivra la structure `execute_query()` avec :
 **Version** : 1.0
 
 
+

@@ -234,3 +234,4 @@ Le script 18 est maintenant **complet et enrichi** :
 *Document créé le 2025-11-26*
 
 
+

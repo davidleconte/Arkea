@@ -208,3 +208,4 @@ Les vecteurs d'embedding représentent le **sens** des textes, pas les **mots ex
 **✅ Analyse terminée**
 
 
+

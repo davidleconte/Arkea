@@ -136,3 +136,4 @@ spark-shell -i examples/scala/update_libelle_prefix.scala
 3. ⚠️ **Données** : Mettre à jour les 14 lignes avec `libelle_prefix = NULL` pour améliorer la couverture
 
 
+

@@ -548,3 +548,4 @@ def intelligent_filter(results, terms, query_embedding):
 **✅ Proposition terminée**
 
 
+

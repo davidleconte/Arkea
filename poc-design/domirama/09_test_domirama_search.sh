@@ -86,3 +86,4 @@ echo "   - Comparez les performances avec l'ancien workflow HBase (SCAN → Solr
 
 
 
+

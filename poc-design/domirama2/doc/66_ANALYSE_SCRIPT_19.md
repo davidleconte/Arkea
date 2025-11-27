@@ -200,3 +200,4 @@ Le script 19 est **fonctionnel** mais **partiellement redondant** avec le schém
 **Priorité** : ⚠️ **Moyenne** - Le script fonctionne mais nécessite des améliorations pour éviter la confusion avec le schéma 02.
 
 
+

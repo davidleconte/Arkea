@@ -56,3 +56,4 @@ Tous ces scripts ont été :
 *Archive créée le 2025-11-26 pour préserver les scripts validés avant modifications ultérieures*
 
 
+

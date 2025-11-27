@@ -285,3 +285,4 @@ Le script 19 **n'apporte rien de nouveau fonctionnellement** par rapport aux scr
 **La seule valeur ajoutée** est **didactique** : comprendre en détail comment fonctionne la configuration de la tolérance aux typos, avec explications et documentation structurée.
 
 
+

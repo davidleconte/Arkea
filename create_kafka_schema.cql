@@ -19,3 +19,4 @@ CREATE TABLE IF NOT EXISTS kafka_events (
 
 
 
+
