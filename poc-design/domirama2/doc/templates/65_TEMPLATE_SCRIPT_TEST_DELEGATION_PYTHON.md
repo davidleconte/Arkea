@@ -41,7 +41,7 @@ Un script avec délégation Python didactique doit :
 #   - Une documentation structurée pour livrable
 #
 # PRÉREQUIS :
-#   - HCD démarré (./03_start_hcd.sh)
+#   - HCD démarré (./scripts/setup/03_start_hcd.sh)
 #   - Schéma configuré (./10_setup_domirama2_poc.sh)
 #   - Données chargées (si nécessaire)
 #   - Python 3.8+ installé
@@ -109,7 +109,7 @@ echo ""
 # Vérifier que HCD est démarré
 info "Vérification de HCD..."
 if ! pgrep -f "cassandra" > /dev/null; then
-    error "HCD n'est pas démarré. Exécutez d'abord: ./03_start_hcd.sh"
+    error "HCD n'est pas démarré. Exécutez d'abord: ./scripts/setup/03_start_hcd.sh"
     exit 1
 fi
 success "HCD est démarré"
@@ -635,6 +635,7 @@ Le rapport markdown est généré automatiquement mais doit être adapté selon 
 ---
 
 **✅ Template 65 créé - Prêt pour utilisation !**
+
 
 
 

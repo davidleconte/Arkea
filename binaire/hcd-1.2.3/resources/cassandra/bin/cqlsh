@@ -88,7 +88,8 @@ if [ "$USER_SPECIFIED_PYTHON" != "" ]; then
     # run a user specified Python interpreter
     run_if_supported_version "$USER_SPECIFIED_PYTHON" "$@"
 else
-    for interpreter in python3 python python2.7; do
+    # Try python3.11 first (compatible with asyncore), then fallback to others
+    for interpreter in python3.11 python3.10 python3.9 python3 python python2.7; do
         run_if_supported_version "$interpreter" "$@"
     done
 fi

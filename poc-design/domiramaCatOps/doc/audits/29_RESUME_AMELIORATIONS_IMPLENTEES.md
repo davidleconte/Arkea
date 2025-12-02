@@ -220,7 +220,7 @@
 ❌ Script échoué (code: 1)
 🔍 Diagnostic de l'erreur...
 ❌ Problème de connexion HCD détecté
-💡 Suggestion : Vérifier que HCD est démarré (./03_start_hcd.sh)
+💡 Suggestion : Vérifier que HCD est démarré (./scripts/setup/03_start_hcd.sh)
 📋 Dernières lignes du log :
 Connection refused: localhost/127.0.0.1:9042
 ```

@@ -15,7 +15,7 @@
 #   - Une documentation structurée pour livrable
 #
 # PRÉREQUIS :
-#   - HCD démarré (./03_start_hcd.sh)
+#   - HCD démarré (./scripts/setup/03_start_hcd.sh)
 #   - Schéma configuré (./01_setup_domiramaCatOps_keyspace.sh, ./02_setup_operations_by_account.sh)
 #   - Données chargées (./05_load_operations_data_parquet.sh)
 #   - Index SAI créés (./04_create_indexes.sh)
@@ -27,7 +27,20 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]:-}" )" &> /dev/null && pwd )"
+# Configuration - Utiliser setup_paths si disponible
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../utils/didactique_functions.sh" ]; then
+    source "$SCRIPT_DIR/../utils/didactique_functions.sh"
+    setup_paths
+else
+    # Fallback si les fonctions ne sont pas disponibles
+    INSTALL_DIR="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+    HCD_DIR="${HCD_DIR:-${INSTALL_DIR}/binaire/hcd-1.2.3}"
+    SPARK_HOME="${SPARK_HOME:-${INSTALL_DIR}/binaire/spark-3.5.1}"
+    HCD_HOST="${HCD_HOST:-localhost}"
+    HCD_PORT="${HCD_PORT:-9042}"
+fi
+
 if [ -f "${SCRIPT_DIR}/../utils/didactique_functions.sh" ]; then
     source "${SCRIPT_DIR}/../utils/didactique_functions.sh"
 else
@@ -50,7 +63,6 @@ else
     expected() { echo -e "${YELLOW}📋 $1${NC}"; }
 fi
 
-INSTALL_DIR="/Users/david.leconte/Documents/Arkea"
 if [ -f "${INSTALL_DIR}/.poc-profile" ]; then
     set +eu
     source "${INSTALL_DIR}/.poc-profile" || true
@@ -59,7 +71,7 @@ fi
 
 HCD_DIR="${HCD_DIR:-${INSTALL_DIR}/binaire/hcd-1.2.3}"
 CQLSH_BIN="${HCD_DIR}/bin/cqlsh"
-CQLSH="${CQLSH_BIN} localhost 9042"
+CQLSH="${CQLSH_BIN} "$HCD_HOST" "$HCD_PORT""
 REPORT_FILE="${SCRIPT_DIR}/../doc/demonstrations/08_CATEGORY_SEARCH_DEMONSTRATION.md"
 TEMP_OUTPUT=$(mktemp "/tmp/08_test_output_$(date +%s).txt")
 TEMP_RESULTS=$(mktemp "/tmp/08_test_results_$(date +%s).txt")

@@ -14,9 +14,22 @@
 #
 # ============================================
 
-set -e
+set -euo pipefail
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+# Configuration - Utiliser setup_paths si disponible
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../utils/didactique_functions.sh" ]; then
+    source "$SCRIPT_DIR/../utils/didactique_functions.sh"
+    setup_paths
+else
+    # Fallback si les fonctions ne sont pas disponibles
+    INSTALL_DIR="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+    HCD_DIR="${HCD_DIR:-${INSTALL_DIR}/binaire/hcd-1.2.3}"
+    SPARK_HOME="${SPARK_HOME:-${INSTALL_DIR}/binaire/spark-3.5.1}"
+    HCD_HOST="${HCD_HOST:-localhost}"
+    HCD_PORT="${HCD_PORT:-9042}"
+fi
+
 if [ -f "${SCRIPT_DIR}/../utils/didactique_functions.sh" ]; then
     source "${SCRIPT_DIR}/../utils/didactique_functions.sh"
 else
@@ -31,7 +44,6 @@ else
     warn() { echo -e "${YELLOW}⚠️  $1${NC}"; }
 fi
 
-INSTALL_DIR="/Users/david.leconte/Documents/Arkea"
 if [ -f "${INSTALL_DIR}/.poc-profile" ]; then
     source "${INSTALL_DIR}/.poc-profile"
 fi
@@ -64,7 +76,7 @@ from datetime import datetime, timedelta
 import subprocess
 import sys
 
-cqlsh_cmd = '${CQLSH_BIN} localhost 9042'.split()
+cqlsh_cmd = '${CQLSH_BIN} "$HCD_HOST" "$HCD_PORT"'.split()
 code_si = "${CODE_SI_TEST}"
 contrat = "${CONTRAT_TEST}"
 
@@ -121,7 +133,7 @@ if [ $EXIT_CODE -eq 0 ]; then
     
     # Vérifier les données
     info "🔍 Vérification des données ajoutées..."
-    COUNT=$("$CQLSH_BIN" localhost 9042 -e "USE domiramacatops_poc; SELECT COUNT(*) FROM operations_by_account WHERE code_si = '$CODE_SI_TEST' AND contrat = '$CONTRAT_TEST';" 2>&1 | grep -E "^[[:space:]]*[0-9]+[[:space:]]*$" | head -1 | tr -d ' ')
+    COUNT=$("$CQLSH_BIN" "$HCD_HOST" "$HCD_PORT" -e "USE domiramacatops_poc; SELECT COUNT(*) FROM operations_by_account WHERE code_si = '$CODE_SI_TEST' AND contrat = '$CONTRAT_TEST';" 2>&1 | grep -E "^[[:space:]]*[0-9]+[[:space:]]*$" | head -1 | tr -d ' ')
     
     if [ -n "$COUNT" ] && [ "$COUNT" -gt 0 ]; then
         success "✅ $COUNT opérations de test trouvées"
@@ -135,4 +147,3 @@ fi
 
 echo ""
 success "✅ Données de test prêtes pour les exports"
-

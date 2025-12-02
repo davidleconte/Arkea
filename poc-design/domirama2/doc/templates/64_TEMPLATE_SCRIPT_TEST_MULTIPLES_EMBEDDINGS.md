@@ -43,7 +43,7 @@ Un script de test avec embeddings didactique doit :
 #   - Documentation structurée
 #
 # PRÉREQUIS :
-#   - HCD démarré (./03_start_hcd.sh)
+#   - HCD démarré (./scripts/setup/03_start_hcd.sh)
 #   - Schéma configuré (./10_setup_domirama2_poc.sh)
 #   - Données chargées (./11_load_domirama2_data_parquet.sh)
 #   - Python 3.8+ avec transformers, torch, cassandra-driver installés
@@ -105,7 +105,7 @@ VECTOR_DIMENSION=1472
 
 # Vérifier que HCD est démarré
 if ! pgrep -f "cassandra" > /dev/null; then
-    error "HCD n'est pas démarré. Exécutez d'abord: ./03_start_hcd.sh"
+    error "HCD n'est pas démarré. Exécutez d'abord: ./scripts/setup/03_start_hcd.sh"
     exit 1
 fi
 

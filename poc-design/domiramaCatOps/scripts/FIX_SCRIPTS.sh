@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script de Correction Systématique des Scripts
 # ============================================
@@ -10,7 +11,19 @@
 # - Ajouter les vérifications manquantes
 #
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+# Configuration - Utiliser setup_paths si disponible
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../utils/didactique_functions.sh" ]; then
+    source "$SCRIPT_DIR/../utils/didactique_functions.sh"
+    setup_paths
+else
+    # Fallback si les fonctions ne sont pas disponibles
+    INSTALL_DIR="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+    HCD_DIR="${HCD_DIR:-${INSTALL_DIR}/binaire/hcd-1.2.3}"
+    SPARK_HOME="${SPARK_HOME:-${INSTALL_DIR}/binaire/spark-3.5.1}"
+    HCD_HOST="${HCD_HOST:-localhost}"
+    HCD_PORT="${HCD_PORT:-9042}"
+fi
 
 echo "🔧 Correction systématique des scripts en cours..."
 echo ""

@@ -117,19 +117,61 @@ if cql_zip:
     sys.path.insert(0, os.path.join(cql_zip, 'cassandra-driver-' + ver))
 
 # the driver needs dependencies
+# First, try to import six from system before loading ZIPs
+# This ensures system six (with six.moves) is used if available
+import site
+six_available = False
+try:
+    # Add site-packages to path first to check for system six
+    for path in site.getsitepackages():
+        if path not in sys.path:
+            sys.path.insert(0, path)
+    try:
+        user_site = site.getusersitepackages()
+        if user_site and user_site not in sys.path:
+            sys.path.insert(0, user_site)
+    except AttributeError:
+        pass
+    # Try importing six from system
+    import six
+    from six.moves import configparser, input
+    from six import StringIO, ensure_text, ensure_str
+    six_available = True
+except (ImportError, AttributeError):
+    # System six not available, will use ZIP version
+    pass
+
+# Load ZIP dependencies (but skip six if system version is available)
 third_parties = ('futures-', 'six-', 'geomet-', 'pure_sasl-', 'datastax_db_*-')
 
 for lib in third_parties:
+    # Skip six ZIP if system six is already available
+    if lib == 'six-' and six_available:
+        continue
     lib_zip = find_zip(lib)
     if lib_zip:
         sys.path.insert(0, lib_zip)
 
-# We cannot import six until we add its location to sys.path so the Python
-# interpreter can find it. Do not move this to the top.
-import six
-
-from six.moves import configparser, input
-from six import StringIO, ensure_text, ensure_str
+# Import six if not already imported
+if not six_available:
+    try:
+        import six
+        from six.moves import configparser, input
+        from six import StringIO, ensure_text, ensure_str
+    except ImportError:
+        # Last resort: try to find six in common locations
+        import os
+        common_paths = [
+            '/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages',
+            '/opt/homebrew/lib/python3.11/site-packages',
+            '/usr/local/lib/python3.9/site-packages',
+        ]
+        for path in common_paths:
+            if os.path.exists(path) and path not in sys.path:
+                sys.path.insert(0, path)
+        import six
+        from six.moves import configparser, input
+        from six import StringIO, ensure_text, ensure_str
 
 warnings.filterwarnings("ignore", r".*blist.*")
 try:

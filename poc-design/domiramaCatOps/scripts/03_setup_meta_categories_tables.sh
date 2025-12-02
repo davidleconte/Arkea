@@ -16,7 +16,7 @@
 #   - Une documentation structurée pour livrable
 #
 # PRÉREQUIS :
-#   - HCD 1.2.3 doit être démarré (exécuter: ./03_start_hcd.sh depuis la racine)
+#   - HCD 1.2.3 doit être démarré (exécuter: ./scripts/setup/03_start_hcd.sh depuis la racine)
 #   - Keyspace 'domiramacatops_poc' doit exister (exécuter: ./01_setup_domiramaCatOps_keyspace.sh)
 #   - Java 11 configuré via jenv (jenv local 11)
 #   - Fichiers schémas présents: schemas/03_create_meta_categories_tables.cql, schemas/04_create_meta_categories_indexes.cql
@@ -31,7 +31,7 @@
 #
 # ============================================
 
-set -e
+set -euo pipefail
 
 # ============================================
 # CONFIGURATION DES COULEURS
@@ -58,8 +58,19 @@ expected() { echo -e "${YELLOW}📋 $1${NC}"; }
 # ============================================
 # CONFIGURATION
 # ============================================
-INSTALL_DIR="/Users/david.leconte/Documents/Arkea"
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+# Configuration - Utiliser setup_paths si disponible
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../utils/didactique_functions.sh" ]; then
+    source "$SCRIPT_DIR/../utils/didactique_functions.sh"
+    setup_paths
+else
+    # Fallback si les fonctions ne sont pas disponibles
+    INSTALL_DIR="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+    HCD_DIR="${HCD_DIR:-${INSTALL_DIR}/binaire/hcd-1.2.3}"
+    SPARK_HOME="${SPARK_HOME:-${INSTALL_DIR}/binaire/spark-3.5.1}"
+    HCD_HOST="${HCD_HOST:-localhost}"
+    HCD_PORT="${HCD_PORT:-9042}"
+fi
 
 # Charger l'environnement POC (HCD déjà installé sur MBP)
 if [ -f "${INSTALL_DIR}/.poc-profile" ]; then
@@ -79,7 +90,7 @@ mkdir -p "$(dirname "$REPORT_FILE")"
 # VÉRIFICATIONS
 # ============================================
 if ! pgrep -f "cassandra" > /dev/null; then
-    error "HCD n'est pas démarré. Exécutez d'abord: ./03_start_hcd.sh"
+    error "HCD n'est pas démarré. Exécutez d'abord: ./scripts/setup/03_start_hcd.sh"
     exit 1
 fi
 
@@ -88,7 +99,7 @@ jenv local 11
 eval "$(jenv init -)"
 
 info "🔍 Vérification que HCD est prêt..."
-if ! ./bin/cqlsh localhost 9042 -e "SELECT cluster_name FROM system.local;" > /dev/null 2>&1; then
+if ! ./bin/cqlsh "$HCD_HOST" "$HCD_PORT" -e "SELECT cluster_name FROM system.local;" > /dev/null 2>&1; then
     error "HCD n'est pas prêt. Attendez quelques secondes et réessayez."
     exit 1
 fi
@@ -104,7 +115,7 @@ if [ ! -f "$INDEX_FILE" ]; then
 fi
 
 # Vérifier que le keyspace existe
-if ! ./bin/cqlsh localhost 9042 -e "DESCRIBE KEYSPACE domiramacatops_poc;" > /dev/null 2>&1; then
+if ! ./bin/cqlsh "$HCD_HOST" "$HCD_PORT" -e "DESCRIBE KEYSPACE domiramacatops_poc;" > /dev/null 2>&1; then
     error "Le keyspace domiramacatops_poc n'existe pas. Exécutez d'abord: ./01_setup_domiramaCatOps_keyspace.sh"
     exit 1
 fi
@@ -255,7 +266,7 @@ echo ""
 
 # Exécution
 echo "🚀 Exécution du DDL..."
-./bin/cqlsh localhost 9042 -f "$SCHEMA_FILE" 2>&1 | grep -v "Warnings" || true
+./bin/cqlsh "$HCD_HOST" "$HCD_PORT" -f "$SCHEMA_FILE" 2>&1 | grep -v "Warnings" || true
 
 sleep 2
 
@@ -275,7 +286,7 @@ TABLES=(
 
 TABLES_CREATED=0
 for table in "${TABLES[@]}"; do
-    if ./bin/cqlsh localhost 9042 -e "DESCRIBE TABLE domiramacatops_poc.$table;" > /dev/null 2>&1; then
+    if ./bin/cqlsh "$HCD_HOST" "$HCD_PORT" -e "DESCRIBE TABLE domiramacatops_poc.$table;" > /dev/null 2>&1; then
         success "✅ Table '$table' créée"
         ((TABLES_CREATED++))
     else
@@ -316,20 +327,20 @@ echo ""
 
 # Exécution
 echo "🚀 Exécution du DDL index..."
-./bin/cqlsh localhost 9042 -f "$INDEX_FILE" 2>&1 | grep -v "Warnings" || true
+./bin/cqlsh "$HCD_HOST" "$HCD_PORT" -f "$INDEX_FILE" 2>&1 | grep -v "Warnings" || true
 
 sleep 2
 
 # Vérification
 info "🔍 Vérification de la création des index..."
-INDEXES=$(./bin/cqlsh localhost 9042 -e "SELECT index_name FROM system_schema.indexes WHERE keyspace_name = 'domiramacatops_poc';" 2>&1 | grep -v "Warnings" | grep -v "index_name" | grep -vE "^---" | grep -v "^$" | wc -l | tr -d ' ')
+INDEXES=$(./bin/cqlsh "$HCD_HOST" "$HCD_PORT" -e "SELECT index_name FROM system_schema.indexes WHERE keyspace_name = 'domiramacatops_poc';" 2>&1 | grep -v "Warnings" | grep -v "index_name" | grep -vE "^---" | grep -v "^$" | wc -l | tr -d ' ')
 
 if [ "$INDEXES" -ge 10 ]; then
     success "✅ $INDEXES index(es) SAI créé(s)"
     echo ""
     result "📊 Liste des index créés :"
     echo "   ┌─────────────────────────────────────────────────────────┐"
-    ./bin/cqlsh localhost 9042 -e "SELECT index_name FROM system_schema.indexes WHERE keyspace_name = 'domiramacatops_poc';" 2>&1 | grep -v "Warnings" | grep -v "index_name" | grep -vE "^---" | grep -v "^$" | sed 's/^/   │ /'
+    ./bin/cqlsh "$HCD_HOST" "$HCD_PORT" -e "SELECT index_name FROM system_schema.indexes WHERE keyspace_name = 'domiramacatops_poc';" 2>&1 | grep -v "Warnings" | grep -v "index_name" | grep -vE "^---" | grep -v "^$" | sed 's/^/   │ /'
     echo "   └─────────────────────────────────────────────────────────┘"
 else
     warn "⚠️  Nombre d'index SAI: $INDEXES (attendu: 10+)"
@@ -351,7 +362,7 @@ echo ""
 # Vérification 1: Keyspace
 expected "📋 Vérification 1 : Keyspace"
 echo "   Attendu : Keyspace 'domiramacatops_poc' existe"
-KEYSpace_EXISTS=$(./bin/cqlsh localhost 9042 -e "SELECT keyspace_name FROM system_schema.keyspaces WHERE keyspace_name = 'domiramacatops_poc';" 2>&1 | grep -v "Warnings" | grep -c "domiramacatops_poc" || echo "0")
+KEYSpace_EXISTS=$(./bin/cqlsh "$HCD_HOST" "$HCD_PORT" -e "SELECT keyspace_name FROM system_schema.keyspaces WHERE keyspace_name = 'domiramacatops_poc';" 2>&1 | grep -v "Warnings" | grep -c "domiramacatops_poc" || echo "0")
 if [ "$KEYSpace_EXISTS" -gt 0 ]; then
     success "✅ Keyspace 'domiramacatops_poc' existe"
 else

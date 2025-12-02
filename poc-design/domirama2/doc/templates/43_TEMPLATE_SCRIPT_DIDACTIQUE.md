@@ -83,7 +83,7 @@ mkdir -p "$(dirname "$REPORT_FILE")"
 # VÉRIFICATIONS
 # ============================================
 if ! pgrep -f "cassandra" > /dev/null; then
-    error "HCD n'est pas démarré. Exécutez d'abord: ./03_start_hcd.sh"
+    error "HCD n'est pas démarré. Exécutez d'abord: ./scripts/setup/03_start_hcd.sh"
     exit 1
 fi
 

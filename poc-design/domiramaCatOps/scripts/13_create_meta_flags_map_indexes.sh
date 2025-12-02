@@ -3,10 +3,23 @@
 # Script : Création des index SAI sur KEYS et VALUES de meta_flags
 # ============================================
 
-set -e
+set -euo pipefail
 
 # Charger l'environnement
-INSTALL_DIR="/Users/david.leconte/Documents/Arkea"
+# Configuration - Utiliser setup_paths si disponible
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../utils/didactique_functions.sh" ]; then
+    source "$SCRIPT_DIR/../utils/didactique_functions.sh"
+    setup_paths
+else
+    # Fallback si les fonctions ne sont pas disponibles
+    INSTALL_DIR="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+    HCD_DIR="${HCD_DIR:-${INSTALL_DIR}/binaire/hcd-1.2.3}"
+    SPARK_HOME="${SPARK_HOME:-${INSTALL_DIR}/binaire/spark-3.5.1}"
+    HCD_HOST="${HCD_HOST:-localhost}"
+    HCD_PORT="${HCD_PORT:-9042}"
+fi
+
 if [ -f "${INSTALL_DIR}/.poc-profile" ]; then
     source "${INSTALL_DIR}/.poc-profile"
 fi
@@ -17,7 +30,7 @@ if [ -n "${HCD_HOME}" ]; then
 else
     CQLSH_BIN="${HCD_DIR}/bin/cqlsh"
 fi
-CQLSH="$CQLSH_BIN localhost 9042"
+CQLSH="$CQLSH_BIN "$HCD_HOST" "$HCD_PORT""
 
 # Couleurs
 GREEN='\033[0;32m'
@@ -35,7 +48,6 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 CQL_FILE="${SCRIPT_DIR}/../schemas/13_create_meta_flags_map_indexes.cql"
 # Vérifier si le fichier existe, sinon utiliser le chemin absolu
 if [ ! -f "$CQL_FILE" ]; then
-    INSTALL_DIR="/Users/david.leconte/Documents/Arkea"
     CQL_FILE="${INSTALL_DIR}/poc-design/domiramaCatOps/schemas/13_create_meta_flags_map_indexes.cql"
 fi
 
@@ -50,9 +62,9 @@ if [ ! -f "$CQL_FILE" ]; then
 fi
 
 # Vérifier que HCD est démarré
-if ! nc -z localhost 9042 2>/dev/null; then
+if ! nc -z "$HCD_HOST" "$HCD_PORT" 2>/dev/null; then
     error "HCD n'est pas démarré sur localhost:9042"
-    error "Exécutez d'abord: ./03_start_hcd.sh"
+    error "Exécutez d'abord: ./scripts/setup/03_start_hcd.sh"
     exit 1
 fi
 
@@ -87,4 +99,3 @@ $CQLSH -e "USE domiramacatops_poc; SELECT index_name FROM system_schema.indexes 
 
 echo ""
 success "✅ Script terminé"
-

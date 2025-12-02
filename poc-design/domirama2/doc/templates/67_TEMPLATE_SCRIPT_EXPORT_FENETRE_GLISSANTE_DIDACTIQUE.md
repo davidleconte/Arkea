@@ -41,7 +41,7 @@ Un script d'export avec fenêtre glissante didactique doit :
 #   - Une documentation structurée pour livrable
 #
 # PRÉREQUIS :
-#   - HCD démarré (./03_start_hcd.sh)
+#   - HCD démarré (./scripts/setup/03_start_hcd.sh)
 #   - Schéma configuré (./10_setup_domirama2_poc.sh)
 #   - Données chargées (./11_load_domirama2_data_parquet.sh)
 #   - Spark 3.5.1 installé et configuré
@@ -552,6 +552,7 @@ rm -f "$TEMP_RESULTS"
 echo ""
 success "✅ Démonstration fenêtre glissante terminée"
 echo ""
+
 
 
 

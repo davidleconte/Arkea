@@ -41,7 +41,7 @@ Un script d'export didactique doit :
 #   - Une documentation structurée pour livrable
 #
 # PRÉREQUIS :
-#   - HCD démarré (./03_start_hcd.sh)
+#   - HCD démarré (./scripts/setup/03_start_hcd.sh)
 #   - Schéma configuré (./10_setup_domirama2_poc.sh)
 #   - Données chargées (./11_load_domirama2_data_parquet.sh)
 #   - Spark 3.5.1 installé et configuré
@@ -124,7 +124,7 @@ echo ""
 info "Vérification de HCD..."
 if ! nc -z localhost 9042 2>/dev/null; then
     error "HCD n'est pas démarré sur localhost:9042"
-    error "Exécutez d'abord: ./03_start_hcd.sh"
+    error "Exécutez d'abord: ./scripts/setup/03_start_hcd.sh"
     exit 1
 fi
 success "HCD est démarré"
@@ -700,6 +700,7 @@ Pour utiliser ce template, adapter :
 ---
 
 **✅ Template créé !**
+
 
 
 

@@ -9,7 +9,7 @@
 #   et système de checkpointing pour reprise après échec.
 #
 # PRÉREQUIS :
-#   - HCD démarré (./03_start_hcd.sh depuis la racine)
+#   - HCD démarré (./scripts/setup/03_start_hcd.sh depuis la racine)
 #   - Java 11 configuré via jenv (jenv local 11)
 #   - Spark 3.5.1 installé et configuré
 #   - Variables d'environnement configurées (.poc-profile)
@@ -24,9 +24,22 @@
 #
 # ============================================
 
-set -e
+set -euo pipefail
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd )"
+# Configuration - Utiliser setup_paths si disponible
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../utils/didactique_functions.sh" ]; then
+    source "$SCRIPT_DIR/../utils/didactique_functions.sh"
+    setup_paths
+else
+    # Fallback si les fonctions ne sont pas disponibles
+    INSTALL_DIR="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+    HCD_DIR="${HCD_DIR:-${INSTALL_DIR}/binaire/hcd-1.2.3}"
+    SPARK_HOME="${SPARK_HOME:-${INSTALL_DIR}/binaire/spark-3.5.1}"
+    HCD_HOST="${HCD_HOST:-localhost}"
+    HCD_PORT="${HCD_PORT:-9042}"
+fi
+
 cd "$SCRIPT_DIR"
 
 # Source des fonctions utilitaires
@@ -242,7 +255,7 @@ validate_hcd_connection() {
     HCD_DIR="${HCD_DIR:-${HCD_HOME:-${INSTALL_DIR}/binaire/hcd-1.2.3}}"
     
     for i in $(seq 1 $max_retries); do
-        if "${HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT now() FROM system.local;" > /dev/null 2>&1; then
+        if "${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT now() FROM system.local;" > /dev/null 2>&1; then
             success "✅ HCD connecté (tentative $i/$max_retries)"
             log "✅ Validation : HCD connecté (tentative $i/$max_retries)"
             return 0
@@ -276,7 +289,7 @@ diagnose_error() {
     # Détecter les erreurs communes
     if echo "$last_lines" | grep -qi "connection.*refused\|timeout\|Connection refused"; then
         error "❌ Problème de connexion HCD détecté"
-        warn "💡 Suggestion : Vérifier que HCD est démarré (./03_start_hcd.sh depuis la racine)"
+        warn "💡 Suggestion : Vérifier que HCD est démarré (./scripts/setup/03_start_hcd.sh depuis la racine)"
         log "💡 Suggestion : Vérifier que HCD est démarré"
     elif echo "$last_lines" | grep -qi "no such file\|file not found\|FileNotFoundError"; then
         error "❌ Fichier manquant détecté"
@@ -359,7 +372,7 @@ validate_phase() {
     case "$phase" in
         1)
             # Validation Phase 1 : Keyspace, tables, index
-            if ! "${HCD_DIR}/bin/cqlsh" localhost 9042 -e "DESCRIBE KEYSPACE domiramacatops_poc;" > /dev/null 2>&1; then
+            if ! "${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "DESCRIBE KEYSPACE domiramacatops_poc;" > /dev/null 2>&1; then
                 error "❌ Keyspace domiramacatops_poc n'existe pas"
                 log "❌ Validation : Keyspace manquant"
                 return 1
@@ -372,7 +385,7 @@ validate_phase() {
             local missing_tables=()
             
             for table in "${tables[@]}"; do
-                if ! "${HCD_DIR}/bin/cqlsh" localhost 9042 -e "DESCRIBE TABLE domiramacatops_poc.${table};" > /dev/null 2>&1; then
+                if ! "${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "DESCRIBE TABLE domiramacatops_poc.${table};" > /dev/null 2>&1; then
                     missing_tables+=("$table")
                 fi
             done
@@ -437,7 +450,7 @@ EOF
             ;;
         3)
             # Validation Phase 3 : Données chargées (avec validation qualité)
-            local total=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT COUNT(*) FROM domiramacatops_poc.operations_by_account;" 2>&1 | grep -oE '[0-9]+' | head -1 || echo "0")
+            local total=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT COUNT(*) FROM domiramacatops_poc.operations_by_account;" 2>&1 | grep -oE '[0-9]+' | head -1 || echo "0")
             
             if [ "$total" -eq 0 ]; then
                 warn "⚠️  Aucune opération chargée"
@@ -449,8 +462,8 @@ EOF
             log "✅ Validation : $total opérations chargées"
             
             # Validation qualité données
-            local categorized=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT COUNT(*) FROM domiramacatops_poc.operations_by_account WHERE cat_auto IS NOT NULL;" 2>&1 | grep -oE '[0-9]+' | head -1 || echo "0")
-            local with_embeddings=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT COUNT(*) FROM domiramacatops_poc.operations_by_account WHERE libelle_embedding IS NOT NULL;" 2>&1 | grep -oE '[0-9]+' | head -1 || echo "0")
+            local categorized=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT COUNT(*) FROM domiramacatops_poc.operations_by_account WHERE cat_auto IS NOT NULL;" 2>&1 | grep -oE '[0-9]+' | head -1 || echo "0")
+            local with_embeddings=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT COUNT(*) FROM domiramacatops_poc.operations_by_account WHERE libelle_embedding IS NOT NULL;" 2>&1 | grep -oE '[0-9]+' | head -1 || echo "0")
             
             local cat_percent=$((categorized * 100 / total))
             local emb_percent=$((with_embeddings * 100 / total))
@@ -521,7 +534,7 @@ if command -v "${HCD_DIR}/bin/cqlsh" &> /dev/null || [ -f "${HCD_DIR}/bin/cqlsh"
     success "HCD détecté"
     log "✅ HCD détecté : ${HCD_DIR}"
 else
-    error "HCD non détecté. Veuillez démarrer HCD avec ./03_start_hcd.sh"
+    error "HCD non détecté. Veuillez démarrer HCD avec ./scripts/setup/03_start_hcd.sh"
     log "❌ HCD non détecté"
     exit 1
 fi

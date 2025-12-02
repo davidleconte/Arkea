@@ -532,7 +532,7 @@ echo "🎉 Exécution complète terminée avec succès !"
 
 ### Avant de Commencer
 
-- [ ] HCD démarré (`./03_start_hcd.sh` depuis la racine)
+- [ ] HCD démarré (`./scripts/setup/03_start_hcd.sh` depuis la racine)
 - [ ] Java 11 configuré (`jenv local 11`)
 - [ ] Spark 3.5.1 installé et configuré
 - [ ] Variables d'environnement configurées (`.poc-profile`)
@@ -589,7 +589,7 @@ ps aux | grep cassandra
 
 # Redémarrer HCD si nécessaire
 cd /Users/david.leconte/Documents/Arkea
-./03_start_hcd.sh
+./scripts/setup/03_start_hcd.sh
 ```
 
 ### Problème : Script échoue avec erreur Java

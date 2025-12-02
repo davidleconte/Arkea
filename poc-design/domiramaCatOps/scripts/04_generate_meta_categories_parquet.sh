@@ -58,7 +58,20 @@ set -e
 # ============================================
 # SOURCE DES FONCTIONS UTILITAIRES
 # ============================================
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+# Configuration - Utiliser setup_paths si disponible
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../utils/didactique_functions.sh" ]; then
+    source "$SCRIPT_DIR/../utils/didactique_functions.sh"
+    setup_paths
+else
+    # Fallback si les fonctions ne sont pas disponibles
+    INSTALL_DIR="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+    HCD_DIR="${HCD_DIR:-${INSTALL_DIR}/binaire/hcd-1.2.3}"
+    SPARK_HOME="${SPARK_HOME:-${INSTALL_DIR}/binaire/spark-3.5.1}"
+    HCD_HOST="${HCD_HOST:-localhost}"
+    HCD_PORT="${HCD_PORT:-9042}"
+fi
+
 if [ -f "${SCRIPT_DIR}/../utils/didactique_functions.sh" ]; then
     source "${SCRIPT_DIR}/../utils/didactique_functions.sh"
 else
@@ -85,7 +98,6 @@ fi
 # ============================================
 # CONFIGURATION
 # ============================================
-INSTALL_DIR="/Users/david.leconte/Documents/Arkea"
 DATA_DIR="${SCRIPT_DIR}/../data"
 OUTPUT_DIR=${1:-"${DATA_DIR}/meta-categories"}
 REPORT_FILE="${SCRIPT_DIR}/../doc/demonstrations/04b_GENERATION_META_CATEGORIES_DEMONSTRATION.md"

@@ -35,7 +35,7 @@
 #   - Une documentation structurée pour livrable
 #
 # PRÉREQUIS :
-#   - HCD démarré (./03_start_hcd.sh)
+#   - HCD démarré (./scripts/setup/03_start_hcd.sh)
 #   - Schéma configuré (./01_setup_domiramaCatOps_keyspace.sh, ./02_setup_operations_by_account.sh, ./03_setup_meta_categories_tables.sh)
 #   - Spark 3.5.1 déjà installé sur le MBP (via Homebrew)
 #   - Variables d'environnement configurées dans .poc-profile (SPARK_HOME)
@@ -61,7 +61,7 @@
 #
 # ============================================
 
-set -e
+set -euo pipefail
 
 # ============================================
 # CONFIGURATION DES COULEURS
@@ -88,10 +88,21 @@ expected() { echo -e "${YELLOW}📋 $1${NC}"; }
 # ============================================
 # CONFIGURATION
 # ============================================
-INSTALL_DIR="/Users/david.leconte/Documents/Arkea"
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-REPORT_FILE="${SCRIPT_DIR}/../doc/demonstrations/05_INGESTION_OPERATIONS_DEMONSTRATION.md"
+# Configuration - Utiliser setup_paths si disponible
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../utils/didactique_functions.sh" ]; then
+    source "$SCRIPT_DIR/../utils/didactique_functions.sh"
+    setup_paths
+else
+    # Fallback si les fonctions ne sont pas disponibles
+    INSTALL_DIR="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+    HCD_DIR="${HCD_DIR:-${INSTALL_DIR}/binaire/hcd-1.2.3}"
+    SPARK_HOME="${SPARK_HOME:-${INSTALL_DIR}/binaire/spark-3.5.1}"
+    HCD_HOST="${HCD_HOST:-localhost}"
+    HCD_PORT="${HCD_PORT:-9042}"
+fi
 
+REPORT_FILE="${SCRIPT_DIR}/../doc/demonstrations/05_INGESTION_OPERATIONS_DEMONSTRATION.md"
 # Charger l'environnement POC (Spark et Kafka déjà installés sur MBP)
 if [ -f "${INSTALL_DIR}/.poc-profile" ]; then
     source "${INSTALL_DIR}/.poc-profile"
@@ -123,7 +134,7 @@ mkdir -p "$(dirname "$REPORT_FILE")"
 # VÉRIFICATIONS
 # ============================================
 if ! pgrep -f "cassandra" > /dev/null; then
-    error "HCD n'est pas démarré. Exécutez d'abord: ./03_start_hcd.sh"
+    error "HCD n'est pas démarré. Exécutez d'abord: ./scripts/setup/03_start_hcd.sh"
     exit 1
 fi
 
@@ -131,7 +142,7 @@ cd "$HCD_DIR"
 jenv local 11
 eval "$(jenv init -)"
 
-if ! ./bin/cqlsh localhost 9042 -e "DESCRIBE KEYSPACE domiramacatops_poc;" > /dev/null 2>&1; then
+if ! ./bin/cqlsh "$HCD_HOST" "$HCD_PORT" -e "DESCRIBE KEYSPACE domiramacatops_poc;" > /dev/null 2>&1; then
     error "Le keyspace domiramacatops_poc n'existe pas. Exécutez d'abord: ./01_setup_domiramaCatOps_keyspace.sh"
     exit 1
 fi
@@ -760,7 +771,7 @@ TEMP_TABLE_DDL="CREATE TABLE IF NOT EXISTS domiramacatops_poc.operations_by_acco
     PRIMARY KEY ((code_si, contrat), date_op, numero_op)
 );"
 
-"${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e "$TEMP_TABLE_DDL" 2>&1 | grep -v "Warnings" || true
+"${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "$TEMP_TABLE_DDL" 2>&1 | grep -v "Warnings" || true
 success "✅ Table temporaire créée"
 
 # Vérifier si le fichier Parquet temporaire existe
@@ -937,7 +948,7 @@ sleep 2
 # Vérification 1: Nombre d'opérations
 expected "📋 Vérification 1 : Nombre d'opérations chargées"
 echo "   Attendu : Au moins 1 opération chargée dans HCD"
-COUNT=$(./bin/cqlsh localhost 9042 -e "USE domiramacatops_poc; SELECT COUNT(*) FROM operations_by_account;" 2>&1 | grep -v "Warnings" | grep -E "^[[:space:]]*[0-9]+" | head -1 | tr -d ' ')
+COUNT=$(./bin/cqlsh "$HCD_HOST" "$HCD_PORT" -e "USE domiramacatops_poc; SELECT COUNT(*) FROM operations_by_account;" 2>&1 | grep -v "Warnings" | grep -E "^[[:space:]]*[0-9]+" | head -1 | tr -d ' ')
 
 if [ -n "$COUNT" ] && [ "$COUNT" -gt 0 ]; then
     success "✅ $COUNT opération(s) chargée(s) dans HCD"
@@ -954,7 +965,7 @@ echo ""
 # Vérification 2: Stratégie batch (cat_user null)
 expected "📋 Vérification 2 : Stratégie Batch"
 echo "   Attendu : cat_user est null (batch ne l'a pas touché)"
-CAT_USER_SAMPLE=$(./bin/cqlsh localhost 9042 -e "USE domiramacatops_poc; SELECT cat_user FROM operations_by_account LIMIT 10;" 2>&1 | grep -v "Warnings" | grep -v "cat_user" | grep -vE "^---" | grep -v "^$" | head -1 | tr -d ' ')
+CAT_USER_SAMPLE=$(./bin/cqlsh "$HCD_HOST" "$HCD_PORT" -e "USE domiramacatops_poc; SELECT cat_user FROM operations_by_account LIMIT 10;" 2>&1 | grep -v "Warnings" | grep -v "cat_user" | grep -vE "^---" | grep -v "^$" | head -1 | tr -d ' ')
 
 if [ -z "$CAT_USER_SAMPLE" ] || [ "$CAT_USER_SAMPLE" = "null" ]; then
     success "✅ Stratégie batch validée: cat_user est null (batch ne l'a pas touché)"
@@ -969,7 +980,7 @@ echo "   Attendu : Affichage d'un échantillon d'opérations chargées"
 echo ""
 result "📊 Échantillon d'opérations chargées :"
 echo "   ┌─────────────────────────────────────────────────────────┐"
-./bin/cqlsh localhost 9042 -e "USE domiramacatops_poc; SELECT code_si, contrat, libelle, montant, cat_auto, cat_confidence, cat_user FROM operations_by_account LIMIT 5;" 2>&1 | grep -v "Warnings" | head -10 | sed 's/^/   │ /'
+./bin/cqlsh "$HCD_HOST" "$HCD_PORT" -e "USE domiramacatops_poc; SELECT code_si, contrat, libelle, montant, cat_auto, cat_confidence, cat_user FROM operations_by_account LIMIT 5;" 2>&1 | grep -v "Warnings" | head -10 | sed 's/^/   │ /'
 echo "   └─────────────────────────────────────────────────────────┘"
 echo ""
 

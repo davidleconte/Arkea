@@ -1,56 +1,106 @@
 # =============================================================================
 # .gitignore pour POC Migration HBase → HCD
 # =============================================================================
+# Date : 2025-12-01
+# =============================================================================
 
+# =============================================================================
 # Logs
+# =============================================================================
+logs/
 *.log
 *.log.*
-logs/
-**/logs/
-hcd-1.2.3/logs/
-binaire/hcd-1.2.3/logs/
 
-# Données HCD
+# =============================================================================
+# Données
+# =============================================================================
+# Répertoires de données générées
+data/
 hcd-data/
-**/hcd-data/
-*.db
-*.crc32
-*.txt
-*.sstable
+**/data/
+**/data/**
 
-# Checkpoints Spark
-/tmp/spark-checkpoints/
-spark-checkpoints/
+# Fichiers de données générés par les scripts
+*.parquet
+*.parquet/
+**/*.parquet
+**/*.parquet/
+*.csv
+*.json
+*.orc
+*.orc/
+**/*.orc
+**/*.orc/
+*.avro
+*.avro/
+**/*.avro
+**/*.avro/
+
+# Répertoires Parquet (avec _SUCCESS et part-*.parquet)
+**/_SUCCESS
+**/part-*.parquet
+**/part-*.snappy.parquet
+
+# Répertoires de données spécifiques aux POCs
+poc-design/*/data/
+poc-design/*/data/**
+poc-design/*/data/parquet/
+poc-design/*/data/json/
+poc-design/*/data/csv/
+poc-design/*/data/temp/
+poc-design/*/data/tmp/
+poc-design/*/data/export/
+poc-design/*/data/checkpoints/
+poc-design/*/data/checkpoints/**
+
+# Exports batch
+**/export/
+**/exports/
+**/export/**
+**/exports/**
+
+# Checkpoints (Kafka, Spark)
+**/checkpoints/
+**/checkpoints/**
 **/checkpoint/
+**/checkpoint/**
+*.checkpoint
+*.checkpoint/
 
-# Fichiers compilés
-*.class
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-target/
-build/
-dist/
-*.egg-info/
+# Fichiers temporaires
+**/temp/
+**/temp/**
+**/tmp/
+**/tmp/**
+*.tmp
+*.temp
 
-# Archives temporaires
-*.tar.gz.tmp
-*.tgz.tmp
-*.zip.tmp
+# Archives de données
+*.zip
+*.tar.gz
+*.tgz
 
-# IDE
-.idea/
-.vscode/
+# =============================================================================
+# Binaires et Logiciels
+# =============================================================================
+binaire/
+software/
+*.tar.gz
+*.tgz
+*.jar
+
+# =============================================================================
+# Fichiers Temporaires
+# =============================================================================
+*.tmp
+*.bak
 *.swp
 *.swo
-*.sublime-*
-.project
-.classpath
-.settings/
+*~
 
+# =============================================================================
 # OS
+# =============================================================================
 .DS_Store
 .DS_Store?
 ._*
@@ -58,47 +108,78 @@ dist/
 .Trashes
 ehthumbs.db
 Thumbs.db
-Desktop.ini
+desktop.ini
 
-# Fichiers de sauvegarde
-*.bak
-*.backup
-*~
-*.orig
+# =============================================================================
+# IDE
+# =============================================================================
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
 
-# Fichiers de test temporaires
-/tmp/test_*
-*.tmp
+# =============================================================================
+# Python
+# =============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
 
-# Variables d'environnement locales (si sensibles)
-.env
+# =============================================================================
+# Java
+# =============================================================================
+*.class
+*.jar
+*.war
+*.ear
+target/
+build/
+out/
+
+# =============================================================================
+# Scala
+# =============================================================================
+*.class
+target/
+.metals/
+.bloop/
+
+# =============================================================================
+# Fichiers de Configuration Locaux
+# =============================================================================
+.poc-profile.local
+.poc-config.local
 .env.local
-*.key
-*.pem
-*.cert
 
-# Fichiers de données sensibles
-*.csv
-*.json
-!package.json
-!tsconfig.json
+# =============================================================================
+# Fichiers de Test Temporaires
+# =============================================================================
+test_output/
+test_results/
+*.test
 
-# Jupyter Notebooks
-.ipynb_checkpoints/
-*.ipynb
+# =============================================================================
+# Archives et Backups
+# =============================================================================
+*.backup
+*.old
+archive/backups/
 
-# Fichiers de cache
-.cache/
-*.cache
+# =============================================================================
+# Fichiers Spécifiques au Projet
+# =============================================================================
+# Répertoire hcd-1.2.3/ à la racine (doublon de binaire/hcd-1.2.3/)
+hcd-1.2.3/
 
-# Fichiers de lock
-*.lock
-*.pid
-
-# Fichiers de configuration locaux
-*.local
-config.local.*
-
-
-
-
+# Répertoires vides ou temporaires
+ehB /

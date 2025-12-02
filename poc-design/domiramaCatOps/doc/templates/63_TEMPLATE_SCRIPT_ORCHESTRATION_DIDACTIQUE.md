@@ -135,7 +135,7 @@ if ! pgrep -f "cassandra" > /dev/null; then
     warn "HCD n'est pas démarré. Démarrage..."
     cd "$INSTALL_DIR"
     if [ -f "03_start_hcd.sh" ]; then
-        ./03_start_hcd.sh || {
+        ./scripts/setup/03_start_hcd.sh || {
             error "Impossible de démarrer HCD"
             exit 1
         }

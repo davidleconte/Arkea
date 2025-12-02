@@ -40,7 +40,7 @@ Un script de setup didactique doit :
 #   - Une documentation structurée pour livrable
 #
 # PRÉREQUIS :
-#   - HCD démarré (./03_start_hcd.sh)
+#   - HCD démarré (./scripts/setup/03_start_hcd.sh)
 #   - Java 11 configuré via jenv
 #   - Fichier schéma présent: schemas/XX_create_schema.cql
 #
@@ -94,7 +94,7 @@ mkdir -p "$(dirname "$REPORT_FILE")"
 # VÉRIFICATIONS
 # ============================================
 if ! pgrep -f "cassandra" > /dev/null; then
-    error "HCD n'est pas démarré. Exécutez d'abord: ./03_start_hcd.sh"
+    error "HCD n'est pas démarré. Exécutez d'abord: ./scripts/setup/03_start_hcd.sh"
     exit 1
 fi
 

@@ -1,151 +1,74 @@
 # =============================================================================
 # Configuration des Variables d'Environnement pour le POC HBase → HCD
 # =============================================================================
-# Date : 2025-11-25
+# Date : 2025-12-01 (Mise à jour pour utiliser .poc-config.sh)
 # Usage : source .poc-profile
 # =============================================================================
-
-# Répertoire de base du projet
-export POC_HOME="/Users/david.leconte/Documents/Arkea"
-
-# =============================================================================
-# Java Configuration
+#
+# NOTE : Ce fichier charge maintenant .poc-config.sh qui contient la configuration
+#        centralisée portable. Les chemins hardcodés ont été remplacés par une
+#        détection automatique multi-OS.
 # =============================================================================
 
-# Java 11 pour HCD et Spark 3.5.1
-# Vérifier si jenv est disponible
-if command -v jenv &> /dev/null; then
-    eval "$(jenv init -)" 2>/dev/null || true
-    cd "$POC_HOME"
-    if jenv versions | grep -q "11"; then
-        jenv local 11 2>/dev/null || true
-        eval "$(jenv init -)"
-        export JAVA_HOME=$(jenv prefix 11)
-        export JAVA11_HOME="$JAVA_HOME"
-    fi
-fi
-
-# Fallback vers Homebrew si jenv n'est pas disponible
-if [ -z "$JAVA_HOME" ] || [ ! -d "$JAVA_HOME" ]; then
-    if [ -d "/opt/homebrew/opt/openjdk@11/libexec/openjdk.jdk/Contents/Home" ]; then
-        export JAVA_HOME="/opt/homebrew/opt/openjdk@11/libexec/openjdk.jdk/Contents/Home"
-    elif [ -d "/opt/homebrew/opt/openjdk@11" ]; then
-        export JAVA_HOME="/opt/homebrew/opt/openjdk@11"
-    fi
-    export JAVA11_HOME="$JAVA_HOME"
-fi
-
-# Java 17 pour Kafka (optionnel, utilisé par kafka-helper.sh)
-if [ -d "/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home" ]; then
-    export JAVA17_HOME="/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home"
-elif [ -d "/opt/homebrew/opt/openjdk@17" ]; then
-    export JAVA17_HOME="/opt/homebrew/opt/openjdk@17"
+# Charger la configuration centralisée (.poc-config.sh)
+# Ce fichier détecte automatiquement ARKEA_HOME et configure tous les chemins
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-${0}}")" && pwd)"
+if [ -f "${SCRIPT_DIR}/.poc-config.sh" ]; then
+    # shellcheck source=/dev/null
+    source "${SCRIPT_DIR}/.poc-config.sh"
+    export POC_HOME="${ARKEA_HOME}"
+else
+    # Fallback si .poc-config.sh n'existe pas (compatibilité ascendante)
+    export POC_HOME="${ARKEA_HOME:-/Users/david.leconte/Documents/Arkea}"
+    export ARKEA_HOME="$POC_HOME"
 fi
 
 # =============================================================================
-# HCD (Hyper-Converged Database) Configuration
+# Java, HCD, Spark, Kafka Configuration
+# =============================================================================
+# NOTE : Ces configurations sont maintenant gérées par .poc-config.sh
+#        Les variables suivantes sont définies pour compatibilité ascendante
+#        mais .poc-config.sh a déjà tout configuré avec détection automatique.
 # =============================================================================
 
-export HCD_HOME="$POC_HOME/binaire/hcd-1.2.3"
-export HCD_VERSION="1.2.3"
-export CASSANDRA_HOME="$HCD_HOME/resources/cassandra"
+# Les variables suivantes sont déjà définies par .poc-config.sh :
+# - JAVA_HOME, JAVA11_HOME, JAVA17_HOME
+# - HCD_HOME, HCD_DIR, CASSANDRA_HOME
+# - SPARK_HOME, SPARK_VERSION, SPARK_CONF_DIR
+# - KAFKA_HOME, KAFKA_VERSION
+# - ZOOKEEPER_HOME
+# - HCD_HOST, HCD_PORT
+# - Et toutes les autres variables de configuration
+
+# Alias pour compatibilité (HCD_HOME peut être défini comme HCD_DIR)
+export HCD_HOME="${HCD_HOME:-${HCD_DIR}}"
+
+# Kafka config (si non défini par .poc-config.sh)
+export KAFKA_CONFIG="${KAFKA_CONFIG:-${KAFKA_HOME}/.bottle/etc/kafka}"
+export KAFKA_LOG_DIR="${KAFKA_LOG_DIR:-${KAFKA_HOME}/libexec/logs}"
+
+# Zookeeper config (si non défini par .poc-config.sh)
+export ZOOKEEPER_CONFIG="${ZOOKEEPER_CONFIG:-${ZOOKEEPER_HOME}/libexec/conf}"
 
 # =============================================================================
-# Spark Configuration
+# PATH, Python, et autres configurations
+# =============================================================================
+# NOTE : Ces configurations sont maintenant gérées par .poc-config.sh
+#        Les variables suivantes sont définies pour compatibilité ascendante.
 # =============================================================================
 
-export SPARK_HOME="$POC_HOME/binaire/spark-3.5.1"
-export SPARK_VERSION="3.5.1"
-export SPARK_CONF_DIR="$SPARK_HOME/conf"
+# PATH est déjà configuré par .poc-config.sh
+# Python est déjà configuré par .poc-config.sh
+# Spark options sont déjà configurées par .poc-config.sh
+# HCD/Cassandra config est déjà configurée par .poc-config.sh
+# Kafka config est déjà configurée par .poc-config.sh
+# Répertoires de données sont déjà configurés par .poc-config.sh
+# Keyspace et tables sont déjà configurés par .poc-config.sh
 
-# Spark Cassandra Connector
-export SPARK_CASSANDRA_CONNECTOR_VERSION="3.5.0"
-export SPARK_CASSANDRA_CONNECTOR_JAR="$POC_HOME/binaire/spark-jars/spark-cassandra-connector_2.12-${SPARK_CASSANDRA_CONNECTOR_VERSION}.jar"
-
-# Spark SQL Kafka (téléchargé automatiquement via --packages)
-export SPARK_SQL_KAFKA_VERSION="3.5.1"
-
-# =============================================================================
-# Kafka Configuration
-# =============================================================================
-
-export KAFKA_HOME="/opt/homebrew/opt/kafka"
-export KAFKA_VERSION="4.1.1"
-export KAFKA_CONFIG="$KAFKA_HOME/.bottle/etc/kafka"
-export KAFKA_LOG_DIR="$KAFKA_HOME/libexec/logs"
-
-# =============================================================================
-# Zookeeper Configuration (pour Kafka)
-# =============================================================================
-
-export ZOOKEEPER_HOME="/opt/homebrew/opt/zookeeper"
-export ZOOKEEPER_CONFIG="$ZOOKEEPER_HOME/libexec/conf"
-
-# =============================================================================
-# PATH Configuration
-# =============================================================================
-
-# Ajouter les binaires au PATH
-export PATH="$SPARK_HOME/bin:$PATH"
-export PATH="$HCD_HOME/bin:$PATH"
-export PATH="$KAFKA_HOME/libexec/bin:$PATH"
-export PATH="$JAVA_HOME/bin:$PATH"
-
-# =============================================================================
-# Python Configuration (pour PySpark)
-# =============================================================================
-
-# Vérifier Python 3
-if command -v python3 &> /dev/null; then
-    export PYSPARK_PYTHON=$(which python3)
-    export PYSPARK_DRIVER_PYTHON=$(which python3)
+# Alias cqlsh (si Python 3.11 disponible)
+if command -v python3.11 &> /dev/null && [ -n "${HCD_HOME:-}" ]; then
+    alias cqlsh="python3.11 ${HCD_HOME}/resources/cassandra/bin/cqlsh.py"
 fi
-
-# =============================================================================
-# Hugging Face Configuration (pour ByteT5)
-# =============================================================================
-
-export HF_API_KEY="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"
-
-# =============================================================================
-# Spark Configuration Options
-# =============================================================================
-
-# Options Spark pour Cassandra
-export SPARK_OPTS="--conf spark.cassandra.connection.host=localhost --conf spark.cassandra.connection.port=9042 --conf spark.sql.extensions=com.datastax.spark.connector.CassandraSparkExtensions"
-
-# Packages Spark nécessaires
-export SPARK_PACKAGES="org.apache.spark:spark-sql-kafka-0-10_2.12:${SPARK_SQL_KAFKA_VERSION},com.datastax.spark:spark-cassandra-connector_2.12:${SPARK_CASSANDRA_CONNECTOR_VERSION}"
-
-# =============================================================================
-# HCD/Cassandra Configuration
-# =============================================================================
-
-export CASSANDRA_HOST="localhost"
-export CASSANDRA_PORT="9042"
-export CQLSH_HOST="$CASSANDRA_HOST"
-export CQLSH_PORT="$CASSANDRA_PORT"
-
-# =============================================================================
-# Kafka Configuration
-# =============================================================================
-
-export KAFKA_BOOTSTRAP_SERVERS="localhost:9092"
-export KAFKA_ZOOKEEPER_CONNECT="localhost:2181"
-
-# =============================================================================
-# Répertoires de Données
-# =============================================================================
-
-export HCD_DATA_DIR="$POC_HOME/hcd-data"
-export SPARK_CHECKPOINT_DIR="/tmp/spark-checkpoints"
-
-# =============================================================================
-# Keyspace et Tables HCD
-# =============================================================================
-
-export POC_KEYSPACE="poc_hbase_migration"
-export KAFKA_EVENTS_TABLE="kafka_events"
 
 # =============================================================================
 # Fonctions Utilitaires

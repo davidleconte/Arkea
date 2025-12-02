@@ -27,7 +27,7 @@
 #
 # ============================================
 
-set -e
+set -euo pipefail
 
 # ============================================
 # CONFIGURATION DES COULEURS
@@ -49,8 +49,19 @@ section() { echo -e "${BOLD}${CYAN}$1${NC}"; }
 # ============================================
 # CONFIGURATION
 # ============================================
-INSTALL_DIR="/Users/david.leconte/Documents/Arkea"
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+# Configuration - Utiliser setup_paths si disponible
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../utils/didactique_functions.sh" ]; then
+    source "$SCRIPT_DIR/../utils/didactique_functions.sh"
+    setup_paths
+else
+    # Fallback si les fonctions ne sont pas disponibles
+    INSTALL_DIR="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+    HCD_DIR="${HCD_DIR:-${INSTALL_DIR}/binaire/hcd-1.2.3}"
+    SPARK_HOME="${SPARK_HOME:-${INSTALL_DIR}/binaire/spark-3.5.1}"
+    HCD_HOST="${HCD_HOST:-localhost}"
+    HCD_PORT="${HCD_PORT:-9042}"
+fi
 
 # Charger l'environnement POC (Spark et Kafka déjà installés sur MBP)
 if [ -f "${INSTALL_DIR}/.poc-profile" ]; then
@@ -64,7 +75,7 @@ HCD_DIR="${HCD_HOME:-${INSTALL_DIR}/binaire/hcd-1.2.3}"
 # VÉRIFICATIONS
 # ============================================
 if ! pgrep -f "cassandra" > /dev/null; then
-    error "HCD n'est pas démarré. Exécutez d'abord: ./03_start_hcd.sh"
+    error "HCD n'est pas démarré. Exécutez d'abord: ./scripts/setup/03_start_hcd.sh"
     exit 1
 fi
 
@@ -72,7 +83,7 @@ cd "$HCD_DIR"
 jenv local 11
 eval "$(jenv init -)"
 
-if ! ./bin/cqlsh localhost 9042 -e "DESCRIBE KEYSPACE domiramacatops_poc;" > /dev/null 2>&1; then
+if ! ./bin/cqlsh "$HCD_HOST" "$HCD_PORT" -e "DESCRIBE KEYSPACE domiramacatops_poc;" > /dev/null 2>&1; then
     error "Le keyspace domiramacatops_poc n'existe pas. Exécutez d'abord: ./01_setup_domiramaCatOps_keyspace.sh"
     exit 1
 fi
@@ -265,7 +276,7 @@ cd "$HCD_DIR"
 jenv local 11
 eval "$(jenv init -)"
 
-CQL_OUTPUT=$(./bin/cqlsh localhost 9042 -f "$CQL_FILE" 2>&1)
+CQL_OUTPUT=$(./bin/cqlsh "$HCD_HOST" "$HCD_PORT" -f "$CQL_FILE" 2>&1)
 CQL_EXIT_CODE=$?
 
 if [ $CQL_EXIT_CODE -eq 0 ]; then
@@ -303,7 +314,7 @@ LIMIT 10;
 EOF
 )
 
-echo "$VERIFICATION_CQL" | ./bin/cqlsh localhost 9042 2>&1 | grep -v "Warnings" | head -15 | sed 's/^/   │ /'
+echo "$VERIFICATION_CQL" | ./bin/cqlsh "$HCD_HOST" "$HCD_PORT" 2>&1 | grep -v "Warnings" | head -15 | sed 's/^/   │ /'
 
 # ============================================
 # RÉSUMÉ

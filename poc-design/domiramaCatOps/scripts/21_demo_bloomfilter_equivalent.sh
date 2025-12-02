@@ -18,7 +18,7 @@
 #   - Une documentation structurée pour livrable
 #
 # PRÉREQUIS :
-#   - HCD démarré (./03_start_hcd.sh)
+#   - HCD démarré (./scripts/setup/03_start_hcd.sh)
 #   - Keyspace 'domiramacatops_poc' et table 'operations_by_account' créés
 #   - Index SAI créés (./04_create_indexes.sh)
 #   - Java 11 configuré via jenv
@@ -39,11 +39,22 @@
 #
 # ============================================
 
-set -e
+set -euo pipefail
 
 # Source les fonctions utilitaires et le profil d'environnement
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd )"
-INSTALL_DIR="${INSTALL_DIR:-/Users/david.leconte/Documents/Arkea}"
+# Configuration - Utiliser setup_paths si disponible
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../utils/didactique_functions.sh" ]; then
+    source "$SCRIPT_DIR/../utils/didactique_functions.sh"
+    setup_paths
+else
+    # Fallback si les fonctions ne sont pas disponibles
+    INSTALL_DIR="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+    HCD_DIR="${HCD_DIR:-${INSTALL_DIR}/binaire/hcd-1.2.3}"
+    SPARK_HOME="${SPARK_HOME:-${INSTALL_DIR}/binaire/spark-3.5.1}"
+    HCD_HOST="${HCD_HOST:-localhost}"
+    HCD_PORT="${HCD_PORT:-9042}"
+fi
 
 if [ -f "${SCRIPT_DIR}/../utils/didactique_functions.sh" ]; then
     source "${SCRIPT_DIR}/../utils/didactique_functions.sh"
@@ -86,12 +97,12 @@ check_jenv_java_version
 
 # Vérifier que le keyspace et la table existent
 check_schema "" "" # Vérifie HCD et Java
-KEYSPACE_EXISTS=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT keyspace_name FROM system_schema.keyspaces WHERE keyspace_name = '$KEYSPACE_NAME';" 2>&1 | grep -c "$KEYSPACE_NAME" || echo "0")
+KEYSPACE_EXISTS=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT keyspace_name FROM system_schema.keyspaces WHERE keyspace_name = '$KEYSPACE_NAME';" 2>&1 | grep -c "$KEYSPACE_NAME" || echo "0")
 if [ "$KEYSPACE_EXISTS" -eq 0 ]; then
     error "Le keyspace '$KEYSPACE_NAME' n'existe pas. Exécutez d'abord ./01_setup_domiramaCatOps_keyspace.sh"
     exit 1
 fi
-TABLE_EXISTS=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT table_name FROM system_schema.tables WHERE keyspace_name = '$KEYSPACE_NAME' AND table_name = '$TABLE_NAME';" 2>&1 | grep -c "$TABLE_NAME" || echo "0")
+TABLE_EXISTS=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT table_name FROM system_schema.tables WHERE keyspace_name = '$KEYSPACE_NAME' AND table_name = '$TABLE_NAME';" 2>&1 | grep -c "$TABLE_NAME" || echo "0")
 if [ "$TABLE_EXISTS" -eq 0 ]; then
     error "La table '$TABLE_NAME' n'existe pas. Exécutez d'abord ./02_setup_operations_by_account.sh"
     exit 1
@@ -130,7 +141,7 @@ echo ""
 show_partie "2" "DDL - STRUCTURE DE PARTITION ET INDEX"
 
 info "📝 DDL - Structure de partition (équivalent BLOOMFILTER rowkey) :"
-PARTITION_DDL=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "USE $KEYSPACE_NAME; DESCRIBE TABLE $TABLE_NAME;" 2>&1 | grep -A 5 "PRIMARY KEY" | head -6)
+PARTITION_DDL=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "USE $KEYSPACE_NAME; DESCRIBE TABLE $TABLE_NAME;" 2>&1 | grep -A 5 "PRIMARY KEY" | head -6)
 show_ddl_section "$PARTITION_DDL"
 
 info "   Explication :"
@@ -141,7 +152,7 @@ echo "      - Équivalent BLOOMFILTER : Cible directement la partition (évite s
 echo ""
 
 info "📝 DDL - Index SAI (équivalent BLOOMFILTER ROWCOL) :"
-INDEXES=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT index_name, kind, options FROM system_schema.indexes WHERE keyspace_name = '$KEYSPACE_NAME' AND table_name = '$TABLE_NAME';" 2>&1 | grep -E "(idx_|CUSTOM)" | head -5)
+INDEXES=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT index_name, kind, options FROM system_schema.indexes WHERE keyspace_name = '$KEYSPACE_NAME' AND table_name = '$TABLE_NAME';" 2>&1 | grep -E "(idx_|CUSTOM)" | head -5)
 if [ -n "$INDEXES" ]; then
     show_ddl_section "$INDEXES"
     info "   Explication :"
@@ -206,14 +217,14 @@ echo ""
 
 info "🚀 Exécution de la requête optimisée..."
 # Utiliser un compte qui existe dans les données de test
-RESULT_TEST1=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT code_si, contrat, date_op, numero_op, libelle, montant FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = '6' AND contrat = '600000041' LIMIT 1;" 2>&1)
+RESULT_TEST1=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT code_si, contrat, date_op, numero_op, libelle, montant FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = '6' AND contrat = '600000041' LIMIT 1;" 2>&1)
 echo "$RESULT_TEST1"
 echo ""
 success "✅ Contrôle effectué : Requête optimisée avec partition key + clustering keys exécutée"
 RESULT_TEST1_CAPTURED="$RESULT_TEST1"
 
 info "🔍 Analyse du plan d'exécution..."
-TRACE_OUTPUT=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "TRACING ON; SELECT code_si, contrat, date_op, numero_op, libelle, montant FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = '6' AND contrat = '600000041' LIMIT 1;" 2>&1 | head -50)
+TRACE_OUTPUT=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "TRACING ON; SELECT code_si, contrat, date_op, numero_op, libelle, montant FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = '6' AND contrat = '600000041' LIMIT 1;" 2>&1 | head -50)
 EXECUTION_PLAN=$(echo "$TRACE_OUTPUT" | grep -E "(Executing|single-partition|Read|Scanned|Merging)" | head -5)
 if [ -n "$EXECUTION_PLAN" ]; then
     result "📊 Plan d'exécution :"
@@ -250,14 +261,14 @@ echo ""
 
 info "🚀 Exécution de la requête avec index SAI full-text..."
 # Utiliser un compte qui existe dans les données de test
-RESULT_TEST2=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT code_si, contrat, date_op, numero_op, libelle, montant, cat_auto FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = '6' AND contrat = '600000041' AND libelle : 'LOYER' ORDER BY date_op DESC LIMIT 5;" 2>&1 | head -30)
+RESULT_TEST2=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT code_si, contrat, date_op, numero_op, libelle, montant, cat_auto FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = '6' AND contrat = '600000041' AND libelle : 'LOYER' ORDER BY date_op DESC LIMIT 5;" 2>&1 | head -30)
 echo "$RESULT_TEST2"
 echo ""
 success "✅ Contrôle effectué : Requête avec index SAI full-text exécutée"
 RESULT_TEST2_CAPTURED="$RESULT_TEST2"
 
 info "🔍 Analyse du plan d'exécution..."
-TRACE_OUTPUT2=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "TRACING ON; SELECT code_si, contrat, date_op, numero_op, libelle, montant, cat_auto FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = '6' AND contrat = '600000041' AND libelle : 'LOYER' ORDER BY date_op DESC LIMIT 5;" 2>&1 | head -50)
+TRACE_OUTPUT2=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "TRACING ON; SELECT code_si, contrat, date_op, numero_op, libelle, montant, cat_auto FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = '6' AND contrat = '600000041' AND libelle : 'LOYER' ORDER BY date_op DESC LIMIT 5;" 2>&1 | head -50)
 EXECUTION_PLAN2=$(echo "$TRACE_OUTPUT2" | grep -E "(Executing|single-partition|Read|Scanned|Merging|index)" | head -5)
 if [ -n "$EXECUTION_PLAN2" ]; then
     result "📊 Plan d'exécution :"
@@ -288,7 +299,7 @@ echo "      - Équivalent BLOOMFILTER : Évite de scanner d'autres partitions"
 echo ""
 
 info "🚀 Exécution du test A (avec partition key)..."
-RESULT_TEST3A=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT COUNT(*) FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = '6' AND contrat = '600000041';" 2>&1 | grep -E "^[[:space:]]*[0-9]+" | head -1 | tr -d '[:space:]' || echo "0")
+RESULT_TEST3A=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT COUNT(*) FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = '6' AND contrat = '600000041';" 2>&1 | grep -E "^[[:space:]]*[0-9]+" | head -1 | tr -d '[:space:]' || echo "0")
 echo "   Résultat : $RESULT_TEST3A ligne(s)"
 success "✅ Contrôle effectué : Requête avec partition key exécutée ($RESULT_TEST3A ligne(s))"
 RESULT_TEST3A_CAPTURED="$RESULT_TEST3A"
@@ -304,7 +315,7 @@ echo "      - BLOOMFILTER HBase évite ce scan, SAI aussi mais avec index exact"
 echo ""
 
 info "🚀 Exécution du test B (sans partition key)..."
-RESULT_TEST3B=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT COUNT(*) FROM $KEYSPACE_NAME.$TABLE_NAME WHERE libelle : 'LOYER' ALLOW FILTERING;" 2>&1 | grep -E "^[[:space:]]*[0-9]+" | head -1 | tr -d '[:space:]' || echo "0")
+RESULT_TEST3B=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT COUNT(*) FROM $KEYSPACE_NAME.$TABLE_NAME WHERE libelle : 'LOYER' ALLOW FILTERING;" 2>&1 | grep -E "^[[:space:]]*[0-9]+" | head -1 | tr -d '[:space:]' || echo "0")
 echo "   Résultat : $RESULT_TEST3B ligne(s)"
 warn "⚠️  Contrôle effectué : Requête sans partition key exécutée ($RESULT_TEST3B ligne(s)) - ALLOW FILTERING requis"
 RESULT_TEST3B_CAPTURED="$RESULT_TEST3B"
@@ -337,7 +348,7 @@ echo "      - paging_state permet navigation efficace"
 echo ""
 
 info "🚀 Exécution du test de pagination..."
-RESULT_TEST4=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT libelle, montant, cat_auto FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = '6' AND contrat = '600000041' ORDER BY date_op DESC LIMIT 10;" 2>&1 | head -15)
+RESULT_TEST4=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT libelle, montant, cat_auto FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = '6' AND contrat = '600000041' ORDER BY date_op DESC LIMIT 10;" 2>&1 | head -15)
 echo "$RESULT_TEST4"
 echo ""
 success "✅ Contrôle effectué : Pagination optimisée avec partition key exécutée"
@@ -357,7 +368,7 @@ echo ""
 
 info "🚀 Exécution avec mesure de latence..."
 START_TIME=$(date +%s.%N)
-RESULT_TEST5A=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT COUNT(*) FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = '6' AND contrat = '600000041';" 2>&1 | grep -E "^[[:space:]]*[0-9]+" | head -1 | tr -d '[:space:]' || echo "0")
+RESULT_TEST5A=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT COUNT(*) FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = '6' AND contrat = '600000041';" 2>&1 | grep -E "^[[:space:]]*[0-9]+" | head -1 | tr -d '[:space:]' || echo "0")
 END_TIME=$(date +%s.%N)
 LATENCY_A=$(python3 -c "print(($END_TIME - $START_TIME) * 1000)" 2>/dev/null || echo "0")
 echo "   Résultat : $RESULT_TEST5A ligne(s) en ${LATENCY_A}ms"
@@ -372,7 +383,7 @@ echo ""
 
 info "🚀 Exécution avec mesure de latence..."
 START_TIME=$(date +%s.%N)
-RESULT_TEST5B=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT COUNT(*) FROM $KEYSPACE_NAME.$TABLE_NAME WHERE libelle : 'LOYER' ALLOW FILTERING;" 2>&1 | grep -E "^[[:space:]]*[0-9]+" | head -1 | tr -d '[:space:]' || echo "0")
+RESULT_TEST5B=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT COUNT(*) FROM $KEYSPACE_NAME.$TABLE_NAME WHERE libelle : 'LOYER' ALLOW FILTERING;" 2>&1 | grep -E "^[[:space:]]*[0-9]+" | head -1 | tr -d '[:space:]' || echo "0")
 END_TIME=$(date +%s.%N)
 LATENCY_B=$(python3 -c "print(($END_TIME - $START_TIME) * 1000)" 2>/dev/null || echo "0")
 echo "   Résultat : $RESULT_TEST5B ligne(s) en ${LATENCY_B}ms"
@@ -402,13 +413,13 @@ echo ""
 
 info "🚀 Test de cache (requête répétée)..."
 START_TIME=$(date +%s.%N)
-RESULT_TEST6_1=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT COUNT(*) FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = '6' AND contrat = '600000041';" 2>&1 | grep -E "^[[:space:]]*[0-9]+" | head -1 | tr -d '[:space:]' || echo "0")
+RESULT_TEST6_1=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT COUNT(*) FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = '6' AND contrat = '600000041';" 2>&1 | grep -E "^[[:space:]]*[0-9]+" | head -1 | tr -d '[:space:]' || echo "0")
 END_TIME=$(date +%s.%N)
 LATENCY_6_1=$(python3 -c "print(($END_TIME - $START_TIME) * 1000)" 2>/dev/null || echo "0")
 
 # Deuxième exécution (devrait être plus rapide avec cache)
 START_TIME=$(date +%s.%N)
-RESULT_TEST6_2=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT COUNT(*) FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = '6' AND contrat = '600000041';" 2>&1 | grep -E "^[[:space:]]*[0-9]+" | head -1 | tr -d '[:space:]' || echo "0")
+RESULT_TEST6_2=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT COUNT(*) FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = '6' AND contrat = '600000041';" 2>&1 | grep -E "^[[:space:]]*[0-9]+" | head -1 | tr -d '[:space:]' || echo "0")
 END_TIME=$(date +%s.%N)
 LATENCY_6_2=$(python3 -c "print(($END_TIME - $START_TIME) * 1000)" 2>/dev/null || echo "0")
 

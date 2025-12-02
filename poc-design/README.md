@@ -11,16 +11,22 @@ Ce répertoire contient les designs et implémentations de POC organisés par ta
 
 ```
 poc-design/
-├── domirama/          # POC pour la table Domirama
-│   ├── README.md
-│   ├── create_domirama_schema.cql
-│   ├── domirama_loader_csv.scala
-│   ├── domirama_search_test.cql
-│   ├── 07_setup_domirama_poc.sh
-│   └── data/
-│       └── operations_sample.csv
+├── domirama2/         # POC Domirama v2 (remplace domirama/)
+│   ├── scripts/       # 64 scripts
+│   ├── doc/           # 138 fichiers de documentation
+│   └── schemas/       # 9 schémas CQL
 │
-└── [autres projets]   # À venir : BIC, EDM, Catégorisation, etc.
+├── domiramaCatOps/    # POC Catégorisation
+│   ├── scripts/       # 80 scripts
+│   ├── doc/           # 168 fichiers de documentation
+│   └── schemas/       # 10 schémas CQL
+│
+├── bic/               # POC BIC (Base d'Interaction Client)
+│   ├── scripts/       # 20 scripts
+│   ├── doc/           # 45 fichiers de documentation
+│   └── schemas/       # 3 schémas CQL
+│
+└── archive/            # Archives (domirama_archive_2025-12-01.tar.gz)
 ```
 
 ---
@@ -37,18 +43,46 @@ Centraliser tous les designs de POC pour faciliter :
 
 ## 📊 Projets Disponibles
 
-### ✅ Domirama
+### ✅ Domirama2
 
 **Table HBase** : `B997X04:domirama`  
-**Statut** : POC complet prêt
+**Statut** : POC complet et amélioré
 
 **Contenu** :
-- Schéma CQL avec index SAI
-- Code Spark pour ingestion
-- Tests de recherche full-text
-- Données de test
+- 64 scripts (setup, load, test, export, demo)
+- 138 fichiers de documentation
+- 9 schémas CQL avec index SAI avancés
+- Tests exhaustifs (recherche, export, API, vector)
 
-**Voir** : `domirama/README.md`
+**Voir** : `domirama2/README.md`
+
+**Note** : `domirama/` (POC initial) a été archivé le 2025-12-01 et remplacé par `domirama2/`
+
+### ✅ DomiramaCatOps
+
+**Table HBase** : `B997X04:domirama-meta-categories`  
+**Statut** : POC complet avec catégorisation
+
+**Contenu** :
+- 80 scripts (catégorisation, feedbacks, règles)
+- 168 fichiers de documentation
+- 10 schémas CQL avec séparation MECE
+- Tests exhaustifs
+
+**Voir** : `domiramaCatOps/README.md`
+
+### ✅ BIC
+
+**Table HBase** : `B993O02:bi-client`  
+**Statut** : POC complet
+
+**Contenu** :
+- 20 scripts (setup, génération, ingestion, tests)
+- 45 fichiers de documentation
+- 3 schémas CQL avec index SAI
+- Tests exhaustifs (timeline, filtres, full-text)
+
+**Voir** : `bic/README.md`
 
 ---
 
@@ -73,6 +107,7 @@ cd poc-design/domirama
 ---
 
 **Répertoire POC Design organisé !** ✅
+
 
 
 

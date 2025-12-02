@@ -125,18 +125,18 @@ Tous les scripts ont été mis à jour pour pointer vers `binaire/` :
 ### Installation Complète
 
 ```bash
-./01_install_hcd.sh
-./02_install_spark_kafka.sh
-./03_start_hcd.sh background
-./04_start_kafka.sh background
-./05_setup_kafka_hcd_streaming.sh
-./06_test_kafka_hcd_streaming.sh
+./scripts/setup/01_install_hcd.sh
+./scripts/setup/02_install_spark_kafka.sh
+./scripts/setup/03_start_hcd.sh background
+./scripts/setup/04_start_kafka.sh background
+./scripts/setup/05_setup_kafka_hcd_streaming.sh
+./scripts/setup/06_test_kafka_hcd_streaming.sh
 ```
 
 ### Vérification
 
 ```bash
-./80_verify_all.sh
+./scripts/utils/80_verify_all.sh
 ```
 
 ### Documentation

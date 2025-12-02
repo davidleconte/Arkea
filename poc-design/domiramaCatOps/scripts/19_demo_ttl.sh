@@ -18,7 +18,7 @@
 #   - Une documentation structurée pour livrable
 #
 # PRÉREQUIS :
-#   - HCD démarré (./03_start_hcd.sh)
+#   - HCD démarré (./scripts/setup/03_start_hcd.sh)
 #   - Keyspace 'domiramacatops_poc' et table 'operations_by_account' créés
 #   - Java 11 configuré via jenv
 #
@@ -38,11 +38,22 @@
 #
 # ============================================
 
-set -e
+set -euo pipefail
 
 # Source les fonctions utilitaires et le profil d'environnement
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd )"
-INSTALL_DIR="${INSTALL_DIR:-/Users/david.leconte/Documents/Arkea}"
+# Configuration - Utiliser setup_paths si disponible
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../utils/didactique_functions.sh" ]; then
+    source "$SCRIPT_DIR/../utils/didactique_functions.sh"
+    setup_paths
+else
+    # Fallback si les fonctions ne sont pas disponibles
+    INSTALL_DIR="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+    HCD_DIR="${HCD_DIR:-${INSTALL_DIR}/binaire/hcd-1.2.3}"
+    SPARK_HOME="${SPARK_HOME:-${INSTALL_DIR}/binaire/spark-3.5.1}"
+    HCD_HOST="${HCD_HOST:-localhost}"
+    HCD_PORT="${HCD_PORT:-9042}"
+fi
 
 if [ -f "${SCRIPT_DIR}/../utils/didactique_functions.sh" ]; then
     source "${SCRIPT_DIR}/../utils/didactique_functions.sh"
@@ -85,12 +96,12 @@ check_jenv_java_version
 
 # Vérifier que le keyspace et la table existent
 check_schema "" "" # Vérifie HCD et Java
-KEYSPACE_EXISTS=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT keyspace_name FROM system_schema.keyspaces WHERE keyspace_name = '$KEYSPACE_NAME';" 2>&1 | grep -c "$KEYSPACE_NAME" || echo "0")
+KEYSPACE_EXISTS=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT keyspace_name FROM system_schema.keyspaces WHERE keyspace_name = '$KEYSPACE_NAME';" 2>&1 | grep -c "$KEYSPACE_NAME" || echo "0")
 if [ "$KEYSPACE_EXISTS" -eq 0 ]; then
     error "Le keyspace '$KEYSPACE_NAME' n'existe pas. Exécutez d'abord ./01_setup_domiramaCatOps_keyspace.sh"
     exit 1
 fi
-TABLE_EXISTS=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT table_name FROM system_schema.tables WHERE keyspace_name = '$KEYSPACE_NAME' AND table_name = '$TABLE_NAME';" 2>&1 | grep -c "$TABLE_NAME" || echo "0")
+TABLE_EXISTS=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT table_name FROM system_schema.tables WHERE keyspace_name = '$KEYSPACE_NAME' AND table_name = '$TABLE_NAME';" 2>&1 | grep -c "$TABLE_NAME" || echo "0")
 if [ "$TABLE_EXISTS" -eq 0 ]; then
     error "La table '$TABLE_NAME' n'existe pas. Exécutez d'abord ./02_setup_operations_by_account.sh"
     exit 1
@@ -128,7 +139,7 @@ echo ""
 show_partie "2" "DDL - CONFIGURATION TTL"
 
 info "📝 DDL - Configuration TTL de la table (déjà créée) :"
-TTL_DDL=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "USE $KEYSPACE_NAME; DESCRIBE TABLE $TABLE_NAME;" 2>&1 | grep -A 2 "default_time_to_live" | head -3)
+TTL_DDL=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "USE $KEYSPACE_NAME; DESCRIBE TABLE $TABLE_NAME;" 2>&1 | grep -A 2 "default_time_to_live" | head -3)
 show_ddl_section "$TTL_DDL"
 
 info "   Explication :"
@@ -184,7 +195,7 @@ info "🚀 Exécution de l'insertion..."
 execute_cql_query "INSERT INTO $KEYSPACE_NAME.$TABLE_NAME (code_si, contrat, date_op, numero_op, libelle, montant) VALUES ('DEMO_TTL', 'DEMO_001', '2024-01-20 10:00:00', 1, 'TEST TTL', 100.00);" "Insertion avec TTL par défaut"
 
 info "🔍 Vérification de l'insertion (résultats réels)..."
-RESULT_TEST1=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT code_si, contrat, date_op, numero_op, libelle, montant, TTL(libelle) as ttl_remaining FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = 'DEMO_TTL' AND contrat = 'DEMO_001' AND date_op = '2024-01-20 10:00:00' AND numero_op = 1;" 2>&1)
+RESULT_TEST1=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT code_si, contrat, date_op, numero_op, libelle, montant, TTL(libelle) as ttl_remaining FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = 'DEMO_TTL' AND contrat = 'DEMO_001' AND date_op = '2024-01-20 10:00:00' AND numero_op = 1;" 2>&1)
 echo "$RESULT_TEST1"
 echo ""
 success "✅ Contrôle effectué : Ligne insérée avec succès, TTL par défaut appliqué"
@@ -213,7 +224,7 @@ info "🚀 Exécution de l'insertion avec TTL 60 secondes..."
 execute_cql_query "INSERT INTO $KEYSPACE_NAME.$TABLE_NAME (code_si, contrat, date_op, numero_op, libelle, montant) VALUES ('DEMO_TTL', 'DEMO_001', '2024-01-20 11:00:00', 2, 'TEST TTL COURT', 200.00) USING TTL 60;" "Insertion avec TTL personnalisé"
 
 info "🔍 Vérification AVANT expiration (immédiatement après insertion)..."
-RESULT_TEST2_BEFORE=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT code_si, contrat, date_op, numero_op, libelle, montant, TTL(libelle) as ttl_remaining FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = 'DEMO_TTL' AND contrat = 'DEMO_001' AND date_op = '2024-01-20 11:00:00' AND numero_op = 2;" 2>&1)
+RESULT_TEST2_BEFORE=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT code_si, contrat, date_op, numero_op, libelle, montant, TTL(libelle) as ttl_remaining FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = 'DEMO_TTL' AND contrat = 'DEMO_001' AND date_op = '2024-01-20 11:00:00' AND numero_op = 2;" 2>&1)
 echo "$RESULT_TEST2_BEFORE"
 echo ""
 success "✅ Contrôle effectué : Ligne insérée avec TTL 60 secondes, TTL restant ~60 secondes"
@@ -224,11 +235,11 @@ echo "   (En production, le TTL serait de 10 ans, pas 60 secondes)"
 sleep 65
 
 info "🔍 Vérification APRÈS expiration (la ligne devrait être expirée)..."
-RESULT_TEST2_AFTER=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT code_si, contrat, date_op, numero_op, libelle, montant, TTL(libelle) as ttl_remaining FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = 'DEMO_TTL' AND contrat = 'DEMO_001' AND date_op = '2024-01-20 11:00:00' AND numero_op = 2;" 2>&1)
+RESULT_TEST2_AFTER=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT code_si, contrat, date_op, numero_op, libelle, montant, TTL(libelle) as ttl_remaining FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = 'DEMO_TTL' AND contrat = 'DEMO_001' AND date_op = '2024-01-20 11:00:00' AND numero_op = 2;" 2>&1)
 echo "$RESULT_TEST2_AFTER"
 echo ""
 
-EXPIRED_COUNT=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT COUNT(*) FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = 'DEMO_TTL' AND contrat = 'DEMO_001' AND date_op = '2024-01-20 11:00:00' AND numero_op = 2;" 2>&1 | grep -E "^[[:space:]]*[0-9]+" | head -1 | tr -d '[:space:]' || echo "0")
+EXPIRED_COUNT=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT COUNT(*) FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = 'DEMO_TTL' AND contrat = 'DEMO_001' AND date_op = '2024-01-20 11:00:00' AND numero_op = 2;" 2>&1 | grep -E "^[[:space:]]*[0-9]+" | head -1 | tr -d '[:space:]' || echo "0")
 EXPIRED_COUNT=${EXPIRED_COUNT:-0}
 if [ "${EXPIRED_COUNT:-0}" -eq 0 ] 2>/dev/null; then
     success "✅ Contrôle effectué : La ligne a été automatiquement purgée après expiration du TTL"
@@ -265,7 +276,7 @@ info "🚀 Exécution de la mise à jour avec nouveau TTL..."
 execute_cql_query "UPDATE $KEYSPACE_NAME.$TABLE_NAME USING TTL 120 SET libelle = 'TEST TTL MIS À JOUR' WHERE code_si = 'DEMO_TTL' AND contrat = 'DEMO_001' AND date_op = '2024-01-20 10:00:00' AND numero_op = 1;" "Mise à jour avec nouveau TTL"
 
 info "🔍 Vérification du nouveau TTL (résultats réels)..."
-RESULT_TEST3=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT code_si, contrat, date_op, numero_op, libelle, montant, TTL(libelle) as ttl_remaining FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = 'DEMO_TTL' AND contrat = 'DEMO_001' AND date_op = '2024-01-20 10:00:00' AND numero_op = 1;" 2>&1)
+RESULT_TEST3=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT code_si, contrat, date_op, numero_op, libelle, montant, TTL(libelle) as ttl_remaining FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = 'DEMO_TTL' AND contrat = 'DEMO_001' AND date_op = '2024-01-20 10:00:00' AND numero_op = 1;" 2>&1)
 echo "$RESULT_TEST3"
 echo ""
 success "✅ Contrôle effectué : TTL mis à jour à 120 secondes, libelle modifié"
@@ -297,7 +308,7 @@ execute_cql_query "INSERT INTO $KEYSPACE_NAME.$TABLE_NAME (code_si, contrat, dat
 execute_cql_query "INSERT INTO $KEYSPACE_NAME.$TABLE_NAME (code_si, contrat, date_op, numero_op, libelle, montant) VALUES ('DEMO_TTL', 'DEMO_002', '2024-01-20 12:00:00', 2, 'TEST TTL 90s', 400.00) USING TTL 90;" "Insertion ligne 2 avec TTL 90s"
 
 info "🔍 Vérification des deux lignes (résultats réels)..."
-RESULT_TEST4=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT code_si, contrat, date_op, numero_op, libelle, montant, TTL(libelle) as ttl_remaining FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = 'DEMO_TTL' AND contrat = 'DEMO_002' AND date_op = '2024-01-20 12:00:00';" 2>&1)
+RESULT_TEST4=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT code_si, contrat, date_op, numero_op, libelle, montant, TTL(libelle) as ttl_remaining FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = 'DEMO_TTL' AND contrat = 'DEMO_002' AND date_op = '2024-01-20 12:00:00';" 2>&1)
 echo "$RESULT_TEST4"
 echo ""
 success "✅ Contrôle effectué : Deux lignes insérées avec TTL différents (30s et 90s)"
@@ -307,7 +318,7 @@ info "⏱️  Attente de 35 secondes (la ligne avec TTL 30s devrait expirer)..."
 sleep 35
 
 info "🔍 Vérification après 35 secondes (ligne 1 devrait être expirée, ligne 2 encore présente)..."
-RESULT_TEST4_AFTER35=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT code_si, contrat, date_op, numero_op, libelle, montant, TTL(libelle) as ttl_remaining FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = 'DEMO_TTL' AND contrat = 'DEMO_002' AND date_op = '2024-01-20 12:00:00';" 2>&1)
+RESULT_TEST4_AFTER35=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT code_si, contrat, date_op, numero_op, libelle, montant, TTL(libelle) as ttl_remaining FROM $KEYSPACE_NAME.$TABLE_NAME WHERE code_si = 'DEMO_TTL' AND contrat = 'DEMO_002' AND date_op = '2024-01-20 12:00:00';" 2>&1)
 echo "$RESULT_TEST4_AFTER35"
 echo ""
 

@@ -7,12 +7,25 @@
 # Voir l'en-tête du script original pour le contexte / utilisation / prérequis.
 # Version corrigée : suppression des textes collés et robustification des quotes.
 #
-set -e
+set -euo pipefail
 
 # ============================================
 # SOURCE DES FONCTIONS UTILITAIRES
 # ============================================
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+# Configuration - Utiliser setup_paths si disponible
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../utils/didactique_functions.sh" ]; then
+    source "$SCRIPT_DIR/../utils/didactique_functions.sh"
+    setup_paths
+else
+    # Fallback si les fonctions ne sont pas disponibles
+    INSTALL_DIR="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+    HCD_DIR="${HCD_DIR:-${INSTALL_DIR}/binaire/hcd-1.2.3}"
+    SPARK_HOME="${SPARK_HOME:-${INSTALL_DIR}/binaire/spark-3.5.1}"
+    HCD_HOST="${HCD_HOST:-localhost}"
+    HCD_PORT="${HCD_PORT:-9042}"
+fi
+
 if [ -f "${SCRIPT_DIR}/../utils/didactique_functions.sh" ]; then
     # shellcheck source=/dev/null
     source "${SCRIPT_DIR}/../utils/didactique_functions.sh"
@@ -40,7 +53,6 @@ fi
 # ============================================
 # CONFIGURATION
 # ============================================
-INSTALL_DIR="/Users/david.leconte/Documents/Arkea"
 INDEX_FILE="${SCRIPT_DIR}/../schemas/02_create_operations_indexes.cql"
 META_INDEX_FILE="${SCRIPT_DIR}/../schemas/04_create_meta_categories_indexes.cql"
 REPORT_FILE="${SCRIPT_DIR}/../doc/demonstrations/04_CREATE_INDEXES_DEMONSTRATION.md"
@@ -69,19 +81,19 @@ if command -v jenv >/dev/null 2>&1; then
 fi
 
 info "🔍 Vérification que HCD est prêt..."
-if ! "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e 'SELECT cluster_name FROM system.local;' > /dev/null 2>&1; then
+if ! "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e 'SELECT cluster_name FROM system.local;' > /dev/null 2>&1; then
     error "HCD n'est pas prêt. Attendez quelques secondes et réessayez."
     exit 1
 fi
 
 # Vérifier que le keyspace existe (nom en minuscules)
-if ! "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e 'DESCRIBE KEYSPACE domiramacatops_poc;' > /dev/null 2>&1; then
+if ! "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e 'DESCRIBE KEYSPACE domiramacatops_poc;' > /dev/null 2>&1; then
     error "Le keyspace domiramacatops_poc n'existe pas. Exécutez d'abord: ./01_setup_domiramaCatOps_keyspace.sh"
     exit 1
 fi
 
 # Vérifier que la table existe
-if ! "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e 'DESCRIBE TABLE domiramacatops_poc.operations_by_account;' > /dev/null 2>&1; then
+if ! "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e 'DESCRIBE TABLE domiramacatops_poc.operations_by_account;' > /dev/null 2>&1; then
     error "La table operations_by_account n'existe pas. Exécutez d'abord: ./02_setup_operations_by_account.sh"
     exit 1
 fi
@@ -260,14 +272,14 @@ echo ""
 # Exécution - Index operations_by_account
 # ============================================
 info "🚀 Exécution du DDL pour les index operations_by_account..."
-"${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -f "$INDEX_FILE" 2>&1 | grep -v 'Warnings' || true
+"${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -f "$INDEX_FILE" 2>&1 | grep -v 'Warnings' || true
 
 sleep 3
 
 # Vérification - Index operations_by_account
 info "🔍 Vérification de la création des index operations_by_account..."
 INDEXES_OPS=$(
-  "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT index_name FROM system_schema.indexes WHERE keyspace_name = 'domiramacatops_poc' AND table_name = 'operations_by_account';" 2>&1 \
+  "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT index_name FROM system_schema.indexes WHERE keyspace_name = 'domiramacatops_poc' AND table_name = 'operations_by_account';" 2>&1 \
   | grep -v 'Warnings' | grep -v 'index_name' | grep -vE '^---' | grep -v '^$' | wc -l | tr -d ' '
 )
 
@@ -276,7 +288,7 @@ if [ "${INDEXES_OPS}" -ge 8 ]; then
     echo ""
     result "📊 Liste des index operations_by_account créés :"
     echo "   ┌─────────────────────────────────────────────────────────┐"
-    "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT index_name FROM system_schema.indexes WHERE keyspace_name = 'domiramacatops_poc' AND table_name = 'operations_by_account';" 2>&1 \
+    "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT index_name FROM system_schema.indexes WHERE keyspace_name = 'domiramacatops_poc' AND table_name = 'operations_by_account';" 2>&1 \
       | grep -v 'Warnings' | grep -v 'index_name' | grep -vE '^---' | grep -v '^$' | sed 's/^/   │ /'
     echo "   └─────────────────────────────────────────────────────────┘"
 else
@@ -311,14 +323,14 @@ if [ -f "$META_INDEX_FILE" ]; then
     
     # Exécution - Index meta-categories
     info "🚀 Exécution du DDL pour les index meta-categories..."
-    "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -f "$META_INDEX_FILE" 2>&1 | grep -v 'Warnings' || true
+    "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -f "$META_INDEX_FILE" 2>&1 | grep -v 'Warnings' || true
     
     sleep 3
     
     # Vérification - Index meta-categories
     info "🔍 Vérification de la création des index meta-categories..."
     INDEXES_META=$(
-      "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT table_name, index_name FROM system_schema.indexes WHERE keyspace_name = 'domiramacatops_poc' AND table_name IN ('historique_opposition', 'feedback_par_libelle', 'feedback_par_ics', 'regles_personnalisees', 'decisions_salaires');" 2>&1 \
+      "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT table_name, index_name FROM system_schema.indexes WHERE keyspace_name = 'domiramacatops_poc' AND table_name IN ('historique_opposition', 'feedback_par_libelle', 'feedback_par_ics', 'regles_personnalisees', 'decisions_salaires');" 2>&1 \
       | grep -v 'Warnings' | grep -v 'table_name' | grep -vE '^---' | grep -v '^$' | wc -l | tr -d ' '
     )
     
@@ -327,7 +339,7 @@ if [ -f "$META_INDEX_FILE" ]; then
         echo ""
         result "📊 Liste des index meta-categories créés :"
         echo "   ┌─────────────────────────────────────────────────────────┐"
-        "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT table_name, index_name FROM system_schema.indexes WHERE keyspace_name = 'domiramacatops_poc' AND table_name IN ('historique_opposition', 'feedback_par_libelle', 'feedback_par_ics', 'regles_personnalisees', 'decisions_salaires') ORDER BY table_name, index_name;" 2>&1 \
+        "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT table_name, index_name FROM system_schema.indexes WHERE keyspace_name = 'domiramacatops_poc' AND table_name IN ('historique_opposition', 'feedback_par_libelle', 'feedback_par_ics', 'regles_personnalisees', 'decisions_salaires') ORDER BY table_name, index_name;" 2>&1 \
           | grep -v 'Warnings' | grep -v 'table_name' | grep -vE '^---' | grep -v '^$' | sed 's/^/   │ /'
         echo "   └─────────────────────────────────────────────────────────┘"
     else
@@ -368,7 +380,7 @@ echo ""
 expected "📋 Vérification 1 : Index Full-Text"
 echo "   Attendu : Index 'idx_libelle_fulltext_advanced' existe"
 FULLTEXT_EXISTS=$(
-  "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT index_name FROM system_schema.indexes WHERE keyspace_name = 'domiramacatops_poc' AND table_name = 'operations_by_account' AND index_name = 'idx_libelle_fulltext_advanced';" 2>&1 \
+  "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT index_name FROM system_schema.indexes WHERE keyspace_name = 'domiramacatops_poc' AND table_name = 'operations_by_account' AND index_name = 'idx_libelle_fulltext_advanced';" 2>&1 \
   | grep -v 'Warnings' | grep -c 'idx_libelle_fulltext_advanced' || echo '0'
 )
 
@@ -383,7 +395,7 @@ echo ""
 expected "📋 Vérification 2 : Index Vector"
 echo "   Attendu : Index 'idx_libelle_embedding_vector' existe"
 VECTOR_EXISTS=$(
-  "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT index_name FROM system_schema.indexes WHERE keyspace_name = 'domiramacatops_poc' AND table_name = 'operations_by_account' AND index_name = 'idx_libelle_embedding_vector';" 2>&1 \
+  "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT index_name FROM system_schema.indexes WHERE keyspace_name = 'domiramacatops_poc' AND table_name = 'operations_by_account' AND index_name = 'idx_libelle_embedding_vector';" 2>&1 \
   | grep -v 'Warnings' | grep -c 'idx_libelle_embedding_vector' || echo '0'
 )
 
@@ -398,12 +410,12 @@ echo ""
 expected "📋 Vérification 3 : Index Catégories"
 echo "   Attendu : Index 'idx_cat_auto' et 'idx_cat_user' existent"
 CAT_AUTO_EXISTS=$(
-  "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT index_name FROM system_schema.indexes WHERE keyspace_name = 'domiramacatops_poc' AND table_name = 'operations_by_account' AND index_name = 'idx_cat_auto';" 2>&1 \
+  "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT index_name FROM system_schema.indexes WHERE keyspace_name = 'domiramacatops_poc' AND table_name = 'operations_by_account' AND index_name = 'idx_cat_auto';" 2>&1 \
   | grep -v 'Warnings' | grep -c 'idx_cat_auto' || echo '0'
 )
 
 CAT_USER_EXISTS=$(
-  "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT index_name FROM system_schema.indexes WHERE keyspace_name = 'domiramacatops_poc' AND table_name = 'operations_by_account' AND index_name = 'idx_cat_user';" 2>&1 \
+  "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT index_name FROM system_schema.indexes WHERE keyspace_name = 'domiramacatops_poc' AND table_name = 'operations_by_account' AND index_name = 'idx_cat_user';" 2>&1 \
   | grep -v 'Warnings' | grep -c 'idx_cat_user' || echo '0'
 )
 

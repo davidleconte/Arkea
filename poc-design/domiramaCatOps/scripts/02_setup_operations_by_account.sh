@@ -35,12 +35,25 @@
 #
 # ============================================
 
-set -e
+set -euo pipefail
 
 # ============================================
 # SOURCE DES FONCTIONS UTILITAIRES
 # ============================================
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+# Configuration - Utiliser setup_paths si disponible
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../utils/didactique_functions.sh" ]; then
+    source "$SCRIPT_DIR/../utils/didactique_functions.sh"
+    setup_paths
+else
+    # Fallback si les fonctions ne sont pas disponibles
+    INSTALL_DIR="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+    HCD_DIR="${HCD_DIR:-${INSTALL_DIR}/binaire/hcd-1.2.3}"
+    SPARK_HOME="${SPARK_HOME:-${INSTALL_DIR}/binaire/spark-3.5.1}"
+    HCD_HOST="${HCD_HOST:-localhost}"
+    HCD_PORT="${HCD_PORT:-9042}"
+fi
+
 if [ -f "${SCRIPT_DIR}/../utils/didactique_functions.sh" ]; then
     source "${SCRIPT_DIR}/../utils/didactique_functions.sh"
 else
@@ -67,7 +80,6 @@ fi
 # ============================================
 # CONFIGURATION
 # ============================================
-INSTALL_DIR="/Users/david.leconte/Documents/Arkea"
 SCHEMA_FILE="${SCRIPT_DIR}/../schemas/01_create_domiramaCatOps_schema.cql"
 REPORT_FILE="${SCRIPT_DIR}/../doc/demonstrations/02_SETUP_OPERATIONS_DEMONSTRATION.md"
 
@@ -95,13 +107,13 @@ if command -v jenv >/dev/null 2>&1; then
 fi
 
 info "🔍 Vérification que HCD est prêt..."
-if ! "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT cluster_name FROM system.local;" > /dev/null 2>&1; then
+if ! "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT cluster_name FROM system.local;" > /dev/null 2>&1; then
     error "HCD n'est pas prêt. Attendez quelques secondes et réessayez."
     exit 1
 fi
 
 # Vérifier que le keyspace existe
-if ! "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e "DESCRIBE KEYSPACE domiramacatops_poc;" > /dev/null 2>&1; then
+if ! "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "DESCRIBE KEYSPACE domiramacatops_poc;" > /dev/null 2>&1; then
     error "Le keyspace domiramacatops_poc n'existe pas. Exécutez d'abord: ./01_setup_domiramaCatOps_keyspace.sh"
     exit 1
 fi
@@ -233,14 +245,14 @@ echo ""
 # Exécution
 info "🚀 Exécution du DDL..."
 # Exécuter le DDL depuis le fichier CQL
-"${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -f "$SCHEMA_FILE" 2>&1 | grep -v "Warnings" || true
+"${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -f "$SCHEMA_FILE" 2>&1 | grep -v "Warnings" || true
 
 sleep 2
 
 # Vérification
 info "🔍 Vérification de la création de la table..."
 TABLE_CHECK=$(
-  "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e "DESCRIBE TABLE domiramacatops_poc.operations_by_account;" 2>&1 \
+  "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "DESCRIBE TABLE domiramacatops_poc.operations_by_account;" 2>&1 \
   | grep -v "Warnings" | head -40
 )
 
@@ -292,7 +304,7 @@ echo ""
 expected "📋 Vérification 1 : Table"
 echo "   Attendu : Table operations_by_account existe"
 TABLE_EXISTS=$(
-  "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT table_name FROM system_schema.tables WHERE keyspace_name = 'domiramacatops_poc' AND table_name = 'operations_by_account';" 2>&1 \
+  "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT table_name FROM system_schema.tables WHERE keyspace_name = 'domiramacatops_poc' AND table_name = 'operations_by_account';" 2>&1 \
   | grep -v "Warnings" | grep -c "operations_by_account" || echo "0"
 )
 if [ "$TABLE_EXISTS" -gt 0 ]; then
@@ -311,7 +323,7 @@ if [ "$COLUMNS" -ge 5 ]; then
     echo ""
     result "📊 Colonnes de catégorisation trouvées :"
     echo "   ┌─────────────────────────────────────────────────────────┐"
-    "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e "DESCRIBE TABLE domiramacatops_poc.operations_by_account;" 2>&1 \
+    "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "DESCRIBE TABLE domiramacatops_poc.operations_by_account;" 2>&1 \
       | grep -v "Warnings" | grep -E "(cat_auto|cat_confidence|cat_user|cat_date_user|cat_validee)" | sed 's/^/   │ /'
     echo "   └─────────────────────────────────────────────────────────┘"
 else
@@ -327,7 +339,7 @@ if [ "$ADVANCED_COLUMNS" -ge 3 ]; then
     echo ""
     result "📊 Colonnes de recherche avancée trouvées :"
     echo "   ┌─────────────────────────────────────────────────────────┐"
-    "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e "DESCRIBE TABLE domiramacatops_poc.operations_by_account;" 2>&1 \
+    "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "DESCRIBE TABLE domiramacatops_poc.operations_by_account;" 2>&1 \
       | grep -v "Warnings" | grep -E "(libelle_prefix|libelle_tokens|libelle_embedding)" | sed 's/^/   │ /'
     echo "   └─────────────────────────────────────────────────────────┘"
 else
@@ -490,5 +502,3 @@ PYEOF
 
 success "✅ Rapport généré : $REPORT_FILE"
 echo ""
-
-

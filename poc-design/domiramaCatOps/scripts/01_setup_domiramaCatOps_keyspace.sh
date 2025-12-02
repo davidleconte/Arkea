@@ -9,7 +9,7 @@
 #   de catégorisation des opérations.
 #
 # PRÉREQUIS :
-#   - HCD 1.2.3 doit être démarré (exécuter: ./03_start_hcd.sh depuis la racine)
+#   - HCD 1.2.3 doit être démarré (exécuter: ./scripts/setup/03_start_hcd.sh depuis la racine)
 #   - Java 11 configuré via jenv (jenv local 11)
 #   - HCD accessible sur localhost:9042
 #
@@ -23,12 +23,25 @@
 #
 # ============================================
 
-set -e
+set -euo pipefail
 
 # ============================================
 # SOURCE DES FONCTIONS UTILITAIRES
 # ============================================
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+# Configuration - Utiliser setup_paths si disponible
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../utils/didactique_functions.sh" ]; then
+    source "$SCRIPT_DIR/../utils/didactique_functions.sh"
+    setup_paths
+else
+    # Fallback si les fonctions ne sont pas disponibles
+    INSTALL_DIR="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+    HCD_DIR="${HCD_DIR:-${INSTALL_DIR}/binaire/hcd-1.2.3}"
+    SPARK_HOME="${SPARK_HOME:-${INSTALL_DIR}/binaire/spark-3.5.1}"
+    HCD_HOST="${HCD_HOST:-localhost}"
+    HCD_PORT="${HCD_PORT:-9042}"
+fi
+
 if [ -f "${SCRIPT_DIR}/../utils/didactique_functions.sh" ]; then
     # shellcheck source=/dev/null
     source "${SCRIPT_DIR}/../utils/didactique_functions.sh"
@@ -56,7 +69,6 @@ fi
 # ============================================
 # CONFIGURATION
 # ============================================
-INSTALL_DIR="/Users/david.leconte/Documents/Arkea"
 REPORT_FILE="${SCRIPT_DIR}/../doc/demonstrations/01_SETUP_KEYSPACE_DEMONSTRATION.md"
 
 # Charger l'environnement POC (HCD déjà installé sur MBP)
@@ -83,7 +95,7 @@ if command -v jenv >/dev/null 2>&1; then
 fi
 
 info "🔍 Vérification que HCD est prêt..."
-if ! "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e 'SELECT cluster_name FROM system.local;' > /dev/null 2>&1; then
+if ! "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e 'SELECT cluster_name FROM system.local;' > /dev/null 2>&1; then
     error "HCD n'est pas prêt. Attendez quelques secondes et réessayez."
     exit 1
 fi
@@ -157,14 +169,14 @@ WITH REPLICATION = {
 EOF
 
 # Exécute le DDL et filtre les warnings
-"${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e "$KEYSpace_DDL" 2>&1 | grep -v 'Warnings' || true
+"${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "$KEYSpace_DDL" 2>&1 | grep -v 'Warnings' || true
 
 sleep 2
 
 # Vérification
 info "🔍 Vérification de la création du keyspace..."
 KEYSpace_CHECK=$(
-  "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e 'DESCRIBE KEYSPACE domiramacatops_poc;' 2>&1 \
+  "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e 'DESCRIBE KEYSPACE domiramacatops_poc;' 2>&1 \
   | grep -v 'Warnings' \
   | head -20
 )
@@ -206,7 +218,7 @@ echo ""
 expected "📋 Vérification 1 : Keyspace"
 echo "   Attendu : Keyspace domiramacatops_poc existe"
 KEYSpace_EXISTS=$(
-  "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT keyspace_name FROM system_schema.keyspaces WHERE keyspace_name = 'domiramacatops_poc';" 2>&1 \
+  "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT keyspace_name FROM system_schema.keyspaces WHERE keyspace_name = 'domiramacatops_poc';" 2>&1 \
   | grep -v 'Warnings' \
   | grep -c 'domiramacatops_poc' || echo '0'
 )

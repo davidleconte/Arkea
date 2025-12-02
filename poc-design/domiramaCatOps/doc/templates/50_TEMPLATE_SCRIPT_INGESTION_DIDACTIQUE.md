@@ -47,7 +47,7 @@ Un script d'ingestion didactique doit :
 #   - Une documentation structurée pour livrable
 #
 # PRÉREQUIS :
-#   - HCD démarré (./03_start_hcd.sh)
+#   - HCD démarré (./scripts/setup/03_start_hcd.sh)
 #   - Schéma configuré (./10_setup_domiramacatops_poc.sh)
 #   - Spark 3.5.1 installé et configuré
 #   - Spark Cassandra Connector 3.5.0 disponible
@@ -120,7 +120,7 @@ mkdir -p "$(dirname "$REPORT_FILE")"
 # VÉRIFICATIONS
 # ============================================
 if ! pgrep -f "cassandra" > /dev/null; then
-    error "HCD n'est pas démarré. Exécutez d'abord: ./03_start_hcd.sh"
+    error "HCD n'est pas démarré. Exécutez d'abord: ./scripts/setup/03_start_hcd.sh"
     exit 1
 fi
 

@@ -4,10 +4,21 @@
 # Ajoute la colonne et l'index pour le modèle spécialisé facturation
 # ============================================
 
-set -e
+set -euo pipefail
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-HCD_DIR="${HCD_HOME:-/Users/david.leconte/Documents/Arkea/binaire/hcd-1.2.3}"
+# Configuration - Utiliser setup_paths si disponible
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../utils/didactique_functions.sh" ]; then
+    source "$SCRIPT_DIR/../utils/didactique_functions.sh"
+    setup_paths
+else
+    # Fallback si les fonctions ne sont pas disponibles
+    INSTALL_DIR="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+    HCD_DIR="${HCD_DIR:-${INSTALL_DIR}/binaire/hcd-1.2.3}"
+    SPARK_HOME="${SPARK_HOME:-${INSTALL_DIR}/binaire/spark-3.5.1}"
+    HCD_HOST="${HCD_HOST:-localhost}"
+    HCD_PORT="${HCD_PORT:-9042}"
+fi
 
 # Couleurs
 GREEN='\033[0;32m'
@@ -42,7 +53,7 @@ fi
 # Exécuter le schéma
 info "📝 Exécution du schéma..."
 echo "   Fichier : 18_add_invoice_embedding_column.cql"
-if "$CQLSH_BIN" localhost 9042 -f "${SCRIPT_DIR}/../schemas/18_add_invoice_embedding_column.cql"; then
+if "$CQLSH_BIN" "$HCD_HOST" "$HCD_PORT" -f "${SCRIPT_DIR}/../schemas/18_add_invoice_embedding_column.cql"; then
     success "✅ Schéma exécuté avec succès"
 else
     error "❌ Erreur lors de la création"
@@ -51,7 +62,7 @@ fi
 
 # Vérifier les index SAI
 info "🔍 Vérification des index SAI..."
-INDEX_COUNT=$("$CQLSH_BIN" localhost 9042 -e "SELECT count(*) FROM system_schema.indexes WHERE keyspace_name = 'domiramacatops_poc' AND table_name = 'operations_by_account' AND kind = 'CUSTOM' ALLOW FILTERING;" 2>&1 | grep -E '^[[:space:]]*[0-9]+$' | tr -d '[:space:]')
+INDEX_COUNT=$("$CQLSH_BIN" "$HCD_HOST" "$HCD_PORT" -e "SELECT count(*) FROM system_schema.indexes WHERE keyspace_name = 'domiramacatops_poc' AND table_name = 'operations_by_account' AND kind = 'CUSTOM' ALLOW FILTERING;" 2>&1 | grep -E '^[[:space:]]*[0-9]+$' | tr -d '[:space:]')
 info "   Nombre d'index SAI : $INDEX_COUNT"
 
 if [ "$INDEX_COUNT" -le 10 ]; then
@@ -62,7 +73,7 @@ fi
 
 # Vérifier la colonne
 info "🔍 Vérification de la colonne..."
-if "$CQLSH_BIN" localhost 9042 -e "DESCRIBE TABLE domiramacatops_poc.operations_by_account;" 2>&1 | grep -q "libelle_embedding_invoice"; then
+if "$CQLSH_BIN" "$HCD_HOST" "$HCD_PORT" -e "DESCRIBE TABLE domiramacatops_poc.operations_by_account;" 2>&1 | grep -q "libelle_embedding_invoice"; then
     success "✅ Colonne libelle_embedding_invoice créée"
 else
     warn "⚠️  Colonne libelle_embedding_invoice non trouvée"

@@ -29,7 +29,7 @@
 #   - Une documentation structurée pour livrable
 #
 # PRÉREQUIS :
-#   - HCD démarré (./03_start_hcd.sh)
+#   - HCD démarré (./scripts/setup/03_start_hcd.sh)
 #   - Schéma configuré (./01_setup_domiramaCatOps_keyspace.sh, ./02_setup_operations_by_account.sh, ./03_setup_meta_categories_tables.sh)
 #   - Données chargées (./05_load_operations_data_parquet.sh, ./06_load_meta_categories_data_parquet.sh)
 #   - Note : Kafka est déjà installé sur le MBP (via Homebrew) mais non utilisé dans ce script de démonstration
@@ -53,7 +53,20 @@ set -euo pipefail
 # ============================================
 # SOURCE DES FONCTIONS UTILITAIRES
 # ============================================
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]:-}" )" &> /dev/null && pwd )"
+# Configuration - Utiliser setup_paths si disponible
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../utils/didactique_functions.sh" ]; then
+    source "$SCRIPT_DIR/../utils/didactique_functions.sh"
+    setup_paths
+else
+    # Fallback si les fonctions ne sont pas disponibles
+    INSTALL_DIR="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+    HCD_DIR="${HCD_DIR:-${INSTALL_DIR}/binaire/hcd-1.2.3}"
+    SPARK_HOME="${SPARK_HOME:-${INSTALL_DIR}/binaire/spark-3.5.1}"
+    HCD_HOST="${HCD_HOST:-localhost}"
+    HCD_PORT="${HCD_PORT:-9042}"
+fi
+
 if [ -f "${SCRIPT_DIR}/../utils/didactique_functions.sh" ]; then
     # shellcheck source=/dev/null
     source "${SCRIPT_DIR}/../utils/didactique_functions.sh"
@@ -78,7 +91,7 @@ result() { echo -e "${GREEN}📊 $1${NC}"; }
 expected() { echo -e "${YELLOW}📋 $1${NC}"; }
     check_hcd_status() {
         if ! pgrep -f "cassandra" > /dev/null; then
-            error "HCD n'est pas démarré. Exécutez d'abord: ./03_start_hcd.sh"
+            error "HCD n'est pas démarré. Exécutez d'abord: ./scripts/setup/03_start_hcd.sh"
             exit 1
         fi
         success "HCD est démarré et accessible"
@@ -96,7 +109,6 @@ fi
 # ============================================
 # CONFIGURATION
 # ============================================
-INSTALL_DIR="/Users/david.leconte/Documents/Arkea"
 REPORT_FILE="${SCRIPT_DIR}/../doc/demonstrations/07_REALTIME_CORRECTIONS_DEMONSTRATION.md"
 
 # Charger l'environnement POC (HCD déjà installé sur MBP)
@@ -125,7 +137,7 @@ mkdir -p "$(dirname "$REPORT_FILE")"
 # Note: La vérification via cqlsh est désactivée car elle nécessite le module Python 'six'
 # Le script échouera de toute façon plus tard si le keyspace n'existe pas
 # Si vous voulez vérifier manuellement, utilisez:
-# cd "$HCD_DIR" && jenv local 11 && eval "$(jenv init -)" && ./bin/cqlsh localhost 9042 -e 'DESCRIBE KEYSPACE domiramacatops_poc;'
+# cd "$HCD_DIR" && jenv local 11 && eval "$(jenv init -)" && ./bin/cqlsh "$HCD_HOST" "$HCD_PORT" -e 'DESCRIBE KEYSPACE domiramacatops_poc;'
 cd "$HCD_DIR"
 # use jenv only if available
 if command -v jenv &> /dev/null; then
@@ -134,7 +146,7 @@ if command -v jenv &> /dev/null; then
 fi
 
 # Vérification optionnelle (désactivée car cqlsh nécessite le module Python 'six')
-# if ! "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e 'DESCRIBE KEYSPACE domiramacatops_poc;' > /dev/null 2>&1; then
+# if ! "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e 'DESCRIBE KEYSPACE domiramacatops_poc;' > /dev/null 2>&1; then
 #     error "Le keyspace domiramacatops_poc n'existe pas. Exécutez d'abord: ./01_setup_domiramaCatOps_keyspace.sh"
 #     exit 1
 # fi
@@ -413,7 +425,7 @@ echo
 
 # Capturer l'état avant les UPDATE
 info "📊 État AVANT les corrections client..."
-BEFORE_STATE=$("${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e 'USE domiramacatops_poc; SELECT code_si, contrat, date_op, numero_op, libelle, cat_auto, cat_user, cat_date_user, cat_validee FROM operations_by_account LIMIT 10;' 2>&1 | grep -v "Warnings" | head -15 || true)
+BEFORE_STATE=$("${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e 'USE domiramacatops_poc; SELECT code_si, contrat, date_op, numero_op, libelle, cat_auto, cat_user, cat_date_user, cat_validee FROM operations_by_account LIMIT 10;' 2>&1 | grep -v "Warnings" | head -15 || true)
 echo "$BEFORE_STATE"
 
 # Créer un fichier temporaire avec les exemples de corrections
@@ -477,7 +489,7 @@ EOFCQL
 info "   Exécution en cours..."
 API_OUTPUT=""
 API_EXIT_CODE=0
-if ! API_OUTPUT=$(timeout 30 "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -f "$TEMP_CQL" 2>&1); then
+if ! API_OUTPUT=$(timeout 30 "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -f "$TEMP_CQL" 2>&1); then
     API_EXIT_CODE=$?
 fi
 
@@ -497,7 +509,7 @@ echo
 
 # Capturer l'état après les UPDATE
 info "📊 État APRÈS les corrections client..."
-AFTER_STATE=$("${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e 'USE domiramacatops_poc; SELECT code_si, contrat, date_op, numero_op, libelle, cat_auto, cat_user, cat_date_user, cat_validee FROM operations_by_account LIMIT 10;' 2>&1 | grep -v "Warnings" | head -15 || true)
+AFTER_STATE=$("${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e 'USE domiramacatops_poc; SELECT code_si, contrat, date_op, numero_op, libelle, cat_auto, cat_user, cat_date_user, cat_validee FROM operations_by_account LIMIT 10;' 2>&1 | grep -v "Warnings" | head -15 || true)
 echo "$AFTER_STATE"
 
 echo
@@ -517,7 +529,7 @@ echo
 # Vérification 1 : cat_user mis à jour
 expected "📋 Vérification 1 : cat_user mis à jour"
 echo "   Attendu : Opérations avec cat_user non null (corrigées par client)"
-CORRECTED_SAMPLE=$("${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e "USE domiramacatops_poc; SELECT cat_user FROM operations_by_account LIMIT 10;" 2>&1 | grep -v "Warnings" | grep -v "cat_user" | grep -vE "^---" | grep -v "^$" | grep -v "null" | head -1 || true)
+CORRECTED_SAMPLE=$("${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "USE domiramacatops_poc; SELECT cat_user FROM operations_by_account LIMIT 10;" 2>&1 | grep -v "Warnings" | grep -v "cat_user" | grep -vE "^---" | grep -v "^$" | grep -v "null" | head -1 || true)
 if [ -n "$CORRECTED_SAMPLE" ]; then
     success "✅ Opération(s) corrigée(s) par le client trouvée(s)"
     result "   Exemple : cat_user = $CORRECTED_SAMPLE"
@@ -529,7 +541,7 @@ echo
 # Vérification 2 : cat_auto préservé
 expected "📋 Vérification 2 : cat_auto préservé"
 echo "   Attendu : cat_auto non modifié par les UPDATE client"
-AUTO_SAMPLE=$("${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e "USE domiramacatops_poc; SELECT cat_auto FROM operations_by_account LIMIT 10;" 2>&1 | grep -v "Warnings" | grep -v "cat_auto" | grep -vE "^---" | grep -v "^$" | grep -v "null" | head -1 || true)
+AUTO_SAMPLE=$("${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "USE domiramacatops_poc; SELECT cat_auto FROM operations_by_account LIMIT 10;" 2>&1 | grep -v "Warnings" | grep -v "cat_auto" | grep -vE "^---" | grep -v "^$" | grep -v "null" | head -1 || true)
 if [ -n "$AUTO_SAMPLE" ]; then
     success "✅ Opération(s) avec cat_auto trouvée(s) (batch préservé)"
     result "   Exemple : cat_auto = $AUTO_SAMPLE"
@@ -543,7 +555,7 @@ expected "📋 Vérification 3 : Logique de priorité"
 echo "   Attendu : cat_user prioritaire sur cat_auto si non null"
 result "📊 Échantillon d'opérations avec priorité :"
 echo "   ┌─────────────────────────────────────────────────────────┐"
-"${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e 'USE domiramacatops_poc; SELECT date_op, numero_op, libelle, cat_auto, cat_user, cat_date_user, cat_validee FROM operations_by_account ORDER BY date_op DESC LIMIT 5;' 2>&1 | grep -v "Warnings" | head -10 | sed 's/^/   │ /' || true
+"${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e 'USE domiramacatops_poc; SELECT date_op, numero_op, libelle, cat_auto, cat_user, cat_date_user, cat_validee FROM operations_by_account ORDER BY date_op DESC LIMIT 5;' 2>&1 | grep -v "Warnings" | head -10 | sed 's/^/   │ /' || true
 echo "   └─────────────────────────────────────────────────────────┘"
 echo
 info "   Explication de la priorité :"

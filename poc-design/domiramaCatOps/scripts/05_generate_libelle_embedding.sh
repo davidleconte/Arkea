@@ -4,12 +4,25 @@
 # Génère les embeddings pour tous les libellés dans HCD
 # À exécuter IMMÉDIATEMENT après le chargement des données
 # ============================================
-set -e
+set -euo pipefail
 
 # ============================================
 # SOURCE DES FONCTIONS UTILITAIRES
 # ============================================
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+# Configuration - Utiliser setup_paths si disponible
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../utils/didactique_functions.sh" ]; then
+    source "$SCRIPT_DIR/../utils/didactique_functions.sh"
+    setup_paths
+else
+    # Fallback si les fonctions ne sont pas disponibles
+    INSTALL_DIR="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+    HCD_DIR="${HCD_DIR:-${INSTALL_DIR}/binaire/hcd-1.2.3}"
+    SPARK_HOME="${SPARK_HOME:-${INSTALL_DIR}/binaire/spark-3.5.1}"
+    HCD_HOST="${HCD_HOST:-localhost}"
+    HCD_PORT="${HCD_PORT:-9042}"
+fi
+
 if [ -f "${SCRIPT_DIR}/../utils/didactique_functions.sh" ]; then
     # shellcheck source=/dev/null
     source "${SCRIPT_DIR}/../utils/didactique_functions.sh"
@@ -37,7 +50,6 @@ fi
 # ============================================
 # CONFIGURATION
 # ============================================
-INSTALL_DIR="/Users/david.leconte/Documents/Arkea"
 REPORT_FILE="${SCRIPT_DIR}/../doc/demonstrations/05c_GENERATION_EMBEDDINGS_DEMONSTRATION.md"
 
 # Charger l'environnement POC (HCD déjà installé sur MBP)
@@ -84,7 +96,7 @@ fi
 
 info "🔍 Vérification que HCD est prêt..."
 
-if ! "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e 'SELECT cluster_name FROM system.local;' > /dev/null 2>&1; then
+if ! "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e 'SELECT cluster_name FROM system.local;' > /dev/null 2>&1; then
     error "HCD n'est pas prêt ou cqlsh indisponible. Assurez-vous que HCD écoute sur localhost:9042."
     exit 1
 fi
@@ -93,13 +105,13 @@ fi
 # We'll accept both by checking lowercase variant (Cassandra stores lowercase unless quoted).
 KEYSPACE_NAME_LOWER="domiramacatops_poc"
 
-if ! "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e "DESCRIBE KEYSPACE ${KEYSPACE_NAME_LOWER};" > /dev/null 2>&1; then
+if ! "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "DESCRIBE KEYSPACE ${KEYSPACE_NAME_LOWER};" > /dev/null 2>&1; then
     error "Le keyspace ${KEYSPACE_NAME_LOWER} n'existe pas. Exécutez d'abord: ./01_setup_domiramaCatOps_keyspace.sh"
     exit 1
 fi
 
 # Vérifier la colonne libelle_embedding existe dans la table operations_by_account
-COLUMN_EXISTS=$("${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e "DESCRIBE TABLE ${KEYSPACE_NAME_LOWER}.operations_by_account;" 2>&1 | grep -c "libelle_embedding" || true)
+COLUMN_EXISTS=$("${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "DESCRIBE TABLE ${KEYSPACE_NAME_LOWER}.operations_by_account;" 2>&1 | grep -c "libelle_embedding" || true)
 
 if [ "${COLUMN_EXISTS}" -eq 0 ]; then
     error "La colonne libelle_embedding n'existe pas dans ${KEYSPACE_NAME_LOWER}.operations_by_account. Exécutez d'abord le script de schema."
@@ -429,7 +441,7 @@ if command -v jenv >/dev/null 2>&1; then
     eval "$(jenv init -)"
 fi
 
-EMBEDDED_COUNT=$("${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT COUNT(*) FROM ${KEYSPACE_NAME_LOWER}.operations_by_account WHERE libelle_embedding IS NOT NULL ALLOW FILTERING;" 2>&1 | sed -n 's/[^0-9]*\([0-9]\+\).*/\1/p' | head -1 || echo "0")
+EMBEDDED_COUNT=$("${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT COUNT(*) FROM ${KEYSPACE_NAME_LOWER}.operations_by_account WHERE libelle_embedding IS NOT NULL ALLOW FILTERING;" 2>&1 | sed -n 's/[^0-9]*\([0-9]\+\).*/\1/p' | head -1 || echo "0")
 
 if [ -n "$EMBEDDED_COUNT" ] && [ "$EMBEDDED_COUNT" -gt 0 ]; then
     success "✅ $EMBEDDED_COUNT opération(s) avec embeddings générés"

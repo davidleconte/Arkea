@@ -365,7 +365,7 @@ show_summary() {
 #
 check_hcd_status() {
     if ! pgrep -f "cassandra" > /dev/null; then
-        error "HCD n'est pas démarré. Exécutez d'abord: ./03_start_hcd.sh"
+        error "HCD n'est pas démarré. Exécutez d'abord: ./scripts/setup/03_start_hcd.sh"
         exit 1
     fi
     
@@ -460,4 +460,54 @@ show_ddl_section() {
         fi
     done <<< "$ddl"
     echo ""
+}
+
+# ============================================
+# FONCTION : Configuration des Chemins (Portable)
+# ============================================
+#
+# Usage: setup_paths
+#
+# Priorité : Variables d'environnement > .poc-config.sh > Détection automatique
+#
+setup_paths() {
+    # Détecter le répertoire du script appelant
+    # Note: Cette fonction doit être appelée depuis un script, pas directement
+    local caller_script="${BASH_SOURCE[1]:-${BASH_SOURCE[0]}}"
+    SCRIPT_DIR="$(cd "$(dirname "$caller_script")" && pwd)"
+    
+    # Détecter INSTALL_DIR (racine du projet Arkea) pour localiser .poc-config.sh
+    # Priorité 1: Variable d'environnement ARKEA_HOME
+    # Priorité 2: Détection automatique (2 niveaux au-dessus de domiramaCatOps)
+    local detected_install_dir
+    if [ -z "${ARKEA_HOME:-}" ]; then
+        detected_install_dir="$(cd "$SCRIPT_DIR/../.." && pwd)"
+    else
+        detected_install_dir="$ARKEA_HOME"
+    fi
+    
+    # Charger la configuration centralisée EN PREMIER (priorité maximale)
+    local config_file="${ARKEA_HOME:-${detected_install_dir}}/.poc-config.sh"
+    if [ -f "$config_file" ]; then
+        # shellcheck source=/dev/null
+        source "$config_file"
+    fi
+    
+    # Maintenant utiliser les valeurs de .poc-config.sh ou fallback
+    # INSTALL_DIR (alias de ARKEA_HOME pour compatibilité)
+    INSTALL_DIR="${ARKEA_HOME:-${detected_install_dir}}"
+    export ARKEA_HOME="$INSTALL_DIR"
+    
+    # Configuration HCD (déjà chargée par .poc-config.sh, mais fallback si nécessaire)
+    HCD_DIR="${HCD_DIR:-${HCD_HOME:-${INSTALL_DIR}/binaire/hcd-1.2.3}}"
+    
+    # Configuration Spark (déjà chargée par .poc-config.sh, mais fallback si nécessaire)
+    SPARK_HOME="${SPARK_HOME:-${INSTALL_DIR}/binaire/spark-3.5.1}"
+    
+    # Configuration HCD Host/Port (déjà chargée par .poc-config.sh, mais fallback si nécessaire)
+    HCD_HOST="${HCD_HOST:-localhost}"
+    HCD_PORT="${HCD_PORT:-9042}"
+    
+    # Exporter les variables pour qu'elles soient disponibles dans le script appelant
+    export SCRIPT_DIR INSTALL_DIR HCD_DIR SPARK_HOME HCD_HOST HCD_PORT
 }

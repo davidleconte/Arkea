@@ -1,0 +1,190 @@
+# Changelog
+
+Tous les changements notables de ce projet seront documentés dans ce fichier.
+
+Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
+et ce projet adhère à [Semantic Versioning](https://semver.org/lang/fr/).
+
+---
+
+## [Unreleased]
+
+### À venir
+
+- Tests unitaires et d'intégration complets
+- Amélioration continue de la documentation
+
+---
+
+## [1.1.0] - 2025-12-02
+
+### Ajouté
+
+**Documentation BIC**
+
+- ✅ **`poc-design/bic/doc/audits/32_AUDIT_COMPLET_EXIGENCES_DECISION_ARKEA.md`** : Audit complet MECE des exigences BIC pour décision ARKEA (99.2% conformité)
+- ✅ **`poc-design/bic/doc/audits/33_TABLEAU_RECAPITULATIF_COUVERTURE_EXIGENCES.md`** : Tableau récapitulatif de couverture des exigences BIC
+
+**Documentation domirama2**
+
+- ✅ **`poc-design/domirama2/README.md`** : README complet créé (448 lignes) avec structure alignée sur BIC
+
+**Documentation domiramaCatOps**
+
+- ✅ **`poc-design/domiramaCatOps/README.md`** : README mis à jour et complété (509 lignes) avec structure alignée sur BIC
+
+### Modifié
+
+**Configuration**
+
+- ✅ **`.gitignore`** : Amélioration des patterns pour exclure tous les fichiers de données générés
+  - Ajout patterns pour répertoires `data/` dans `poc-design/*/`
+  - Ajout formats `.orc`, `.avro` et leurs répertoires
+  - Ajout patterns pour répertoires Parquet (`_SUCCESS`, `part-*.parquet`)
+  - Ajout patterns pour `checkpoints/`, `export/`, `temp/`, `tmp/`
+
+---
+
+## [2025-12-01] - Nettoyage et Archivage
+
+### Supprimé
+
+- **`poc-design/domirama/`** : POC Domirama initial obsolète
+  - **Raison** : Remplacé par `domirama2/` (version complète et améliorée)
+  - **Archivage** : Contenu archivé dans `poc-design/archive/domirama_archive_2025-12-01.tar.gz`
+  - **Impact** : Aucun (aucune référence active trouvée)
+  - **Documentation** : `docs/ARCHITECTURE.md` et `poc-design/README.md` mis à jour
+
+### Modifié
+
+- **`docs/ARCHITECTURE.md`** : Structure mise à jour (suppression référence domirama/)
+- **`poc-design/README.md`** : Liste des projets mise à jour avec les 3 POCs actifs
+
+---
+
+## [1.0.0] - 2025-12-01
+
+### 🎉 Version Initiale
+
+#### Ajouté
+
+**Structure et Organisation**
+
+- ✅ Réorganisation complète de la racine ARKEA
+- ✅ Création de `scripts/setup/`, `scripts/utils/`, `scripts/scala/`
+- ✅ Création de `schemas/kafka/`
+- ✅ Organisation des logs (`logs/archive/`, `logs/current/`)
+
+**Configuration**
+
+- ✅ `.poc-config.sh` - Configuration centralisée avec détection OS
+- ✅ `.poc-profile` - Profil d'environnement amélioré
+- ✅ `.gitignore` - Exclusions complètes
+- ✅ Factorisation des chemins hardcodés
+
+**Documentation**
+
+- ✅ `README.md` - Documentation principale mise à jour
+- ✅ `docs/GUIDE_STRUCTURE.md` - Guide de structure complet
+- ✅ `docs/ANALYSE_AMELIORATION_RACINE_ARKEA.md` - Analyse d'amélioration
+- ✅ `docs/RESUME_AMELIORATION_RACINE_2025.md` - Résumé des améliorations
+- ✅ `docs/AUDIT_BONNES_PRATIQUES_RACINE_2025.md` - Audit de conformité
+- ✅ `docs/ANALYSE_DOUBLON_HCD_1_2_3.md` - Analyse du doublon
+
+**Scripts**
+
+- ✅ Migration automatique des références aux scripts
+- ✅ `scripts/utils/update_script_references.py` - Script de mise à jour
+- ✅ Amélioration de tous les scripts avec `setup_paths()`
+- ✅ Ajout de `set -euo pipefail` dans tous les scripts
+
+**Bonnes Pratiques**
+
+- ✅ `LICENSE` - Licence Apache 2.0
+- ✅ `CONTRIBUTING.md` - Guide de contribution
+- ✅ `CHANGELOG.md` - Suivi des versions (ce fichier)
+- ✅ `.editorconfig` - Standardisation du code
+
+**Tests et Qualité**
+
+- ✅ `tests/` - Structure de tests créée
+- ✅ `.pre-commit-config.yaml` - Hooks de pré-commit
+- ✅ `.github/workflows/` - CI/CD de base
+
+**Documentation Complémentaire**
+
+- ✅ `docs/ARCHITECTURE.md` - Architecture détaillée (composants, flux, décisions)
+- ✅ `docs/DEPLOYMENT.md` - Guide de déploiement complet (installation, configuration, vérification)
+- ✅ `docs/TROUBLESHOOTING.md` - Guide de dépannage (problèmes courants, solutions, FAQ)
+
+**Tests et Qualité**
+
+- ✅ `tests/` - Structure de tests (unit/, integration/, e2e/, fixtures/)
+- ✅ `tests/README.md` - Guide des tests
+- ✅ `tests/run_all_tests.sh` - Script d'exécution de tous les tests
+- ✅ `.pre-commit-config.yaml` - Hooks de pré-commit (shellcheck, black, isort, flake8, markdownlint)
+- ✅ `.github/workflows/test.yml` - CI/CD pour tests (syntaxe, configuration, documentation, structure)
+- ✅ `.github/workflows/lint.yml` - CI/CD pour linting (shellcheck, Python, Markdown)
+
+#### Modifié
+
+- ✅ Tous les scripts mis à jour avec nouveaux chemins
+- ✅ Documentation mise à jour avec nouveaux chemins
+- ✅ Configuration centralisée et portable
+
+#### Nettoyé
+
+- ✅ Suppression de `ehB /` (répertoire vide)
+- ✅ Suppression de `date_requête` (fichier vide)
+- ✅ Archivage de 37 répertoires de logs dans `logs/archive/2025-11/`
+
+#### Corrigé
+
+- ✅ Références aux anciens chemins corrigées (124 fichiers)
+- ✅ Permissions des scripts corrigées
+- ✅ Syntaxe des scripts validée
+
+---
+
+## [0.9.0] - 2025-11-30
+
+### Préparation Release 1.0.0
+
+#### Ajouté
+
+- Structure de base du projet
+- Scripts d'installation et de configuration
+- Documentation initiale
+
+#### Modifié
+
+- Amélioration progressive de la structure
+
+---
+
+## Format des Entrées
+
+### Types de Changements
+
+- **Ajouté** : Nouvelles fonctionnalités
+- **Modifié** : Changements dans les fonctionnalités existantes
+- **Déprécié** : Fonctionnalités qui seront supprimées
+- **Supprimé** : Fonctionnalités supprimées
+- **Corrigé** : Corrections de bugs
+- **Sécurité** : Corrections de vulnérabilités
+
+---
+
+## Notes
+
+- Les dates sont au format `YYYY-MM-DD`
+- Les versions suivent [Semantic Versioning](https://semver.org/lang/fr/)
+- Les changements sont groupés par type et triés par importance
+
+---
+
+**Pour plus d'informations, voir** :
+
+- `CONTRIBUTING.md` - Guide de contribution
+- `docs/ARCHITECTURE.md` - Architecture du projet
+- `docs/DEPLOYMENT.md` - Guide de déploiement

@@ -21,7 +21,7 @@
 #   - Une documentation structurée pour livrable
 #
 # PRÉREQUIS :
-#   - HCD démarré (./03_start_hcd.sh)
+#   - HCD démarré (./scripts/setup/03_start_hcd.sh)
 #   - Schéma configuré (./03_setup_meta_categories_tables.sh)
 #   - Spark 3.5.1 déjà installé sur le MBP (via Homebrew)
 #   - Variables d'environnement configurées dans .poc-profile (SPARK_HOME)
@@ -44,12 +44,25 @@
 #
 # ============================================
 
-set -e
+set -euo pipefail
 
 # ============================================
 # SOURCE DES FONCTIONS UTILITAIRES
 # ============================================
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+# Configuration - Utiliser setup_paths si disponible
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../utils/didactique_functions.sh" ]; then
+    source "$SCRIPT_DIR/../utils/didactique_functions.sh"
+    setup_paths
+else
+    # Fallback si les fonctions ne sont pas disponibles
+    INSTALL_DIR="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+    HCD_DIR="${HCD_DIR:-${INSTALL_DIR}/binaire/hcd-1.2.3}"
+    SPARK_HOME="${SPARK_HOME:-${INSTALL_DIR}/binaire/spark-3.5.1}"
+    HCD_HOST="${HCD_HOST:-localhost}"
+    HCD_PORT="${HCD_PORT:-9042}"
+fi
+
 if [ -f "${SCRIPT_DIR}/../utils/didactique_functions.sh" ]; then
     source "${SCRIPT_DIR}/../utils/didactique_functions.sh"
 else
@@ -76,7 +89,6 @@ fi
 # ============================================
 # CONFIGURATION
 # ============================================
-INSTALL_DIR="/Users/david.leconte/Documents/Arkea"
 REPORT_FILE="${SCRIPT_DIR}/../doc/demonstrations/06_INGESTION_META_CATEGORIES_DEMONSTRATION.md"
 
 # Charger l'environnement POC (Spark et Kafka déjà installés sur MBP)
@@ -114,7 +126,7 @@ cd "$HCD_DIR"
 jenv local 11
 eval "$(jenv init -)"
 
-if ! "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e "DESCRIBE KEYSPACE domiramacatops_poc;" > /dev/null 2>&1; then
+if ! "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "DESCRIBE KEYSPACE domiramacatops_poc;" > /dev/null 2>&1; then
     error "Le keyspace domiramacatops_poc n'existe pas. Exécutez d'abord: ./01_setup_domiramaCatOps_keyspace.sh"
     exit 1
 fi
@@ -131,7 +143,7 @@ TABLES=(
 )
 
 for table in "${TABLES[@]}"; do
-    if ! "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" localhost 9042 -e "DESCRIBE TABLE domiramacatops_poc.$table;" > /dev/null 2>&1; then
+    if ! "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "DESCRIBE TABLE domiramacatops_poc.$table;" > /dev/null 2>&1; then
         error "La table $table n'existe pas. Exécutez d'abord: ./03_setup_meta_categories_tables.sh"
         exit 1
     fi
@@ -603,4 +615,3 @@ EOF
 
 success "✅ Rapport généré : $REPORT_FILE"
 echo ""
-

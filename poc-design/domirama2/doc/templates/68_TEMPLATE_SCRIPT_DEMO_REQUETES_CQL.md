@@ -44,7 +44,7 @@ Un script de démonstration de requêtes CQL didactique doit :
 #   - Une documentation structurée pour livrable
 #
 # PRÉREQUIS :
-#   - HCD démarré (./03_start_hcd.sh)
+#   - HCD démarré (./scripts/setup/03_start_hcd.sh)
 #   - Schéma configuré (./10_setup_domirama2_poc.sh)
 #   - Données chargées (./11_load_domirama2_data_parquet.sh)
 #   - Java 11 configuré via jenv
@@ -118,7 +118,7 @@ echo ""
 info "Vérification que HCD est démarré..."
 if ! nc -z localhost 9042 2>/dev/null; then
     error "HCD n'est pas démarré sur localhost:9042"
-    error "Exécutez d'abord: ./03_start_hcd.sh"
+    error "Exécutez d'abord: ./scripts/setup/03_start_hcd.sh"
     exit 1
 fi
 success "HCD est démarré"
@@ -567,6 +567,7 @@ Chaque requête suivra la structure `execute_query()` avec :
 
 **Date de création** : 2025-11-27  
 **Version** : 1.0
+
 
 
 

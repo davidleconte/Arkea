@@ -1,4 +1,19 @@
 #!/bin/bash
+set -euo pipefail
+# Configuration - Utiliser setup_paths si disponible
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../utils/didactique_functions.sh" ]; then
+    source "$SCRIPT_DIR/../utils/didactique_functions.sh"
+    setup_paths
+else
+    # Fallback si les fonctions ne sont pas disponibles
+    INSTALL_DIR="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+    HCD_DIR="${HCD_DIR:-${INSTALL_DIR}/binaire/hcd-1.2.3}"
+    SPARK_HOME="${SPARK_HOME:-${INSTALL_DIR}/binaire/spark-3.5.1}"
+    HCD_HOST="${HCD_HOST:-localhost}"
+    HCD_PORT="${HCD_PORT:-9042}"
+fi
+
 # ============================================
 # Script 13 : Tests de Colonnes Dynamiques (MAP) (Version Didactique)
 # Démontre le filtrage sur colonnes MAP (équivalent colonnes dynamiques HBase)
@@ -15,7 +30,7 @@
 #   - Une documentation structurée pour livrable
 #
 # PRÉREQUIS :
-#   - HCD démarré (./03_start_hcd.sh)
+#   - HCD démarré (./scripts/setup/03_start_hcd.sh)
 #   - Schéma configuré (./01_setup_domiramaCatOps_keyspace.sh, ./02_setup_operations_by_account.sh)
 #   - Colonnes dérivées et index SAI créés (./13_create_meta_flags_indexes.sh)
 #   - Données chargées (./05_load_operations_data_parquet.sh)
@@ -58,7 +73,6 @@ expected() { echo -e "${YELLOW}📋 $1${NC}"; }
 # ============================================
 # CONFIGURATION
 # ============================================
-INSTALL_DIR="/Users/david.leconte/Documents/Arkea"
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 REPORT_FILE="${SCRIPT_DIR}/../doc/demonstrations/13_DYNAMIC_COLUMNS_DEMONSTRATION.md"
 
@@ -86,7 +100,7 @@ if [ -n "${HCD_HOME}" ]; then
 else
     CQLSH_BIN="${HCD_DIR}/bin/cqlsh"
 fi
-CQLSH="$CQLSH_BIN localhost 9042"
+CQLSH="$CQLSH_BIN "$HCD_HOST" "$HCD_PORT""
 
 # Initialiser le fichier JSON
 echo "[]" > "$TEMP_RESULTS"
@@ -101,9 +115,9 @@ section "━━━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 
 info "Vérification que HCD est démarré..."
-if ! nc -z localhost 9042 2>/dev/null; then
+if ! nc -z "$HCD_HOST" "$HCD_PORT" 2>/dev/null; then
     error "HCD n'est pas démarré sur localhost:9042"
-    error "Exécutez d'abord: ./03_start_hcd.sh"
+    error "Exécutez d'abord: ./scripts/setup/03_start_hcd.sh"
     exit 1
 fi
 success "HCD est démarré"

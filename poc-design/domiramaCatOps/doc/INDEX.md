@@ -13,9 +13,9 @@ Documents de design, analyse, architecture et data model.
 **Répertoire** : [`design/`](design/)
 
 **Fichiers principaux** :
-- `00_ANALYSE_POC_DOMIRAMA_CAT_OPS.md` - Analyse MECE complète
-- `04_DATA_MODEL_COMPLETE.md` - Data model complet
-- `13_AUDIT_COMPLET_USE_CASES_MECE.md` - Audit use cases
+- Documents d'architecture et de design
+- Analyses techniques
+- Modèles de données
 
 [Voir tous les fichiers design →](design/)
 
@@ -27,8 +27,9 @@ Guides d'utilisation, index et références.
 **Répertoire** : [`guides/`](guides/)
 
 **Fichiers principaux** :
-- `18_INDEX_USE_CASES_SCRIPTS.md` - Index complet use cases ↔ scripts
-- `20_GUIDE_EXECUTION_ORDRE_SCRIPTS.md` - Guide d'exécution des scripts
+- Guides d'utilisation
+- Références techniques
+- Documentation des fonctionnalités
 
 [Voir tous les guides →](guides/)
 
@@ -40,8 +41,9 @@ Documents d'implémentation et de développement.
 **Répertoire** : [`implementation/`](implementation/)
 
 **Fichiers principaux** :
-- `16_IMPLEMENTATION_EMBEDDINGS_MULTIPLES.md` - Implémentation embeddings
-- `20_IMPLEMENTATION_TESTS_P1.md` - Implémentation tests P1
+- Documents d'implémentation
+- Guides de développement
+- Détails techniques
 
 [Voir toutes les implémentations →](implementation/)
 
@@ -53,8 +55,9 @@ Résultats de tests et exécutions.
 **Répertoire** : [`results/`](results/)
 
 **Fichiers principaux** :
-- `20_RESULTATS_REEXECUTION_TESTS_P1.md` - Résultats tests P1
-- `21_RESULTATS_REEXECUTION_TESTS_P2.md` - Résultats tests P2
+- Résultats de tests
+- Rapports de démonstrations
+- Métriques de performance
 
 [Voir tous les résultats →](results/)
 
@@ -66,8 +69,9 @@ Corrections appliquées.
 **Répertoire** : [`corrections/`](corrections/)
 
 **Fichiers principaux** :
-- `16_CORRECTION_PAIEMENT_CARTE_CB.md` - Correction CB/Carte
-- `20_CORRECTIONS_APPLIQUEES_TESTS_P1.md` - Corrections tests P1
+- Guides d'amélioration
+- Corrections de bugs
+- Améliorations de scripts
 
 [Voir toutes les corrections →](corrections/)
 
@@ -79,11 +83,9 @@ Audits et analyses complètes.
 **Répertoire** : [`audits/`](audits/)
 
 **Fichiers principaux** :
-- `13_AUDIT_COMPLET_USE_CASES_MECE.md` - Audit use cases
-- `15_AUDIT_SCRIPTS_COMPLET.md` - Audit scripts
-- `23_AUDIT_COMPLET_MANQUANTS.md` - Audit manquants
-- `24_AUDIT_FICHIERS_OBSOLETES.md` - Audit fichiers obsolètes
-- `25_AUDIT_RENOMMAGE_ENRICHISSEMENT.md` - Audit renommage
+- Audits complets
+- Analyses de conformité
+- Rapports d'évaluation
 
 [Voir tous les audits →](audits/)
 
@@ -93,6 +95,10 @@ Audits et analyses complètes.
 Rapports auto-générés des démonstrations.
 
 **Répertoire** : [`demonstrations/`](demonstrations/)
+
+**Fichiers principaux** :
+- Démonstrations automatiques générées par les scripts didactiques
+- Rapports structurés de chaque démonstration
 
 [Voir toutes les démonstrations →](demonstrations/)
 
@@ -111,13 +117,17 @@ Templates réutilisables pour scripts didactiques.
 
 ### Par Type de Document
 
-- **Commencer par** : [`design/00_ANALYSE_POC_DOMIRAMA_CAT_OPS.md`](design/00_ANALYSE_POC_DOMIRAMA_CAT_OPS.md)
-- **Guides** : [`guides/18_INDEX_USE_CASES_SCRIPTS.md`](guides/18_INDEX_USE_CASES_SCRIPTS.md)
-- **Résultats** : [`results/20_RESULTATS_REEXECUTION_TESTS_P1.md`](results/20_RESULTATS_REEXECUTION_TESTS_P1.md)
+- **Commencer par** : [`guides/01_README.md`](guides/01_README.md)
+- **Guides** : [`guides/`](guides/)
+  - [`01_README.md`](guides/01_README.md) - Vue d'ensemble
+  - [`02_GUIDE_SETUP.md`](guides/02_GUIDE_SETUP.md) - Guide de configuration
+  - [`03_GUIDE_INGESTION.md`](guides/03_GUIDE_INGESTION.md) - Guide d'ingestion
+  - [`04_GUIDE_RECHERCHE.md`](guides/04_GUIDE_RECHERCHE.md) - Guide de recherche
+- **Audits** : [`audits/`](audits/)
 
 ### Par Numéro
 
-Les fichiers sont toujours numérotés (00_, 01_, etc.) pour préserver l'ordre chronologique dans chaque catégorie.
+Les fichiers sont numérotés dans chaque catégorie pour préserver l'ordre logique.
 
 ---
 

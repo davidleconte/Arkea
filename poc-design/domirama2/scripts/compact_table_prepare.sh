@@ -24,7 +24,7 @@
 #
 # ============================================
 
-set -e
+set -euo pipefail
 
 # Couleurs
 RED='\033[0;31m'
@@ -41,29 +41,28 @@ warn() { echo -e "${YELLOW}⚠️  $1${NC}"; }
 error() { echo -e "${RED}❌ $1${NC}"; }
 section() { echo -e "${BOLD}${CYAN}$1${NC}"; }
 
-# Configuration
+# Configuration - Utiliser setup_paths si disponible
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-INSTALL_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+if [ -f "$SCRIPT_DIR/../utils/didactique_functions.sh" ]; then
+    source "$SCRIPT_DIR/../utils/didactique_functions.sh"
+    setup_paths
+else
+    # Fallback si les fonctions ne sont pas disponibles
+    INSTALL_DIR="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+    HCD_DIR="${HCD_DIR:-${INSTALL_DIR}/binaire/hcd-1.2.3}"
+    HCD_HOST="${HCD_HOST:-localhost}"
+    HCD_PORT="${HCD_PORT:-9042}"
+fi
 
-# Chercher HCD_DIR dans plusieurs emplacements possibles
-HCD_DIR=""
-for possible_dir in \
-    "${INSTALL_DIR}/binaire/hcd-1.2.3" \
-    "${INSTALL_DIR}/../binaire/hcd-1.2.3" \
-    "/Users/david.leconte/Documents/Arkea/binaire/hcd-1.2.3"; do
-    if [ -d "$possible_dir" ] && [ -f "$possible_dir/bin/nodetool" ]; then
-        HCD_DIR="$possible_dir"
-        break
-    fi
-done
-
-if [ -z "$HCD_DIR" ]; then
+if [ -z "${HCD_DIR:-}" ]; then
     error "HCD_DIR non trouvé. Veuillez définir HCD_DIR manuellement."
     exit 1
 fi
 
 NODETOOL="${HCD_DIR}/bin/nodetool"
 CQLSH="${HCD_DIR}/bin/cqlsh"
+HCD_HOST="${HCD_HOST:-localhost}"
+HCD_PORT="${HCD_PORT:-9042}"
 
 # Paramètres
 KEYSPACE="${1:-domirama2_poc}"
@@ -80,8 +79,8 @@ if [ ! -f "$CQLSH" ]; then
     exit 1
 fi
 
-if ! nc -z localhost 9042 2>/dev/null; then
-    error "HCD n'est pas démarré sur localhost:9042"
+if ! nc -z "$HCD_HOST" "$HCD_PORT" 2>/dev/null; then
+    error "HCD n'est pas démarré sur ${HCD_HOST}:${HCD_PORT}"
     exit 1
 fi
 
@@ -114,7 +113,7 @@ section "⏱️  ÉTAPE 2 : Vérification gc_grace_seconds"
 echo ""
 
 info "Vérification de gc_grace_seconds pour $KEYSPACE.$TABLE..."
-GC_GRACE=$("$CQLSH" localhost 9042 -e "DESCRIBE TABLE $KEYSPACE.$TABLE;" 2>/dev/null | grep -i "gc_grace_seconds" | grep -oE '[0-9]+' || echo "864000")
+GC_GRACE=$("$CQLSH" "$HCD_HOST" "$HCD_PORT" -e "DESCRIBE TABLE $KEYSPACE.$TABLE;" 2>/dev/null | grep -i "gc_grace_seconds" | grep -oE '[0-9]+' || echo "864000")
 
 if [ -n "$GC_GRACE" ]; then
     GC_GRACE_DAYS=$((GC_GRACE / 86400))

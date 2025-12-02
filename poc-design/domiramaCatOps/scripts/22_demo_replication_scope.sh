@@ -20,7 +20,7 @@
 #   - Une documentation structurée pour livrable
 #
 # PRÉREQUIS :
-#   - HCD démarré (./03_start_hcd.sh)
+#   - HCD démarré (./scripts/setup/03_start_hcd.sh)
 #   - Keyspace 'domiramacatops_poc' créé
 #   - Java 11 configuré via jenv
 #
@@ -40,7 +40,7 @@
 #
 # ============================================
 
-set -e
+set -euo pipefail
 
 # Source les fonctions utilitaires et le profil d'environnement
 source "$(dirname "${BASH_SOURCE[0]}")/../utils/didactique_functions.sh"
@@ -49,14 +49,23 @@ source "$(dirname "${BASH_SOURCE[0]}")/../../.poc-profile"
 # ============================================
 # CONFIGURATION
 # ============================================
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd )"
-INSTALL_DIR="${INSTALL_DIR:-/Users/david.leconte/Documents/Arkea}"
+# Configuration - Utiliser setup_paths si disponible
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../utils/didactique_functions.sh" ]; then
+    source "$SCRIPT_DIR/../utils/didactique_functions.sh"
+    setup_paths
+else
+    # Fallback si les fonctions ne sont pas disponibles
+    INSTALL_DIR="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+    HCD_DIR="${HCD_DIR:-${INSTALL_DIR}/binaire/hcd-1.2.3}"
+    SPARK_HOME="${SPARK_HOME:-${INSTALL_DIR}/binaire/spark-3.5.1}"
+    HCD_HOST="${HCD_HOST:-localhost}"
+    HCD_PORT="${HCD_PORT:-9042}"
+fi
+
 REPORT_FILE="${SCRIPT_DIR}/../doc/demonstrations/22_REPLICATION_SCOPE_DEMONSTRATION.md"
 KEYSPACE_NAME="domiramacatops_poc"
-
 # HCD_HOME devrait être défini par .poc-profile
-HCD_DIR="${HCD_HOME:-${INSTALL_DIR}/binaire/hcd-1.2.3}"
-
 # Créer le répertoire de documentation
 mkdir -p "$(dirname "$REPORT_FILE")"
 
@@ -70,7 +79,7 @@ check_jenv_java_version
 
 # Vérifier que le keyspace existe
 check_schema "" "" # Vérifie HCD et Java
-KEYSPACE_EXISTS=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "SELECT keyspace_name FROM system_schema.keyspaces WHERE keyspace_name = '$KEYSPACE_NAME';" 2>&1 | grep -c "$KEYSPACE_NAME" || echo "0")
+KEYSPACE_EXISTS=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT keyspace_name FROM system_schema.keyspaces WHERE keyspace_name = '$KEYSPACE_NAME';" 2>&1 | grep -c "$KEYSPACE_NAME" || echo "0")
 if [ "$KEYSPACE_EXISTS" -eq 0 ]; then
     error "Le keyspace '$KEYSPACE_NAME' n'existe pas. Exécutez d'abord ./01_setup_domiramaCatOps_keyspace.sh"
     exit 1
@@ -108,7 +117,7 @@ echo ""
 show_partie "2" "DDL - CONFIGURATION DE RÉPLICATION"
 
 info "📝 DDL - Configuration de réplication du keyspace (POC) :"
-REPLICATION_DDL=$("${HCD_DIR}/bin/cqlsh" localhost 9042 -e "USE $KEYSPACE_NAME; DESCRIBE KEYSPACE;" 2>&1 | grep -A 3 "replication" | head -4)
+REPLICATION_DDL=$("${HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "USE $KEYSPACE_NAME; DESCRIBE KEYSPACE;" 2>&1 | grep -A 3 "replication" | head -4)
 show_ddl_section "$REPLICATION_DDL"
 
 info "   Explication :"
