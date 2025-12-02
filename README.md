@@ -3,6 +3,7 @@
 **Date** : 2025-12-01  
 **Version** : 1.0.0  
 **Objectif** : Démonstration de faisabilité de la migration HBase vers DataStax HCD  
+**IBM | Opportunité ICS 006gR000001hiA5QAI - ARKEA | Ingénieur Avant-Vente** : David LECONTE | <david.leconte1@ibm.com> - Mobile : +33614126117  
 **License** : [Apache 2.0](LICENSE)
 
 ---
@@ -130,6 +131,7 @@ Voir `docs/README.md` pour l'index complet.
 ## 🛠️ Scripts Disponibles
 
 ### Installation (scripts/setup/)
+
 - `01_install_hcd.sh` - Installe HCD
 - `02_install_spark_kafka.sh` - Installe Spark et Kafka
 - `03_start_hcd.sh` - Démarre HCD
@@ -138,11 +140,13 @@ Voir `docs/README.md` pour l'index complet.
 - `06_test_kafka_hcd_streaming.sh` - Test du pipeline
 
 ### Utilitaires (scripts/utils/)
+
 - `70_kafka-helper.sh` - Helper pour Kafka
 - `80_verify_all.sh` - Vérifie tous les composants
 - `90_list_scripts.sh` - Liste tous les scripts
 
 ### Tests Scala (scripts/scala/)
+
 - `test_spark_hcd.scala` - Tests Spark ↔ HCD
 - `test_spark_hcd_connection.scala` - Tests de connexion
 - `kafka_to_hcd_streaming.scala` - Streaming Kafka → HCD
@@ -231,6 +235,7 @@ pre-commit run --all-files
 ```
 
 **Hooks configurés** :
+
 - ✅ ShellCheck (linting shell)
 - ✅ Black, isort, flake8 (Python)
 - ✅ Markdownlint (Markdown)
@@ -240,6 +245,7 @@ pre-commit run --all-files
 ### GitHub Actions
 
 CI/CD automatique configuré (`.github/workflows/`) :
+
 - ✅ Tests de syntaxe
 - ✅ Validation de configuration
 - ✅ Linting automatique
@@ -258,6 +264,7 @@ Le projet suit les standards de contribution :
 - **LICENSE** - Apache 2.0
 
 **Processus** :
+
 1. Fork le projet
 2. Créer une branche (`feature/nom` ou `fix/nom`)
 3. Commiter avec messages clairs (voir CONTRIBUTING.md)
@@ -281,23 +288,27 @@ Le projet suit les standards de contribution :
 ## ✅ Statut
 
 ### Infrastructure
+
 - ✅ Infrastructure installée et opérationnelle
 - ✅ Pipeline Kafka → HCD fonctionnel
 - ✅ Configuration centralisée et portable
 
 ### Qualité et Tests
+
 - ✅ Structure de tests créée
 - ✅ Pre-commit hooks configurés
 - ✅ GitHub Actions CI/CD configuré
 - ✅ Documentation complète
 
 ### Conformité
+
 - ✅ License Apache 2.0
 - ✅ Guide de contribution
 - ✅ CHANGELOG maintenu
 - ✅ Standards de code (`.editorconfig`)
 
 ### Développement
+
 - 🔄 Schémas Domirama/BIC à créer
 - 🔄 Jobs Spark métier à développer
 - 🔄 Tests unitaires et d'intégration à compléter
@@ -314,8 +325,3 @@ Le projet suit les standards de contribution :
 ---
 
 **POC opérationnel, conforme aux bonnes pratiques et prêt pour le développement !** 🚀
-
-
-
-
-
