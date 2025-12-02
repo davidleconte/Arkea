@@ -101,12 +101,13 @@ if [ "$JENV_AVAILABLE" = false ]; then
         export PATH="$JAVA_HOME/bin:$PATH"
     # macOS : Vérifier Java 11 via Homebrew
     elif [[ "$OSTYPE" == "darwin"* ]]; then
-        if [ -f "/opt/homebrew/opt/openjdk@11/bin/java" ]; then
-            info "Java 11 trouvé via Homebrew : $(/opt/homebrew/opt/openjdk@11/bin/java -version 2>&1 | head -n 1)"
-            if [ -d "/opt/homebrew/opt/openjdk@11/libexec/openjdk.jdk/Contents/Home" ]; then
-                export JAVA_HOME=/opt/homebrew/opt/openjdk@11/libexec/openjdk.jdk/Contents/Home
+        HOMEBREW_PREFIX="${HOMEBREW_PREFIX:-/opt/homebrew}"
+        if [ -f "${HOMEBREW_PREFIX}/opt/openjdk@11/bin/java" ]; then
+            info "Java 11 trouvé via Homebrew : $(${HOMEBREW_PREFIX}/opt/openjdk@11/bin/java -version 2>&1 | head -n 1)"
+            if [ -d "${HOMEBREW_PREFIX}/opt/openjdk@11/libexec/openjdk.jdk/Contents/Home" ]; then
+                export JAVA_HOME="${HOMEBREW_PREFIX}/opt/openjdk@11/libexec/openjdk.jdk/Contents/Home"
             else
-                export JAVA_HOME=/opt/homebrew/opt/openjdk@11
+                export JAVA_HOME="${HOMEBREW_PREFIX}/opt/openjdk@11"
             fi
             export PATH="$JAVA_HOME/bin:$PATH"
         elif [ -f "/usr/local/opt/openjdk@11/bin/java" ]; then
@@ -134,10 +135,11 @@ if [ "$JENV_AVAILABLE" = false ]; then
                 if [[ "$OSTYPE" == "darwin"* ]] && command -v brew &> /dev/null; then
                     info "Installation de Java 11 via Homebrew..."
                     brew install openjdk@11
-                    if [ -d "/opt/homebrew/opt/openjdk@11/libexec/openjdk.jdk/Contents/Home" ]; then
-                        export JAVA_HOME=/opt/homebrew/opt/openjdk@11/libexec/openjdk.jdk/Contents/Home
+                    HOMEBREW_PREFIX="${HOMEBREW_PREFIX:-/opt/homebrew}"
+                    if [ -d "${HOMEBREW_PREFIX}/opt/openjdk@11/libexec/openjdk.jdk/Contents/Home" ]; then
+                        export JAVA_HOME="${HOMEBREW_PREFIX}/opt/openjdk@11/libexec/openjdk.jdk/Contents/Home"
                     else
-                        export JAVA_HOME=/opt/homebrew/opt/openjdk@11
+                        export JAVA_HOME="${HOMEBREW_PREFIX}/opt/openjdk@11"
                     fi
                     export PATH="$JAVA_HOME/bin:$PATH"
                     info "Java 11 installé. Vérification..."

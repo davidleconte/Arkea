@@ -1,4 +1,6 @@
 #!/bin/bash
+set -euo pipefail
+
 # ============================================
 # Script 04 : Génération des Données Operations (Version Didactique - Parquet)
 # Génère 20 000+ opérations avec diversité maximale pour tous les tests

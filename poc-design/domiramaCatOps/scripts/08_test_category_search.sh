@@ -1,4 +1,6 @@
 #!/bin/bash
+set -euo pipefail
+
 # ============================================
 # Script 08 : Tests de Recherche par Catégorie (Version Didactique)
 # Exécute les tests de recherche par catégorie avec SAI

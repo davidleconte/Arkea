@@ -2,7 +2,7 @@
 
 # Script de configuration pour Kafka → HCD Streaming
 
-set -e
+set -euo pipefail
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -29,7 +29,15 @@ info "✅ Répertoire créé: /tmp/spark-checkpoints/kafka-to-hcd"
 # 2. Créer le keyspace et la table dans HCD
 info "📊 Création du schéma HCD..."
 
-cd /Users/david.leconte/Documents/Arkea/binaire/hcd-1.2.3
+# Charger la configuration centralisée
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ARKEA_HOME="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+if [ -f "${ARKEA_HOME}/.poc-config.sh" ]; then
+    source "${ARKEA_HOME}/.poc-config.sh"
+fi
+
+HCD_DIR="${HCD_DIR:-${ARKEA_HOME}/binaire/hcd-1.2.3}"
+cd "${HCD_DIR}"
 jenv local 11
 eval "$(jenv init -)"
 
@@ -76,8 +84,8 @@ echo "     --bootstrap-server \${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092} \\"
 echo "     --topic test-topic"
 echo ""
 echo "2. Lancer le job Spark Streaming :"
-echo "   cd /Users/david.leconte/Documents/Arkea"
-echo "   export SPARK_HOME=\$(pwd)/binaire/spark-3.5.1"
+echo "   cd \${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+echo "   export SPARK_HOME=\${SPARK_HOME:-\$(pwd)/binaire/spark-3.5.1}"
 echo "   export PATH=\$SPARK_HOME/bin:\$PATH"
 echo "   jenv local 11"
 echo "   eval \"\$(jenv init -)\""

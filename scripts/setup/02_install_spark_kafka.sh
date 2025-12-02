@@ -57,11 +57,12 @@ if ! java -version 2>&1 | grep -q "11"; then
     if [ -n "${JAVA_HOME:-}" ] && [ -d "${JAVA_HOME}" ]; then
         export PATH="$JAVA_HOME/bin:$PATH"
     elif [[ "$OSTYPE" == "darwin"* ]]; then
-        if [ -d "/opt/homebrew/opt/openjdk@11" ]; then
-            export JAVA_HOME=/opt/homebrew/opt/openjdk@11
+        HOMEBREW_PREFIX="${HOMEBREW_PREFIX:-/opt/homebrew}"
+        if [ -d "${HOMEBREW_PREFIX}/opt/openjdk@11" ]; then
+            export JAVA_HOME="${HOMEBREW_PREFIX}/opt/openjdk@11"
             export PATH="$JAVA_HOME/bin:$PATH"
         elif [ -d "/usr/local/opt/openjdk@11" ]; then
-            export JAVA_HOME=/usr/local/opt/openjdk@11
+            export JAVA_HOME="/usr/local/opt/openjdk@11"
             export PATH="$JAVA_HOME/bin:$PATH"
         fi
     fi

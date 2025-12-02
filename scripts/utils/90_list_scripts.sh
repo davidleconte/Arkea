@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # Script qui liste tous les scripts disponibles avec leur description
 

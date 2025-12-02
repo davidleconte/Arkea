@@ -2,7 +2,7 @@
 
 # Script de test complet du pipeline Kafka → HCD
 
-set -e
+set -euo pipefail
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -26,7 +26,14 @@ echo "Test Complet : Kafka → HCD Streaming"
 echo "=========================================="
 echo ""
 
-cd /Users/david.leconte/Documents/Arkea
+# Charger la configuration centralisée
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ARKEA_HOME="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
+if [ -f "${ARKEA_HOME}/.poc-config.sh" ]; then
+    source "${ARKEA_HOME}/.poc-config.sh"
+fi
+
+cd "${ARKEA_HOME}"
 
 # 1. Vérifier que Kafka est démarré
 info "🔍 Vérification de Kafka..."

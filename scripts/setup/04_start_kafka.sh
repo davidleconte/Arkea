@@ -24,8 +24,9 @@ KAFKA_HOME="${KAFKA_HOME:-}"
 if [ -z "$KAFKA_HOME" ]; then
     # Détection automatique selon OS
     if [[ "$OSTYPE" == "darwin"* ]]; then
-        if [ -d "/opt/homebrew/opt/kafka" ]; then
-            KAFKA_HOME="/opt/homebrew/opt/kafka"
+        HOMEBREW_PREFIX="${HOMEBREW_PREFIX:-/opt/homebrew}"
+        if [ -d "${HOMEBREW_PREFIX}/opt/kafka" ]; then
+            KAFKA_HOME="${HOMEBREW_PREFIX}/opt/kafka"
         elif [ -d "/usr/local/opt/kafka" ]; then
             KAFKA_HOME="/usr/local/opt/kafka"
         fi
@@ -69,12 +70,13 @@ if [ -n "${JAVA17_HOME:-}" ] && [ -d "${JAVA17_HOME}" ]; then
     export PATH="$JAVA_HOME/bin:$PATH"
     echo "✅ Java 17 trouvé via configuration : $JAVA_HOME"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
-    if [ -d "/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home" ]; then
-        export JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home
+    HOMEBREW_PREFIX="${HOMEBREW_PREFIX:-/opt/homebrew}"
+    if [ -d "${HOMEBREW_PREFIX}/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home" ]; then
+        export JAVA_HOME="${HOMEBREW_PREFIX}/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home"
         export PATH="$JAVA_HOME/bin:$PATH"
         echo "✅ Java 17 trouvé via Homebrew"
-    elif [ -d "/opt/homebrew/opt/openjdk@17" ]; then
-        export JAVA_HOME=/opt/homebrew/opt/openjdk@17
+    elif [ -d "${HOMEBREW_PREFIX}/opt/openjdk@17" ]; then
+        export JAVA_HOME="${HOMEBREW_PREFIX}/opt/openjdk@17"
         export PATH="$JAVA_HOME/bin:$PATH"
         echo "✅ Java 17 trouvé via Homebrew"
     fi
@@ -93,10 +95,11 @@ else
     if [[ "$OSTYPE" == "darwin"* ]] && command -v brew &> /dev/null; then
         echo "Installation via Homebrew..."
         brew install openjdk@17
-        if [ -d "/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home" ]; then
-            export JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home
+        HOMEBREW_PREFIX="${HOMEBREW_PREFIX:-/opt/homebrew}"
+        if [ -d "${HOMEBREW_PREFIX}/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home" ]; then
+            export JAVA_HOME="${HOMEBREW_PREFIX}/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home"
         else
-            export JAVA_HOME=/opt/homebrew/opt/openjdk@17
+            export JAVA_HOME="${HOMEBREW_PREFIX}/opt/openjdk@17"
         fi
         export PATH="$JAVA_HOME/bin:$PATH"
     else

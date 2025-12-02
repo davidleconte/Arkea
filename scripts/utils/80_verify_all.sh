@@ -3,7 +3,7 @@
 # Script de vérification globale de tous les composants
 # Vérifie l'installation et l'état de HCD, Spark, Kafka, et leurs configurations
 
-set -e
+set -euo pipefail
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -50,8 +50,9 @@ if command -v jenv &> /dev/null; then
         warn "Java 11 non détecté via jenv. Version: $JAVA_VERSION"
     fi
 else
-    if [ -d "/opt/homebrew/opt/openjdk@11" ]; then
-        export JAVA_HOME=/opt/homebrew/opt/openjdk@11
+    HOMEBREW_PREFIX="${HOMEBREW_PREFIX:-/opt/homebrew}"
+    if [ -d "${HOMEBREW_PREFIX}/opt/openjdk@11" ]; then
+        export JAVA_HOME="${HOMEBREW_PREFIX}/opt/openjdk@11"
         JAVA_VERSION=$(java -version 2>&1 | head -1)
         info "Java 11 trouvé via Homebrew: $JAVA_VERSION"
     else
@@ -104,7 +105,8 @@ fi
 
 # 4. Vérifier Kafka
 section "4. Kafka"
-KAFKA_HOME="/opt/homebrew/opt/kafka"
+HOMEBREW_PREFIX="${HOMEBREW_PREFIX:-/opt/homebrew}"
+KAFKA_HOME="${KAFKA_HOME:-${HOMEBREW_PREFIX}/opt/kafka}"
 if [ -d "$KAFKA_HOME" ]; then
     info "Kafka installé dans: $KAFKA_HOME"
     if [ -f "$KAFKA_HOME/libexec/bin/kafka-server-start.sh" ]; then

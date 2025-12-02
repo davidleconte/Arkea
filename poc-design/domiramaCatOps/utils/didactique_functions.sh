@@ -374,7 +374,11 @@ check_hcd_status() {
     local cqlsh_bin="${HCD_HOME:-${HCD_DIR}}/bin/cqlsh"
     if [ ! -f "$cqlsh_bin" ]; then
         # Fallback si HCD_HOME/HCD_DIR pas défini
-        INSTALL_DIR="${INSTALL_DIR:-/Users/david.leconte/Documents/Arkea}"
+        # Détection automatique de ARKEA_HOME
+        if [ -z "${ARKEA_HOME:-}" ]; then
+            ARKEA_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && cd ../.. && pwd 2>/dev/null || echo "")"
+        fi
+        INSTALL_DIR="${INSTALL_DIR:-${ARKEA_HOME:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && cd ../.. && pwd 2>/dev/null || echo "")}}"
         cqlsh_bin="${INSTALL_DIR}/binaire/hcd-1.2.3/bin/cqlsh"
     fi
 
@@ -423,7 +427,11 @@ execute_cql_query() {
 
     # Fallback si HCD_HOME/HCD_DIR pas défini
     if [ ! -f "$cqlsh_bin" ]; then
-        INSTALL_DIR="${INSTALL_DIR:-/Users/david.leconte/Documents/Arkea}"
+        # Détection automatique de ARKEA_HOME
+        if [ -z "${ARKEA_HOME:-}" ]; then
+            ARKEA_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && cd ../.. && pwd 2>/dev/null || echo "")"
+        fi
+        INSTALL_DIR="${INSTALL_DIR:-${ARKEA_HOME:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && cd ../.. && pwd 2>/dev/null || echo "")}}"
         cqlsh_bin="${INSTALL_DIR}/binaire/hcd-1.2.3/bin/cqlsh"
     fi
 

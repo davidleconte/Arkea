@@ -28,7 +28,9 @@ get_realpath() {
             python3 -c "import os; print(os.path.realpath('$path'))" 2>/dev/null || echo "$path"
         else
             # Fallback : utiliser cd et pwd
-            (cd "$(dirname "$path")" && pwd)/$(basename "$path")
+            local dir_path
+            dir_path=$(cd "$(dirname "$path")" && pwd)
+            echo "${dir_path}/$(basename "$path")"
         fi
     # Linux (GNU) - readlink -f disponible
     elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
@@ -40,11 +42,15 @@ get_realpath() {
             readlink -f "$path" 2>/dev/null || echo "$path"
         else
             # Fallback : utiliser cd et pwd
-            (cd "$(dirname "$path")" && pwd)/$(basename "$path")
+            local dir_path
+            dir_path=$(cd "$(dirname "$path")" && pwd)
+            echo "${dir_path}/$(basename "$path")"
         fi
     else
         # Fallback générique
-        (cd "$(dirname "$path")" && pwd)/$(basename "$path")
+        local dir_path
+        dir_path=$(cd "$(dirname "$path")" && pwd)
+        echo "${dir_path}/$(basename "$path")"
     fi
 }
 
