@@ -32,7 +32,7 @@ Un script d'ingestion didactique doit :
 # OBJECTIF :
 #   Ce script charge les données d'opérations depuis un fichier [format]
 #   dans la table HCD 'operations_by_account' via Spark.
-#   
+#  
 #   IMPORTANT - Stratégie Multi-Version (conforme IBM) :
 #   - Le batch écrit UNIQUEMENT cat_auto et cat_confidence
 #   - Le batch NE TOUCHE JAMAIS cat_user, cat_date_user, cat_validee
@@ -752,6 +752,3 @@ EOF
 
 success "✅ Rapport généré : $REPORT_FILE"
 echo ""
-
-
-

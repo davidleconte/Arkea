@@ -8,7 +8,7 @@
 # OBJECTIF :
 #   Ce script démontre les fonctionnalités compteurs atomiques (feedbacks) en exécutant
 #   8 requêtes CQL directement via "${HCD_HOME}/bin/cqlsh".
-#   
+#
 #   Cette version didactique affiche :
 #   - Les équivalences HBase → HCD détaillées
 #   - Les requêtes CQL complètes avant exécution
@@ -166,21 +166,21 @@ execute_query() {
     local hbase_equivalent="$4"
     local query_cql="$5"
     local expected_result="$6"
-    
+
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "  🔍 TEST $query_num : $query_title"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-    
+
     info "📚 DÉFINITION - $query_title :"
     echo "   $query_description"
     echo ""
-    
+
     info "🔄 ÉQUIVALENT HBase :"
     code "   $hbase_equivalent"
     echo ""
-    
+
     info "📝 Requête CQL :"
     echo "$query_cql" | while IFS= read -r line; do
         if [ -n "$line" ]; then
@@ -188,10 +188,10 @@ execute_query() {
         fi
     done
     echo ""
-    
+
     expected "📋 Résultat attendu : $expected_result"
     echo ""
-    
+
     # Créer un fichier temporaire pour la requête
     TEMP_QUERY_FILE=$(mktemp "/tmp/query_${query_num}_$(date +%s).cql")
     cat > "$TEMP_QUERY_FILE" <<EOF
@@ -199,25 +199,25 @@ USE domiramacatops_poc;
 TRACING ON;
 $query_cql
 EOF
-    
+
     # Exécuter la requête
     info "🚀 Exécution de la requête..."
     START_TIME=$(date +%s.%N)
     QUERY_OUTPUT=$($CQLSH -f "$TEMP_QUERY_FILE" 2>&1 | tee -a "$TEMP_OUTPUT")
     EXIT_CODE=$?
     END_TIME=$(date +%s.%N)
-    
+
     # Calculer le temps d'exécution
     if command -v bc >/dev/null 2>&1; then
         QUERY_TIME=$(echo "$END_TIME - $START_TIME" | bc 2>/dev/null || echo "0.000")
     else
         QUERY_TIME=$(python3 -c "print($END_TIME - $START_TIME)" 2>/dev/null || echo "0.000")
     fi
-    
+
     # Extraire les métriques
     COORDINATOR_TIME=$(echo "$QUERY_OUTPUT" | grep "coordinator" | awk -F'|' '{print $4}' | tr -d ' ' | head -1 || echo "")
     TOTAL_TIME=$(echo "$QUERY_OUTPUT" | grep "total" | awk -F'|' '{print $4}' | tr -d ' ' | head -1 || echo "")
-    
+
     # Compter les lignes retournées
     ROW_COUNT=$(echo "$QUERY_OUTPUT" | grep -E "\([0-9]+ rows\)" | grep -oE "[0-9]+" | head -1 || echo "0")
     # Si pas trouvé, compter les lignes de données réelles
@@ -228,29 +228,29 @@ EOF
     if [ -z "$ROW_COUNT" ] || ! [[ "$ROW_COUNT" =~ ^[0-9]+$ ]]; then
         ROW_COUNT="0"
     fi
-    
+
     # Filtrer les résultats (garder les en-têtes et les lignes de données, exclure le tracing)
     # Pour les tables de compteurs, capturer les lignes qui commencent par type_operation ou une valeur
     QUERY_RESULTS_FILTERED=$(echo "$QUERY_OUTPUT" | grep -vE "^Warnings|^\([0-9]+ rows\)|coordinator|total|Executing|Read|Scanned|Merging|Tracing|Activity|Requests|responses|Parsing|Sending|MULTI_RANGE|Query execution|Limit|Filter|Fetch|LiteralIndexScan|single-partition|stage READ|RequestResponse|activity|timestamp|source|client|Processing|Request complete|Tracing session|^[[:space:]]*$" | grep -E "^[[:space:]]*type_operation|^[[:space:]]*code_efs|^[[:space:]]*-{3,}|^[[:space:]]*[0-9]+[[:space:]]*\||^[[:space:]]*[[:alpha:]]+[[:space:]]*\|" | grep -vE "^[[:space:]]*-+[[:space:]]*\|[[:space:]]*-+[[:space:]]*\|" | sed '/^[[:space:]]*-*[[:space:]]*$/d' | head -20)
-    
+
     # Si QUERY_RESULTS_FILTERED est vide, essayer une autre méthode pour capturer les données
     if [ -z "$QUERY_RESULTS_FILTERED" ] || [ "$QUERY_RESULTS_FILTERED" = "" ]; then
         # Capturer les lignes qui contiennent des données (avec | et des valeurs)
         QUERY_RESULTS_FILTERED=$(echo "$QUERY_OUTPUT" | grep -E "\|" | grep -vE "^Warnings|^\([0-9]+ rows\)|coordinator|total|Executing|Read|Scanned|Merging|Tracing|Activity|Requests|responses|Parsing|Sending|MULTI_RANGE|Query execution|Limit|Filter|Fetch|LiteralIndexScan|single-partition|stage READ|RequestResponse|activity|timestamp|source|client|Processing|Request complete|Tracing session" | head -20)
     fi
-    
+
     # Extraire les lignes de données réelles (commencent par un nombre ou une chaîne)
     DATA_ROWS=$(echo "$QUERY_OUTPUT" | grep -E "^[[:space:]]*[0-9]+[[:space:]]*\|" | grep -vE "activity|timestamp|source|client|Processing|Request|Executing|Tracing" | head -20)
     # Pour les compteurs, aussi capturer les lignes qui commencent par une chaîne (type_operation, VIREMENT, etc.)
     if [ -z "$DATA_ROWS" ] || [ "$DATA_ROWS" = "" ]; then
         DATA_ROWS=$(echo "$QUERY_OUTPUT" | grep -E "^[[:space:]]*VIREMENT|^[[:space:]]*CB|^[[:space:]]*[[:alpha:]]+[[:space:]]*\|" | grep -vE "^[[:space:]]*type_operation|^[[:space:]]*code_efs|activity|timestamp|source|client|Processing|Request|Executing|Tracing" | head -20)
     fi
-    
+
     # Afficher les résultats
     if [ $EXIT_CODE -eq 0 ]; then
         result "📊 Résultats obtenus ($ROW_COUNT ligne(s)) en ${QUERY_TIME}s :"
         echo ""
-        
+
         # Si aucune ligne retournée, expliquer pourquoi
         if [ "$ROW_COUNT" = "0" ] || [ -z "$DATA_ROWS" ] || [ "$DATA_ROWS" = "" ]; then
             warn "⚠️  Aucune ligne retournée"
@@ -284,7 +284,7 @@ EOF
                 echo "... (affichage limité à 15 lignes sur $ROW_COUNT)"
             fi
             echo ""
-            
+
             # Validation et explication du résultat
             info "✅ Validation du résultat :"
             echo "   - Requête exécutée avec succès"
@@ -293,14 +293,14 @@ EOF
                 echo "   - Les données correspondent aux critères de recherche"
                 echo "   - Le résultat est conforme aux attentes"
                 echo ""
-                
+
                 # Vérifier la cohérence des compteurs si la requête contient count_engine ou count_client
                 if echo "$query_cql" | grep -qi "count_engine\|count_client"; then
                     info "💡 Validation de cohérence des compteurs :"
                     # Extraire les valeurs des compteurs depuis les résultats
                     COUNT_ENGINE_VALUES=$(echo "$QUERY_RESULTS_FILTERED" | grep -E "^[[:space:]]*[0-9]+[[:space:]]*\|" | awk -F'|' '{print $(NF-1)}' | tr -d ' ' | grep -E "^[0-9]+$" || echo "")
                     COUNT_CLIENT_VALUES=$(echo "$QUERY_RESULTS_FILTERED" | grep -E "^[[:space:]]*[0-9]+[[:space:]]*\|" | awk -F'|' '{print $NF}' | tr -d ' ' | grep -E "^[0-9]+$" || echo "")
-                    
+
                     if [ -n "$COUNT_ENGINE_VALUES" ]; then
                         for val in $COUNT_ENGINE_VALUES; do
                             if [ "$val" -ge 0 ] 2>/dev/null; then
@@ -310,7 +310,7 @@ EOF
                             fi
                         done
                     fi
-                    
+
                     if [ -n "$COUNT_CLIENT_VALUES" ]; then
                         for val in $COUNT_CLIENT_VALUES; do
                             if [ "$val" -ge 0 ] 2>/dev/null; then
@@ -320,7 +320,7 @@ EOF
                             fi
                         done
                     fi
-                    
+
                     # Si c'est une requête après un UPDATE, vérifier que les compteurs ont été incrémentés
                     if echo "$query_cql" | grep -qi "SELECT.*FROM feedback"; then
                         echo ""
@@ -334,16 +334,16 @@ EOF
             fi
             echo ""
         fi
-        
+
         if [ -n "$COORDINATOR_TIME" ]; then
             info "   ⏱️  Temps coordinateur : ${COORDINATOR_TIME}μs"
         fi
         if [ -n "$TOTAL_TIME" ]; then
             info "   ⏱️  Temps total : ${TOTAL_TIME}μs"
         fi
-        
+
         success "✅ Test $query_num exécuté avec succès"
-        
+
         # Stocker les résultats avec les données filtrées pour le rapport
         # Utiliser une méthode plus robuste pour capturer les données
         if [ -n "$QUERY_RESULTS_FILTERED" ] && [ "$QUERY_RESULTS_FILTERED" != "" ]; then
@@ -352,14 +352,14 @@ EOF
             # Si toujours vide, capturer au moins les en-têtes et quelques lignes de données
             OUTPUT_FOR_REPORT=$(echo "$QUERY_OUTPUT" | grep -E "^[[:space:]]*type_operation|^[[:space:]]*-{3,}|^[[:space:]]*[VIREMENT0-9]" | head -10 | awk '{printf "%s___NL___", $0}')
         fi
-        
+
         # Stocker dans le tableau (format simplifié pour compatibilité)
         QUERY_RESULTS+=("$query_num|$query_title|$ROW_COUNT|$QUERY_TIME|$COORDINATOR_TIME|$TOTAL_TIME|$EXIT_CODE|OK|${OUTPUT_FOR_REPORT}|$query_cql")
-        
+
         # Stocker aussi dans le fichier JSON pour un accès plus fiable (avec la requête dans un fichier temporaire)
         QUERY_TEMP_FILE=$(mktemp "/tmp/query_${query_num}_$(date +%s).txt")
         echo "$query_cql" > "$QUERY_TEMP_FILE"
-        
+
         python3 << PYEOF
 import json
 import os
@@ -393,18 +393,18 @@ results.append({
 with open(results_file, 'w') as f:
     json.dump(results, f, indent=2)
 PYEOF
-        
+
         # Nettoyer le fichier temporaire de la requête
         rm -f "$QUERY_TEMP_FILE"
     else
         error "❌ Erreur lors de l'exécution du test $query_num"
         echo "$QUERY_OUTPUT" | tail -10
         QUERY_RESULTS+=("$query_num|$query_title|0|$QUERY_TIME|||$EXIT_CODE|ERROR||$query_cql")
-        
+
         # Écrire dans le fichier JSON temporaire
         QUERY_TEMP_FILE=$(mktemp "/tmp/query_${query_num}_$(date +%s).txt")
         echo "$query_cql" > "$QUERY_TEMP_FILE"
-        
+
         python3 << PYEOF
 import json
 import os
@@ -437,11 +437,11 @@ results.append({
 with open(results_file, 'w') as f:
     json.dump(results, f, indent=2)
 PYEOF
-        
+
         # Nettoyer le fichier temporaire de la requête
         rm -f "$QUERY_TEMP_FILE"
     fi
-    
+
     rm -f "$TEMP_QUERY_FILE"
     echo ""
 }
@@ -460,17 +460,17 @@ if [ -f "$PREPARE_SCRIPT" ]; then
 else
     warn "⚠️  Script de préparation non trouvé : $PREPARE_SCRIPT"
     info "📝 Insertion manuelle des données de test..."
-    
+
     # Valeurs de test cohérentes
     TEST_TYPE_OPERATION="VIREMENT"
     TEST_SENS_OPERATION="DEBIT"
     TEST_LIBELLE_SIMPLIFIE="CARREFOUR MARKET"
     TEST_CATEGORIE="ALIMENTATION"
     TEST_CODE_ICS="ICS001"
-    
+
     # Vérifier/Créer données feedback_par_libelle
     CHECK_FEEDBACK_LIBELLE=$($CQLSH -e "USE domiramacatops_poc; SELECT COUNT(*) FROM feedback_par_libelle WHERE type_operation = '${TEST_TYPE_OPERATION}' AND sens_operation = '${TEST_SENS_OPERATION}' AND libelle_simplifie = '${TEST_LIBELLE_SIMPLIFIE}' AND categorie = '${TEST_CATEGORIE}';" 2>&1 | grep -E "^\s+[0-9]+" | tr -d ' ' || echo "0")
-    
+
     if [ "$CHECK_FEEDBACK_LIBELLE" = "0" ] || [ -z "$CHECK_FEEDBACK_LIBELLE" ]; then
         $CQLSH -e "USE domiramacatops_poc; INSERT INTO feedback_par_libelle (type_operation, sens_operation, libelle_simplifie, categorie, count_engine, count_client) VALUES ('${TEST_TYPE_OPERATION}', '${TEST_SENS_OPERATION}', '${TEST_LIBELLE_SIMPLIFIE}', '${TEST_CATEGORIE}', 0, 0);" 2>&1 | grep -vE "^Warnings|^$|^\([0-9]+ rows\)|coordinator|total|Executing|Read|Scanned|Merging|Tracing|Activity|Requests|responses|Parsing|Sending" || true
     else
@@ -478,10 +478,10 @@ else
         # Les données existent déjà, elles seront utilisées pour les tests
         info "   Données feedback_par_libelle existent déjà"
     fi
-    
+
     # Vérifier/Créer données feedback_par_ics
     CHECK_FEEDBACK_ICS=$($CQLSH -e "USE domiramacatops_poc; SELECT COUNT(*) FROM feedback_par_ics WHERE type_operation = '${TEST_TYPE_OPERATION}' AND sens_operation = '${TEST_SENS_OPERATION}' AND code_ics = '${TEST_CODE_ICS}' AND categorie = '${TEST_CATEGORIE}';" 2>&1 | grep -E "^\s+[0-9]+" | tr -d ' ' || echo "0")
-    
+
     if [ "$CHECK_FEEDBACK_ICS" = "0" ] || [ -z "$CHECK_FEEDBACK_ICS" ]; then
         $CQLSH -e "USE domiramacatops_poc; INSERT INTO feedback_par_ics (type_operation, sens_operation, code_ics, categorie, count_engine, count_client) VALUES ('${TEST_TYPE_OPERATION}', '${TEST_SENS_OPERATION}', '${TEST_CODE_ICS}', '${TEST_CATEGORIE}', 0, 0);" 2>&1 | grep -vE "^Warnings|^$|^\([0-9]+ rows\)|coordinator|total|Executing|Read|Scanned|Merging|Tracing|Activity|Requests|responses|Parsing|Sending" || true
     else
@@ -885,7 +885,7 @@ for r in results:
     if r.get('total_time'):
         report += f"- **Temps total** : {r['total_time']}μs\n"
     report += f"- **Statut** : {'✅ OK' if r['status'] == 'OK' else '❌ ERROR'}\n\n"
-    
+
     # Afficher la requête
     if r.get('query'):
         report += "**Requête CQL exécutée :**\n\n"
@@ -894,7 +894,7 @@ for r in results:
         # Utiliser des triple backticks Python pour éviter l'interprétation bash
         code_marker = chr(96) * 3  # Triple backticks
         report += code_marker + "cql\n" + query_lines + "\n" + code_marker + "\n\n"
-    
+
     # Afficher les résultats ou explication
     if r['rows'] == '0' or not r['rows'] or r['rows'] == '':
         report += "**Résultat :** Aucune ligne retournée\n\n"
@@ -917,7 +917,7 @@ for r in results:
             report += "```\n"
             report += "(Aucune donnée retournée)\n"
             report += "```\n\n"
-    
+
     # Validation et explication
     report += "**Validation :**\n\n"
     if r['status'] == 'OK':
@@ -926,7 +926,7 @@ for r in results:
         if r['rows'] != '0':
             report += f"- ✅ Les données correspondent aux critères de recherche\n"
             report += f"- ✅ Le résultat est conforme aux attentes\n"
-            
+
             # Vérification de cohérence pour les compteurs
             if 'count_engine' in r.get('query', '') or 'count_client' in r.get('query', ''):
                 report += f"\n**Validation de cohérence des compteurs :**\n\n"
@@ -944,7 +944,7 @@ for r in results:
                 report += f"- ⚠️  Aucune ligne retournée (les données correspondantes n'existent peut-être pas)\n"
     else:
         report += f"- ❌ Erreur lors de l'exécution de la requête\n"
-    
+
     # Pour les tests UPDATE (3, 4, 5, 6), afficher les valeurs avant/après
     if r.get('before_value') and r.get('after_value'):
         report += "\n**Démonstration de l'atomicité :**\n\n"
@@ -960,7 +960,7 @@ for r in results:
         report += "- Les opérations UPDATE sur les compteurs sont atomiques\n"
         report += "- Chaque incrément est garanti d'être appliqué exactement une fois\n"
         report += "- La valeur après incrément = valeur avant + 1 (vérifiée dans le script)\n"
-    
+
     report += "\n"
 
 report += """---
@@ -1011,4 +1011,3 @@ code "  ✅ Lecture compteur après incréments (par libellé) - GET équivalent
 code "  ✅ Lecture compteur après incréments (par ICS) - GET équivalent"
 code "  ✅ Démonstration de l'atomicité des compteurs (vérification avant/après)"
 echo ""
-

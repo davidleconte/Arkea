@@ -8,7 +8,7 @@
 # OBJECTIF :
 #   Ce script charge les données d'opérations depuis un fichier Parquet
 #   dans la table HCD 'operations_by_account' via Spark.
-#   
+#
 #   IMPORTANT - Stratégie Multi-Version (conforme IBM) :
 #   - Le batch écrit UNIQUEMENT cat_auto et cat_confidence
 #   - Le batch NE TOUCHE JAMAIS cat_user, cat_date_user, cat_validee
@@ -844,26 +844,26 @@ for i, (idx, row) in enumerate(df.iterrows()):
         contrat = str(row['contrat']) if pd.notna(row.get('contrat')) else None
         date_op = row['date_op'] if pd.notna(row.get('date_op')) else None
         numero_op = int(row['numero_op']) if pd.notna(row.get('numero_op')) else None
-        
+
         libelle = str(row['libelle']) if pd.notna(row.get('libelle')) else None
         montant = Decimal(str(row['montant'])) if pd.notna(row.get('montant')) else None
         devise = str(row['devise']) if pd.notna(row.get('devise')) else "EUR"
         type_operation = str(row['type_operation']) if pd.notna(row.get('type_operation')) else "AUTRE"
         sens_operation = str(row['sens_operation']) if pd.notna(row.get('sens_operation')) else "DEBIT"
-        
+
         operation_data = bytes(row['operation_data']) if pd.notna(row.get('operation_data')) and row.get('operation_data') is not None else b''
         date_valeur = row['date_valeur'] if pd.notna(row.get('date_valeur')) else None
         meta_flags = dict(row['meta_flags']) if pd.notna(row.get('meta_flags')) and row.get('meta_flags') is not None else None
-        
+
         libelle_prefix = str(row['libelle_prefix']) if pd.notna(row.get('libelle_prefix')) else None
         libelle_tokens = set(row['libelle_tokens']) if pd.notna(row.get('libelle_tokens')) and row.get('libelle_tokens') is not None else None
-        
+
         cat_auto = str(row['cat_auto']) if pd.notna(row.get('cat_auto')) else ""
         cat_confidence = Decimal(str(row['cat_confidence'])) if pd.notna(row.get('cat_confidence')) else Decimal("0.0")
         cat_user = str(row['cat_user']) if pd.notna(row.get('cat_user')) else None
         cat_date_user = row['cat_date_user'] if pd.notna(row.get('cat_date_user')) else None
         cat_validee = bool(row['cat_validee']) if pd.notna(row.get('cat_validee')) else False
-        
+
         session.execute(prepared, [
             code_si, contrat, date_op, numero_op,
             libelle, montant, devise, type_operation, sens_operation,
@@ -872,7 +872,7 @@ for i, (idx, row) in enumerate(df.iterrows()):
             cat_auto, cat_confidence, cat_user, cat_date_user, cat_validee
         ])
         count += 1
-        
+
         if (i + 1) % batch_size == 0:
             print(f"   Progression: {i + 1}/{total_rows} opérations écrites...")
     except Exception as e:
@@ -1055,8 +1055,8 @@ info "📝 Génération du rapport de démonstration..."
 cat > "$REPORT_FILE" << EOF
 # 📥 Démonstration : Chargement des Données Operations (Parquet)
 
-**Date** : $(date +"%Y-%m-%d %H:%M:%S")  
-**Script** : $(basename "$0")  
+**Date** : $(date +"%Y-%m-%d %H:%M:%S")
+**Script** : $(basename "$0")
 **Objectif** : Démontrer le chargement de données Parquet dans HCD via Spark
 
 ---
@@ -1297,18 +1297,18 @@ spark.stop()
 
 Le chargement des données Parquet a été effectué avec succès :
 
-✅ **Fichier source** : $PARQUET_FILE  
-✅ **Format** : Parquet (columnar binaire)  
-✅ **Opérations chargées** : $COUNT  
-✅ **Stratégie batch validée** : cat_user est null  
+✅ **Fichier source** : $PARQUET_FILE
+✅ **Format** : Parquet (columnar binaire)
+✅ **Opérations chargées** : $COUNT
+✅ **Stratégie batch validée** : cat_user est null
 ✅ **Stratégie multi-version** : Conforme IBM
 
 ### Avantages Parquet Validés
 
-✅ **Performance** : Lecture 3-10x plus rapide que CSV  
-✅ **Schéma typé** : Types préservés, pas de parsing  
-✅ **Compression** : Jusqu'à 10x plus petit  
-✅ **Optimisations** : Projection pushdown, predicate pushdown  
+✅ **Performance** : Lecture 3-10x plus rapide que CSV
+✅ **Schéma typé** : Types préservés, pas de parsing
+✅ **Compression** : Jusqu'à 10x plus petit
+✅ **Optimisations** : Projection pushdown, predicate pushdown
 ✅ **Production** : Format standard pour l'analytique
 
 ### Prochaines Étapes
@@ -1346,7 +1346,3 @@ EOF
 
 success "✅ Rapport généré : $REPORT_FILE"
 echo ""
-
-
-
-

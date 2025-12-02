@@ -8,7 +8,7 @@
 #   Ce script démontre de manière très didactique la recherche hybride qui
 #   combine Full-Text Search (SAI) et Vector Search (ByteT5) pour améliorer
 #   la pertinence des résultats.
-#   
+#
 #   Cette version didactique affiche :
 #   - Le DDL complet (schéma pour recherche hybride)
 #   - Les requêtes CQL détaillées (DML) pour chaque stratégie

@@ -94,15 +94,15 @@ for period_start, period_end in periods:
     print(f"📅 Génération données pour {period_start.strftime('%Y-%m')}...", file=sys.stderr)
     current_date = period_start
     period_operations = []
-    
+
     # Générer environ 30-40 opérations par mois
     period_label = period_start.strftime("%Y-%m")
     while current_date < period_end and len(period_operations) < 40:
         date_op_cql = current_date.strftime("%Y-%m-%dT%H:%M:%S")
-        
+
         # Insérer l'opération
         insert_query = f"INSERT INTO domiramacatops_poc.operations_by_account (code_si, contrat, date_op, numero_op, libelle, montant, devise, type_operation, cat_auto, cat_confidence) VALUES ('{code_si}', '{contrat}', '{date_op_cql}', {numero_op}, 'Test operation {numero_op} - {period_label}', {100.0 + numero_op}, 'EUR', 'VIREMENT', 'TEST_CATEGORY', 0.95)"
-        
+
         try:
             result = subprocess.run(
                 cqlsh_cmd + ['-e', insert_query],
@@ -117,10 +117,10 @@ for period_start, period_end in periods:
                 print(f"Erreur pour opération {numero_op}: {result.stderr}", file=sys.stderr)
         except Exception as e:
             print(f"Exception pour opération {numero_op}: {e}", file=sys.stderr)
-        
+
         numero_op += 1
         current_date += timedelta(hours=18)  # Environ 1.3 opérations par jour
-    
+
     print(f"✅ {len(period_operations)} opérations ajoutées pour {period_start.strftime('%Y-%m')}", file=sys.stderr)
 
 print(f"✅ {len(total_operations)} opérations de test ajoutées au total")
@@ -130,11 +130,11 @@ EXIT_CODE=$?
 
 if [ $EXIT_CODE -eq 0 ]; then
     success "✅ Données de test ajoutées avec succès"
-    
+
     # Vérifier les données
     info "🔍 Vérification des données ajoutées..."
     COUNT=$("$CQLSH_BIN" "$HCD_HOST" "$HCD_PORT" -e "USE domiramacatops_poc; SELECT COUNT(*) FROM operations_by_account WHERE code_si = '$CODE_SI_TEST' AND contrat = '$CONTRAT_TEST';" 2>&1 | grep -E "^[[:space:]]*[0-9]+[[:space:]]*$" | head -1 | tr -d ' ')
-    
+
     if [ -n "$COUNT" ] && [ "$COUNT" -gt 0 ]; then
         success "✅ $COUNT opérations de test trouvées"
     else

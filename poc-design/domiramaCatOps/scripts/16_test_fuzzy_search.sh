@@ -7,7 +7,7 @@
 # OBJECTIF :
 #   Ce script démontre de manière très didactique la recherche floue (fuzzy search)
 #   en utilisant les embeddings ByteT5 stockés dans la colonne 'libelle_embedding'.
-#   
+#
 #   Cette version didactique affiche :
 #   - Le DDL complet (schéma VECTOR et index)
 #   - Les requêtes CQL détaillées (DML)

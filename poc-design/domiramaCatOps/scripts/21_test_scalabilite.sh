@@ -57,7 +57,7 @@ info "🚀 Exécution du test..."
 
 if python3 "${PYTHON_SCRIPT}" 2>&1 | tee /tmp/test_scalabilite_output.txt; then
     success "✅ Test terminé avec succès"
-    
+
     # Génération du rapport
     info "📝 Génération du rapport..."
     export REPORT_FILE
@@ -105,7 +105,7 @@ with open(report_file, 'w') as f:
 
 print(f"✅ Rapport généré : {report_file}")
 PYEOF
-    
+
     success "✅ Rapport généré : ${REPORT_FILE}"
 else
     error "❌ Test échoué"

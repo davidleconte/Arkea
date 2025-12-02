@@ -8,7 +8,7 @@
 # OBJECTIF :
 #   Ce script génère un fichier Parquet contenant au moins 20 000 opérations
 #   avec une diversité maximale pour valider tous les use cases du POC.
-#   
+#
 #   Cette version didactique affiche :
 #   - Le code Python complet (génération CSV) avec explications
 #   - Le code Spark complet (conversion CSV → Parquet) avec explications
@@ -335,7 +335,7 @@ LIBELLES = [
     "CB BOULANGERIE PAUL PARIS",
     "CB BOULANGERIE ERIC KAYSER",
     "CB BOULANGERIE MAISON KAYSER",
-    
+
     # Restaurants - Variations pour fuzzy search
     "CB RESTAURANT LE COMPTOIR PARIS",
     "CB RESTAURANT ITALIEN PARIS 15",
@@ -355,7 +355,7 @@ LIBELLES = [
     "CB RESTAURANT LIVRAISON UBER EATS",
     "CB RESTAURANT LIVRAISON DELIVEROO",
     "CB RESTAURANT LIVRAISON JUST EAT",
-    
+
     # Transport - Variations pour fuzzy search
     "CB RATP PARIS METRO",
     "CB RATP PARIS BUS",
@@ -376,7 +376,7 @@ LIBELLES = [
     "CB PARKING PARIS 15",
     "CB PARKING INDIGO PARIS",
     "CB PARKING Q PARK PARIS",
-    
+
     # Habitation - Variations pour fuzzy search
     "LOYER MENSUEL APPARTEMENT PARIS 15EME",
     "LOYER JANVIER 2024 PARIS",
@@ -400,7 +400,7 @@ LIBELLES = [
     "CHARGES COPROPRIETE TRIMESTRE 4",
     "TAXE FONCIERE ANNEE 2024",
     "ASSURANCE HABITATION ANNUELLE",
-    
+
     # Utilitaires - Variations pour fuzzy search
     "PRELEVEMENT EDF PARIS",
     "PRELEVEMENT EDF FACTURE ELECTRICITE",
@@ -420,7 +420,7 @@ LIBELLES = [
     "PRELEVEMENT SPOTIFY",
     "PRELEVEMENT AMAZON PRIME",
     "PRELEVEMENT DISNEY PLUS",
-    
+
     # E-commerce - Variations pour fuzzy search
     "CB AMAZON FRANCE",
     "CB AMAZON MARKETPLACE",
@@ -439,7 +439,7 @@ LIBELLES = [
     "CB H&M PARIS",
     "CB UNIQLO PARIS",
     "CB PRIMARK PARIS",
-    
+
     # Santé - Variations pour fuzzy search
     "CB PHARMACIE PARIS 15",
     "CB PHARMACIE CENTRALE PARIS",
@@ -450,7 +450,7 @@ LIBELLES = [
     "CB KINE PARIS",
     "CB MUTUELLE SANTE",
     "CB MUTUELLE COMPLEMENTAIRE",
-    
+
     # Revenus - Variations pour fuzzy search
     "VIREMENT SALAIRE MENSUEL",
     "VIREMENT SALAIRE JANVIER 2024",
@@ -465,7 +465,7 @@ LIBELLES = [
     "VIREMENT ALLOCATION FAMILIALE",
     "VIREMENT RETRAITE MENSUELLE",
     "VIREMENT PENSION ALIMENTAIRE",
-    
+
     # Loisirs - Variations pour fuzzy search
     "CB CINEMA UGC PARIS",
     "CB CINEMA PATHE PARIS",
@@ -482,7 +482,7 @@ LIBELLES = [
     "CB EXPOSITION PARIS",
     "CB PARC ATTRACTIONS DISNEYLAND",
     "CB PARC ASTRIX ENTREE",
-    
+
     # Banque - Variations pour fuzzy search
     "FRAIS BANCAIRES",
     "FRAIS TENUE DE COMPTE",
@@ -492,7 +492,7 @@ LIBELLES = [
     "COMMISSION RETRAIT",
     "COMMISSION CHEQUE",
     "FRAIS OPERATION",
-    
+
     # Libellés avec typos potentielles (pour fuzzy search)
     "CB CARREFUR PARIS",  # Typo: CARREFOUR -> CARREFUR
     "CB CARREFOR PARIS",  # Typo: CARREFOUR -> CARREFOR
@@ -502,7 +502,7 @@ LIBELLES = [
     "CB UBER PARIS",  # Correct
     "CB AMAZOM FRANCE",  # Typo: AMAZON -> AMAZOM
     "CB AMAZON FRANCE",  # Correct
-    
+
     # Libellés sémantiquement similaires (pour vector search)
     "CB SUPERMARCHE CARREFOUR PARIS",
     "CB HYPERMARCHE CARREFOUR PARIS",
@@ -514,7 +514,7 @@ LIBELLES = [
     "CB TRANSPORT PUBLIC PARIS",
     "CB TRANSPORT EN COMMUN PARIS",
     "CB MOBILITE URBAINE PARIS",
-    
+
     # Libellés pour N-Gram (préfixes variés)
     "CB CARREFOUR",
     "CB CARREF",
@@ -560,13 +560,13 @@ END_DATE = datetime(2024, 7, 1)
 def generate_operations():
     """Génère les opérations"""
     operations = []
-    
+
     # Générer les contrats
     contrats = []
     for code_si in CODES_SI:
         for i in range(CONTRATS_PAR_SI):
             contrats.append((code_si, f"{code_si}{i:08d}"))
-    
+
     # Distribution des catégories
     categories_list = []
     for cat, prob in CATEGORIES:
@@ -576,22 +576,22 @@ def generate_operations():
     while len(categories_list) < NUM_LINES:
         categories_list.append(random.choice([cat for cat, _ in CATEGORIES]))
     random.shuffle(categories_list)
-    
+
     # Générer les opérations
     for i in range(NUM_LINES):
         code_si, contrat = random.choice(contrats)
-        
+
         # Date aléatoire dans la période
         days_diff = (END_DATE - START_DATE).days
         random_days = random.randint(0, days_diff - 1)
         date_op = START_DATE + timedelta(days=random_days, hours=random.randint(0, 23), minutes=random.randint(0, 59))
-        
+
         # Numéro opération (séquentiel par compte)
         numero_op = random.randint(1, 1000)
-        
+
         # Libellé aléatoire
         libelle = random.choice(LIBELLES)
-        
+
         # Montant (distribution réaliste)
         if random.random() < 0.9:  # 90% débits
             montant = Decimal(str(round(random.uniform(-5000, -5), 2)))
@@ -599,13 +599,13 @@ def generate_operations():
         else:  # 10% crédits
             montant = Decimal(str(round(random.uniform(100, 10000), 2)))
             sens = "CREDIT"
-        
+
         # Type opération
         type_op = random.choice(TYPES_OPERATION)
-        
+
         # Catégorie
         categorie_auto = categories_list[i]
-        
+
         # Confidence (distribution réaliste)
         # Pour certaines opérations, pas de catégorie (pour tester les cas null)
         if random.random() < 0.05:  # 5% sans catégorie
@@ -617,10 +617,10 @@ def generate_operations():
             cat_confidence = Decimal(str(round(random.uniform(0.5, 0.8), 2)))
         else:  # 5% faible confiance
             cat_confidence = Decimal(str(round(random.uniform(0.0, 0.5), 2)))
-        
+
         # Devise
         devise = "EUR"
-        
+
         operations.append({
             "code_si": code_si,
             "contrat": contrat,
@@ -634,7 +634,7 @@ def generate_operations():
             "categorie_auto": categorie_auto,
             "cat_confidence": str(cat_confidence),
         })
-    
+
     return operations
 
 # Générer les opérations
@@ -839,7 +839,7 @@ echo ""
 if [ -d "$OUTPUT_PARQUET" ]; then
     PARQUET_SIZE=$(du -sh "$OUTPUT_PARQUET" 2>/dev/null | cut -f1)
     PARQUET_FILES=$(find "$OUTPUT_PARQUET" -type f | wc -l | tr -d ' ')
-    
+
     success "✅ Fichier Parquet créé : $OUTPUT_PARQUET"
     result "📊 Statistiques :"
     echo "   - Taille : $PARQUET_SIZE"
@@ -924,8 +924,8 @@ backtick = chr(96)
 
 report = f"""# 📝 Démonstration : Génération des Données Operations (Parquet)
 
-**Date** : {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}  
-**Script** : `04_generate_operations_parquet.sh`  
+**Date** : {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+**Script** : `04_generate_operations_parquet.sh`
 **Objectif** : Générer un jeu de données complet pour valider tous les use cases du POC DomiramaCatOps
 
 ---
@@ -1112,9 +1112,9 @@ println(s"📊 Vérification : $count lignes dans le Parquet")
 
 ### Résultats
 
-✅ **Parquet généré** : {parquet_lines} opérations  
-✅ **Taille** : {parquet_size}  
-✅ **Fichiers** : {parquet_files} fichiers Parquet  
+✅ **Parquet généré** : {parquet_lines} opérations
+✅ **Taille** : {parquet_size}
+✅ **Fichiers** : {parquet_files} fichiers Parquet
 ✅ **Compression** : snappy
 
 ---
@@ -1133,20 +1133,20 @@ println(s"📊 Vérification : $count lignes dans le Parquet")
 
 ### Caractéristiques des Données
 
-✅ **10 codes SI** différents  
-✅ **500 contrats** (50 par code SI)  
-✅ **200+ libellés** différents  
-✅ **30+ catégories** différentes  
-✅ **5 types d'opérations** (VIREMENT, CB, CHEQUE, PRLV, AUTRE)  
-✅ **2 sens** (DEBIT, CREDIT)  
+✅ **10 codes SI** différents
+✅ **500 contrats** (50 par code SI)
+✅ **200+ libellés** différents
+✅ **30+ catégories** différentes
+✅ **5 types d'opérations** (VIREMENT, CB, CHEQUE, PRLV, AUTRE)
+✅ **2 sens** (DEBIT, CREDIT)
 ✅ **Période** : 6 mois (janvier 2024 - juin 2024)
 
 ### Recherches Avancées Supportées
 
-✅ **Full-text search** : Libellés variés avec accents français  
-✅ **Fuzzy search** : Variations de libellés et typos potentielles  
-✅ **N-Gram search** : Préfixes variés (CARREFOUR, CARREF, CARRE, CAR)  
-✅ **Vector search** : Libellés sémantiquement similaires  
+✅ **Full-text search** : Libellés variés avec accents français
+✅ **Fuzzy search** : Variations de libellés et typos potentielles
+✅ **N-Gram search** : Préfixes variés (CARREFOUR, CARREF, CARRE, CAR)
+✅ **Vector search** : Libellés sémantiquement similaires
 ✅ **Hybrid search** : Combinaison full-text + vector
 
 ---
@@ -1155,10 +1155,10 @@ println(s"📊 Vérification : $count lignes dans le Parquet")
 
 ### Résumé de la Génération
 
-✅ **Opérations générées** : {parquet_lines}  
-✅ **Fichier Parquet** : `{output_parquet}`  
-✅ **Format** : Parquet (compression snappy)  
-✅ **Taille** : {parquet_size}  
+✅ **Opérations générées** : {parquet_lines}
+✅ **Fichier Parquet** : `{output_parquet}`
+✅ **Format** : Parquet (compression snappy)
+✅ **Taille** : {parquet_size}
 ✅ **Diversité** : Maximale (200+ libellés, 30+ catégories)
 
 ### Points Clés Démontrés

@@ -88,7 +88,7 @@ if window_type == "monthly":
         window_end = current.replace(day=last_day) + timedelta(days=1)
         if window_end > end:
             window_end = end
-        
+
         windows.append((window_start.strftime("%Y-%m-%d"), window_end.strftime("%Y-%m-%d"), current.strftime("%Y-%m")))
         if current.month == 12:
             current = current.replace(year=current.year + 1, month=1)
@@ -133,24 +133,24 @@ while IFS='|' read -r window_num window_start window_end window_label; do
     info "  🪟 Fenêtre $window_num/$TOTAL_WINDOWS : $window_label ($window_start → $window_end)"
     info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-    
+
     WINDOW_OUTPUT="${OUTPUT_BASE}/${window_label}"
-    
+
     # Démarrer le chronomètre
     WINDOW_START_TIME=$(date +%s)
-    
+
     # Exporter la fenêtre
     python3 "${SCRIPT_DIR}/14_export_incremental_python.py" \
         "$window_start" "$window_end" "$WINDOW_OUTPUT" "$COMPRESSION" \
         "TEST_EXPORT" "TEST_CONTRAT" > /tmp/window_${window_label}.log 2>&1
-    
+
     WINDOW_EXIT_CODE=$?
     WINDOW_END_TIME=$(date +%s)
     WINDOW_DURATION=$((WINDOW_END_TIME - WINDOW_START_TIME))
-    
+
     # Lire les logs
     WINDOW_LOG=$(cat /tmp/window_${window_label}.log 2>/dev/null || echo "")
-    
+
     if [ $WINDOW_EXIT_CODE -eq 0 ]; then
         # Validation de la fenêtre
         PARQUET_COUNT=$(find "$WINDOW_OUTPUT" -name "*.parquet" 2>/dev/null | wc -l | tr -d ' ' || echo "0")
@@ -167,7 +167,7 @@ except:
     print("0")
 PYCOUNT
 )
-        
+
         # Statistiques détaillées
         STATS=$(python3 << PYSTATS
 import pyarrow.parquet as pq
@@ -177,7 +177,7 @@ try:
     dataset = pq.ParquetDataset(parquet_path)
     table = dataset.read()
     df = table.to_pandas()
-    
+
     stats = {
         "date_min": None,
         "date_max": None,
@@ -186,29 +186,29 @@ try:
         "vector_count": 0,
         "null_dates": 0
     }
-    
+
     if 'date_op' in df.columns:
         date_col = df['date_op']
         if not date_col.empty:
             stats["date_min"] = str(date_col.min()) if not date_col.isna().all() else None
             stats["date_max"] = str(date_col.max()) if not date_col.isna().all() else None
             stats["null_dates"] = int(date_col.isna().sum())
-    
+
     if 'code_si' in df.columns and 'contrat' in df.columns:
         stats["unique_accounts"] = int(df[['code_si', 'contrat']].drop_duplicates().shape[0])
-    
+
     if 'date_partition' in df.columns:
         stats["unique_partitions"] = int(df['date_partition'].nunique())
-    
+
     if 'libelle_embedding' in df.columns:
         stats["vector_count"] = int(df['libelle_embedding'].notna().sum())
-    
+
     print(json.dumps(stats))
 except Exception as e:
     print(json.dumps({"error": str(e)}))
 PYSTATS
 )
-        
+
         # Récupérer le nombre d'opérations depuis la source HCD pour comparaison
         # Utiliser le même filtrage que l'export Python (code_si et contrat)
         SOURCE_COUNT=$(python3 << PYSOURCE
@@ -218,46 +218,46 @@ from datetime import datetime
 try:
     cluster = Cluster(['localhost'], port=9042)
     session = cluster.connect('domiramacatops_poc')
-    
+
     # Convertir les dates en timestamps (comme dans l'export Python)
     start_dt = datetime.strptime("$window_start", "%Y-%m-%d")
     end_dt = datetime.strptime("$window_end", "%Y-%m-%d")
     start_ts = int(start_dt.timestamp() * 1000)
     end_ts = int(end_dt.timestamp() * 1000)
-    
+
     # Utiliser les mêmes filtres que l'export Python
     code_si_filter = "TEST_EXPORT"
     contrat_filter = "TEST_CONTRAT"
-    
+
     # Requête pour compter les opérations dans la période (même WHERE que l'export)
     query = f"""
-    SELECT COUNT(*) 
-    FROM operations_by_account 
-    WHERE code_si = '{code_si_filter}' 
-      AND contrat = '{contrat_filter}' 
-      AND date_op >= {start_ts} 
+    SELECT COUNT(*)
+    FROM operations_by_account
+    WHERE code_si = '{code_si_filter}'
+      AND contrat = '{contrat_filter}'
+      AND date_op >= {start_ts}
       AND date_op < {end_ts}
     """
-    
+
     result = session.execute(query)
     count = result.one()[0] if result else 0
     print(count)
-    
+
     cluster.shutdown()
 except Exception as e:
     print(f"0")
 PYSOURCE
 )
-        
+
         # Validation avancée si disponible
         VALIDATION_OUTPUT=""
         if [ -f "${SCRIPT_DIR}/14_validate_export_advanced.py" ]; then
             VALIDATION_OUTPUT=$(python3 "${SCRIPT_DIR}/14_validate_export_advanced.py" "$WINDOW_OUTPUT" "$SOURCE_COUNT" 2>&1 || echo "")
         fi
-        
+
         if [ "$PARQUET_COUNT" -gt 0 ] && [ "$OPERATIONS_COUNT" -gt 0 ]; then
             success "✅ Fenêtre $window_label : $OPERATIONS_COUNT opérations, $PARQUET_COUNT fichiers en ${WINDOW_DURATION}s"
-            
+
             # Ajouter les détails au JSON
             python3 << PYJSON
 import json
@@ -286,13 +286,13 @@ details.append(window_details)
 with open("$WINDOW_DETAILS_FILE", "w") as f:
     json.dump(details, f, indent=2)
 PYJSON
-            
+
             TOTAL_OPERATIONS=$((TOTAL_OPERATIONS + OPERATIONS_COUNT))
             TOTAL_FILES=$((TOTAL_FILES + PARQUET_COUNT))
             SUCCESSFUL_WINDOWS=$((SUCCESSFUL_WINDOWS + 1))
         else
             warn "⚠️  Fenêtre $window_label : Aucune donnée exportée"
-            
+
             # Ajouter les détails au JSON
             python3 << PYJSON
 import json
@@ -319,12 +319,12 @@ details.append(window_details)
 with open("$WINDOW_DETAILS_FILE", "w") as f:
     json.dump(details, f, indent=2)
 PYJSON
-            
+
             FAILED_WINDOWS=$((FAILED_WINDOWS + 1))
         fi
     else
         error "❌ Fenêtre $window_label : Erreur lors de l'export (code: $WINDOW_EXIT_CODE)"
-        
+
         # Ajouter les détails au JSON
         python3 << PYJSON
 import json
@@ -352,10 +352,10 @@ details.append(window_details)
 with open("$WINDOW_DETAILS_FILE", "w") as f:
     json.dump(details, f, indent=2)
 PYJSON
-        
+
         FAILED_WINDOWS=$((FAILED_WINDOWS + 1))
     fi
-    
+
 done <<< "$WINDOWS"
 
 # ============================================
@@ -416,7 +416,7 @@ if window_details:
     # Utiliser le nombre réel de fenêtres depuis les détails
     total_windows_actual = len(window_details)
     success_rate = (successful_windows_actual / total_windows_actual * 100) if total_windows_actual > 0 else 0
-    
+
     # Utiliser les valeurs calculées depuis les détails
     successful_windows = successful_windows_actual
     failed_windows = failed_windows_actual
@@ -507,16 +507,16 @@ for i, window in enumerate(sorted(window_details, key=lambda x: x.get('window_nu
     validation_output = window.get('validation_output', '')
     error = window.get('error', '')
     log = window.get('log', '')
-    
+
     status_icon = "✅" if success else "❌"
     status_text = "RÉUSSIE" if success else "ÉCHOUÉE"
-    
+
     # Échapper les caractères spéciaux pour le markdown
     def escape_md(text):
         if not text:
             return ""
         return str(text).replace('`', '\\`').replace('$', '\\$')
-    
+
     report += f"""### Fenêtre {window_num} : {window_label} {status_icon} {status_text}
 
 **Période** : {window_start} → {window_end}
@@ -538,7 +538,7 @@ for i, window in enumerate(sorted(window_details, key=lambda x: x.get('window_nu
         unique_partitions = stats.get('unique_partitions', 0)
         vector_count = stats.get('vector_count', 0)
         null_dates = stats.get('null_dates', 0)
-        
+
         report += f"""**Statistiques Détaillées** :
 - Date min : {date_min}
 - Date max : {date_max}
@@ -548,7 +548,7 @@ for i, window in enumerate(sorted(window_details, key=lambda x: x.get('window_nu
 - Dates NULL : {null_dates}
 
 """
-        
+
         if validation_output:
             # Tronquer à 2000 caractères pour inclure la section "Comparaison avec Source"
             val_output_escaped = escape_md(validation_output[:2000])
@@ -573,7 +573,7 @@ for i, window in enumerate(sorted(window_details, key=lambda x: x.get('window_nu
 ```
 
 """
-    
+
     report += "---\n\n"
 
 # Statistiques globales

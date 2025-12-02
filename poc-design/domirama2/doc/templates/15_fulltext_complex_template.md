@@ -24,6 +24,7 @@
 Les analyzers SAI traitent le texte avant l'indexation et la recherche pour améliorer la pertinence et la tolérance aux variations.
 
 **Configuration dans le schéma** :
+
 ```cql
 CREATE CUSTOM INDEX idx_libelle_fulltext_advanced
 ON operations_by_account(libelle)
@@ -47,6 +48,7 @@ WITH OPTIONS = {
 **Fonction** : Convertit tout en minuscules
 
 **Exemples** :
+
 - 'Loyer' → 'loyer'
 - 'LOYER' → 'loyer'
 - 'Loyer Paris' → 'loyer paris'
@@ -58,6 +60,7 @@ WITH OPTIONS = {
 **Fonction** : Supprime les accents
 
 **Exemples** :
+
 - 'impayé' → 'impaye'
 - 'café' → 'cafe'
 - 'régularisation' → 'regularisation'
@@ -69,6 +72,7 @@ WITH OPTIONS = {
 **Fonction** : Racinisation française (stemming)
 
 **Exemples** :
+
 - 'loyers' → 'loyer'
 - 'virements' → 'virement'
 - 'factures' → 'facture'
@@ -80,6 +84,7 @@ WITH OPTIONS = {
 **Fonction** : Ignore les mots vides (le, la, de, etc.)
 
 **Exemples** :
+
 - 'le loyer' → 'loyer' (le ignoré)
 - 'de paris' → 'paris' (de ignoré)
 
@@ -92,6 +97,7 @@ WITH OPTIONS = {
 ### Principe
 
 **Recherches Multi-Termes** :
+
 - Recherche de plusieurs mots simultanément
 - **AND implicite** : Tous les termes doivent être présents
 - Ordre des termes : Peu importe l'ordre
@@ -108,6 +114,7 @@ LIMIT 20;
 ```
 
 **Explication** :
+
 - `libelle : 'loyer' AND libelle : 'paris'`
 - Trouve les opérations contenant 'loyer' **ET** 'paris'
 - L'ordre des termes n'a pas d'importance
@@ -155,6 +162,7 @@ LIMIT 20;
 ```
 
 **Explication** :
+
 - AND implicite : Trouve les opérations contenant 'loyer' ET 'paris'
 - lowercase : 'Loyer' ou 'LOYER' trouvés
 - asciifolding : 'paris' trouvé même si accentué
@@ -173,6 +181,7 @@ LIMIT 20;
 ```
 
 **Explication** :
+
 - asciifolding : 'impaye' requête → 'impaye' index
 - asciifolding : 'IMPAYÉ' données → 'impaye' index
 - Match réussi grâce à l'asciifolding
@@ -190,6 +199,7 @@ LIMIT 20;
 ```
 
 **Explication** :
+
 - frenchLightStem : 'loyers' requête → 'loyer' racine
 - frenchLightStem : 'LOYER' données → 'loyer' racine
 - Match réussi grâce au stemming
@@ -208,6 +218,7 @@ LIMIT 20;
 ```
 
 **Explication** :
+
 - Full-text search : Filtre par libellé - analyzers
 - Filtre montant : Filtre numérique - index SAI standard
 - Combinaison : Résultats pertinents ET montant < -500
@@ -280,8 +291,3 @@ Les tests Full-Text Search complexes ont été exécutés avec succès :
 ---
 
 **✅ Tests Full-Text Search complexes terminés avec succès !**
-
-
-
-
-

@@ -118,7 +118,7 @@ GC_GRACE=$("$CQLSH" "$HCD_HOST" "$HCD_PORT" -e "DESCRIBE TABLE $KEYSPACE.$TABLE;
 if [ -n "$GC_GRACE" ]; then
     GC_GRACE_DAYS=$((GC_GRACE / 86400))
     success "gc_grace_seconds : $GC_GRACE secondes ($GC_GRACE_DAYS jours)"
-    
+
     if [ "$GC_GRACE" -lt 864000 ]; then
         warn "gc_grace_seconds est inférieur à 10 jours (défaut)"
         warn "   Assurez-vous que les repairs sont effectués régulièrement"
@@ -147,7 +147,7 @@ echo ""
 if [[ $REPLY =~ ^[OoYy]$ ]]; then
     info "Lancement du repair complet pour $KEYSPACE.$TABLE..."
     warn "⚠️  Cette opération peut prendre du temps selon la taille des données"
-    
+
     if "$NODETOOL" repair -pr "$KEYSPACE" "$TABLE" 2>&1; then
         success "Repair terminé avec succès"
     else
@@ -207,7 +207,7 @@ echo ""
 
 if [[ $REPLY =~ ^[OoYy]$ ]]; then
     info "Compaction en cours..."
-    
+
     if "$NODETOOL" compact "$KEYSPACE" "$TABLE" 2>&1; then
         success "Compaction lancée avec succès"
         info "La compaction s'exécute en arrière-plan"
@@ -246,4 +246,3 @@ echo "   1. Attendre la fin de la compaction (surveiller avec: nodetool compacti
 echo "   2. Vérifier les tombstones restants (SELECT COUNT(*) FROM $KEYSPACE.$TABLE)"
 echo "   3. Lancer l'export : ./27_export_incremental_parquet_v2_didactique.sh"
 echo ""
-

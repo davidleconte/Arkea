@@ -7,7 +7,7 @@
 # OBJECTIF :
 #   Ce script crée la table 'operations_by_account' dans le keyspace 'domiramacatops_poc'
 #   avec toutes les colonnes nécessaires pour la catégorisation des opérations.
-#   
+#
 #   Cette version didactique affiche :
 #   (Le DDL complet ( avec explications
 #   (Les équivalences HBase → HCD pour chaque concept
@@ -259,25 +259,25 @@ TABLE_CHECK=$(
 if echo "$TABLE_CHECK" | grep -q "operations_by_account"; then
     success "✅ Table operations_by_account créée"
     echo ""
-    
+
     # Compter les colonnes de catégorisation
     COLUMNS=$(echo "$TABLE_CHECK" | grep -E "(cat_auto|cat_confidence|cat_user|cat_date_user|cat_validee)" | wc -l | tr -d ' ')
-    
+
     if [ "$COLUMNS" -ge 5 ]; then
         success "✅ Toutes les colonnes de catégorisation présentes ("
     else
         warn "⚠️  Certaines colonnes manquantes ("
     fi
-    
+
     # Compter les colonnes de recherche avancée
     ADVANCED_COLUMNS=$(echo "$TABLE_CHECK" | grep -E "(libelle_prefix|libelle_tokens|libelle_embedding)" | wc -l | tr -d ' ')
-    
+
     if [ "$ADVANCED_COLUMNS" -ge 3 ]; then
         success "✅ Toutes les colonnes de recherche avancée présentes ("
     else
         warn "⚠️  Certaines colonnes de recherche avancée manquantes ("
     fi
-    
+
     echo ""
     result "📊 Structure de la table ( :"
     echo "   ┌─────────────────────────────────────────────────────────┐"

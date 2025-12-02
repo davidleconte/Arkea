@@ -101,17 +101,17 @@ echo ""
 for test_info in "${TESTS[@]}"; do
     IFS=':' read -r test_file test_name <<< "$test_info"
     test_path="${PYTHON_DIR}/${test_file}"
-    
+
     if [ ! -f "$test_path" ]; then
         warn "⚠️  Test non trouvé : $test_file"
         ((FAILED_TESTS++))
         continue
     fi
-    
+
     info "🧪 Exécution : $test_name"
     echo "   Fichier : $test_file"
     echo ""
-    
+
     if python3 "$test_path" 2>&1; then
         success "✅ $test_name : RÉUSSI"
         ((PASSED_TESTS++))
@@ -119,7 +119,7 @@ for test_info in "${TESTS[@]}"; do
         error "❌ $test_name : ÉCHOUÉ"
         ((FAILED_TESTS++))
     fi
-    
+
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
@@ -149,4 +149,3 @@ fi
 echo ""
 success "✅ Rapport généré : $REPORT_FILE"
 echo ""
-

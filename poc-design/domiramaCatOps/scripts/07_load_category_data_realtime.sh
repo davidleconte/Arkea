@@ -8,7 +8,7 @@
 # OBJECTIF :
 #   Ce script démontre de manière très didactique le chargement temps réel
 #   des corrections client avec vérification acceptation/opposition et mise à jour des feedbacks.
-#   
+#
 #   NOUVEAU - Vérification Acceptation/Opposition :
 #   - Vérification acceptation_client avant affichage
 #   - Vérification opposition_categorisation avant catégorisation
@@ -17,7 +17,7 @@
 #   NOUVEAU - Mise à Jour des Feedbacks :
 #   - Après chaque correction client, incrémenter count_client dans feedback_par_libelle
 #   - Utilisation de UPDATE avec type COUNTER (atomique)
-#   
+#
 #   Cette version didactique affiche :
 #   - La stratégie multi-version détaillée (batch vs client)
 #   - Les vérifications acceptation/opposition

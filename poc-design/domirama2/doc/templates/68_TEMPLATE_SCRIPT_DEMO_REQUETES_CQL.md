@@ -34,7 +34,7 @@ Un script de démonstration de requêtes CQL didactique doit :
 # OBJECTIF :
 #   Ce script démontre [fonctionnalité] en exécutant [nombre] requêtes CQL
 #   directement via cqlsh.
-#   
+#  
 #   Cette version didactique affiche :
 #   - Les équivalences HBase → HCD détaillées
 #   - Les requêtes CQL complètes avant exécution
@@ -192,21 +192,21 @@ execute_query() {
     local query_cql="$5"
     local expected_result="$6"
     local sai_value="$7"
-    
+
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "  🔍 REQUÊTE $query_num : $query_title"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-    
+
     info "📚 DÉFINITION - $query_title :"
     echo "   $query_description"
     echo ""
-    
+
     info "🔄 ÉQUIVALENT HBase :"
     code "   $hbase_equivalent"
     echo ""
-    
+
     info "📝 Requête CQL :"
     echo "$query_cql" | while IFS= read -r line; do
         if [ -n "$line" ]; then
@@ -214,16 +214,16 @@ execute_query() {
         fi
     done
     echo ""
-    
+
     if [ -n "$sai_value" ]; then
         info "💡 VALEUR AJOUTÉE SAI :"
         echo "   $sai_value" | sed 's/^/   /'
         echo ""
     fi
-    
+
     expected "📋 Résultat attendu : $expected_result"
     echo ""
-    
+
     # Créer un fichier temporaire pour la requête
     TEMP_QUERY_FILE=$(mktemp "/tmp/query_${query_num}_$(date +%s).cql")
     cat > "$TEMP_QUERY_FILE" <<EOF
@@ -231,37 +231,37 @@ USE domirama2_poc;
 TRACING ON;
 $query_cql
 EOF
-    
+
     # Exécuter la requête et mesurer le temps
     info "🚀 Exécution de la requête..."
     START_TIME=$(date +%s.%N)
     QUERY_OUTPUT=$($CQLSH -f "$TEMP_QUERY_FILE" 2>&1 | tee -a "$TEMP_OUTPUT")
     EXIT_CODE=$?
     END_TIME=$(date +%s.%N)
-    
+
     # Calculer le temps d'exécution (compatible macOS)
     if command -v bc >/dev/null 2>&1; then
         QUERY_TIME=$(echo "$END_TIME - $START_TIME" | bc 2>/dev/null || echo "0.000")
     else
         QUERY_TIME=$(python3 -c "print($END_TIME - $START_TIME)" 2>/dev/null || echo "0.000")
     fi
-    
+
     # Extraire les métriques du tracing
     COORDINATOR_TIME=$(echo "$QUERY_OUTPUT" | grep "coordinator" | awk -F'|' '{print $4}' | tr -d ' ' | head -1 || echo "")
     TOTAL_TIME=$(echo "$QUERY_OUTPUT" | grep "total" | awk -F'|' '{print $4}' | tr -d ' ' | head -1 || echo "")
-    
+
     # Compter les lignes retournées
     ROW_COUNT=$(echo "$QUERY_OUTPUT" | grep -E "^[A-Z_]+ \|" | grep -v "^code_si " | wc -l | tr -d ' ')
     if [ "$ROW_COUNT" -eq 0 ] || [ -z "$ROW_COUNT" ]; then
         ROW_COUNT=$(echo "$QUERY_OUTPUT" | grep -E "\([0-9]+ rows\)" | grep -oE "[0-9]+" | head -1 || echo "0")
     fi
-    
+
     # Extraire le plan d'exécution
     EXECUTION_PLAN=$(echo "$QUERY_OUTPUT" | grep -E "(Executing|single-partition|Read|Scanned|Merging)" | head -3 | tr '\n' '; ' || echo "")
-    
+
     # Filtrer les résultats pour affichage (sans tracing)
     QUERY_RESULTS_FILTERED=$(echo "$QUERY_OUTPUT" | grep -vE "^Warnings|^$|^\([0-9]+ rows\)|coordinator|total|Executing|Read|Scanned|Merging" | head -20)
-    
+
     # Afficher les résultats
     if [ $EXIT_CODE -eq 0 ]; then
         result "📊 Résultats obtenus ($ROW_COUNT ligne(s)) en ${QUERY_TIME}s :"
@@ -271,7 +271,7 @@ EOF
             echo "... (affichage limité à 15 lignes)"
         fi
         echo ""
-        
+
         if [ -n "$COORDINATOR_TIME" ] && [ "$COORDINATOR_TIME" != "" ]; then
             info "   ⏱️  Temps coordinateur : ${COORDINATOR_TIME}μs"
         fi
@@ -281,9 +281,9 @@ EOF
         if [ -n "$EXECUTION_PLAN" ]; then
             info "   📋 Plan d'exécution : $EXECUTION_PLAN"
         fi
-        
+
         success "✅ Requête $query_num exécutée avec succès"
-        
+
         # Stocker les résultats pour le rapport
         QUERY_RESULTS+=("$query_num|$query_title|$ROW_COUNT|$QUERY_TIME|$COORDINATOR_TIME|$TOTAL_TIME|$EXIT_CODE|OK")
     else
@@ -291,7 +291,7 @@ EOF
         echo "$QUERY_OUTPUT" | tail -10
         QUERY_RESULTS+=("$query_num|$query_title|0|$QUERY_TIME|||$EXIT_CODE|ERROR")
     fi
-    
+
     # Nettoyer
     rm -f "$TEMP_QUERY_FILE"
     echo ""
@@ -541,6 +541,7 @@ Le script 29 peut être refactorisé en utilisant ce template pour :
 3. **Requête 3** : Requête avec SAI (date + full-text)
 
 Chaque requête suivra la structure `execute_query()` avec :
+
 - Titre et description
 - Équivalent HBase
 - Code CQL complet
@@ -567,7 +568,3 @@ Chaque requête suivra la structure `execute_query()` avec :
 
 **Date de création** : 2025-11-27  
 **Version** : 1.0
-
-
-
-

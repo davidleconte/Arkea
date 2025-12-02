@@ -8,7 +8,7 @@
 # OBJECTIF :
 #   Ce script démontre de manière très didactique l'ingestion temps réel via Kafka
 #   et Spark Structured Streaming pour les corrections client de catégorisation.
-#   
+#
 #   Cette version didactique affiche :
 #   - Le contexte et l'architecture Kafka + Spark Streaming
 #   - La configuration Kafka (topics, producers)
@@ -396,18 +396,18 @@ REPORT_CONTENT=$(cat << EOF
 
 ### Cas d'Usage
 
-✅ **Ingestion temps réel** : Corrections client de catégorisation  
-✅ **Source** : API Client → Kafka Topic  
-✅ **Consumer** : Spark Structured Streaming  
-✅ **Cible** : Table \`operations_by_account\` (mise à jour cat_user, cat_date_user)  
+✅ **Ingestion temps réel** : Corrections client de catégorisation
+✅ **Source** : API Client → Kafka Topic
+✅ **Consumer** : Spark Structured Streaming
+✅ **Cible** : Table \`operations_by_account\` (mise à jour cat_user, cat_date_user)
 ✅ **Pattern** : Event-driven, faible latence
 
 ### Avantages
 
-✅ **Découplage** : Client API indépendant de HCD  
-✅ **Scalabilité** : Kafka gère la charge (buffering)  
-✅ **Fiabilité** : Checkpointing Spark (reprise après crash)  
-✅ **Performance** : Traitement en micro-batches  
+✅ **Découplage** : Client API indépendant de HCD
+✅ **Scalabilité** : Kafka gère la charge (buffering)
+✅ **Fiabilité** : Checkpointing Spark (reprise après crash)
+✅ **Performance** : Traitement en micro-batches
 ✅ **Exactly-Once** : Garantie de traitement unique
 
 ---
@@ -492,8 +492,8 @@ query.awaitTermination()
 
 ### Avantages
 
-✅ **Fault Tolerance** : Reprise après crash sans perte de données  
-✅ **Exactly-Once Semantics** : Garantie de traitement unique  
+✅ **Fault Tolerance** : Reprise après crash sans perte de données
+✅ **Exactly-Once Semantics** : Garantie de traitement unique
 ✅ **Idempotence** : Écritures idempotentes dans HCD
 
 ---
@@ -502,10 +502,10 @@ query.awaitTermination()
 
 La démonstration de Kafka + Spark Streaming a été réalisée avec succès, mettant en évidence :
 
-✅ **Architecture découplée** : Client API → Kafka → Spark Streaming → HCD  
-✅ **Scalabilité** : Kafka gère la charge (buffering)  
-✅ **Fiabilité** : Checkpointing Spark (reprise après crash)  
-✅ **Performance** : Traitement en micro-batches  
+✅ **Architecture découplée** : Client API → Kafka → Spark Streaming → HCD
+✅ **Scalabilité** : Kafka gère la charge (buffering)
+✅ **Fiabilité** : Checkpointing Spark (reprise après crash)
+✅ **Performance** : Traitement en micro-batches
 ✅ **Exactly-Once** : Garantie de traitement unique
 
 ---
@@ -514,4 +514,3 @@ La démonstration de Kafka + Spark Streaming a été réalisée avec succès, me
 EOF
 )
 generate_report "$REPORT_FILE" "🔄 Démonstration : Kafka Réel + Spark Streaming DomiramaCatOps" "$REPORT_CONTENT"
-

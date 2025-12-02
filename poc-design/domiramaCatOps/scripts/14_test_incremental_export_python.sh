@@ -111,7 +111,7 @@ EXIT_CODE=$?
 if [ $EXIT_CODE -eq 0 ]; then
     # Vérifier les fichiers Parquet créés
     PARQUET_COUNT=$(find "$OUTPUT_PATH" -name "*.parquet" 2>/dev/null | wc -l | tr -d ' ' || echo "0")
-    
+
     if [ "$PARQUET_COUNT" -gt 0 ]; then
         success "✅ Export réussi : $PARQUET_COUNT fichiers Parquet créés"
         info "   Répertoire : $OUTPUT_PATH"

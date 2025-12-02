@@ -77,6 +77,3 @@ Pour utiliser un template :
 ## Dernière Mise à Jour
 
 2024-11-27 : Tous les templates ont été centralisés dans ce répertoire.
-
-
-

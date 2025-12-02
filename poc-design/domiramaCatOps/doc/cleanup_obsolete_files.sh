@@ -1,10 +1,9 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script de Nettoyage : Suppression des Fichiers .md Obsolètes
 # Basé sur : 24_AUDIT_FICHIERS_OBSOLETES.md
 # ============================================
-
-set -e
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd "$SCRIPT_DIR"

@@ -8,7 +8,7 @@
 # OBJECTIF :
 #   Ce script démontre les fonctionnalités historique opposition (VERSIONS) en exécutant
 #   8 requêtes CQL directement via "${HCD_HOME}/bin/cqlsh".
-#   
+#
 #   Cette version didactique affiche :
 #   - Les équivalences HBase → HCD détaillées
 #   - Les requêtes CQL complètes avant exécution
@@ -175,21 +175,21 @@ execute_query() {
     local hbase_equivalent="$4"
     local query_cql="$5"
     local expected_result="$6"
-    
+
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "  🔍 TEST $query_num : $query_title"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-    
+
     info "📚 DÉFINITION - $query_title :"
     echo "   $query_description"
     echo ""
-    
+
     info "🔄 ÉQUIVALENT HBase :"
     code "   $hbase_equivalent"
     echo ""
-    
+
     info "📝 Requête CQL :"
     echo "$query_cql" | while IFS= read -r line; do
         if [ -n "$line" ]; then
@@ -197,10 +197,10 @@ execute_query() {
         fi
     done
     echo ""
-    
+
     expected "📋 Résultat attendu : $expected_result"
     echo ""
-    
+
     # Créer un fichier temporaire pour la requête
     TEMP_QUERY_FILE=$(mktemp "/tmp/query_${query_num}_$(date +%s).cql")
     cat > "$TEMP_QUERY_FILE" <<EOF
@@ -208,25 +208,25 @@ USE domiramacatops_poc;
 TRACING ON;
 $query_cql
 EOF
-    
+
     # Exécuter la requête
     info "🚀 Exécution de la requête..."
     START_TIME=$(date +%s.%N)
     QUERY_OUTPUT=$($CQLSH -f "$TEMP_QUERY_FILE" 2>&1 | tee -a "$TEMP_OUTPUT")
     EXIT_CODE=$?
     END_TIME=$(date +%s.%N)
-    
+
     # Calculer le temps d'exécution
     if command -v bc >/dev/null 2>&1; then
         QUERY_TIME=$(echo "$END_TIME - $START_TIME" | bc 2>/dev/null || echo "0.000")
     else
         QUERY_TIME=$(python3 -c "print($END_TIME - $START_TIME)" 2>/dev/null || echo "0.000")
     fi
-    
+
     # Extraire les métriques
     COORDINATOR_TIME=$(echo "$QUERY_OUTPUT" | grep "coordinator" | awk -F'|' '{print $4}' | tr -d ' ' | head -1 || echo "")
     TOTAL_TIME=$(echo "$QUERY_OUTPUT" | grep "total" | awk -F'|' '{print $4}' | tr -d ' ' | head -1 || echo "")
-    
+
     # Compter les lignes retournées (utiliser UNIQUEMENT le message "(X rows)" de cqlsh qui est fiable)
     ROW_COUNT=$(echo "$QUERY_OUTPUT" | grep -E "\([0-9]+ rows\)" | grep -oE "[0-9]+" | head -1 || echo "0")
     # Pour les UPDATE/INSERT, il n'y a pas de "(X rows)", donc ROW_COUNT reste 0
@@ -234,21 +234,21 @@ EOF
     if [ -z "$ROW_COUNT" ] || [ "$ROW_COUNT" = "" ]; then
         ROW_COUNT="0"
     fi
-    
+
     # Filtrer les résultats (garder les en-têtes et les lignes de données, exclure le tracing)
     # Améliorer pour capturer aussi total_entries, total_versions, total_before_ttl, etc.
     # Exclure aussi les lignes de tracing qui contiennent "Execute CQL3 query"
     QUERY_RESULTS_FILTERED=$(echo "$QUERY_OUTPUT" | grep -vE "^Warnings|^\([0-9]+ rows\)|coordinator|total|Executing|Read|Scanned|Merging|Tracing|Activity|Requests|responses|Parsing|Sending|MULTI_RANGE|Query execution|Limit|Filter|Fetch|LiteralIndexScan|single-partition|stage READ|RequestResponse|activity|timestamp|source|client|Processing|Request complete|Tracing session|Execute CQL3 query|^[[:space:]]*$" | grep -E "^[[:space:]]*code_efs|^[[:space:]]*no_pse|^[[:space:]]*horodate|^[[:space:]]*status|^[[:space:]]*timestamp|^[[:space:]]*raison|^[[:space:]]*total_entries|^[[:space:]]*total_versions|^[[:space:]]*total_before_ttl|^[[:space:]]*-{3,}|^[[:space:]]*[0-9]+[[:space:]]*\||^[[:space:]]*[[:alpha:]]+[[:space:]]*\|" | grep -vE "^[[:space:]]*-+[[:space:]]*\|[[:space:]]*-+[[:space:]]*\|" | head -30)
-    
+
     # Extraire les lignes de données réelles (commencent par un nombre ou contiennent des pipes avec données)
     # Améliorer pour capturer aussi les lignes avec UUID, dates, valeurs COUNT(*), etc.
     DATA_ROWS=$(echo "$QUERY_OUTPUT" | grep -E "^[[:space:]]*[0-9]+[[:space:]]*\|" | grep -vE "activity|timestamp|source|client|Processing|Request|Executing|Tracing" | head -30)
-    
+
     # Si toujours vide, essayer une capture plus large (toutes les lignes avec |)
     if [ -z "$DATA_ROWS" ] || [ "$DATA_ROWS" = "" ]; then
         DATA_ROWS=$(echo "$QUERY_OUTPUT" | grep -E "\|" | grep -vE "^Warnings|^\([0-9]+ rows\)|coordinator|total|Executing|Read|Scanned|Merging|Tracing|Activity|Requests|responses|Parsing|Sending|MULTI_RANGE|Query execution|Limit|Filter|Fetch|LiteralIndexScan|single-partition|stage READ|RequestResponse|activity|timestamp|source|client|Processing|Request complete|Tracing session|Execute CQL3 query|^[[:space:]]*$" | head -30)
     fi
-    
+
     # Pour les requêtes COUNT(*), capturer aussi les lignes avec seulement des nombres
     if [ -z "$DATA_ROWS" ] || [ "$DATA_ROWS" = "" ]; then
         COUNT_VALUE=$(echo "$QUERY_OUTPUT" | grep -E "^[[:space:]]*[0-9]+[[:space:]]*$" | grep -vE "activity|timestamp|source|client|Processing|Request|Executing|Tracing|coordinator|total|Warnings|\([0-9]+ rows\)" | head -1)
@@ -256,7 +256,7 @@ EOF
             DATA_ROWS="$COUNT_VALUE"
         fi
     fi
-    
+
     # Afficher les résultats
     if [ $EXIT_CODE -eq 0 ]; then
         result "📊 Résultats obtenus ($ROW_COUNT ligne(s)) en ${QUERY_TIME}s :"
@@ -279,20 +279,20 @@ EOF
             echo "... (affichage limité à 20 lignes sur $ROW_COUNT total)"
         fi
         echo ""
-        
+
         if [ -n "$COORDINATOR_TIME" ]; then
             info "   ⏱️  Temps coordinateur : ${COORDINATOR_TIME}μs"
         fi
         if [ -n "$TOTAL_TIME" ]; then
             info "   ⏱️  Temps total : ${TOTAL_TIME}μs"
         fi
-        
+
         success "✅ Test $query_num exécuté avec succès"
-        
+
         # Stocker les résultats avec les données filtrées pour le rapport
         # Améliorer la capture pour s'assurer d'avoir toujours des données
         OUTPUT_FOR_REPORT=""
-        
+
         # D'abord, capturer l'en-tête et le séparateur (inclure aussi total_entries, total_versions, total_before_ttl, etc.)
         # Améliorer pour capturer les en-têtes même s'ils contiennent plusieurs colonnes
         HEADER_LINE=$(echo "$QUERY_OUTPUT" | grep -E "^[[:space:]]*code_efs|^[[:space:]]*no_pse|^[[:space:]]*horodate|^[[:space:]]*status|^[[:space:]]*timestamp|^[[:space:]]*raison|^[[:space:]]*total_entries|^[[:space:]]*total_versions|^[[:space:]]*total_before_ttl" | head -1)
@@ -301,14 +301,14 @@ EOF
             HEADER_LINE=$(echo "$QUERY_OUTPUT" | grep -E "code_efs|no_pse|horodate|status|timestamp|raison|total_entries|total_versions|total_before_ttl" | grep -E "\|" | grep -vE "^[[:space:]]*-+[[:space:]]*\|" | head -1)
         fi
         SEPARATOR_LINE=$(echo "$QUERY_OUTPUT" | grep -E "^[[:space:]]*-{3,}" | head -1)
-        
+
         if [ -n "$HEADER_LINE" ]; then
             OUTPUT_FOR_REPORT="${HEADER_LINE}___NL___"
         fi
         if [ -n "$SEPARATOR_LINE" ]; then
             OUTPUT_FOR_REPORT="${OUTPUT_FOR_REPORT}${SEPARATOR_LINE}___NL___"
         fi
-        
+
         # Ensuite, capturer les données - améliorer pour capturer aussi les valeurs COUNT(*)
         if [ -n "$QUERY_RESULTS_FILTERED" ] && [ "$QUERY_RESULTS_FILTERED" != "" ]; then
             # Extraire seulement les lignes de données (pas les en-têtes déjà capturés)
@@ -323,7 +323,7 @@ EOF
         elif [ -n "$DATA_ROWS" ] && [ "$DATA_ROWS" != "" ]; then
             OUTPUT_FOR_REPORT="${OUTPUT_FOR_REPORT}$(echo "$DATA_ROWS" | head -20 | awk '{printf "%s___NL___", $0}')"
         fi
-        
+
         # Si toujours vide, essayer une capture directe depuis QUERY_OUTPUT
         if [ -z "$OUTPUT_FOR_REPORT" ] || [ "$OUTPUT_FOR_REPORT" = "" ] || [ "$(echo "$OUTPUT_FOR_REPORT" | grep -vE "___NL___" | wc -l)" -le 2 ]; then
             # Capturer directement les lignes avec des pipes et des données
@@ -344,7 +344,7 @@ EOF
                 fi
             fi
         fi
-        
+
         # Dernière tentative : capturer les lignes avec des nombres seuls (pour COUNT(*))
         if [ -z "$OUTPUT_FOR_REPORT" ] || [ "$OUTPUT_FOR_REPORT" = "" ] || [ "$(echo "$OUTPUT_FOR_REPORT" | grep -vE "___NL___" | wc -l)" -le 2 ]; then
             COUNT_VALUE=$(echo "$QUERY_OUTPUT" | grep -E "^[[:space:]]*[0-9]+[[:space:]]*$" | grep -vE "activity|timestamp|source|client|Processing|Request|Executing|Tracing|coordinator|total|Warnings|\([0-9]+ rows\)|Execute CQL3 query" | head -1)
@@ -358,7 +358,7 @@ EOF
                 fi
             fi
         fi
-        
+
         # Nettoyer les duplications dans OUTPUT_FOR_REPORT
         if [ -n "$OUTPUT_FOR_REPORT" ] && [ "$OUTPUT_FOR_REPORT" != "" ]; then
             # Supprimer les lignes dupliquées (garder seulement la première occurrence)
@@ -370,7 +370,7 @@ EOF
                 # Normaliser les espaces pour la comparaison
                 normalized = $0
                 gsub(/^[[:space:]]+|[[:space:]]+$/, "", normalized)
-                
+
                 # Identifier les en-têtes (colonnes) - chercher les noms de colonnes (même avec des pipes)
                 # Un en-tête contient au moins un nom de colonne connu et commence par un nom de colonne ou contient des pipes
                 # Exclure les lignes qui sont clairement des données (commencent par un UUID ou un nombre)
@@ -378,10 +378,10 @@ EOF
                 # Un en-tête contient des noms de colonnes mais ne commence pas par un UUID ou un nombre
                 is_header = !is_data_line && (normalized ~ /code_efs|no_pse|horodate|status|timestamp|raison|total_entries|total_versions|total_before_ttl/) && (normalized ~ /\|/ || normalized ~ /^[a-z_]+/) && !(normalized ~ /^[0-9a-f-]{8,}/)
                 is_separator = (normalized ~ /^-+[[:space:]]*$/)
-                
+
                 # Compter les occurrences générales
                 seen[normalized]++
-                
+
                 # Gérer les en-têtes : garder seulement le premier
                 if (is_header && !is_separator) {
                     if (header_seen == 0) {
@@ -407,21 +407,21 @@ EOF
                 }
             }')
         fi
-        
+
         QUERY_RESULTS+=("$query_num|$query_title|$ROW_COUNT|$QUERY_TIME|$COORDINATOR_TIME|$TOTAL_TIME|$EXIT_CODE|OK|${OUTPUT_FOR_REPORT}")
-        
+
         # Stocker aussi dans le fichier JSON pour un accès plus fiable
         QUERY_TEMP_FILE=$(mktemp "/tmp/query_${query_num}_$(date +%s).txt")
         echo "$query_cql" > "$QUERY_TEMP_FILE"
-        
+
         # Créer un fichier temporaire pour OUTPUT_FOR_REPORT pour éviter les problèmes d'échappement
         OUTPUT_TEMP_FILE=$(mktemp "/tmp/output_${query_num}_$(date +%s).txt")
         printf '%s' "$OUTPUT_FOR_REPORT" > "$OUTPUT_TEMP_FILE"
-        
+
         # Créer un fichier temporaire pour query_title pour éviter les problèmes d'échappement
         TITLE_TEMP_FILE=$(mktemp "/tmp/title_${query_num}_$(date +%s).txt")
         printf '%s' "$query_title" > "$TITLE_TEMP_FILE"
-        
+
         python3 << PYEOF
 import json
 import os
@@ -473,24 +473,24 @@ results.append({
 with open(results_file, 'w') as f:
     json.dump(results, f, indent=2)
 PYEOF
-        
+
         # Nettoyer le fichier temporaire
         rm -f "$TITLE_TEMP_FILE"
-        
+
         # Nettoyer les fichiers temporaires (TITLE_TEMP_FILE est nettoyé dans le bloc Python ci-dessus)
         rm -f "$QUERY_TEMP_FILE" "$OUTPUT_TEMP_FILE"
     else
         error "❌ Erreur lors de l'exécution du test $query_num"
         echo "$QUERY_OUTPUT" | tail -10
         QUERY_RESULTS+=("$query_num|$query_title|0|$QUERY_TIME|||$EXIT_CODE|ERROR")
-        
+
         # Stocker aussi l'erreur dans le JSON
         # Créer des fichiers temporaires pour éviter les problèmes d'échappement
         TITLE_TEMP_FILE=$(mktemp "/tmp/title_${query_num}_$(date +%s).txt")
         QUERY_TEMP_FILE_ERROR=$(mktemp "/tmp/query_${query_num}_error_$(date +%s).txt")
         printf '%s' "$query_title" > "$TITLE_TEMP_FILE"
         printf '%s' "$query_cql" > "$QUERY_TEMP_FILE_ERROR"
-        
+
         python3 << PYEOF
 import json
 import os
@@ -533,11 +533,11 @@ results.append({
 with open(results_file, 'w') as f:
     json.dump(results, f, indent=2)
 PYEOF
-        
+
         # Nettoyer les fichiers temporaires
         rm -f "$TITLE_TEMP_FILE" "$QUERY_TEMP_FILE_ERROR"
     fi
-    
+
     rm -f "$TEMP_QUERY_FILE"
     echo ""
 }
@@ -687,7 +687,7 @@ if [ "$CURRENT_COUNT" -lt 100 ]; then
     info "📝 Ajout d'entrées supplémentaires pour démontrer l'historique illimité (> 50)..."
     ADDITIONAL_NEEDED=$((100 - CURRENT_COUNT))
     info "   Ajout de $ADDITIONAL_NEEDED entrées supplémentaires..."
-    
+
     python3 << PYEOF
 import sys
 from datetime import datetime, timedelta
@@ -719,7 +719,7 @@ for i in range(${ADDITIONAL_NEEDED}):
 
     raison_escaped = raison.replace("'", "''")
     cql_query = f"""USE domiramacatops_poc; INSERT INTO historique_opposition (code_efs, no_pse, horodate, status, timestamp, raison) VALUES ('{code_efs}', '{no_pse}', {horodate}, '{status}', '{timestamp.strftime('%Y-%m-%d %H:%M:%S+0000')}', '{raison_escaped}');"""
-    
+
     try:
         result = subprocess.run(
             cqlsh_cmd.split() + ['-e', cql_query],
@@ -1372,14 +1372,14 @@ for r in results:
     if r.get('total_time'):
         report += f"- **Temps total** : {r['total_time']}μs\n"
     report += f"- **Statut** : {'✅ OK' if r['status'] == 'OK' else '❌ ERROR'}\n\n"
-    
+
     # Afficher la requête CQL exécutée
     if r.get('query'):
         report += "**Requête CQL exécutée :**\n\n"
         query_lines = r['query'].replace('___NL___', '\n')
         code_marker = chr(96) * 3
         report += code_marker + "cql\n" + query_lines + "\n" + code_marker + "\n\n"
-    
+
     # Afficher les résultats ou explication
     if r['rows'] == '0' or not r['rows'] or r['rows'] == '':
         report += "**Résultat :** Aucune ligne retournée\n\n"
@@ -1424,12 +1424,12 @@ for r in results:
             report += "```\n"
             report += str(r['rows']) + " ligne(s) retournée(s) mais format non capturé dans le rapport\n"
             report += "```\n\n"
-        
+
         # Contrôle de cohérence
         report += "**Contrôle de cohérence :**\n\n"
         report += "- ✅ Requête exécutée avec succès\n"
         report += f"- ✅ {r['rows']} ligne(s) retournée(s)\n"
-        
+
         # Vérifications spécifiques selon le test
         backtick = chr(96)
         if 'Test 1' in r.get('title', '') or 'Lecture Historique Complet' in r.get('title', ''):
@@ -1529,10 +1529,10 @@ for r in results:
                 report += "- ⚠️  Aucune alternance détectée dans la séquence\n"
             report += "- ⚠️  Note : Analyse de séquence des statuts effectuée côté application\n"
             report += "- ✅ **Équivalent HBase :** SCAN avec analyse de séquence (traitement côté application également)\n"
-        
+
         # Ajouter une section "Pourquoi le résultat est correct" pour chaque test
         report += "\n**Pourquoi le résultat est correct :**\n\n"
-        
+
         if r['num'] == '1':
             report += "- La requête utilise les clés primaires (code_efs, no_pse) pour un accès optimal.\n"
             report += "- L'ordre ORDER BY horodate DESC garantit que les entrées les plus récentes apparaissent en premier.\n"
@@ -1605,7 +1605,7 @@ for r in results:
             report += "- La requête a été exécutée avec succès sans erreur.\n"
             report += f"- Le nombre de lignes retournées ({r['rows']}) correspond aux données attendues.\n"
             report += "- Les résultats sont cohérents avec les critères de la requête.\n"
-        
+
         report += "\n"
 
 report += """---
@@ -1664,4 +1664,3 @@ code "  ✅ Time-travel queries et comparaison de versions"
 code "  ✅ Pagination et recherche multi-critères"
 code "  ✅ Agrégations temporelles et détection de patterns"
 echo ""
-

@@ -31,7 +31,7 @@ Un script de setup didactique doit :
 # OBJECTIF :
 #   Ce script initialise le keyspace '[keyspace]' et la table '[table]'
 #   avec toutes les colonnes nécessaires. Il crée également les index SAI.
-#   
+#  
 #   Cette version didactique affiche :
 #   - Le DDL complet (keyspace, table, index) avec explications
 #   - Les équivalences HBase → HCD pour chaque concept
@@ -286,16 +286,16 @@ TABLE_CHECK=$(./bin/cqlsh localhost 9042 -e "DESCRIBE TABLE domiramacatops_poc.o
 if echo "$TABLE_CHECK" | grep -q "operations_by_account"; then
     success "✅ Table operations_by_account créée"
     echo ""
-    
+
     # Compter les colonnes de catégorisation
     COLUMNS=$(echo "$TABLE_CHECK" | grep -E "(cat_auto|cat_confidence|cat_user|cat_date_user|cat_validée)" | wc -l | tr -d ' ')
-    
+
     if [ "$COLUMNS" -ge 5 ]; then
         success "✅ Toutes les colonnes de catégorisation présentes ($COLUMNS/5)"
     else
         warn "⚠️  Certaines colonnes manquantes (trouvé: $COLUMNS/5)"
     fi
-    
+
     echo ""
     result "📊 Structure de la table (extrait) :"
     echo "   ┌─────────────────────────────────────────────────────────┐"
@@ -573,24 +573,24 @@ CREATE TABLE IF NOT EXISTS operations_by_account (
     -- Partition Keys
     code_si           TEXT,
     contrat           TEXT,
-    
+
     -- Clustering Keys
     date_op           TIMESTAMP,
     numero_op         INT,
-    
+
     -- Colonnes principales
     libelle           TEXT,
     montant           DECIMAL,
     type_operation    TEXT,
     operation_data    BLOB,
-    
+
     -- Colonnes de catégorisation
     cat_auto          TEXT,
     cat_confidence    DECIMAL,
     cat_user          TEXT,
     cat_date_user     TIMESTAMP,
     cat_validee       BOOLEAN,
-    
+
     PRIMARY KEY ((code_si, contrat), date_op, numero_op)
 ) WITH CLUSTERING ORDER BY (date_op DESC, numero_op ASC)
   AND default_time_to_live = 315360000;
@@ -635,7 +635,7 @@ CREATE TABLE IF NOT EXISTS operations_by_account (
 ### Index Full-Text (Analyzer Français)
 
 \`\`\`cql
-CREATE CUSTOM INDEX IF NOT EXISTS idx_libelle_fulltext 
+CREATE CUSTOM INDEX IF NOT EXISTS idx_libelle_fulltext
 ON operations_by_account(libelle)
 USING 'StorageAttachedIndex'
 WITH OPTIONS = {
@@ -719,9 +719,9 @@ show_ddl_section() {
 verify_and_display_schema() {
     local keyspace="$1"
     local table="$2"
-    
+
     info "🔍 Vérification du schéma..."
-    
+
     # Vérifier keyspace
     if ./bin/cqlsh localhost 9042 -e "SELECT keyspace_name FROM system_schema.keyspaces WHERE keyspace_name = '$keyspace';" > /dev/null 2>&1; then
         success "✅ Keyspace '$keyspace' existe"
@@ -729,7 +729,7 @@ verify_and_display_schema() {
         error "❌ Keyspace '$keyspace' n'existe pas"
         return 1
     fi
-    
+
     # Vérifier table
     if ./bin/cqlsh localhost 9042 -e "SELECT table_name FROM system_schema.tables WHERE keyspace_name = '$keyspace' AND table_name = '$table';" > /dev/null 2>&1; then
         success "✅ Table '$table' existe"
@@ -737,7 +737,7 @@ verify_and_display_schema() {
         error "❌ Table '$table' n'existe pas"
         return 1
     fi
-    
+
     # Afficher structure
     result "📊 Structure de la table :"
     echo "   ┌─────────────────────────────────────────────────────────┐"
@@ -817,6 +817,3 @@ Voir `10_setup_domiramacatops_poc.sh` (version améliorée) pour un exemple comp
 ---
 
 **✅ Ce template est spécifiquement conçu pour les scripts de setup/schéma !**
-
-
-

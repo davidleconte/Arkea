@@ -211,13 +211,13 @@ def generate_operations():
     operations = []
     numero_op = 1
     base_date = datetime.now() - timedelta(days=180)  # 6 mois en arrière
-    
+
     for query, libelles in RELEVANT_LIBELLES.items():
         for libelle in libelles:
             # Générer une date aléatoire sur 6 mois
             days_offset = random.randint(0, 180)
             date_op = base_date + timedelta(days=days_offset)
-            
+
             # Générer un montant réaliste
             if "LOYER" in libelle.upper():
                 montant = Decimal(str(random.uniform(500, 1500)))
@@ -233,7 +233,7 @@ def generate_operations():
                 montant = Decimal(str(random.uniform(500, 2000)))
             else:
                 montant = Decimal(str(random.uniform(10, 500)))
-            
+
             operation = {
                 "code_si": CODE_SI,
                 "contrat": CONTRAT,
@@ -248,10 +248,10 @@ def generate_operations():
                 "cat_auto": get_category(libelle),
                 "cat_confidence": Decimal("0.95"),
             }
-            
+
             operations.append(operation)
             numero_op += 1
-    
+
     return operations
 
 def main():
@@ -260,20 +260,20 @@ def main():
     print("  📊 Génération de Données de Test Pertinentes")
     print("=" * 70)
     print()
-    
+
     # Connexion HCD
     print("📡 Connexion à HCD...")
     cluster = Cluster(['localhost'])
     session = cluster.connect(KEYSPACE)
     print("✅ Connecté à HCD")
     print()
-    
+
     # Générer les opérations
     print("🔄 Génération des opérations...")
     operations = generate_operations()
     print(f"✅ {len(operations)} opérations générées")
     print()
-    
+
     # Insérer dans HCD
     print("💾 Insertion dans HCD...")
     insert_query = """
@@ -284,10 +284,10 @@ def main():
         cat_auto, cat_confidence
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """
-    
+
     prepared = session.prepare(insert_query)
     inserted = 0
-    
+
     for op in operations:
         try:
             session.execute(prepared, (
@@ -301,18 +301,18 @@ def main():
                 print(f"   {inserted}/{len(operations)} opérations insérées...")
         except Exception as e:
             print(f"   ⚠️  Erreur pour '{op['libelle']}': {str(e)}")
-    
+
     print(f"✅ {inserted} opérations insérées avec succès")
     print()
-    
+
     # Note sur les embeddings
     print("💡 Note : Les embeddings (ByteT5 et e5-large) doivent être générés séparément")
     print("   Utiliser les scripts de génération d'embeddings pour compléter les données")
     print()
-    
+
     session.shutdown()
     cluster.shutdown()
-    
+
     print("=" * 70)
     print("  ✅ Génération terminée !")
     print("=" * 70)
@@ -336,4 +336,3 @@ rm -f "$PYTHON_SCRIPT"
 echo ""
 success "✅ Script terminé avec succès"
 echo ""
-

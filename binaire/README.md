@@ -8,6 +8,7 @@
 ## 📋 Contenu
 
 ### HCD (Hyper-Converged Database)
+
 - **Répertoire** : `hcd-1.2.3/`
 - **Version** : 1.2.3
 - **Type** : Installation locale (tarball extrait)
@@ -16,6 +17,7 @@
 - **Port** : 9042 (CQL)
 
 ### Spark
+
 - **Répertoire** : `spark-3.5.1/`
 - **Version** : 3.5.1
 - **Type** : Installation locale (tarball extrait)
@@ -24,6 +26,7 @@
 - **Compatible** : Java 11
 
 ### Kafka
+
 - **Répertoire** : `kafka/` (lien symbolique)
 - **Version** : 4.1.1
 - **Type** : Installation Homebrew
@@ -33,6 +36,7 @@
 - **Compatible** : Java 17
 
 ### spark-cassandra-connector
+
 - **Répertoire** : `spark-jars/`
 - **Version** : 3.5.0
 - **Type** : JAR téléchargé
@@ -96,8 +100,3 @@ libexec/bin/kafka-server-start.sh .bottle/etc/kafka/server.properties
 ---
 
 **Tous les logiciels du POC sont organisés dans ce répertoire !** ✅
-
-
-
-
-

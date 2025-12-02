@@ -107,7 +107,7 @@ for line in lines:
     line = line.strip()
     if not line or line.startswith('(') or line.startswith('Warnings') or line.startswith('---'):
         continue
-    
+
     # Détecter les lignes de données (commencent par un nombre ou contiennent des pipes)
     if '|' in line and not line.startswith('code_si'):
         parts = [p.strip() for p in line.split('|')]
@@ -117,7 +117,7 @@ for line in lines:
             date_op = parts[2]
             numero_op = parts[3]
             meta_flags_str = parts[4] if len(parts) > 4 else ''
-            
+
             # Parser meta_flags (format MAP: {'key1': 'value1', 'key2': 'value2'})
             meta_flags = {}
             if meta_flags_str and meta_flags_str != 'null':
@@ -126,7 +126,7 @@ for line in lines:
                 matches = re.findall(r"'([^']+)':\s*'([^']+)'", meta_flags_str)
                 for key, value in matches:
                     meta_flags[key] = value
-            
+
             operations.append({
                 'code_si': code_si,
                 'contrat': contrat,
@@ -141,7 +141,7 @@ print(f"✅ {len(operations)} opérations récupérées")
 updated = 0
 for op in operations:
     meta_flags = op['meta_flags']
-    
+
     # Construire la clause SET pour les colonnes dérivées
     set_clauses = []
     if 'source' in meta_flags:
@@ -156,13 +156,13 @@ for op in operations:
         set_clauses.append(f"meta_ip = '{meta_flags['ip']}'")
     if 'location' in meta_flags:
         set_clauses.append(f"meta_location = '{meta_flags['location']}'")
-    
+
     if set_clauses:
         # Échapper les apostrophes dans date_op si nécessaire
         date_op_escaped = op['date_op'].replace("'", "''")
-        
+
         update_query = f"""USE domiramacatops_poc; UPDATE operations_by_account SET {', '.join(set_clauses)} WHERE code_si = '{op['code_si']}' AND contrat = '{op['contrat']}' AND date_op = '{date_op_escaped}' AND numero_op = {op['numero_op']};"""
-        
+
         try:
             result = subprocess.run(
                 cqlsh_cmd.split() + ['-e', update_query],
@@ -198,4 +198,3 @@ fi
 
 echo ""
 success "✅ Préparation des données terminée"
-

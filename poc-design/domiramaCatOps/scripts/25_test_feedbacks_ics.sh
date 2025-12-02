@@ -8,7 +8,7 @@
 # OBJECTIF :
 #   Ce script démontre de manière très didactique les fonctionnalités compteurs atomiques
 #   (feedbacks) par ICS (code catégorie) en exécutant des requêtes CQL directement via cqlsh.
-#   
+#
 #   Cette version didactique affiche :
 #   - Les équivalences HBase → HCD détaillées
 #   - Les requêtes CQL complètes avant exécution
@@ -410,9 +410,9 @@ WHERE type_operation = 'VIREMENT'
 
 La démonstration des Feedbacks ICS a été réalisée avec succès, mettant en évidence :
 
-✅ **Type COUNTER** : Opération atomique garantie (vs INCREMENT HBase).  
-✅ **Structure normalisée** : Table dédiée (vs colonnes dynamiques HBase).  
-✅ **Performance** : Partition key optimisée (vs scan HBase).  
+✅ **Type COUNTER** : Opération atomique garantie (vs INCREMENT HBase).
+✅ **Structure normalisée** : Table dédiée (vs colonnes dynamiques HBase).
+✅ **Performance** : Partition key optimisée (vs scan HBase).
 ✅ **Métadonnées** : last_updated_at, updated_by (traçabilité).
 
 ---
@@ -421,4 +421,3 @@ La démonstration des Feedbacks ICS a été réalisée avec succès, mettant en 
 EOF
 )
 generate_report "$REPORT_FILE" "🔍 Tests : Feedbacks ICS DomiramaCatOps" "$REPORT_CONTENT"
-

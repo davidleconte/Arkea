@@ -98,53 +98,53 @@ operations = []
 for i in range(50):
     # Générer meta_flags avec différentes combinaisons
     meta_flags = {}
-    
+
     # Source (toujours présent)
     source = random.choice(sources)
     meta_flags['source'] = source
-    
+
     # Device (80% de chance)
     if random.random() < 0.8:
         device = random.choice(devices)
         meta_flags['device'] = device
     else:
         device = None
-    
+
     # Channel (70% de chance)
     if random.random() < 0.7:
         channel = random.choice(channels)
         meta_flags['channel'] = channel
     else:
         channel = None
-    
+
     # IP (60% de chance)
     if random.random() < 0.6:
         ip = random.choice(ips)
         meta_flags['ip'] = ip
     else:
         ip = None
-    
+
     # Location (50% de chance)
     if random.random() < 0.5:
         location = random.choice(locations)
         meta_flags['location'] = location
     else:
         location = None
-    
+
     # Fraud score (40% de chance)
     if random.random() < 0.4:
         fraud_score = random.choice(fraud_scores)
         meta_flags['fraud_score'] = fraud_score
     else:
         fraud_score = None
-    
+
     # Date opération (incrémenter de i heures)
     date_op = base_date + timedelta(hours=i)
     date_op_str = date_op.strftime('%Y-%m-%d %H:%M:%S')
-    
+
     # Numéro opération
     numero_op = i + 1
-    
+
     # Libellé
     libelles = [
         'VIREMENT SEPA',
@@ -154,10 +154,10 @@ for i in range(50):
         'CHEQUE'
     ]
     libelle = random.choice(libelles)
-    
+
     # Montant
     montant = round(random.uniform(10.0, 1000.0), 2)
-    
+
     operations.append({
         'code_si': code_si,
         'contrat': contrat,
@@ -189,7 +189,7 @@ for op in operations:
             meta_flags_parts.append(f"'{key}': '{value_escaped}'")
     meta_flags_map += ', '.join(meta_flags_parts)
     meta_flags_map += '}'
-    
+
     # Construire les valeurs pour les colonnes dérivées (NULL si None)
     meta_source_val = f"'{op['meta_source']}'" if op['meta_source'] else 'NULL'
     meta_device_val = f"'{op['meta_device']}'" if op['meta_device'] else 'NULL'
@@ -197,10 +197,10 @@ for op in operations:
     meta_ip_val = f"'{op['meta_ip']}'" if op['meta_ip'] else 'NULL'
     meta_location_val = f"'{op['meta_location']}'" if op['meta_location'] else 'NULL'
     meta_fraud_score_val = f"'{op['meta_fraud_score']}'" if op['meta_fraud_score'] else 'NULL'
-    
+
     # Échapper le libellé
     libelle_escaped = op['libelle'].replace("'", "''")
-    
+
     # Construire la requête INSERT
     insert_query = f"""USE domiramacatops_poc; INSERT INTO operations_by_account (
     code_si, contrat, date_op, numero_op, libelle, montant, devise, type_operation, sens_operation,
@@ -211,7 +211,7 @@ for op in operations:
     {meta_flags_map},
     {meta_source_val}, {meta_device_val}, {meta_channel_val}, {meta_ip_val}, {meta_location_val}, {meta_fraud_score_val}
 );"""
-    
+
     try:
         result = subprocess.run(
             cqlsh_cmd.split() + ['-e', insert_query],
@@ -264,5 +264,3 @@ $CQLSH -e "USE domiramacatops_poc; SELECT code_si, contrat, date_op, numero_op, 
 
 echo ""
 success "✅ Script terminé"
-
-

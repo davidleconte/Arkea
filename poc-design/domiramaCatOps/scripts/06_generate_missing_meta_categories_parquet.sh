@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # ============================================
 # Script 06b : Génération des fichiers Parquet manquants
 # Génère acceptation_client.parquet et opposition_categorisation.parquet
 # avec des données cohérentes avec les opérations chargées
 # ============================================
-
-set -e
 
 # Configuration - Utiliser setup_paths si disponible
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -75,7 +74,7 @@ for code_si in CODES_SI:
             # Toujours renseigné car le client prend une décision à une date donnée
             accepted_at = datetime(2024, 1, 1) + timedelta(days=random.randint(0, 180))
             updated_at = accepted_at + timedelta(days=random.randint(0, 30))
-            
+
             acceptations.append({
                 "code_efs": code_si,
                 "no_contrat": contrat,
@@ -107,7 +106,7 @@ for code_si in CODES_SI:
         if opposed:
             opposed_at = datetime(2024, 1, 1) + timedelta(days=random.randint(0, 180))
             updated_at = opposed_at + timedelta(days=random.randint(0, 30))
-            
+
             oppositions.append({
                 "code_efs": code_si,
                 "no_pse": pse,
@@ -150,4 +149,3 @@ rm -f "$PYTHON_SCRIPT"
 echo ""
 echo "✅ Fichiers Parquet générés avec succès !"
 echo ""
-

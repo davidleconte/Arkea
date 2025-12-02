@@ -72,4 +72,3 @@ success "✅ Règles supplémentaires insérées"
 echo ""
 success "✅ Données de test préparées avec succès"
 echo ""
-

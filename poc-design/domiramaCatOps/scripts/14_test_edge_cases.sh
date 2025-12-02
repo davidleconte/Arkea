@@ -75,13 +75,13 @@ COMPRESSIONS=("snappy" "gzip" "lz4")
 for compression in "${COMPRESSIONS[@]}"; do
     TOTAL_TESTS=$((TOTAL_TESTS + 1))
     info "📦 Test compression : $compression"
-    
+
     OUTPUT_PATH="/tmp/exports/domiramaCatOps/edge_cases/compression_${compression}"
-    
+
     python3 "${SCRIPT_DIR}/14_export_incremental_python.py" \
         "2024-06-01" "2024-07-01" "$OUTPUT_PATH" "$compression" \
         "TEST_EXPORT" "TEST_CONTRAT" > /tmp/test_compression_${compression}.log 2>&1
-    
+
     if [ $? -eq 0 ]; then
         PARQUET_COUNT=$(find "$OUTPUT_PATH" -name "*.parquet" 2>/dev/null | wc -l | tr -d ' ' || echo "0")
         if [ "$PARQUET_COUNT" -gt 0 ]; then
@@ -122,11 +122,11 @@ session = cluster.connect('domiramacatops_poc')
 # Insérer quelques opérations avec date_op NULL
 for i in range(5):
     insert_query = f"""
-    INSERT INTO domiramacatops_poc.operations_by_account 
+    INSERT INTO domiramacatops_poc.operations_by_account
     (code_si, contrat, date_op, numero_op, libelle, montant, devise, type_operation, cat_auto, cat_confidence)
-    VALUES 
-    ('TEST_EXPORT', 'TEST_CONTRAT', null, {1000 + i}, 
-     'Test NULL date {i}', {100.0 + i}, 'EUR', 'VIREMENT', 
+    VALUES
+    ('TEST_EXPORT', 'TEST_CONTRAT', null, {1000 + i},
+     'Test NULL date {i}', {100.0 + i}, 'EUR', 'VIREMENT',
      'TEST_CATEGORY', 0.95);
     """
     try:
@@ -153,14 +153,14 @@ parquet_path = "$OUTPUT_PATH"
 try:
     dataset = pq.ParquetDataset(parquet_path)
     df = dataset.read_pandas()
-    
+
     if 'date_op' in df.columns:
         null_count = df['date_op'].isna().sum()
         if null_count > 0:
             print(f"✅ Dates NULL détectées et gérées : {null_count} opérations")
         else:
             print("⚠️  Aucune date NULL détectée (peut être normal)")
-        
+
         # Vérifier date_partition pour les dates NULL
         if 'date_partition' in df.columns:
             unknown_partitions = (df['date_partition'] == 'unknown').sum()
@@ -170,7 +170,7 @@ try:
 except Exception as e:
     print(f"⚠️  Erreur : {e}")
 PYEOF
-    
+
     PARQUET_COUNT=$(find "$OUTPUT_PATH" -name "*.parquet" 2>/dev/null | wc -l | tr -d ' ' || echo "0")
     if [ "$PARQUET_COUNT" -gt 0 ]; then
         success "✅ Test dates NULL : $PARQUET_COUNT fichiers créés"
@@ -222,7 +222,7 @@ except:
     print("0")
 PYCOUNT
 )
-    
+
     if [ "$PARQUET_COUNT" -gt 0 ]; then
         success "✅ Test grand volume : $PARQUET_COUNT fichiers, $OPERATIONS_COUNT opérations en ${DURATION}s"
         if [ "$OPERATIONS_COUNT" -gt 1000 ]; then

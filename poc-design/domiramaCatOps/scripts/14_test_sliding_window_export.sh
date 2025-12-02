@@ -8,7 +8,7 @@
 # OBJECTIF :
 #   Ce script démontre l'export par fenêtre glissante, équivalent aux exports
 #   périodiques HBase avec TIMERANGE.
-#   
+#
 #   Fonctionnalités :
 #   - Calcul automatique des fenêtres (mensuelles, hebdomadaires)
 #   - Export de plusieurs fenêtres consécutives
@@ -101,7 +101,7 @@ if window_type == "monthly":
         window_end = current.replace(day=last_day) + timedelta(days=1)
         if window_end > end:
             window_end = end
-        
+
         windows.append((window_start.strftime("%Y-%m-%d"), window_end.strftime("%Y-%m-%d"), current.strftime("%Y-%m")))
         # Passer au mois suivant
         if current.month == 12:
@@ -129,26 +129,26 @@ while IFS='|' read -r num window_start window_end window_label; do
     if [ -z "$window_start" ]; then
         continue
     fi
-    
+
     WINDOW_COUNT=$((WINDOW_COUNT + 1))
     WINDOW_OUTPUT_PATH="${OUTPUT_BASE_PATH}/${window_label}"
-    
+
     echo ""
     info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     info "  📅 Fenêtre $WINDOW_COUNT : $window_label ($window_start → $window_end)"
     info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-    
+
     # Appeler le script d'export principal
     "${SCRIPT_DIR}/14_test_incremental_export.sh" "$window_start" "$window_end" "$WINDOW_OUTPUT_PATH" "$COMPRESSION" "" "" "" "" "" "timerange"
-    
+
     if [ $? -eq 0 ]; then
         success "✅ Fenêtre $WINDOW_COUNT exportée avec succès"
     else
         error "❌ Erreur lors de l'export de la fenêtre $WINDOW_COUNT"
         exit 1
     fi
-    
+
 done < <(python3 << PYEOF
 from datetime import datetime, timedelta
 import calendar

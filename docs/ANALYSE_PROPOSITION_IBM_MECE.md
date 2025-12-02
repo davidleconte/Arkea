@@ -18,12 +18,14 @@ Ce document est une **proposition MECE (Mutually Exclusive, Collectively Exhaust
 ### 1. **Axe Technologique** (Lignes 1-79)
 
 **Constats actuels** :
+
 - Infrastructure HBase 1.1.2 sur HDP 2.6.4 (version ancienne)
 - Deux instances HBase en production + une hors-prod
 - Architecture lourde (HDFS, Yarn, ZooKeeper) en fin de vie
 - Fonctionnalités HBase utilisées : TTL, Bloom filters, INCREMENT, multi-version, scans distribués
 
 **Enjeux de la migration** :
+
 - Garantir performances et disponibilité
 - Répliquer les fonctionnalités clés (TTL, scans avec filtres, incréments atomiques, versionnement, bulk load)
 - Refonte de l'architecture (pas de lift-and-shift)
@@ -32,6 +34,7 @@ Ce document est une **proposition MECE (Mutually Exclusive, Collectively Exhaust
 - Coût total de possession
 
 **Propositions** :
+
 - Adoption d'HCD (Cassandra 4.x) avec architecture cloud-native
 - Consolidation sur un unique cluster Cassandra/HCD
 - Maximisation des lectures par clé de partition
@@ -45,6 +48,7 @@ Ce document est une **proposition MECE (Mutually Exclusive, Collectively Exhaust
 ### 2. **Axe Données** (Lignes 81-216)
 
 **Constats actuels** :
+
 - Schémas HBase sur mesure pour chaque projet
 - **Domirama** : transactions sur 10 ans, clé composite, données COBOL Base64
 - **Catégorisation** : extension Domirama avec CF `category`, TTL 10 ans
@@ -53,6 +57,7 @@ Ce document est une **proposition MECE (Mutually Exclusive, Collectively Exhaust
 - **domirama-meta-categories** : table multi-usages avec préfixes de clés
 
 **Enjeux de la migration** :
+
 - Transformation de schéma (colonnes dynamiques → schéma fixe)
 - Partitionnement et clés primaires (éviter partitions trop volumineuses)
 - Représentation des données complexes (multi-version, colonnes dynamiques, JSON)
@@ -61,6 +66,7 @@ Ce document est une **proposition MECE (Mutually Exclusive, Collectively Exhaust
 - Gestion de l'historique
 
 **Propositions** :
+
 - **Table `operations_by_account`** (Domirama) : partition par (entite_id, compte_id), clustering par date
 - **Table `category_feedback`** : ensemble de tables séparées (MECE)
 - **Table `interactions_by_client`** (BIC) : partition par client, clustering par date
@@ -73,6 +79,7 @@ Ce document est une **proposition MECE (Mutually Exclusive, Collectively Exhaust
 ### 3. **Axe Applicatif** (Lignes 217-361)
 
 **Constats actuels** :
+
 - Applications fortement couplées à HBase
 - **Domirama** : construction index Solr en mémoire au login
 - **Batch Domirama** : PIG + MapReduce
@@ -82,6 +89,7 @@ Ce document est une **proposition MECE (Mutually Exclusive, Collectively Exhaust
 - **Batch BIC unload** : export ORC HDFS
 
 **Enjeux de la migration** :
+
 - Refonte du code d'accès aux données (HBase → CQL/driver Cassandra)
 - Maintien des fonctionnalités équivalentes
 - Adaptation des pipelines batch/stream
@@ -90,6 +98,7 @@ Ce document est une **proposition MECE (Mutually Exclusive, Collectively Exhaust
 - Tests et QA
 
 **Propositions** :
+
 - Abstraction et couches d'accès aux données
 - **Mise à jour Domirama** : remplacer Solr par requêtes SAI, API catégorisation simplifiée
 - **Mise à jour BIC/EDM** : Kafka Connector, backend conseiller optimisé, batch unload via Spark
@@ -101,6 +110,7 @@ Ce document est une **proposition MECE (Mutually Exclusive, Collectively Exhaust
 ### 4. **Axe Organisationnel** (Lignes 362-461)
 
 **Constats actuels** :
+
 - Dette technique (HBase 1.1.2, HDP 2.6.4)
 - Gestion des coûts du cluster Hadoop
 - Organisation des équipes (séparation par usage)
@@ -109,6 +119,7 @@ Ce document est une **proposition MECE (Mutually Exclusive, Collectively Exhaust
 - Contraintes réglementaires
 
 **Enjeux de la migration** :
+
 - Gestion de projet et conduite du changement
 - Formation et appropriation des outils
 - Redéfinition des rôles
@@ -119,6 +130,7 @@ Ce document est une **proposition MECE (Mutually Exclusive, Collectively Exhaust
 - Décommissionnement du cluster Hadoop
 
 **Propositions** :
+
 - **Découpage en phases** :
   1. Phase 0 : Infrastructure & Préparation
   2. Phase 1 : Prototype EDM (périmètre réduit)
@@ -135,34 +147,41 @@ Ce document est une **proposition MECE (Mutually Exclusive, Collectively Exhaust
 ### 5. **Refonte Domirama** (Lignes 462-657)
 
 **Modélisation CQL** :
+
 - Table `domirama` avec clé primaire composite
 - Colonnes normalisées (décodage COBOL)
 - Intégration catégorisation dans la table principale
 - TTL 10 ans
 
 **Recherche full-text** :
+
 - Remplacement Solr par **CQL analyzers** (SAI avec Lucene)
 - Requêtes `WHERE libelle : 'terme'` avec index SAI
 - Élimination de l'index Solr en mémoire
 
 **Recherche vectorielle** :
+
 - Support des embeddings `VECTOR<FLOAT, N>`
 - Index SAI vectoriel pour recherche par similarité
 - Combinaison vector + mot-clé (hybrid search)
 
 **Data API** :
+
 - Exposition REST/GraphQL via Stargate
 - Simplification de l'accès applicatif
 
 **Ingestion batch** :
+
 - Remplacement PIG/MapReduce par **Spark** ou **DSBulk**
 - Pipeline moderne sans dépendance Hadoop
 
 **TTL et purge** :
+
 - `default_time_to_live` au niveau table
 - Gestion automatique par Cassandra
 
 **Stratégie d'indexation** :
+
 - Clé primaire pour accès direct par client
 - Index SAI texte sur libellé (remplacement Solr)
 - Index SAI vectoriel pour recherche sémantique
@@ -173,6 +192,7 @@ Ce document est une **proposition MECE (Mutually Exclusive, Collectively Exhaust
 ### 6. **Refonte domirama-meta-categories** (Lignes 658-777)
 
 **Modèle de données CQL refondu** :
+
 - **Séparation MECE** : plusieurs tables au lieu d'une table multi-usages
 - **ACCEPTATION_CLIENT** : acceptation affichage catégorie
 - **OPPOSITION_CATEGORISATION** : opposition client
@@ -183,20 +203,24 @@ Ce document est une **proposition MECE (Mutually Exclusive, Collectively Exhaust
 - **DECISIONS_SALAIRES** : décisions salaires
 
 **Gestion des compteurs** :
+
 - Tables dédiées avec type `counter`
 - `UPDATE ... SET col = col + 1` pour incréments atomiques
 - Consistency Level LOCAL_QUORUM
 
 **Indexation SAI** :
+
 - Index sur libellés (recherche texte)
 - Index sur champs numériques (type, code ICS)
 - Index vectoriel optionnel
 
 **API d'accès** :
+
 - Data API REST/GraphQL pour exposition
 - Opérations d'écriture (PUT/INCREMENT) via API
 
 **Considérations** :
+
 - Versionnement : table d'historique dédiée au lieu de multi-version
 - TTL : pas applicable aux compteurs
 - Scalabilité : partitions bien dimensionnées
@@ -207,36 +231,44 @@ Ce document est une **proposition MECE (Mutually Exclusive, Collectively Exhaust
 ### 7. **Refonte bi-client (BIC)** (Lignes 778-912)
 
 **Schéma CQL** :
+
 - Table `bic.client_interaction` : partition par `client_id`, clustering par `interaction_id` (timeuuid)
 - Colonnes : `type_interaction`, `canal`, `resultat`, `details` (JSON)
 - TTL 2 ans (`default_time_to_live = 63072000`)
 
 **Indexation SAI** :
+
 - Index sur `canal`, `type_interaction`, `resultat`
 - Recherches filtrées efficaces sans scans complets
 
 **TTL et purge** :
+
 - Gestion automatique par Cassandra
 - Suppression après 2 ans sans intervention
 
 **Data API** :
+
 - Exposition REST/GraphQL pour applications
 - Simplification du développement
 
 **Ingestion Kafka** :
+
 - **DataStax Kafka Connector** pour ingestion temps réel
 - Écriture directe depuis Kafka vers Cassandra
 
 **Lecture temps réel** :
+
 - Requête optimisée par partition client
 - Filtres par attribut via SAI
 - Pas de multi-version (simplification)
 
 **Export batch** :
+
 - Job Spark pour extraction incrémentale
 - Alternative : Kafka Connect HDFS Sink
 
 **Extensions** :
+
 - Indexation textuelle avec analyseurs Lucene
 - Recherche vectorielle sémantique (optionnel)
 
@@ -245,23 +277,27 @@ Ce document est une **proposition MECE (Mutually Exclusive, Collectively Exhaust
 ### 8. **Guide POC** (Lignes 913-1560)
 
 **POC1 - "Sans jars client"** :
+
 - Objectif : Prouver Spark + Cassandra avec schéma Domirama
 - Données : CSV simulé mais structuré
 - Composants : Spark, Cassandra (Podman), schéma CQL
 - Code : Loader CSV → Spark → Cassandra, Détection récurrence
 
 **POC2 - "Avec jars client"** :
+
 - Objectif : Utiliser les vrais flux (SequenceFile + OperationDecoder)
 - Données : SequenceFile avec décodage COBOL
 - Composants : Jars Arkéa (cobol, operationdecoder, thrift, hadoop)
 - Code : Loader SequenceFile → Spark → Cassandra
 
 **Pré-requis** :
+
 - Homebrew, Java 17, sbt, Spark
 - Podman + Cassandra en conteneur
 - Schéma Cassandra pour POC
 
 **Structure du code** :
+
 - Case classes : `Operation`, `RecurrentOperation`
 - Loader : `DomiramaSparkLoaderCsv`, `DomiramaSparkLoaderSeq`
 - Détection : `RecurrentDetectionSpark`
@@ -355,8 +391,3 @@ Ce document est une **proposition MECE (Mutually Exclusive, Collectively Exhaust
 ---
 
 **Analyse complète de la proposition IBM MECE terminée !** ✅
-
-
-
-
-

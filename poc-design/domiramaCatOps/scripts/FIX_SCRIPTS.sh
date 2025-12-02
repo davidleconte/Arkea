@@ -32,9 +32,9 @@ echo ""
 fix_script() {
     local script=$1
     local fixed=0
-    
+
     echo "📝 Correction de: $(basename "$script")"
-    
+
     # 1. Remplacer HCD_DIR par HCD_HOME dans les nouveaux scripts (ceux qui utilisent les fonctions didactiques)
     if grep -q "source.*didactique_functions.sh" "$script" && grep -q "HCD_DIR=" "$script"; then
         # Garder HCD_DIR pour compatibilité mais utiliser HCD_HOME pour cqlsh
@@ -44,7 +44,7 @@ fix_script() {
             fixed=1
         fi
     fi
-    
+
     # 2. Ajouter source .poc-profile si manquant (pour scripts qui utilisent les fonctions didactiques)
     if grep -q "source.*didactique_functions.sh" "$script" && ! grep -q "source.*\.poc-profile" "$script"; then
         # Ajouter après le source didactique_functions.sh
@@ -53,7 +53,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../../.poc-profile"
 ' "$script"
         fixed=1
     fi
-    
+
     # 3. Remplacer les vérifications manuelles par les fonctions standardisées
     if grep -q "pgrep -f.*cassandra" "$script" && grep -q "source.*didactique_functions.sh" "$script"; then
         if ! grep -q "check_hcd_status" "$script"; then
@@ -78,7 +78,7 @@ check_jenv_java_version
             fixed=1
         fi
     fi
-    
+
     # 4. Corriger les scripts qui utilisent cqlsh sans chemin complet
     if grep -q "cqlsh" "$script" && ! grep -q "\$HCD_HOME.*cqlsh\|\$HCD_DIR.*cqlsh\|\./bin/cqlsh" "$script"; then
         # Déterminer quelle variable utiliser
@@ -97,14 +97,14 @@ HCD_DIR="${HCD_HOME:-${INSTALL_DIR}/binaire/hcd-1.2.3}"
         fi
         fixed=1
     fi
-    
+
     # 5. Standardiser l'utilisation de execute_cql_query pour les scripts récents
     if grep -q "source.*didactique_functions.sh" "$script" && grep -q "\$HCD_HOME.*cqlsh.*-e" "$script"; then
         # Remplacer les appels directs par execute_cql_query (optionnel, à faire manuellement)
         # Cette partie nécessite une analyse plus fine
         :
     fi
-    
+
     if [ $fixed -eq 1 ]; then
         echo "   ✅ Corrigé"
         rm -f "${script}.bak"
@@ -122,5 +122,3 @@ for script in "$SCRIPT_DIR"/*.sh; do
 done
 
 echo "✅ Correction terminée !"
-
-

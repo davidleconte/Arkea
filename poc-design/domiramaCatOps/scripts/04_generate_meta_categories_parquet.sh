@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # ============================================
 # Script 04b : Génération des Données Meta-Categories (Version Didactique - Parquet)
 # Génère les 7 fichiers Parquet pour toutes les tables meta-categories
@@ -14,7 +15,7 @@
 #   5. feedback_par_ics
 #   6. regles_personnalisees
 #   7. decisions_salaires
-#   
+#
 #   Cette version didactique affiche :
 #   - Le code Python complet (génération CSV) avec explications pour chaque table
 #   - Le code Spark complet (conversion CSV → Parquet) avec explications
@@ -683,14 +684,14 @@ convert_table() {
     local table_name=$1
     local csv_file="${OUTPUT_DIR}/${table_name}.csv"
     local parquet_file="${OUTPUT_DIR}/${table_name}.parquet"
-    
+
     if [ ! -f "$csv_file" ]; then
         warn "⚠️  Fichier CSV non trouvé: $csv_file"
         return 1
     fi
-    
+
     info "📝 Conversion $table_name..."
-    
+
     # Créer le script Spark temporaire
     SPARK_SCRIPT=$(mktemp)
     cat > "$SPARK_SCRIPT" << SPARK_EOF
@@ -756,14 +757,14 @@ SPARK_EOF
 
     # Exécuter Spark et capturer la sortie
     "$SPARK_HOME/bin/spark-shell" -i "$SPARK_SCRIPT" 2>&1 | tee "/tmp/spark_${table_name}.log" | grep -E "(✅|📊|📥|💾|ERROR|Exception|lignes|Parquet)" || true
-    
+
     SPARK_EXIT_CODE=${PIPESTATUS[0]}
     rm -f "$SPARK_SCRIPT"
-    
+
     # Extraire le nombre de lignes
     PARQUET_LINES=$(grep -oE "[0-9]+ lignes dans le Parquet" "/tmp/spark_${table_name}.log" | grep -oE "[0-9]+" | head -1 || echo "0")
     rm -f "/tmp/spark_${table_name}.log"
-    
+
     if [ $SPARK_EXIT_CODE -eq 0 ]; then
         success "✅ $table_name converti avec succès ($PARQUET_LINES lignes)"
         echo "$PARQUET_LINES" > "/tmp/parquet_${table_name}_count.txt"
@@ -772,7 +773,7 @@ SPARK_EOF
         echo "0" > "/tmp/parquet_${table_name}_count.txt"
         return 1
     fi
-    
+
     # Supprimer le CSV temporaire
     rm -f "$csv_file"
 }
@@ -811,7 +812,7 @@ for table in "${TABLES[@]}"; do
         PARQUET_SIZE=$(du -sh "$parquet_file" 2>/dev/null | cut -f1)
         PARQUET_FILES=$(find "$parquet_file" -type f | wc -l | tr -d ' ')
         TOTAL_FILES=$((TOTAL_FILES + PARQUET_FILES))
-        
+
         success "✅ $table.parquet"
         result "   - Lignes : ${PARQUET_COUNTS[$table]}"
         result "   - Taille : $PARQUET_SIZE"
@@ -896,8 +897,8 @@ backtick = chr(96)
 
 report = f"""# 📝 Démonstration : Génération des Données Meta-Categories (Parquet)
 
-**Date** : {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}  
-**Script** : `04_generate_meta_categories_parquet.sh`  
+**Date** : {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+**Script** : `04_generate_meta_categories_parquet.sh`
 **Objectif** : Générer un jeu de données complet pour les 7 tables meta-categories du POC DomiramaCatOps
 
 ---
@@ -930,10 +931,10 @@ Générer un jeu de données complet pour les **7 tables meta-categories** avec 
 
 ### Cohérence avec les Opérations
 
-✅ **Mêmes codes SI** (1-10)  
-✅ **Mêmes contrats** (cohérents avec operations_by_account)  
-✅ **Mêmes libellés simplifiés** (CARREFOUR, LECLERC, etc.)  
-✅ **Mêmes catégories** (ALIMENTATION, RESTAURANT, etc.)  
+✅ **Mêmes codes SI** (1-10)
+✅ **Mêmes contrats** (cohérents avec operations_by_account)
+✅ **Mêmes libellés simplifiés** (CARREFOUR, LECLERC, etc.)
+✅ **Mêmes catégories** (ALIMENTATION, RESTAURANT, etc.)
 ✅ **Mêmes types d'opérations** (VIREMENT, CB, CHEQUE, PRLV, AUTRE)
 
 ### Stratégie de Génération
@@ -978,12 +979,12 @@ for code_si in CODES_SI:
 
 ### Résultats
 
-✅ **acceptation_client** : {acceptations_count} acceptations générées  
-✅ **opposition_categorisation** : {oppositions_count} oppositions générées  
-✅ **historique_opposition** : {historiques_count} entrées d'historique générées  
-✅ **feedback_par_libelle** : {feedbacks_libelle_count} feedbacks générés  
-✅ **feedback_par_ics** : {feedbacks_ics_count} feedbacks générés  
-✅ **regles_personnalisees** : {regles_count} règles générées  
+✅ **acceptation_client** : {acceptations_count} acceptations générées
+✅ **opposition_categorisation** : {oppositions_count} oppositions générées
+✅ **historique_opposition** : {historiques_count} entrées d'historique générées
+✅ **feedback_par_libelle** : {feedbacks_libelle_count} feedbacks générés
+✅ **feedback_par_ics** : {feedbacks_ics_count} feedbacks générés
+✅ **regles_personnalisees** : {regles_count} règles générées
 ✅ **decisions_salaires** : {decisions_count} décisions générées
 
 ---
@@ -1025,8 +1026,8 @@ dfTyped.write
 
 ### Résultats
 
-✅ **7 fichiers Parquet générés** dans `{output_dir}`  
-✅ **Format** : Parquet (compression snappy)  
+✅ **7 fichiers Parquet générés** dans `{output_dir}`
+✅ **Format** : Parquet (compression snappy)
 ✅ **Types** : Boolean, Timestamp, Long (COUNTER), Integer
 
 ---
@@ -1047,9 +1048,9 @@ dfTyped.write
 
 ### Caractéristiques des Données
 
-✅ **Cohérence** : Mêmes codes SI, contrats, libellés que les opérations  
-✅ **Distribution réaliste** : 80% acceptent, 10% opposent, etc.  
-✅ **Types corrects** : Boolean, Timestamp, Long (COUNTER), Integer  
+✅ **Cohérence** : Mêmes codes SI, contrats, libellés que les opérations
+✅ **Distribution réaliste** : 80% acceptent, 10% opposent, etc.
+✅ **Types corrects** : Boolean, Timestamp, Long (COUNTER), Integer
 ✅ **Format optimisé** : Parquet (compression snappy)
 
 ---
@@ -1058,9 +1059,9 @@ dfTyped.write
 
 ### Résumé de la Génération
 
-✅ **7 fichiers Parquet générés** dans `{output_dir}`  
-✅ **Cohérence** : Données cohérentes avec les opérations générées  
-✅ **Distribution réaliste** : Respect des proportions métier  
+✅ **7 fichiers Parquet générés** dans `{output_dir}`
+✅ **Cohérence** : Données cohérentes avec les opérations générées
+✅ **Distribution réaliste** : Respect des proportions métier
 ✅ **Types corrects** : Conversion appropriée pour chaque table
 
 ### Points Clés Démontrés

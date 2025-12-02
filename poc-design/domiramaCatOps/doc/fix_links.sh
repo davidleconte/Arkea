@@ -1,9 +1,8 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script de Correction : Mise à jour des liens après réorganisation
 # ============================================
-
-set -e
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd "$SCRIPT_DIR"

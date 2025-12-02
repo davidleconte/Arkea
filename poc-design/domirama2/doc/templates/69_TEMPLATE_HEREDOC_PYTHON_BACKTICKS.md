@@ -2,7 +2,7 @@
 
 ## Problème
 
-Lors de l'utilisation d'un heredoc Python dans un script shell pour générer du markdown avec des blocs de code (```cql, ```python, etc.), le shell interprète les backticks comme des command substitutions, ce qui provoque des erreurs.
+Lors de l'utilisation d'un heredoc Python dans un script shell pour générer du markdown avec des blocs de code (```cql,```python, etc.), le shell interprète les backticks comme des command substitutions, ce qui provoque des erreurs.
 
 ### Symptômes
 
@@ -123,7 +123,7 @@ report = ""
 
 for r in results:
     report += f"### Requête {r.get('query_num', '?')}\n\n"
-    
+
     # Afficher la requête CQL avec backticks
     query_cql = r.get('query_cql', '')
     if query_cql:
@@ -133,12 +133,12 @@ for r in results:
             backtick = chr(96)
             code_block_start = backtick + backtick + backtick + "cql\n"
             code_block_end = "\n" + backtick + backtick + backtick + "\n"
-            
+
             report += "**Requête CQL exécutée :**\n\n"
             report += code_block_start
             report += query_cql_str
             report += code_block_end + "\n"
-    
+
     # Afficher les résultats
     if r.get('query_output'):
         report += "**Lignes retournées :**\n\n"
@@ -178,11 +178,14 @@ PYEOF
 ```
 
 Résultat attendu :
+
 ```
 ```cql
 SELECT * FROM table;
 ```
+
 Contains ```cql: True
+
 ```
 
 ## Références
@@ -190,6 +193,3 @@ Contains ```cql: True
 - Script 30 : `30_demo_requetes_startrow_stoprow_v2_didactique.sh`
 - Rapport généré : `doc/demonstrations/30_STARTROW_STOPROW_REQUETES_DEMONSTRATION.md`
 - Date de création : 2024-11-27
-
-
-

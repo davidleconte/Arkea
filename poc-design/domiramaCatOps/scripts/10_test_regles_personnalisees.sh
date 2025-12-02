@@ -8,7 +8,7 @@
 # OBJECTIF :
 #   Ce script démontre les fonctionnalités règles personnalisées en exécutant
 #   8 requêtes CQL directement via "${HCD_HOME}/bin/cqlsh".
-#   
+#
 #   Cette version didactique affiche :
 #   - Les équivalences HBase → HCD détaillées
 #   - Les requêtes CQL complètes avant exécution
@@ -166,21 +166,21 @@ execute_query() {
     local hbase_equivalent="$4"
     local query_cql="$5"
     local expected_result="$6"
-    
+
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "  🔍 TEST $query_num : $query_title"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-    
+
     info "📚 DÉFINITION - $query_title :"
     echo "   $query_description"
     echo ""
-    
+
     info "🔄 ÉQUIVALENT HBase :"
     code "   $hbase_equivalent"
     echo ""
-    
+
     info "📝 Requête CQL :"
     echo "$query_cql" | while IFS= read -r line; do
         if [ -n "$line" ]; then
@@ -188,10 +188,10 @@ execute_query() {
         fi
     done
     echo ""
-    
+
     expected "📋 Résultat attendu : $expected_result"
     echo ""
-    
+
     # Créer un fichier temporaire pour la requête
     TEMP_QUERY_FILE=$(mktemp "/tmp/query_${query_num}_$(date +%s).cql")
     cat > "$TEMP_QUERY_FILE" <<EOF
@@ -199,34 +199,34 @@ USE domiramacatops_poc;
 TRACING ON;
 $query_cql
 EOF
-    
+
     # Exécuter la requête
     info "🚀 Exécution de la requête..."
     START_TIME=$(date +%s.%N)
     QUERY_OUTPUT=$($CQLSH -f "$TEMP_QUERY_FILE" 2>&1 | tee -a "$TEMP_OUTPUT")
     EXIT_CODE=$?
     END_TIME=$(date +%s.%N)
-    
+
     # Calculer le temps d'exécution
     if command -v bc >/dev/null 2>&1; then
         QUERY_TIME=$(echo "$END_TIME - $START_TIME" | bc 2>/dev/null || echo "0.000")
     else
         QUERY_TIME=$(python3 -c "print($END_TIME - $START_TIME)" 2>/dev/null || echo "0.000")
     fi
-    
+
     # Extraire les métriques
     COORDINATOR_TIME=$(echo "$QUERY_OUTPUT" | grep "coordinator" | awk -F'|' '{print $4}' | tr -d ' ' | head -1 || echo "")
     TOTAL_TIME=$(echo "$QUERY_OUTPUT" | grep "total" | awk -F'|' '{print $4}' | tr -d ' ' | head -1 || echo "")
-    
+
     # Compter les lignes retournées
     ROW_COUNT=$(echo "$QUERY_OUTPUT" | grep -E "^[A-Z_]+ \|" | grep -v "^code_efs " | wc -l | tr -d ' ')
     if [ "$ROW_COUNT" -eq 0 ] || [ -z "$ROW_COUNT" ]; then
         ROW_COUNT=$(echo "$QUERY_OUTPUT" | grep -E "\([0-9]+ rows\)" | grep -oE "[0-9]+" | head -1 || echo "0")
     fi
-    
+
     # Filtrer les résultats (garder les en-têtes et les lignes de données, exclure le tracing)
     QUERY_RESULTS_FILTERED=$(echo "$QUERY_OUTPUT" | grep -vE "^Warnings|^\([0-9]+ rows\)|coordinator|total|Executing|Read|Scanned|Merging|Tracing|Activity|Requests|responses|Parsing|Sending|MULTI_RANGE|Query execution|Limit|Filter|Fetch|LiteralIndexScan|single-partition|stage READ|RequestResponse|activity|timestamp|source|client|Processing|Request complete|^[[:space:]]*$" | grep -E "^[[:space:]]*code_efs|^[[:space:]]*-{3,}|^[[:space:]]*[0-9]+[[:space:]]*\|" | grep -vE "^[[:space:]]*-+[[:space:]]*\|[[:space:]]*-+[[:space:]]*\|" | head -20)
-    
+
     # Afficher les résultats
     if [ $EXIT_CODE -eq 0 ]; then
         result "📊 Résultats obtenus ($ROW_COUNT ligne(s)) en ${QUERY_TIME}s :"
@@ -236,26 +236,26 @@ EOF
             echo "... (affichage limité à 15 lignes)"
         fi
         echo ""
-        
+
         if [ -n "$COORDINATOR_TIME" ]; then
             info "   ⏱️  Temps coordinateur : ${COORDINATOR_TIME}μs"
         fi
         if [ -n "$TOTAL_TIME" ]; then
             info "   ⏱️  Temps total : ${TOTAL_TIME}μs"
         fi
-        
+
         success "✅ Test $query_num exécuté avec succès"
-        
+
         # Stocker les résultats avec les données filtrées pour le rapport
         OUTPUT_FOR_REPORT=$(echo "$QUERY_RESULTS_FILTERED" | head -5 | awk '{printf "%s___NL___", $0}')
-        
+
         # Stocker dans le tableau (format simplifié pour compatibilité)
         QUERY_RESULTS+=("$query_num|$query_title|$ROW_COUNT|$QUERY_TIME|$COORDINATOR_TIME|$TOTAL_TIME|$EXIT_CODE|OK|${OUTPUT_FOR_REPORT}")
-        
+
         # Stocker aussi dans le fichier JSON pour un accès plus fiable (avec la requête dans un fichier temporaire)
         QUERY_TEMP_FILE=$(mktemp "/tmp/query_${query_num}_$(date +%s).txt")
         echo "$query_cql" > "$QUERY_TEMP_FILE"
-        
+
         python3 << PYEOF
 import json
 import os
@@ -289,7 +289,7 @@ results.append({
 with open(results_file, 'w') as f:
     json.dump(results, f, indent=2)
 PYEOF
-        
+
         # Nettoyer le fichier temporaire de la requête
         rm -f "$QUERY_TEMP_FILE"
     else
@@ -297,7 +297,7 @@ PYEOF
         echo "$QUERY_OUTPUT" | tail -10
         QUERY_RESULTS+=("$query_num|$query_title|0|$QUERY_TIME|||$EXIT_CODE|ERROR||")
     fi
-    
+
     rm -f "$TEMP_QUERY_FILE"
     echo ""
 }
@@ -316,10 +316,10 @@ if [ -f "$PREPARE_SCRIPT" ]; then
 else
     warn "⚠️  Script de préparation non trouvé : $PREPARE_SCRIPT"
     info "📝 Vérification des données existantes..."
-    
+
     # Vérifier si la règle CARREFOUR MARKET existe
     CHECK_RULE=$($CQLSH -e "USE domiramacatops_poc; SELECT COUNT(*) FROM regles_personnalisees WHERE code_efs = '1' AND type_operation = 'VIREMENT' AND sens_operation = 'DEBIT' AND libelle_simplifie = 'CARREFOUR MARKET';" 2>&1 | grep -E "^\s+[0-9]+" | tr -d ' ' || echo "0")
-    
+
     if [ "$CHECK_RULE" = "0" ] || [ -z "$CHECK_RULE" ]; then
         info "📝 Insertion règle CARREFOUR MARKET..."
         $CQLSH -e "USE domiramacatops_poc; INSERT INTO regles_personnalisees (code_efs, type_operation, sens_operation, libelle_simplifie, categorie_cible, priorite, actif, created_at) VALUES ('1', 'VIREMENT', 'DEBIT', 'CARREFOUR MARKET', 'ALIMENTATION', 100, true, toTimestamp(now()));" 2>&1 | grep -vE "^Warnings|^$|^\([0-9]+ rows\)|coordinator|total|Executing|Read|Scanned|Merging|Tracing|Activity|Requests|responses|Parsing|Sending" || true
@@ -413,7 +413,7 @@ if [ -n "$PRIORITIES" ]; then
         fi
     done
     success "   ✅ Le tri par priorité DESC est démontré (valeurs décroissantes)"
-    
+
     # Stocker les priorités triées dans le JSON pour le rapport
     PRIORITIES_SORTED=$(echo "$PRIORITIES" | tr '\n' ',' | sed 's/,$//')
     python3 << PYEOF
@@ -1213,14 +1213,14 @@ for r in results:
     if r['total_time']:
         report += f"- **Temps total** : {r['total_time']}μs\n"
     report += f"- **Statut** : {'✅ OK' if r['status'] == 'OK' else '❌ ERROR'}\n\n"
-    
+
     # Afficher la requête
     if r.get('query'):
         report += "**Requête CQL exécutée :**\n\n"
         query_lines = r['query'].replace('___NL___', '\n')
         code_marker = chr(96) * 3
         report += code_marker + "cql\n" + query_lines + "\n" + code_marker + "\n\n"
-    
+
     # Afficher les résultats ou explication
     if r['rows'] == '0' or not r['rows'] or r['rows'] == '':
         report += "**Résultat :** Aucune ligne retournée\n\n"
@@ -1249,7 +1249,7 @@ for r in results:
         report += "- ✅ " + str(r['rows']) + " ligne(s) retournée(s)\n"
         report += "- ✅ Les données correspondent aux critères de recherche\n"
         report += "- ✅ Le résultat est conforme aux attentes\n\n"
-    
+
     # Démonstration de la modification pour Test 8
     if r['num'] == '8' and r.get('modification_valid'):
         report += "**Démonstration de la modification :**\n\n"
@@ -1260,7 +1260,7 @@ for r in results:
         else:
             report += "- ⚠️  **Validation** : La modification n'a pas été correctement appliquée\n\n"
         report += "**Note** : La règle a été réinitialisée après ce test pour ne pas affecter les autres tests.\n\n"
-    
+
     # Vérification de la suppression pour Test 9
     if r['num'] == '9' and r.get('delete_valid'):
         report += "**Vérification de la suppression :**\n\n"
@@ -1269,7 +1269,7 @@ for r in results:
             report += "- ✅ **Validation** : La règle a bien été supprimée (COUNT = 0)\n\n"
         else:
             report += "- ⚠️  **Validation** : La règle n'a pas été supprimée (COUNT > 0)\n\n"
-    
+
     # Démonstration du tri pour Test 5
     if r['num'] == '5' and r.get('priorities_sorted'):
         report += "**Démonstration du tri par priorité :**\n\n"
@@ -1282,7 +1282,7 @@ for r in results:
             report += "\n"
             report += "**Note** : Le tri se fait côté application après récupération des données.\n"
             report += "CQL ne supporte pas ORDER BY sur des colonnes non-clustering dans ce contexte.\n\n"
-    
+
     # Tests de validation pour Test 10
     if r['num'] == '10':
         report += "**Tests de validation :**\n\n"
@@ -1293,7 +1293,7 @@ for r in results:
         report += "\n"
         report += "**Note** : CQL n'impose pas de contraintes de validation strictes.\n"
         report += "La validation doit être gérée côté application pour garantir l'intégrité des données.\n\n"
-    
+
     # Information sur l'index SAI pour Test 11
     if r['num'] == '11':
         report += "**Utilisation de l'index SAI :**\n\n"
@@ -1306,14 +1306,14 @@ for r in results:
             report += "- ⚠️  **Index manquant** : idx_regles_libelle_fulltext n'existe pas\n"
             report += "- ⚠️  **Impact** : La requête nécessitera ALLOW FILTERING (non recommandé)\n"
             report += "- 💡 **Recommandation** : Créer l'index avec ./04_create_indexes.sh\n\n"
-    
+
     # Information sur la recherche combinée pour Test 12
     if r['num'] == '12':
         report += "**Recherche combinée :**\n\n"
         report += "- ✅ **Index utilisés** : idx_regles_actif ET idx_regles_categorie_cible\n"
         report += "- ✅ **Avantage** : Filtrage efficace avec plusieurs critères simultanés\n"
         report += "- ✅ **Performance** : Utilisation optimale des index SAI multiples\n\n"
-    
+
     # Information sur les tests de performance pour Test 13
     if r['num'] == '13':
         report += "**Analyse de performance :**\n\n"
@@ -1327,7 +1327,7 @@ for r in results:
         report += "- **Lignes retournées** : " + r.get('rows', 'N/A') + " (LIMIT 100)\n"
         report += "\n"
         report += "**Note** : Les performances sont excellentes grâce à l'utilisation des index SAI.\n\n"
-    
+
     # Information sur la pagination pour Test 14
     if r['num'] == '14':
         report += "**Pagination :**\n\n"
@@ -1338,7 +1338,7 @@ for r in results:
         report += "\n"
         report += "**Note** : La pagination se fait avec LIMIT et OFFSET (ou token de pagination).\n"
         report += "Pour de meilleures performances, utiliser des tokens de pagination plutôt que OFFSET.\n\n"
-    
+
     # Information sur la recherche par date pour Test 15
     if r['num'] == '15':
         report += "**Recherche par date :**\n\n"
@@ -1349,7 +1349,7 @@ for r in results:
         report += "\n"
         report += "**Note** : Les filtres sur created_at permettent de rechercher des règles créées dans une période donnée.\n"
         report += "Utile pour l'audit et l'historique des règles.\n\n"
-    
+
     # Information sur la gestion des versions pour Test 16
     if r['num'] == '16':
         report += "**Gestion des versions :**\n\n"
@@ -1362,7 +1362,7 @@ for r in results:
                 report += "- ⚠️  **Validation** : La version n'a pas été correctement incrémentée\n\n"
         report += "**Note** : Le champ `version` permet de suivre les modifications d'une règle.\n"
         report += "Utile pour l'audit et la gestion de l'historique.\n\n"
-    
+
     # Information sur la recherche par créateur pour Test 17
     if r['num'] == '17':
         report += "**Recherche par créateur :**\n\n"
@@ -1374,7 +1374,7 @@ for r in results:
             report += "- ⚠️  **Note** : Le champ `created_by` n'est pas renseigné dans les données de test\n\n"
         report += "**Note** : Le champ `created_by` permet de tracer qui a créé chaque règle.\n"
         report += "Utile pour l'audit et la gestion des permissions.\n\n"
-    
+
     # Information sur les conditions complexes pour Test 18
     if r['num'] == '18':
         report += "**Conditions complexes (OR) :**\n\n"
@@ -1386,7 +1386,7 @@ for r in results:
         report += "\n"
         report += "**Note** : CQL ne supporte pas directement OR dans WHERE.\n"
         report += "La combinaison OR se fait côté application en fusionnant les résultats de plusieurs requêtes.\n\n"
-    
+
     # Information sur le tri multi-critères pour Test 19
     if r['num'] == '19':
         report += "**Tri multi-critères :**\n\n"
@@ -1464,4 +1464,3 @@ code "  ✅ Recherche par créateur (champ created_by)"
 code "  ✅ Conditions complexes (OR côté application)"
 code "  ✅ Tri multi-critères (côté application)"
 echo ""
-

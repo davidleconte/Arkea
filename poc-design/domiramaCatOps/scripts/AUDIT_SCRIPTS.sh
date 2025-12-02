@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script d'Audit : Analyse de tous les scripts .sh
 # ============================================

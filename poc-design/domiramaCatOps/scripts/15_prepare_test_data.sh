@@ -262,16 +262,16 @@ try:
     test_code_efs = os.environ.get('TEST_CODE_EFS', '${TEST_CODE_EFS}')
     test_no_contrat = os.environ.get('TEST_NO_CONTRAT', '${TEST_NO_CONTRAT}')
     test_no_pse = os.environ.get('TEST_NO_PSE', '${TEST_NO_PSE}')
-    
+
     # Vérifier l'existence du PSE de test dans acceptation_client (clé primaire complète)
     query_accept = f"""
-    SELECT no_pse 
-    FROM acceptation_client 
-    WHERE code_efs = '{test_code_efs}' 
+    SELECT no_pse
+    FROM acceptation_client
+    WHERE code_efs = '{test_code_efs}'
       AND no_contrat = '{test_no_contrat}'
       AND no_pse = '{test_no_pse}'
     """
-    
+
     pse_in_accept = False
     try:
         result = session.execute(query_accept)
@@ -279,15 +279,15 @@ try:
             pse_in_accept = True
     except:
         pass
-    
+
     # Vérifier l'existence du PSE de test dans opposition_categorisation (clé primaire complète)
     query_oppose = f"""
-    SELECT no_pse 
-    FROM opposition_categorisation 
+    SELECT no_pse
+    FROM opposition_categorisation
     WHERE code_efs = '{test_code_efs}'
       AND no_pse = '{test_no_pse}'
     """
-    
+
     pse_in_oppose = False
     try:
         result = session.execute(query_oppose)
@@ -295,16 +295,16 @@ try:
             pse_in_oppose = True
     except:
         pass
-    
+
     # Vérifier l'existence du PSE de test dans historique_opposition (clé primaire partielle)
     query_hist = f"""
-    SELECT no_pse 
-    FROM historique_opposition 
+    SELECT no_pse
+    FROM historique_opposition
     WHERE code_efs = '{test_code_efs}'
       AND no_pse = '{test_no_pse}'
     LIMIT 1
     """
-    
+
     pse_in_hist = False
     try:
         result = session.execute(query_hist)
@@ -312,10 +312,10 @@ try:
             pse_in_hist = True
     except:
         pass
-    
+
     # Vérifier la cohérence des PSE
     pse_found = pse_in_accept or pse_in_oppose or pse_in_hist
-    
+
     if pse_found:
         if pse_in_accept and (pse_in_oppose or pse_in_hist):
             print(f"✅ Cohérence des PSE : PSE '{test_no_pse}' présent dans acceptation et opposition/historique")
@@ -325,7 +325,7 @@ try:
             print(f"✅ PSE '{test_no_pse}' trouvé dans les tables de référence")
     else:
         print(f"⚠️  PSE '{test_no_pse}' non trouvé dans les tables de référence (normal si pas de données de test)")
-    
+
 except Exception as e:
     print(f"⚠️  Impossible de vérifier les PSE : {e}")
 
@@ -347,16 +347,16 @@ try:
     test_code_efs = os.environ.get('TEST_CODE_EFS', '${TEST_CODE_EFS}')
     test_no_contrat = os.environ.get('TEST_NO_CONTRAT', '${TEST_NO_CONTRAT}')
     test_no_pse = os.environ.get('TEST_NO_PSE', '${TEST_NO_PSE}')
-    
+
     # Vérifier que les acceptations existent (clé primaire complète)
     query_accept = f"""
-    SELECT no_pse 
-    FROM acceptation_client 
-    WHERE code_efs = '{test_code_efs}' 
+    SELECT no_pse
+    FROM acceptation_client
+    WHERE code_efs = '{test_code_efs}'
       AND no_contrat = '{test_no_contrat}'
       AND no_pse = '{test_no_pse}'
     """
-    
+
     accept_exists = False
     try:
         result_accept = session.execute(query_accept)
@@ -364,15 +364,15 @@ try:
             accept_exists = True
     except:
         pass
-    
+
     # Vérifier que les oppositions existent (clé primaire complète)
     query_oppose = f"""
-    SELECT no_pse 
-    FROM opposition_categorisation 
+    SELECT no_pse
+    FROM opposition_categorisation
     WHERE code_efs = '{test_code_efs}'
       AND no_pse = '{test_no_pse}'
     """
-    
+
     oppose_exists = False
     try:
         result_oppose = session.execute(query_oppose)
@@ -380,11 +380,11 @@ try:
             oppose_exists = True
     except:
         pass
-    
+
     # Vérifier la cohérence : code_efs doit correspondre à code_si (déjà vérifié plus haut)
     # Note: Dans ce POC, code_efs et code_si sont supposés être équivalents
     # La vérification du compte dans operations_by_account est déjà faite dans TEST 9 (lignes 226-235)
-    
+
     if accept_exists or oppose_exists:
         if accept_exists:
             print(f"✅ Intégrité référentielle : Acceptation trouvée pour (code_efs='{test_code_efs}', no_contrat='{test_no_contrat}', no_pse='{test_no_pse}')")
@@ -392,7 +392,7 @@ try:
             print(f"✅ Intégrité référentielle : Opposition trouvée pour (code_efs='{test_code_efs}', no_pse='{test_no_pse}')")
     else:
         print(f"⚠️  Intégrité référentielle : Aucune acceptation/opposition trouvée pour les valeurs de test")
-    
+
 except Exception as e:
     print(f"⚠️  Impossible de vérifier l'intégrité référentielle : {e}")
 
@@ -454,18 +454,18 @@ PERTINENCE_OK=true
 if [ "$COUNT_OPS" -gt 0 ]; then
     COUNT_LIBELLE_VIDE=$($CQLSH -e "USE domiramacatops_poc; SELECT COUNT(*) FROM operations_by_account WHERE code_si = '${TEST_CODE_SI}' AND contrat = '${TEST_CONTRAT}' AND (libelle IS NULL OR libelle = '');" 2>&1 | grep -E "^\s+[0-9]+" | tr -d ' ' || echo "0")
     COUNT_LIBELLE_VIDE=${COUNT_LIBELLE_VIDE:-0}
-    
+
     if [ -n "$COUNT_LIBELLE_VIDE" ] && [ "$COUNT_LIBELLE_VIDE" -gt 0 ] 2>/dev/null; then
         warn "⚠️  $COUNT_LIBELLE_VIDE opération(s) avec libellé vide ou NULL"
         PERTINENCE_OK=false
     else
         success "✅ Tous les libellés sont renseignés"
     fi
-    
+
     # Vérifier que les montants sont cohérents (positifs)
     COUNT_MONTANT_INVALIDE=$($CQLSH -e "USE domiramacatops_poc; SELECT COUNT(*) FROM operations_by_account WHERE code_si = '${TEST_CODE_SI}' AND contrat = '${TEST_CONTRAT}' AND (montant IS NULL OR montant <= 0);" 2>&1 | grep -E "^\s+[0-9]+" | tr -d ' ' || echo "0")
     COUNT_MONTANT_INVALIDE=${COUNT_MONTANT_INVALIDE:-0}
-    
+
     if [ -n "$COUNT_MONTANT_INVALIDE" ] && [ "$COUNT_MONTANT_INVALIDE" -gt 0 ] 2>/dev/null; then
         warn "⚠️  $COUNT_MONTANT_INVALIDE opération(s) avec montant invalide (NULL ou <= 0)"
         PERTINENCE_OK=false
@@ -488,9 +488,9 @@ session = cluster.connect('domiramacatops_poc')
 # Vérifier les dates futures
 now = datetime.now()
 query = f"""
-SELECT date_op 
-FROM operations_by_account 
-WHERE code_si = '{TEST_CODE_SI}' 
+SELECT date_op
+FROM operations_by_account
+WHERE code_si = '{TEST_CODE_SI}'
   AND contrat = '{TEST_CONTRAT}'
 LIMIT 100
 """
@@ -527,10 +527,10 @@ session = cluster.connect('domiramacatops_poc')
 try:
     # Récupérer les catégories auto utilisées
     query_ops = f"""
-    SELECT DISTINCT cat_auto 
-    FROM operations_by_account 
-    WHERE code_si = '{TEST_CODE_SI}' 
-      AND contrat = '{TEST_CONTRAT}' 
+    SELECT DISTINCT cat_auto
+    FROM operations_by_account
+    WHERE code_si = '{TEST_CODE_SI}'
+      AND contrat = '{TEST_CONTRAT}'
       AND cat_auto IS NOT NULL
     LIMIT 10
     """
@@ -544,9 +544,9 @@ try:
     if categories:
         categories_str = "', '".join(categories)
         query_regles = f"""
-        SELECT COUNT(*) 
-        FROM regles_personnalisees 
-        WHERE code_efs = '{TEST_CODE_EFS}' 
+        SELECT COUNT(*)
+        FROM regles_personnalisees
+        WHERE code_efs = '{TEST_CODE_EFS}'
           AND categorie_cible IN ('{categories_str}')
           AND actif = true
         """
@@ -580,18 +580,18 @@ COUVERTURE_OK=true
 if [ "$COUNT_OPS" -gt 0 ]; then
     COUNT_CAT_USER=$($CQLSH -e "USE domiramacatops_poc; SELECT COUNT(*) FROM operations_by_account WHERE code_si = '${TEST_CODE_SI}' AND contrat = '${TEST_CONTRAT}' AND cat_user IS NOT NULL;" 2>&1 | grep -E "^\s+[0-9]+" | tr -d ' ' || echo "0")
     COUNT_CAT_USER=${COUNT_CAT_USER:-0}
-    
+
     if [ -n "$COUNT_CAT_USER" ] && [ "$COUNT_CAT_USER" -gt 0 ] 2>/dev/null; then
         success "✅ $COUNT_CAT_USER opération(s) avec cat_user (multi-version testable)"
     else
         warn "⚠️  Aucune opération avec cat_user (tests multi-version limités)"
         COUVERTURE_OK=false
     fi
-    
+
     # Vérifier présence de données avec différentes catégories
     COUNT_CATEGORIES=$($CQLSH -e "USE domiramacatops_poc; SELECT COUNT(DISTINCT cat_auto) FROM operations_by_account WHERE code_si = '${TEST_CODE_SI}' AND contrat = '${TEST_CONTRAT}' AND cat_auto IS NOT NULL;" 2>&1 | grep -E "^\s+[0-9]+" | tr -d ' ' || echo "0")
     COUNT_CATEGORIES=${COUNT_CATEGORIES:-0}
-    
+
     if [ -n "$COUNT_CATEGORIES" ] && [ "$COUNT_CATEGORIES" -ge 2 ] 2>/dev/null; then
         success "✅ Diversité des catégories : $COUNT_CATEGORIES catégorie(s)"
     else
@@ -663,24 +663,24 @@ try:
     FROM operations_by_account
     LIMIT 20
     """
-    
+
     accounts = list(session.execute(query))
-    
+
     if accounts:
         # Compter les opérations pour chaque compte
         counts = []
         for account in accounts[:10]:  # Limiter à 10 pour performance
             count_query = f"""
-            SELECT COUNT(*) 
-            FROM operations_by_account 
-            WHERE code_si = '{account.code_si}' 
+            SELECT COUNT(*)
+            FROM operations_by_account
+            WHERE code_si = '{account.code_si}'
               AND contrat = '{account.contrat}'
             """
             result = session.execute(count_query)
             count = result.one()[0] if result else 0
             if count > 0:
                 counts.append(count)
-        
+
         if counts:
             max_count = max(counts)
             min_count = min(counts)
@@ -718,9 +718,9 @@ try:
     # Vérifier les données des 30 derniers jours
     thirty_days_ago = datetime.now() - timedelta(days=30)
     query = f"""
-    SELECT COUNT(*) 
-    FROM operations_by_account 
-    WHERE code_si = '{TEST_CODE_SI}' 
+    SELECT COUNT(*)
+    FROM operations_by_account
+    WHERE code_si = '{TEST_CODE_SI}'
       AND contrat = '{TEST_CONTRAT}'
       AND date_op >= {int(thirty_days_ago.timestamp() * 1000)}
     """
@@ -762,7 +762,7 @@ try:
     query_ops = f"""
     SELECT MIN(date_op) as min_date
     FROM operations_by_account
-    WHERE code_si = '{TEST_CODE_SI}' 
+    WHERE code_si = '{TEST_CODE_SI}'
       AND contrat = '{TEST_CONTRAT}'
     """
 
@@ -777,7 +777,7 @@ try:
     query_accept = f"""
     SELECT MIN(accepted_at) as min_date
     FROM acceptation_client
-    WHERE code_efs = '{TEST_CODE_EFS}' 
+    WHERE code_efs = '{TEST_CODE_EFS}'
       AND no_contrat = '{TEST_NO_CONTRAT}'
     """
 
@@ -851,4 +851,3 @@ echo ""
 info "💡 Pour exécuter les tests de cohérence :"
 info "   ./15_test_coherence_multi_tables.sh"
 echo ""
-

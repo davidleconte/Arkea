@@ -1,0 +1,79 @@
+name: Lint
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  # =============================================================================
+  # Linting Shell Scripts
+  # =============================================================================
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: 'scripts'
+
+  # =============================================================================
+  # Linting Python
+  # =============================================================================
+  python-lint:
+    name: Python Lint
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install Linters
+        run: |
+          pip install flake8 black isort
+      
+      - name: Run Black Check
+        run: |
+          black --check --line-length 100 .
+        continue-on-error: true
+      
+      - name: Run isort Check
+        run: |
+          isort --check-only --profile black --line-length 100 .
+        continue-on-error: true
+      
+      - name: Run Flake8
+        run: |
+          flake8 --max-line-length=100 --extend-ignore=E203 .
+        continue-on-error: true
+
+  # =============================================================================
+  # Linting Markdown
+  # =============================================================================
+  markdown-lint:
+    name: Markdown Lint
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run Markdownlint
+        uses: DavidAnson/markdownlint@v3
+        with:
+          globs: |
+            **/*.md
+            !binaire/**/*.md
+            !software/**/*.md
+

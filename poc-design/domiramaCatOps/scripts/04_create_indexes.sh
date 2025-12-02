@@ -320,20 +320,20 @@ if [ -f "$META_INDEX_FILE" ]; then
     echo "      - Index standard : Pour filtrage rapide (categorie, actif, status)"
     echo "      - Index SAI : Intégré à HCD (pas de système externe)"
     echo ""
-    
+
     # Exécution - Index meta-categories
     info "🚀 Exécution du DDL pour les index meta-categories..."
     "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -f "$META_INDEX_FILE" 2>&1 | grep -v 'Warnings' || true
-    
+
     sleep 3
-    
+
     # Vérification - Index meta-categories
     info "🔍 Vérification de la création des index meta-categories..."
     INDEXES_META=$(
       "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT table_name, index_name FROM system_schema.indexes WHERE keyspace_name = 'domiramacatops_poc' AND table_name IN ('historique_opposition', 'feedback_par_libelle', 'feedback_par_ics', 'regles_personnalisees', 'decisions_salaires');" 2>&1 \
       | grep -v 'Warnings' | grep -v 'table_name' | grep -vE '^---' | grep -v '^$' | wc -l | tr -d ' '
     )
-    
+
     if [ "${INDEXES_META}" -ge 10 ]; then
         success "✅ ${INDEXES_META} index(es) SAI créé(s) pour tables meta-categories"
         echo ""
@@ -346,7 +346,7 @@ if [ -f "$META_INDEX_FILE" ]; then
         warn "⚠️  Nombre d index SAI meta-categories: ${INDEXES_META} (attendu: 10+)"
     fi
     echo ""
-    
+
     TOTAL_INDEXES=$((INDEXES_OPS + INDEXES_META))
     info "📊 Total des index SAI créés : ${TOTAL_INDEXES} (operations: ${INDEXES_OPS}, meta-categories: ${INDEXES_META})"
     echo ""

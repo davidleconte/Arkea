@@ -8,7 +8,7 @@
 # OBJECTIF :
 #   Ce script démontre de manière très didactique l'équivalent BLOOMFILTER HBase avec
 #   Index SAI (Storage-Attached Index) dans HCD.
-#   
+#
 #   Cette version didactique affiche :
 #   - Le DDL complet (structure de partition, index SAI)
 #   - Les équivalences HBase → HCD détaillées
@@ -493,10 +493,10 @@ REPORT_CONTENT=$(cat << EOF
 
 ### Avantages HCD vs HBase
 
-✅ **Index exact** : Pas de faux positifs (vs BLOOMFILTER probabiliste)  
-✅ **Performance** : Accès direct via index (meilleur que BLOOMFILTER)  
-✅ **Maintenance** : Index persistant (pas de reconstruction)  
-✅ **Flexibilité** : Clustering keys + colonnes (vs rowkeys uniquement)  
+✅ **Index exact** : Pas de faux positifs (vs BLOOMFILTER probabiliste)
+✅ **Performance** : Accès direct via index (meilleur que BLOOMFILTER)
+✅ **Maintenance** : Index persistant (pas de reconstruction)
+✅ **Flexibilité** : Clustering keys + colonnes (vs rowkeys uniquement)
 ✅ **Valeur ajoutée** : Full-text search (non disponible avec BLOOMFILTER)
 
 ---
@@ -541,7 +541,7 @@ FROM domiramacatops_poc.operations_by_account
 WHERE code_si = '6' AND contrat = '600000041'
 LIMIT 1;
 \`\`\`
-**Résultat attendu** : Accès direct à la partition via partition key + clustering keys.  
+**Résultat attendu** : Accès direct à la partition via partition key + clustering keys.
 **Équivalent BLOOMFILTER** : Évite de lire des fichiers qui ne contiennent pas la clé.
 
 **✅ Contrôle effectué** :
@@ -560,7 +560,7 @@ WHERE code_si = '6' AND contrat = '600000041'
   AND libelle : 'LOYER'
 ORDER BY date_op DESC LIMIT 5;
 \`\`\`
-**Résultat attendu** : Recherche full-text optimisée via index SAI.  
+**Résultat attendu** : Recherche full-text optimisée via index SAI.
 **Valeur ajoutée HCD** : Non disponible avec BLOOMFILTER HBase (ne fonctionne que sur rowkeys).
 
 **✅ Contrôle effectué** :
@@ -578,7 +578,7 @@ WHERE code_si = '6' AND contrat = '600000041';
 \`\`\`
 **Résultat attendu** : Accès direct (équivalent BLOOMFILTER).
 
-**✅ Contrôle effectué** : $RESULT_TEST3A_CAPTURED ligne(s) retournée(s)  
+**✅ Contrôle effectué** : $RESULT_TEST3A_CAPTURED ligne(s) retournée(s)
 **✅ Validation** : Requête avec partition key optimisée (accès direct).
 
 **Test B - Sans partition key** :
@@ -588,7 +588,7 @@ WHERE libelle : 'LOYER' ALLOW FILTERING;
 \`\`\`
 **Résultat attendu** : Scan complet (ALLOW FILTERING requis).
 
-**✅ Contrôle effectué** : $RESULT_TEST3B_CAPTURED ligne(s) retournée(s)  
+**✅ Contrôle effectué** : $RESULT_TEST3B_CAPTURED ligne(s) retournée(s)
 **⚠️  Validation** : Requête sans partition key nécessite ALLOW FILTERING (scan complet).
 
 ### Test 4 : Pagination Optimisée (Évite Scan Complet)
@@ -601,7 +601,7 @@ WHERE code_si = '6' AND contrat = '600000041'
 ORDER BY date_op DESC
 LIMIT 10;
 \`\`\`
-**Résultat attendu** : Pagination efficace avec partition key (pas de scan complet).  
+**Résultat attendu** : Pagination efficace avec partition key (pas de scan complet).
 **Équivalent BLOOMFILTER** : Évite de lire toutes les partitions lors de la pagination.
 
 **✅ Contrôle effectué** :
@@ -617,7 +617,7 @@ $(echo "$RESULT_TEST4_CAPTURED" | sed 's/^/    /' | head -15)
 SELECT COUNT(*) FROM domiramacatops_poc.operations_by_account
 WHERE code_si = '6' AND contrat = '600000041';
 \`\`\`
-**Résultat** : $RESULT_TEST5A_CAPTURED ligne(s) retournée(s) en ${LATENCY_A_CAPTURED}ms  
+**Résultat** : $RESULT_TEST5A_CAPTURED ligne(s) retournée(s) en ${LATENCY_A_CAPTURED}ms
 **✅ Validation** : Latence optimisée avec partition key.
 
 **Test B - Sans partition key (scan complet)** :
@@ -625,7 +625,7 @@ WHERE code_si = '6' AND contrat = '600000041';
 SELECT COUNT(*) FROM domiramacatops_poc.operations_by_account
 WHERE libelle : 'LOYER' ALLOW FILTERING;
 \`\`\`
-**Résultat** : $RESULT_TEST5B_CAPTURED ligne(s) retournée(s) en ${LATENCY_B_CAPTURED}ms  
+**Résultat** : $RESULT_TEST5B_CAPTURED ligne(s) retournée(s) en ${LATENCY_B_CAPTURED}ms
 **⚠️  Validation** : Latence dégradée sans partition key (scan complet).
 
 **📊 Comparaison** :
@@ -648,9 +648,9 @@ WHERE libelle : 'LOYER' ALLOW FILTERING;
 
 La démonstration du BLOOMFILTER équivalent a été réalisée avec succès, mettant en évidence :
 
-✅ **Équivalence HBase** : Le partition key + clustering keys reproduit le comportement BLOOMFILTER avec des avantages supplémentaires.  
-✅ **Index exact** : Pas de faux positifs (vs BLOOMFILTER probabiliste).  
-✅ **Performance** : Accès direct via index (meilleur que BLOOMFILTER).  
+✅ **Équivalence HBase** : Le partition key + clustering keys reproduit le comportement BLOOMFILTER avec des avantages supplémentaires.
+✅ **Index exact** : Pas de faux positifs (vs BLOOMFILTER probabiliste).
+✅ **Performance** : Accès direct via index (meilleur que BLOOMFILTER).
 ✅ **Valeur ajoutée** : Full-text search (non disponible avec BLOOMFILTER).
 
 ---
@@ -665,4 +665,3 @@ EOF
     echo "$REPORT_CONTENT"
 } > "$REPORT_FILE"
 success "✅ Rapport généré : $REPORT_FILE"
-

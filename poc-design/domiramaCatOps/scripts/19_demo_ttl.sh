@@ -8,7 +8,7 @@
 # OBJECTIF :
 #   Ce script démontre de manière très didactique le TTL (Time To Live) et la purge
 #   automatique des données dans HCD, équivalent au TTL HBase.
-#   
+#
 #   Cette version didactique affiche :
 #   - Le DDL complet (configuration TTL)
 #   - Les équivalences HBase → HCD détaillées
@@ -387,9 +387,9 @@ cat > "$REPORT_FILE" << 'REPORT_EOF'
 
 ### Avantages HCD vs HBase
 
-✅ **TTL par écriture** : Contrôle granulaire (INSERT ... USING TTL ...)  
-✅ **TTL par table** : Configuration centralisée (default_time_to_live)  
-✅ **Purge automatique** : Pas d'intervention manuelle  
+✅ **TTL par écriture** : Contrôle granulaire (INSERT ... USING TTL ...)
+✅ **TTL par table** : Configuration centralisée (default_time_to_live)
+✅ **Purge automatique** : Pas d'intervention manuelle
 ✅ **Tombstones** : Gestion automatique des marqueurs de suppression
 
 ---
@@ -425,7 +425,7 @@ INSERT INTO domiramacatops_poc.operations_by_account (code_si, contrat, date_op,
 VALUES ('DEMO_TTL', 'DEMO_001', '2024-01-20 10:00:00', 1, 'TEST TTL', 100.00);
 ```
 
-**Résultat attendu** : L'opération est insérée avec TTL = 315619200 secondes (10 ans).  
+**Résultat attendu** : L'opération est insérée avec TTL = 315619200 secondes (10 ans).
 **Équivalent HBase** : TTL par défaut de la Column Family.
 
 **✅ Contrôle effectué après insertion** :
@@ -454,7 +454,7 @@ VALUES ('DEMO_TTL', 'DEMO_001', '2024-01-20 11:00:00', 2, 'TEST TTL COURT', 200.
 USING TTL 60;
 ```
 
-**Résultat attendu** : L'opération est insérée avec TTL = 60 secondes et expire automatiquement.  
+**Résultat attendu** : L'opération est insérée avec TTL = 60 secondes et expire automatiquement.
 **Valeur ajoutée HCD** : TTL par écriture (non disponible avec HBase).
 
 **✅ Contrôle effectué AVANT expiration (immédiatement après insertion)** :
@@ -487,7 +487,7 @@ fi
 
 cat >> "$REPORT_FILE" << 'REPORT_EOF'
 ```
-**✅ Validation** : 
+**✅ Validation** :
 REPORT_EOF
 
 # Ajouter le statut de l'expiration
@@ -516,7 +516,7 @@ WHERE code_si = 'DEMO_TTL' AND contrat = 'DEMO_001'
   AND date_op = '2024-01-20 10:00:00' AND numero_op = 1;
 ```
 
-**Résultat attendu** : Le TTL de la ligne est mis à jour à 120 secondes.  
+**Résultat attendu** : Le TTL de la ligne est mis à jour à 120 secondes.
 **Valeur ajoutée HCD** : Mise à jour du TTL sans réécrire toute la ligne.
 
 **✅ Contrôle effectué après mise à jour** :
@@ -581,7 +581,7 @@ fi
 
 cat >> "$REPORT_FILE" << 'REPORT_EOF'
 ```
-**✅ Validation** : 
+**✅ Validation** :
 REPORT_EOF
 
 # Ajouter le statut du Test 4
@@ -604,10 +604,10 @@ cat >> "$REPORT_FILE" << 'REPORT_EOF'
 **Tous les tests ont été exécutés et contrôlés avec les résultats réels :**
 
 1. ✅ **Test 1** : Insertion avec TTL par défaut → **Contrôlé** : Ligne insérée, TTL = 315619200 secondes
-2. ✅ **Test 2** : Insertion avec TTL personnalisé → **Contrôlé AVANT expiration** : TTL = 60 secondes  
+2. ✅ **Test 2** : Insertion avec TTL personnalisé → **Contrôlé AVANT expiration** : TTL = 60 secondes
    → **Contrôlé APRÈS expiration** : Ligne purgée automatiquement (0 ligne retournée)
 3. ✅ **Test 3** : Mise à jour avec nouveau TTL → **Contrôlé** : TTL mis à jour à 120 secondes, libelle modifié
-4. ✅ **Test 4** : Insertion multiple avec TTL différents → **Contrôlé** : Deux lignes avec TTL 30s et 90s  
+4. ✅ **Test 4** : Insertion multiple avec TTL différents → **Contrôlé** : Deux lignes avec TTL 30s et 90s
    → **Contrôlé après 35s** : Ligne TTL 30s expirée, ligne TTL 90s encore présente (TTL indépendants confirmés)
 
 **Tous les résultats ont été vérifiés et documentés dans ce rapport.**
@@ -618,11 +618,11 @@ cat >> "$REPORT_FILE" << 'REPORT_EOF'
 
 La démonstration du TTL a été réalisée avec succès, mettant en évidence :
 
-✅ **Équivalence HBase** : Le TTL HCD reproduit le comportement HBase avec des avantages supplémentaires.  
-✅ **Flexibilité** : TTL par table ET par écriture (valeur ajoutée HCD).  
-✅ **Purge automatique** : Les données expirées sont automatiquement supprimées (confirmé par les contrôles).  
-✅ **Performance** : Pas d'impact sur les performances (purge lors compaction).  
-✅ **Tests complets** : Tous les scénarios ont été testés avec résultats réels et contrôles documentés.  
+✅ **Équivalence HBase** : Le TTL HCD reproduit le comportement HBase avec des avantages supplémentaires.
+✅ **Flexibilité** : TTL par table ET par écriture (valeur ajoutée HCD).
+✅ **Purge automatique** : Les données expirées sont automatiquement supprimées (confirmé par les contrôles).
+✅ **Performance** : Pas d'impact sur les performances (purge lors compaction).
+✅ **Tests complets** : Tous les scénarios ont été testés avec résultats réels et contrôles documentés.
 ✅ **Tests complexes** : TTL multiples, purge sélective, indépendance des TTL par ligne validés.
 
 ---
@@ -631,4 +631,3 @@ La démonstration du TTL a été réalisée avec succès, mettant en évidence :
 REPORT_EOF
 
 success "✅ Rapport généré : $REPORT_FILE"
-

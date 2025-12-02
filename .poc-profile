@@ -18,9 +18,14 @@ if [ -f "${SCRIPT_DIR}/.poc-config.sh" ]; then
     source "${SCRIPT_DIR}/.poc-config.sh"
     export POC_HOME="${ARKEA_HOME}"
 else
-    # Fallback si .poc-config.sh n'existe pas (compatibilité ascendante)
-    export POC_HOME="${ARKEA_HOME:-/Users/david.leconte/Documents/Arkea}"
-    export ARKEA_HOME="$POC_HOME"
+    # Fallback portable si .poc-config.sh n'existe pas (compatibilité ascendante)
+    # Détection automatique du répertoire du projet
+    if [ -z "${ARKEA_HOME:-}" ]; then
+        # Ce fichier est à la racine, donc ARKEA_HOME = répertoire de ce fichier
+        ARKEA_HOME="$(cd "$(dirname "${BASH_SOURCE[0]:-${0}}")" && pwd)"
+        export ARKEA_HOME
+    fi
+    export POC_HOME="${ARKEA_HOME}"
 fi
 
 # =============================================================================
@@ -78,9 +83,9 @@ fi
 check_poc_env() {
     echo "=== Vérification des Variables d'Environnement POC ==="
     echo ""
-    
+
     local errors=0
-    
+
     # Vérifier JAVA_HOME
     if [ -z "$JAVA_HOME" ] || [ ! -d "$JAVA_HOME" ]; then
         echo "❌ JAVA_HOME non défini ou invalide"
@@ -89,7 +94,7 @@ check_poc_env() {
         echo "✅ JAVA_HOME: $JAVA_HOME"
         java -version 2>&1 | head -1
     fi
-    
+
     # Vérifier HCD_HOME
     if [ -z "$HCD_HOME" ] || [ ! -d "$HCD_HOME" ]; then
         echo "❌ HCD_HOME non défini ou invalide: $HCD_HOME"
@@ -97,7 +102,7 @@ check_poc_env() {
     else
         echo "✅ HCD_HOME: $HCD_HOME"
     fi
-    
+
     # Vérifier SPARK_HOME
     if [ -z "$SPARK_HOME" ] || [ ! -d "$SPARK_HOME" ]; then
         echo "❌ SPARK_HOME non défini ou invalide: $SPARK_HOME"
@@ -105,7 +110,7 @@ check_poc_env() {
     else
         echo "✅ SPARK_HOME: $SPARK_HOME"
     fi
-    
+
     # Vérifier KAFKA_HOME
     if [ -z "$KAFKA_HOME" ] || [ ! -d "$KAFKA_HOME" ]; then
         echo "❌ KAFKA_HOME non défini ou invalide: $KAFKA_HOME"
@@ -113,7 +118,7 @@ check_poc_env() {
     else
         echo "✅ KAFKA_HOME: $KAFKA_HOME"
     fi
-    
+
     echo ""
     if [ $errors -eq 0 ]; then
         echo "✅ Toutes les variables sont correctement configurées !"

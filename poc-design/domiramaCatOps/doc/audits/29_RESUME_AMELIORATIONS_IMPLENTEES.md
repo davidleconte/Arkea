@@ -13,6 +13,7 @@
 **Fonction** : `validate_hcd_connection()`
 
 **Fonctionnalités** :
+
 - ✅ Vérification de la connectivité HCD avant chaque phase critique
 - ✅ Retry automatique (3 tentatives) avec backoff exponentiel
 - ✅ Messages clairs pour chaque tentative
@@ -26,6 +27,7 @@
 **Amélioration** : `validate_phase()` pour Phase 1
 
 **Fonctionnalités** :
+
 - ✅ Vérification du keyspace
 - ✅ Vérification des tables principales (operations_by_account, acceptations, oppositions, feedbacks_libelles)
 - ✅ Messages détaillés pour chaque table manquante
@@ -39,6 +41,7 @@
 **Amélioration** : `validate_phase()` pour Phase 2
 
 **Fonctionnalités** :
+
 - ✅ Vérification de l'existence du fichier Parquet
 - ✅ Validation du schéma Parquet (colonnes requises : code_si, contrat, date_op, libelle)
 - ✅ Validation du nombre de lignes (minimum 20 000)
@@ -53,6 +56,7 @@
 **Amélioration** : `validate_phase()` pour Phase 3
 
 **Fonctionnalités** :
+
 - ✅ Comptage total des opérations
 - ✅ Validation du taux de catégorisation (minimum 90%)
 - ✅ Validation du taux d'embeddings (minimum 90%)
@@ -67,6 +71,7 @@
 **Fonction** : `diagnose_error()`
 
 **Fonctionnalités** :
+
 - ✅ Analyse automatique des dernières lignes du log
 - ✅ Détection des erreurs communes :
   - Problèmes de connexion HCD
@@ -86,6 +91,7 @@
 **Fonction** : `execute_script_with_retry()`
 
 **Fonctionnalités** :
+
 - ✅ Retry automatique (3 tentatives par défaut)
 - ✅ Backoff exponentiel entre les tentatives
 - ✅ Diagnostic automatique après échec définitif
@@ -100,6 +106,7 @@
 **Amélioration** : Fonction `execute_script()` existante
 
 **Fonctionnalités** :
+
 - ✅ Vérification des permissions d'exécution
 - ✅ Ajout automatique des permissions si nécessaire
 - ✅ Capture précise du code de sortie
@@ -115,6 +122,7 @@
 **Amélioration** : Validation HCD avant Phase 1
 
 **Fonctionnalités** :
+
 - ✅ Vérification de la connectivité HCD avant de commencer Phase 1
 - ✅ Arrêt immédiat si HCD non accessible
 - ✅ Checkpoint d'échec sauvegardé
@@ -180,11 +188,13 @@
 ### Exemple 1 : Erreur de Connexion HCD
 
 **Avant** :
+
 ```
 ❌ Script échoué
 ```
 
 **Après** :
+
 ```
 ⚠️  Tentative 1/3 : HCD non accessible, retry dans 2s...
 ⚠️  Tentative 2/3 : HCD non accessible, retry dans 4s...
@@ -196,11 +206,13 @@
 ### Exemple 2 : Fichier Parquet Invalide
 
 **Avant** :
+
 ```
 ✅ Fichier operations_20000.parquet existe
 ```
 
 **Après** :
+
 ```
 ✅ Fichier operations_20000.parquet existe
 ✅ Schéma Parquet valide : 25000 lignes
@@ -211,11 +223,13 @@
 ### Exemple 3 : Diagnostic Automatique
 
 **Avant** :
+
 ```
 ❌ Script échoué
 ```
 
 **Après** :
+
 ```
 ❌ Script échoué (code: 1)
 🔍 Diagnostic de l'erreur...
@@ -274,4 +288,3 @@ Connection refused: localhost/127.0.0.1:9042
 **Date de génération** : 2025-01-XX  
 **Version** : 1.0  
 **Statut** : ✅ **Améliorations complètes et validées**
-

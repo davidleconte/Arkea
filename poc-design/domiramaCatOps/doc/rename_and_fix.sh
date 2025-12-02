@@ -1,10 +1,9 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script de Renommage et Correction - Fichiers .md
 # Basé sur : 25_AUDIT_RENOMMAGE_ENRICHISSEMENT.md
 # ============================================
-
-set -e
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd "$SCRIPT_DIR"

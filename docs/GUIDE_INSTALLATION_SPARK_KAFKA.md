@@ -1,7 +1,7 @@
 # Guide d'Installation : Spark + spark-cassandra-connector + Kafka
 
-**Date** : 2025-11-25  
-**Système** : MacBook Pro M3 Pro (ARM64)  
+**Date** : 2025-12-02 (Mise à jour pour portabilité cross-platform)  
+**Systèmes supportés** : macOS, Linux, Windows (WSL2)  
 **Objectif** : POC Migration HBase → HCD
 
 ---
@@ -36,29 +36,40 @@ brew install apache-spark
 spark-submit --version
 ```
 
-### Option B : Installation Manuelle
+### Option B : Installation Manuelle (Recommandé pour Linux)
+
+**Utiliser le script d'installation automatique** :
 
 ```bash
-cd /Users/david.leconte/Documents/Arkea
+# Charger la configuration
+source .poc-profile
 
-# Télécharger Spark 3.5.x (compatible avec Java 11)
+# Installer Spark (détection automatique de ARKEA_HOME)
+./scripts/setup/02_install_spark_kafka.sh
+```
+
+**Ou installation manuelle** :
+
+```bash
+# Détecter automatiquement le répertoire du projet
+cd "${ARKEA_HOME:-$(pwd)}"
+
+# Télécharger Spark 3.5.1 (compatible avec Java 11)
+mkdir -p software
+cd software
 curl -O https://archive.apache.org/dist/spark/spark-3.5.1/spark-3.5.1-bin-hadoop3.tgz
 
 # Extraire
-tar xzf spark-3.5.1-bin-hadoop3.tgz
-mv spark-3.5.1-bin-hadoop3 spark-3.5.1
+cd ..
+mkdir -p binaire
+tar xzf software/spark-3.5.1-bin-hadoop3.tgz -C binaire
+mv binaire/spark-3.5.1-bin-hadoop3 binaire/spark-3.5.1
 
-# Configurer les variables d'environnement
-export SPARK_HOME=/Users/david.leconte/Documents/Arkea/spark-3.5.1
-export PATH=$SPARK_HOME/bin:$PATH
+# Les variables sont configurées automatiquement par .poc-config.sh
+# SPARK_HOME sera détecté automatiquement
 ```
 
-**Persistance** (ajouter dans `~/.zshrc`) :
-```bash
-# Spark Configuration
-export SPARK_HOME=/Users/david.leconte/Documents/Arkea/spark-3.5.1
-export PATH=$SPARK_HOME/bin:$PATH
-```
+**Note** : Sur **Linux**, utilisez `~/.bashrc` au lieu de `~/.zshrc`.
 
 ### Vérification
 
@@ -79,11 +90,11 @@ spark-shell --version
 **Version compatible** : spark-cassandra-connector_2.12-3.5.0.jar
 
 ```bash
-# Créer un répertoire pour les JARs
-mkdir -p /Users/david.leconte/Documents/Arkea/spark-jars
+# Créer un répertoire pour les JARs (chemin portable)
+mkdir -p "${ARKEA_HOME:-$(pwd)}/binaire/spark-jars"
 
 # Télécharger le connector
-cd /Users/david.leconte/Documents/Arkea/spark-jars
+cd "${ARKEA_HOME:-$(pwd)}/binaire/spark-jars"
 curl -O https://repo1.maven.org/maven2/com/datastax/spark/spark-cassandra-connector_2.12/3.5.0/spark-cassandra-connector_2.12-3.5.0.jar
 
 # Télécharger les dépendances (si nécessaire)
@@ -132,42 +143,67 @@ spark-shell --packages com.datastax.spark:spark-cassandra-connector_2.12:3.5.0 \
 
 ## 3. Installation d'Apache Kafka
 
-### Option A : Via Homebrew (Recommandé)
+### Option A : Via Homebrew (macOS uniquement)
 
 ```bash
 # Installer Kafka
 brew install kafka
 
-# Démarrer Zookeeper (requis par Kafka)
+# Démarrer Zookeeper (requis par Kafka < 2.8)
 brew services start zookeeper
 
 # Démarrer Kafka
 brew services start kafka
 ```
 
-### Option B : Installation Manuelle
+**Note** : Kafka 4.1.1 (utilisé dans ce POC) n'utilise plus Zookeeper.
+
+---
+
+### Option B : Installation Automatique (Linux - Recommandé)
+
+**Utiliser le script d'installation** :
 
 ```bash
-cd /Users/david.leconte/Documents/Arkea
+# Charger la configuration
+source .poc-profile
 
-# Télécharger Kafka 3.6.x (compatible avec Java 11)
-curl -O https://archive.apache.org/dist/kafka/3.6.1/kafka_2.13-3.6.1.tgz
+# Installer Kafka pour Linux
+./scripts/setup/02_install_kafka_linux.sh
+```
+
+**Ce script** :
+- Télécharge Kafka 4.1.1 depuis Apache
+- Extrait dans `binaire/kafka/`
+- Configure automatiquement `KAFKA_HOME`
+- Compatible Ubuntu, CentOS, RHEL, Debian, Fedora
+
+---
+
+### Option C : Installation Manuelle (Linux)
+
+```bash
+# Détecter automatiquement le répertoire du projet
+cd "${ARKEA_HOME:-$(pwd)}"
+
+# Télécharger Kafka 4.1.1 (compatible avec Java 17)
+mkdir -p software
+cd software
+curl -O https://archive.apache.org/dist/kafka/4.1.1/kafka_2.13-4.1.1.tgz
 
 # Extraire
-tar xzf kafka_2.13-3.6.1.tgz
-mv kafka_2.13-3.6.1 kafka-3.6.1
+cd ..
+mkdir -p binaire
+tar xzf software/kafka_2.13-4.1.1.tgz -C binaire
+mv binaire/kafka_2.13-4.1.1 binaire/kafka
 
-# Configurer les variables d'environnement
-export KAFKA_HOME=/Users/david.leconte/Documents/Arkea/kafka-3.6.1
-export PATH=$KAFKA_HOME/bin:$PATH
+# Les variables sont configurées automatiquement par .poc-config.sh
+# KAFKA_HOME sera détecté automatiquement
 ```
 
-**Persistance** (ajouter dans `~/.zshrc`) :
-```bash
-# Kafka Configuration
-export KAFKA_HOME=/Users/david.leconte/Documents/Arkea/kafka-3.6.1
-export PATH=$KAFKA_HOME/bin:$PATH
-```
+**Voir** :
+- `docs/GUIDE_INSTALLATION_LINUX.md` pour les détails Linux
+- `docs/GUIDE_INSTALLATION_WINDOWS.md` pour Windows (WSL2)
 
 ### Option C : Via Podman (Alternative)
 
@@ -287,14 +323,42 @@ kafkaDF
 
 ## 📝 Script d'Installation Automatisé
 
-Créer `install_spark_kafka.sh` :
+**Le script `scripts/setup/02_install_spark_kafka.sh` est déjà disponible !**
+
+Il détecte automatiquement :
+- Le répertoire du projet (`ARKEA_HOME`)
+- L'OS (macOS/Linux)
+- Les chemins appropriés selon l'OS
+
+**Utilisation** :
+
+```bash
+# Charger la configuration
+source .poc-profile
+
+# Installer Spark et Kafka
+./scripts/setup/02_install_spark_kafka.sh
+```
+
+**Pour Linux uniquement (Kafka)** :
+
+```bash
+./scripts/setup/02_install_kafka_linux.sh
+```
+
+---
+
+### Ancien Script (Référence - Non Recommandé)
+
+Si vous devez créer un script personnalisé :
 
 ```bash
 #!/bin/bash
 
-set -e
+set -euo pipefail
 
-INSTALL_DIR="/Users/david.leconte/Documents/Arkea"
+# Détecter automatiquement le répertoire
+INSTALL_DIR="${ARKEA_HOME:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 cd "$INSTALL_DIR"
 
 echo "=========================================="

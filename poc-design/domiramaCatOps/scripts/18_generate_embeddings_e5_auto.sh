@@ -51,7 +51,7 @@ if ! python3 -c "import sentence_transformers" 2>/dev/null; then
     info "📦 Installation de sentence-transformers..."
     echo "   Cela peut prendre quelques minutes (téléchargement du modèle)..."
     echo ""
-    
+
     if pip install sentence-transformers 2>&1 | tee /tmp/install_st.log; then
         success "✅ Installation terminée"
     else
@@ -82,4 +82,3 @@ fi
 echo ""
 success "✅ Script terminé avec succès"
 echo ""
-

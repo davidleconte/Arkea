@@ -10,12 +10,14 @@
 Tous les fichiers `.md` sont stockés dans le répertoire `docs/` et triés du **plus récent au plus ancien**.
 
 ### Accès à la documentation
+
 ```bash
 cd docs/
 ls -lt *.md  # Liste triée par date (plus récent en premier)
 ```
 
 ### Fichiers dans `docs/`
+
 - **README.md** - Index de la documentation
 - **ORDRE_EXECUTION_SCRIPTS.md** - Guide d'ordre d'exécution des scripts
 - **SCRIPTS_A_JOUR.md** - Documentation complète des scripts
@@ -57,6 +59,7 @@ Tous les scripts `.sh` sont numérotés selon l'ordre d'exécution logique.
 ## 🚀 Workflow Rapide
 
 ### Installation Complète
+
 ```bash
 ./scripts/setup/01_install_hcd.sh
 ./scripts/setup/02_install_spark_kafka.sh
@@ -67,11 +70,13 @@ Tous les scripts `.sh` sont numérotés selon l'ordre d'exécution logique.
 ```
 
 ### Vérification
+
 ```bash
 ./scripts/utils/80_verify_all.sh
 ```
 
 ### Documentation
+
 ```bash
 cd docs/
 cat README.md
@@ -80,4 +85,3 @@ cat README.md
 ---
 
 **Structure organisée et facile à utiliser !** ✅
-

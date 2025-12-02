@@ -7,7 +7,7 @@
 # OBJECTIF :
 #   Ce script charge les données meta-categories depuis 7 fichiers Parquet
 #   dans les 7 tables HCD correspondantes via Spark.
-#   
+#
 #   Transformation HBase → HCD :
 #   - Colonnes dynamiques → Clustering key 'categorie' (pour feedbacks)
 #   - VERSIONS => '50' → Lignes multiples dans historique_opposition
@@ -222,16 +222,16 @@ load_table() {
     local table_name=$1
     local parquet_file=$2
     local description=$3
-    
+
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "  📥 Table : $table_name"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-    
+
     info "📚 Description : $description"
     echo ""
-    
+
     # Ignorer les tables COUNTER (elles sont mises à jour via UPDATE COUNTER, pas INSERT)
     if [ "$table_name" = "feedback_par_libelle" ] || [ "$table_name" = "feedback_par_ics" ]; then
         warn "⚠️  Table COUNTER détectée : $table_name"
@@ -240,7 +240,7 @@ load_table() {
         TABLE_COUNTS+=("$table_name|0|SKIPPED (COUNTER)")
         return
     fi
-    
+
     # Parquet peut être un fichier ou un répertoire
     if [ ! -f "$parquet_file" ] && [ ! -d "$parquet_file" ]; then
         warn "⚠️  Fichier Parquet non trouvé: $parquet_file"
@@ -249,12 +249,12 @@ load_table() {
         TABLE_COUNTS+=("$table_name|0|SKIPPED")
         return
     fi
-    
+
     expected "📋 Résultat attendu :"
     echo "   Données chargées dans la table $table_name"
     echo "   Nombre de lignes chargées affiché"
     echo ""
-    
+
     info "📝 Code Spark - Chargement :"
     echo ""
     code "val inputPath = \"$parquet_file\""
@@ -280,7 +280,7 @@ load_table() {
     code "println(\"✅ Écriture terminée !\")"
     code "spark.stop()"
     echo ""
-    
+
     info "   Explication du code Spark :"
     echo ""
     echo "   📥 Lecture Parquet :"
@@ -294,7 +294,7 @@ load_table() {
     echo "      - mode(\"append\") : Ajoute les données (idempotence si rejeu)"
     echo "      - save() : Écriture atomique dans HCD"
     echo ""
-    
+
     # Créer le script Python pour charger les données (contourne le problème VECTOR avec Spark)
     PYTHON_SCRIPT=$(mktemp)
     cat > "$PYTHON_SCRIPT" <<PYTHON_EOF
@@ -354,10 +354,10 @@ for i, (idx, row) in enumerate(df.iterrows()):
             if col_name not in df.columns:
                 values.append(None)
                 continue
-            
+
             value = row[col_name]
             col_type = columns_info[col_name]
-            
+
             # Convertir selon le type
             if pd.isna(value):
                 values.append(None)
@@ -432,10 +432,10 @@ for i, (idx, row) in enumerate(df.iterrows()):
             else:
                 # Type text ou autre
                 values.append(str(value) if value is not None and not pd.isna(value) else None)
-        
+
         session.execute(prepared, values)
         count += 1
-        
+
         if (i + 1) % batch_size == 0:
             print(f"   Progression: {i + 1}/{count_before} lignes écrites...")
     except Exception as e:
@@ -452,39 +452,39 @@ print(f"📊 Total dans HCD : {total_count}")
 session.shutdown()
 cluster.shutdown()
 PYTHON_EOF
-    
+
     chmod +x "$PYTHON_SCRIPT"
-    
+
     # Vérifier les dépendances Python
     if ! command -v python3 &> /dev/null; then
         error "❌ Python3 n'est pas installé"
         TABLE_COUNTS+=("$table_name|0|ERROR")
         return
     fi
-    
+
     if ! python3 -c "import pandas" 2>/dev/null; then
         warn "⚠️  pandas n'est pas installé, installation..."
         pip3 install pandas pyarrow --quiet
     fi
-    
+
     if ! python3 -c "import cassandra" 2>/dev/null; then
         warn "⚠️  cassandra-driver n'est pas installé, installation..."
         pip3 install cassandra-driver --quiet
     fi
-    
+
     # Exécuter Python
     info "🚀 Exécution du script Python..."
     PYTHON_OUTPUT=$(python3 "$PYTHON_SCRIPT" 2>&1)
     PYTHON_EXIT_CODE=$?
-    
+
     # Afficher la sortie Python
     echo "$PYTHON_OUTPUT" | grep -E "(✅|📊|📥|💾|ERROR|Exception|Progression|Total)" || true
-    
+
     # Extraire le nombre de lignes
     COUNT=$(echo "$PYTHON_OUTPUT" | grep -E "Total dans HCD : [0-9]+" | grep -oE "[0-9]+" | head -1 || echo "0")
-    
+
     rm -f "$PYTHON_SCRIPT"
-    
+
     if [ $PYTHON_EXIT_CODE -eq 0 ]; then
         success "✅ Table '$table_name' chargée : $COUNT ligne(s)"
         TABLE_COUNTS+=("$table_name|$COUNT|OK")
@@ -555,8 +555,8 @@ info "📝 Génération du rapport de démonstration..."
 cat > "$REPORT_FILE" << EOF
 # 📥 Démonstration : Chargement des Données Meta-Categories (Parquet)
 
-**Date** : $(date +"%Y-%m-%d %H:%M:%S")  
-**Script** : $(basename "$0")  
+**Date** : $(date +"%Y-%m-%d %H:%M:%S")
+**Script** : $(basename "$0")
 **Objectif** : Démontrer le chargement de données Parquet dans les 7 tables HCD meta-categories
 
 ---
@@ -604,8 +604,8 @@ cat >> "$REPORT_FILE" << EOF
 
 Le chargement des données meta-categories a été effectué avec succès :
 
-✅ **Total** : $TOTAL_COUNT lignes chargées  
-✅ **Tables** : $SUCCESS_COUNT/7 tables chargées avec succès  
+✅ **Total** : $TOTAL_COUNT lignes chargées
+✅ **Tables** : $SUCCESS_COUNT/7 tables chargées avec succès
 ✅ **Transformations** : Toutes les transformations HBase → HCD validées
 
 ---

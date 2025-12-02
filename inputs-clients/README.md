@@ -23,11 +23,13 @@ Ces fichiers sont les **inputs initiaux** fournis par le client pour le POC.
 ### Document Principal
 
 Le document **"Etat de l'art HBase chez Arkéa.pdf"** a été analysé et son contenu est documenté dans :
+
 - `docs/ANALYSE_ETAT_ART_HBASE.md` - Analyse complète
 
 ### Archives
 
 Les fichiers `groupe_*.zip` contiennent potentiellement :
+
 - Données d'exemple
 - Configurations
 - Schémas
@@ -70,8 +72,3 @@ Le document "Etat de l'art HBase chez Arkéa.pdf" a été analysé et a permis d
 ---
 
 **Inputs clients organisés dans ce répertoire !** ✅
-
-
-
-
-

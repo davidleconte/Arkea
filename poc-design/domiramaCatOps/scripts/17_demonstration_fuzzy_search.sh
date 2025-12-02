@@ -8,7 +8,7 @@
 #   Ce script orchestre une démonstration complète de la recherche floue
 #   (fuzzy search) en exécutant toutes les étapes nécessaires : configuration,
 #   génération des embeddings, et tests de recherche.
-#   
+#
 #   Cette version didactique affiche :
 #   - Le DDL complet (schéma VECTOR et index)
 #   - La génération d'embeddings (démonstration)

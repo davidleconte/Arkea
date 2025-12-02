@@ -32,7 +32,7 @@ Un script d'export didactique doit :
 # OBJECTIF :
 #   Ce script exporte les données d'opérations depuis HCD vers des fichiers
 #   [format] via Spark, avec filtrage par dates (équivalent TIMERANGE HBase).
-#   
+#  
 #   Cette version didactique affiche :
 #   - Le code Spark complet (lecture HCD, filtrage, export) avec explications
 #   - Les équivalences HBase → HCD détaillées
@@ -350,7 +350,7 @@ try {
   val dfRead = spark.read.[format](outputPath)
   val countRead = dfRead.count()
   println(s"✅ Vérification OK : \$countRead opérations lues depuis [Format]")
-  
+
   if (count != countRead) {
     println(s"⚠️  ATTENTION : Incohérence (\$count exportées vs \$countRead lues)")
   }
@@ -401,7 +401,7 @@ fi
 if [ -f "$TEMP_OUTPUT" ]; then
     EXPORT_COUNT=$(grep -oP '\d+ opérations trouvées' "$TEMP_OUTPUT" | head -1 | grep -oP '\d+' || echo "0")
     READ_COUNT=$(grep -oP '\d+ opérations lues' "$TEMP_OUTPUT" | head -1 | grep -oP '\d+' || echo "0")
-    
+
     if [ "$EXPORT_COUNT" != "0" ]; then
         result "Opérations exportées : $EXPORT_COUNT"
     fi
@@ -604,6 +604,7 @@ else:
 """
 
 report_content += f"""
+
 ### Sortie Spark Complète
 
 ```
@@ -648,11 +649,15 @@ PYTHON_REPORT
 success "Rapport markdown généré : $(basename "$REPORT_FILE")"
 
 # Nettoyer les fichiers temporaires
+
 rm -f "$TEMP_OUTPUT" "$TEMP_RESULTS"
 
 # ============================================
+
 # PARTIE 7: RÉSUMÉ ET CONCLUSION
+
 # ============================================
+
 echo ""
 section "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 section "  📊 PARTIE 7: RÉSUMÉ ET CONCLUSION"
@@ -679,6 +684,7 @@ info "📝 Script suivant : Démonstration fenêtre glissante (./28_demo_fenetre
 echo ""
 success "✅ ✅ Export incrémental [Format] terminé !"
 echo ""
+
 ```
 
 ---
@@ -700,7 +706,3 @@ Pour utiliser ce template, adapter :
 ---
 
 **✅ Template créé !**
-
-
-
-

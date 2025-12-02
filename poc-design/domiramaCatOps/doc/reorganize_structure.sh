@@ -1,10 +1,9 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script de Réorganisation : Structure /doc par Catégories
 # Basé sur : 26_ANALYSE_REORGANISATION_STRUCTURE.md
 # ============================================
-
-set -e
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd "$SCRIPT_DIR"

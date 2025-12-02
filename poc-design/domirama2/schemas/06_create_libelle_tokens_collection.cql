@@ -41,7 +41,7 @@ USING 'StorageAttachedIndex';
 -- ============================================
 -- Exemple d'utilisation :
 -- ============================================
--- 
+--
 -- 1. Insertion avec tokens (générés côté application) :
 -- INSERT INTO operations_by_account (
 --     code_si, contrat, date_op, numero_op, op_id,
@@ -59,7 +59,3 @@ USING 'StorageAttachedIndex';
 --   AND libelle_tokens CONTAINS 'carref';  -- Trouve "CARREFOUR" !
 --
 -- ============================================
-
-
-
-

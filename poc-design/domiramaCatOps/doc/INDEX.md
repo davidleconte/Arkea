@@ -8,11 +8,13 @@
 ## 📁 Structure des Catégories
 
 ### 🎨 Design et Architecture
+
 Documents de design, analyse, architecture et data model.
 
 **Répertoire** : [`design/`](design/)
 
 **Fichiers principaux** :
+
 - Documents d'architecture et de design
 - Analyses techniques
 - Modèles de données
@@ -22,11 +24,13 @@ Documents de design, analyse, architecture et data model.
 ---
 
 ### 📖 Guides et Références
+
 Guides d'utilisation, index et références.
 
 **Répertoire** : [`guides/`](guides/)
 
 **Fichiers principaux** :
+
 - Guides d'utilisation
 - Références techniques
 - Documentation des fonctionnalités
@@ -36,11 +40,13 @@ Guides d'utilisation, index et références.
 ---
 
 ### 🔧 Implémentations
+
 Documents d'implémentation et de développement.
 
 **Répertoire** : [`implementation/`](implementation/)
 
 **Fichiers principaux** :
+
 - Documents d'implémentation
 - Guides de développement
 - Détails techniques
@@ -50,11 +56,13 @@ Documents d'implémentation et de développement.
 ---
 
 ### 📊 Résultats
+
 Résultats de tests et exécutions.
 
 **Répertoire** : [`results/`](results/)
 
 **Fichiers principaux** :
+
 - Résultats de tests
 - Rapports de démonstrations
 - Métriques de performance
@@ -64,11 +72,13 @@ Résultats de tests et exécutions.
 ---
 
 ### 🔧 Corrections
+
 Corrections appliquées.
 
 **Répertoire** : [`corrections/`](corrections/)
 
 **Fichiers principaux** :
+
 - Guides d'amélioration
 - Corrections de bugs
 - Améliorations de scripts
@@ -78,11 +88,13 @@ Corrections appliquées.
 ---
 
 ### 🔍 Audits
+
 Audits et analyses complètes.
 
 **Répertoire** : [`audits/`](audits/)
 
 **Fichiers principaux** :
+
 - Audits complets
 - Analyses de conformité
 - Rapports d'évaluation
@@ -92,11 +104,13 @@ Audits et analyses complètes.
 ---
 
 ### 🎬 Démonstrations
+
 Rapports auto-générés des démonstrations.
 
 **Répertoire** : [`demonstrations/`](demonstrations/)
 
 **Fichiers principaux** :
+
 - Démonstrations automatiques générées par les scripts didactiques
 - Rapports structurés de chaque démonstration
 
@@ -105,6 +119,7 @@ Rapports auto-générés des démonstrations.
 ---
 
 ### 📝 Templates
+
 Templates réutilisables pour scripts didactiques.
 
 **Répertoire** : [`templates/`](templates/)

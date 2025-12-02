@@ -32,7 +32,7 @@ Un script avec délégation Python didactique doit :
 # OBJECTIF :
 #   Ce script démontre [fonctionnalité] en appelant un script Python externe
 #   qui exécute [nombre] étapes de démonstration.
-#   
+#  
 #   Cette version didactique affiche :
 #   - L'objectif et la stratégie de démonstration
 #   - Le schéma nécessaire avec explications
@@ -457,6 +457,7 @@ if results.get("queries"):
 """
 
 # Ajouter les validations
+
 report += """
 ---
 
@@ -469,6 +470,7 @@ for i, validation in enumerate(results.get("validations", []), 1):
 """
 
 # Ajouter la conclusion
+
 report += """
 ---
 
@@ -503,6 +505,7 @@ report += """
 """
 
 # Écrire le rapport
+
 with open(report_file, 'w', encoding='utf-8') as f:
     f.write(report)
 
@@ -513,8 +516,11 @@ success "Rapport markdown généré : $(basename "$REPORT_FILE")"
 echo ""
 
 # ============================================
+
 # PARTIE 6 : RÉSUMÉ ET CONCLUSION
+
 # ============================================
+
 echo ""
 section "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 section "  📊 PARTIE 6: RÉSUMÉ ET CONCLUSION"
@@ -525,6 +531,7 @@ info "📊 Résumé de la démonstration :"
 echo ""
 
 # Afficher le résumé depuis les résultats parsés
+
 if [ -f "$TEMP_RESULTS" ]; then
     python3 << PYTHON_SUMMARY
 import json
@@ -554,10 +561,12 @@ info "📝 Script suivant : [Description du prochain script]"
 echo ""
 
 # Nettoyer les fichiers temporaires
+
 rm -f "$TEMP_OUTPUT" "$TEMP_RESULTS"
 
 success "✅ Démonstration terminée !"
 echo ""
+
 ```
 
 ---
@@ -635,7 +644,3 @@ Le rapport markdown est généré automatiquement mais doit être adapté selon 
 ---
 
 **✅ Template 65 créé - Prêt pour utilisation !**
-
-
-
-

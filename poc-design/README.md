@@ -34,6 +34,7 @@ poc-design/
 ## 🎯 Objectif
 
 Centraliser tous les designs de POC pour faciliter :
+
 - **Organisation** : Un répertoire par table/projet
 - **Réutilisabilité** : Code et schémas réutilisables
 - **Documentation** : README par projet
@@ -49,6 +50,7 @@ Centraliser tous les designs de POC pour faciliter :
 **Statut** : POC complet et amélioré
 
 **Contenu** :
+
 - 64 scripts (setup, load, test, export, demo)
 - 138 fichiers de documentation
 - 9 schémas CQL avec index SAI avancés
@@ -64,6 +66,7 @@ Centraliser tous les designs de POC pour faciliter :
 **Statut** : POC complet avec catégorisation
 
 **Contenu** :
+
 - 80 scripts (catégorisation, feedbacks, règles)
 - 168 fichiers de documentation
 - 10 schémas CQL avec séparation MECE
@@ -77,6 +80,7 @@ Centraliser tous les designs de POC pour faciliter :
 **Statut** : POC complet
 
 **Contenu** :
+
 - 20 scripts (setup, génération, ingestion, tests)
 - 45 fichiers de documentation
 - 3 schémas CQL avec index SAI
@@ -91,6 +95,7 @@ Centraliser tous les designs de POC pour faciliter :
 Chaque sous-répertoire contient son propre README avec les instructions d'utilisation.
 
 **Exemple pour Domirama** :
+
 ```bash
 cd poc-design/domirama
 ./07_setup_domirama_poc.sh
@@ -107,8 +112,3 @@ cd poc-design/domirama
 ---
 
 **Répertoire POC Design organisé !** ✅
-
-
-
-
-

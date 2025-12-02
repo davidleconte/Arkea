@@ -22,7 +22,7 @@ fi
 # OBJECTIF :
 #   Ce script démontre de manière très didactique le filtrage sur colonnes MAP
 #   (équivalent colonnes dynamiques HBase) sur la table 'operations_by_account'.
-#   
+#
 #   Cette version didactique affiche :
 #   - Les équivalences HBase → HCD détaillées
 #   - Les requêtes CQL détaillées avec explications
@@ -198,21 +198,21 @@ execute_query() {
     local hbase_equivalent="$4"
     local query_cql="$5"
     local expected_result="$6"
-    
+
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "  🔍 TEST $query_num : $query_title"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-    
+
     info "📚 DÉFINITION - $query_title :"
     echo "   $query_description"
     echo ""
-    
+
     info "🔄 ÉQUIVALENT HBase :"
     code "   $hbase_equivalent"
     echo ""
-    
+
     info "📝 Requête CQL :"
     echo "$query_cql" | while IFS= read -r line; do
         if [ -n "$line" ]; then
@@ -220,10 +220,10 @@ execute_query() {
         fi
     done
     echo ""
-    
+
     expected "📋 Résultat attendu : $expected_result"
     echo ""
-    
+
     # Créer un fichier temporaire pour la requête
     TEMP_QUERY_FILE=$(mktemp "/tmp/query_${query_num}_$(date +%s).cql")
     cat > "$TEMP_QUERY_FILE" <<EOF
@@ -231,42 +231,42 @@ USE domiramacatops_poc;
 TRACING ON;
 $query_cql
 EOF
-    
+
     # Exécuter la requête
     info "🚀 Exécution de la requête..."
     START_TIME=$(date +%s.%N)
     QUERY_OUTPUT=$($CQLSH -f "$TEMP_QUERY_FILE" 2>&1 | tee -a "$TEMP_OUTPUT") || true
     EXIT_CODE=$?
     END_TIME=$(date +%s.%N)
-    
+
     # Calculer le temps d'exécution
     if command -v bc >/dev/null 2>&1; then
         QUERY_TIME=$(echo "$END_TIME - $START_TIME" | bc 2>/dev/null || echo "0.000")
     else
         QUERY_TIME=$(python3 -c "print($END_TIME - $START_TIME)" 2>/dev/null || echo "0.000")
     fi
-    
+
     # Extraire les métriques
     COORDINATOR_TIME=$(echo "$QUERY_OUTPUT" | grep "coordinator" | awk -F'|' '{print $4}' | tr -d ' ' | head -1 || echo "")
     TOTAL_TIME=$(echo "$QUERY_OUTPUT" | grep "total" | awk -F'|' '{print $4}' | tr -d ' ' | head -1 || echo "")
-    
+
     # Compter les lignes retournées
     ROW_COUNT=$(echo "$QUERY_OUTPUT" | grep -E "\([0-9]+ rows\)" | grep -oE "[0-9]+" | head -1 || echo "0")
     if [ -z "$ROW_COUNT" ] || [ "$ROW_COUNT" = "" ]; then
         ROW_COUNT="0"
     fi
-    
+
     # Filtrer les résultats (garder les en-têtes et les lignes de données, exclure le tracing)
     QUERY_RESULTS_FILTERED=$(echo "$QUERY_OUTPUT" | grep -vE "^Warnings|^\([0-9]+ rows\)|coordinator|total|Executing|Read|Scanned|Merging|Tracing|Activity|Requests|responses|Parsing|Sending|MULTI_RANGE|Query execution|Limit|Filter|Fetch|LiteralIndexScan|single-partition|stage READ|RequestResponse|activity|timestamp|source|client|Processing|Request complete|Tracing session|Execute CQL3 query|^[[:space:]]*$" | grep -E "^[[:space:]]*code_si|^[[:space:]]*contrat|^[[:space:]]*date_op|^[[:space:]]*numero_op|^[[:space:]]*libelle|^[[:space:]]*montant|^[[:space:]]*meta_flags|^[[:space:]]*meta_source|^[[:space:]]*meta_device|^[[:space:]]*meta_channel|^[[:space:]]*-{3,}|^[[:space:]]*[0-9]+[[:space:]]*\||^[[:space:]]*[[:alpha:]]+[[:space:]]*\|" | grep -vE "^[[:space:]]*-+[[:space:]]*\|[[:space:]]*-+[[:space:]]*\|" | head -30)
-    
+
     # Extraire les lignes de données réelles
     DATA_ROWS=$(echo "$QUERY_OUTPUT" | grep -E "^[[:space:]]*[0-9]+[[:space:]]*\|" | grep -vE "activity|timestamp|source|client|Processing|Request|Executing|Tracing" | head -30)
-    
+
     # Si toujours vide, essayer une capture plus large
     if [ -z "$DATA_ROWS" ] || [ "$DATA_ROWS" = "" ]; then
         DATA_ROWS=$(echo "$QUERY_OUTPUT" | grep -E "\|" | grep -vE "^Warnings|^\([0-9]+ rows\)|coordinator|total|Executing|Read|Scanned|Merging|Tracing|Activity|Requests|responses|Parsing|Sending|MULTI_RANGE|Query execution|Limit|Filter|Fetch|LiteralIndexScan|single-partition|stage READ|RequestResponse|activity|timestamp|source|client|Processing|Request complete|Tracing session|Execute CQL3 query|^[[:space:]]*$" | head -30)
     fi
-    
+
     # Afficher les résultats
     if [ $EXIT_CODE -eq 0 ]; then
         result "📊 Résultats obtenus ($ROW_COUNT ligne(s)) en ${QUERY_TIME}s :"
@@ -289,33 +289,33 @@ EOF
             echo "... (affichage limité à 20 lignes sur $ROW_COUNT total)"
         fi
         echo ""
-        
+
         if [ -n "$COORDINATOR_TIME" ]; then
             info "   ⏱️  Temps coordinateur : ${COORDINATOR_TIME}μs"
         fi
         if [ -n "$TOTAL_TIME" ]; then
             info "   ⏱️  Temps total : ${TOTAL_TIME}μs"
         fi
-        
+
         success "✅ Test $query_num exécuté avec succès"
-        
+
         # Stocker les résultats avec les données filtrées pour le rapport
         OUTPUT_FOR_REPORT=""
-        
+
         # Capturer l'en-tête et le séparateur
         HEADER_LINE=$(echo "$QUERY_OUTPUT" | grep -E "^[[:space:]]*code_si|^[[:space:]]*contrat|^[[:space:]]*date_op|^[[:space:]]*numero_op|^[[:space:]]*libelle|^[[:space:]]*montant|^[[:space:]]*meta_flags|^[[:space:]]*meta_source|^[[:space:]]*meta_device" | head -1)
         if [ -z "$HEADER_LINE" ] || [ "$HEADER_LINE" = "" ]; then
             HEADER_LINE=$(echo "$QUERY_OUTPUT" | grep -E "code_si|contrat|date_op|numero_op|libelle|montant|meta_flags|meta_source|meta_device" | grep -E "\|" | grep -vE "^[[:space:]]*-+[[:space:]]*\|" | head -1)
         fi
         SEPARATOR_LINE=$(echo "$QUERY_OUTPUT" | grep -E "^[[:space:]]*-{3,}" | head -1)
-        
+
         if [ -n "$HEADER_LINE" ]; then
             OUTPUT_FOR_REPORT="${HEADER_LINE}___NL___"
         fi
         if [ -n "$SEPARATOR_LINE" ]; then
             OUTPUT_FOR_REPORT="${OUTPUT_FOR_REPORT}${SEPARATOR_LINE}___NL___"
         fi
-        
+
         # Capturer les données
         if [ -n "$QUERY_RESULTS_FILTERED" ] && [ "$QUERY_RESULTS_FILTERED" != "" ]; then
             DATA_ONLY=$(echo "$QUERY_RESULTS_FILTERED" | grep -E "^[[:space:]]*[0-9]+[[:space:]]*\||^[[:space:]]*[a-f0-9-]+[[:space:]]*\|" | head -20)
@@ -327,7 +327,7 @@ EOF
         elif [ -n "$DATA_ROWS" ] && [ "$DATA_ROWS" != "" ]; then
             OUTPUT_FOR_REPORT="${OUTPUT_FOR_REPORT}$(echo "$DATA_ROWS" | head -20 | awk '{printf "%s___NL___", $0}')"
         fi
-        
+
         # Si toujours vide, essayer une capture directe
         if [ -z "$OUTPUT_FOR_REPORT" ] || [ "$OUTPUT_FOR_REPORT" = "" ] || [ "$(echo "$OUTPUT_FOR_REPORT" | grep -vE "___NL___" | wc -l)" -le 2 ]; then
             DIRECT_DATA=$(echo "$QUERY_OUTPUT" | grep -E "\||^[[:space:]]*[0-9]+[[:space:]]*$" | grep -vE "^Warnings|^\([0-9]+ rows\)|coordinator|total|Executing|Read|Scanned|Merging|Tracing|Activity|Requests|responses|Parsing|Sending|MULTI_RANGE|Query execution|Limit|Filter|Fetch|LiteralIndexScan|single-partition|stage READ|RequestResponse|activity|timestamp|source|client|Processing|Request complete|Tracing session|Execute CQL3 query|^[[:space:]]*$" | head -20)
@@ -342,7 +342,7 @@ EOF
                 fi
             fi
         fi
-        
+
         # Nettoyer les duplications dans OUTPUT_FOR_REPORT
         if [ -n "$OUTPUT_FOR_REPORT" ] && [ "$OUTPUT_FOR_REPORT" != "" ]; then
             OUTPUT_FOR_REPORT=$(echo "$OUTPUT_FOR_REPORT" | awk -F'___NL___' 'BEGIN {
@@ -375,16 +375,16 @@ EOF
                 }
             }')
         fi
-        
+
         QUERY_RESULTS+=("$query_num|$query_title|$ROW_COUNT|$QUERY_TIME|$COORDINATOR_TIME|$TOTAL_TIME|$EXIT_CODE|OK|${OUTPUT_FOR_REPORT}")
-        
+
         # Stocker aussi dans le fichier JSON pour un accès plus fiable
         QUERY_TEMP_FILE=$(mktemp "/tmp/query_${query_num}_$(date +%s).txt")
         echo "$query_cql" > "$QUERY_TEMP_FILE"
-        
+
         OUTPUT_TEMP_FILE=$(mktemp "/tmp/output_${query_num}_$(date +%s).txt")
         printf '%s' "$OUTPUT_FOR_REPORT" > "$OUTPUT_TEMP_FILE"
-        
+
         python3 << PYEOF
 import json
 import os
@@ -428,13 +428,13 @@ results.append({
 with open(results_file, 'w') as f:
     json.dump(results, f, indent=2)
 PYEOF
-        
+
         rm -f "$QUERY_TEMP_FILE" "$OUTPUT_TEMP_FILE"
     else
         error "❌ Erreur lors de l'exécution du test $query_num"
         echo "$QUERY_OUTPUT" | tail -10
         QUERY_RESULTS+=("$query_num|$query_title|0|$QUERY_TIME|||$EXIT_CODE|ERROR")
-        
+
         python3 << PYEOF
 import json
 import os
@@ -466,7 +466,7 @@ with open(results_file, 'w') as f:
     json.dump(results, f, indent=2)
 PYEOF
     fi
-    
+
     rm -f "$TEMP_QUERY_FILE"
     echo ""
 }
@@ -766,7 +766,7 @@ if [ -z "${SPARK_HOME}" ]; then
     AGG_RESULT="mobile:${MOBILE_COUNT}, web:${WEB_COUNT}"
 else
     info "📊 Utilisation de Spark pour agrégation (GROUP BY)..."
-    
+
     # Créer un script Spark temporaire pour l'agrégation
     SPARK_SCRIPT=$(mktemp "/tmp/spark_agg_$(date +%s).scala")
     cat > "$SPARK_SCRIPT" << 'SPARKEOF'
@@ -825,19 +825,19 @@ SPARKEOF
     elif [ -f "$SPARK_HOME/jars/spark-cassandra-connector*.jar" ]; then
         CASSANDRA_CONNECTOR_JAR=$(ls "$SPARK_HOME/jars/spark-cassandra-connector"*.jar | head -1)
     fi
-    
+
     if [ -n "$CASSANDRA_CONNECTOR_JAR" ]; then
         SPARK_OUTPUT=$("$SPARK_HOME/bin/spark-shell" --jars "$CASSANDRA_CONNECTOR_JAR" -i "$SPARK_SCRIPT" 2>&1)
     else
         SPARK_OUTPUT=$("$SPARK_HOME/bin/spark-shell" -i "$SPARK_SCRIPT" 2>&1)
     fi
     SPARK_EXIT=$?
-    
+
     if [ $SPARK_EXIT -eq 0 ]; then
         # Extraire les résultats depuis les lignes MOBILE_COUNT: et WEB_COUNT:
         MOBILE_COUNT=$(echo "$SPARK_OUTPUT" | grep "MOBILE_COUNT:" | grep -oE "[0-9]+" | head -1 || echo "0")
         WEB_COUNT=$(echo "$SPARK_OUTPUT" | grep "WEB_COUNT:" | grep -oE "[0-9]+" | head -1 || echo "0")
-        
+
         # Si pas trouvé, essayer de parser la sortie show() (format tabulaire)
         if [ "$MOBILE_COUNT" = "0" ] || [ -z "$MOBILE_COUNT" ]; then
             # Chercher dans la sortie tabulaire de Spark (format: | mobile | 25 |)
@@ -853,7 +853,7 @@ SPARKEOF
                 WEB_COUNT=$(echo "$WEB_LINE" | awk -F'|' '{print $2}' | grep -oE "[0-9]+" | head -1 || echo "0")
             fi
         fi
-        
+
         # Si toujours pas trouvé, utiliser un fallback simple (compter dans la sortie)
         if [ "$MOBILE_COUNT" = "0" ] || [ -z "$MOBILE_COUNT" ]; then
             MOBILE_COUNT=$(echo "$SPARK_OUTPUT" | grep -i "mobile" | grep -oE "[0-9]+" | head -1 || echo "0")
@@ -861,7 +861,7 @@ SPARKEOF
         if [ "$WEB_COUNT" = "0" ] || [ -z "$WEB_COUNT" ]; then
             WEB_COUNT=$(echo "$SPARK_OUTPUT" | grep -i "web" | grep -oE "[0-9]+" | head -1 || echo "0")
         fi
-        
+
         info "   Agrégation Spark (GROUP BY) :"
         info "   - mobile : $MOBILE_COUNT"
         info "   - web : $WEB_COUNT"
@@ -876,7 +876,7 @@ SPARKEOF
         AGG_METHOD="application_fallback"
         AGG_RESULT="mobile:${MOBILE_COUNT}, web:${WEB_COUNT}"
     fi
-    
+
     rm -f "$SPARK_SCRIPT"
 fi
 
@@ -940,17 +940,17 @@ if [ -n "$TEST_OP" ] && [ "$TEST_OP" != "" ]; then
     TEST_DATE_OP=$(echo "$TEST_OP" | awk -F'|' '{print $3}' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
     TEST_NUM_OP=$(echo "$TEST_OP" | awk -F'|' '{print $4}' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
     TEST_FRAUD_SCORE=$(echo "$TEST_OP" | awk -F'|' '{print $5}' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-    
+
     info "   Opération sélectionnée : date_op='$TEST_DATE_OP', numero_op=$TEST_NUM_OP, fraud_score=$TEST_FRAUD_SCORE"
     echo ""
-    
+
     # Supprimer fraud_score du MAP (mettre à NULL)
     info "📝 Suppression de fraud_score du MAP..."
     $CQLSH -e "USE domiramacatops_poc; UPDATE operations_by_account SET meta_flags['fraud_score'] = NULL, meta_fraud_score = NULL WHERE code_si = '1' AND contrat = '100000000' AND date_op = '$TEST_DATE_OP' AND numero_op = $TEST_NUM_OP;" > /dev/null 2>&1
-    
+
     # Vérifier la suppression
     VERIF=$($CQLSH -e "USE domiramacatops_poc; SELECT meta_fraud_score FROM operations_by_account WHERE code_si = '1' AND contrat = '100000000' AND date_op = '$TEST_DATE_OP' AND numero_op = $TEST_NUM_OP;" 2>&1 | grep -E "null|NULL" | head -1)
-    
+
     if [ -n "$VERIF" ]; then
         success "✅ Test 17 : fraud_score supprimé avec succès"
         DELETE_VALID="true"
@@ -958,7 +958,7 @@ if [ -n "$TEST_OP" ] && [ "$TEST_OP" != "" ]; then
         warn "⚠️  La suppression n'a pas été vérifiée"
         DELETE_VALID="false"
     fi
-    
+
     # Restaurer la valeur pour ne pas affecter les autres tests
     info "📝 Restauration de fraud_score pour ne pas affecter les autres tests..."
     $CQLSH -e "USE domiramacatops_poc; UPDATE operations_by_account SET meta_flags['fraud_score'] = '$TEST_FRAUD_SCORE', meta_fraud_score = '$TEST_FRAUD_SCORE' WHERE code_si = '1' AND contrat = '100000000' AND date_op = '$TEST_DATE_OP' AND numero_op = $TEST_NUM_OP;" > /dev/null 2>&1
@@ -1184,14 +1184,14 @@ for r in results:
     if r.get('total_time'):
         report += f"- **Temps total** : {r['total_time']}μs\n"
     report += f"- **Statut** : {'✅ OK' if r['status'] == 'OK' else '❌ ERROR'}\n\n"
-    
+
     # Afficher la requête CQL exécutée
     if r.get('query'):
         report += "**Requête CQL exécutée :**\n\n"
         query_lines = r['query'].replace('___NL___', '\n')
         code_marker = chr(96) * 3
         report += code_marker + "cql\n" + query_lines + "\n" + code_marker + "\n\n"
-    
+
     # Afficher les résultats ou explication
     if r['rows'] == '0' or not r['rows'] or r['rows'] == '':
         report += "**Résultat :** Aucune ligne retournée\n\n"
@@ -1218,12 +1218,12 @@ for r in results:
             report += "```\n"
             report += str(r['rows']) + " ligne(s) retournée(s) mais format non capturé dans le rapport\n"
             report += "```\n\n"
-        
+
         # Contrôle de cohérence
         report += "**Pourquoi le résultat est correct :**\n\n"
         report += "- ✅ Requête exécutée avec succès\n"
         report += f"- ✅ {r['rows']} ligne(s) retournée(s)\n"
-        
+
         # Vérifications spécifiques selon le test
         backtick = chr(96)
         if 'Test 1' in r.get('title', '') or 'Source' in r.get('title', ''):
@@ -1308,7 +1308,7 @@ for r in results:
             report += "- ✅ **Structure HBase** : Column Family 'meta' avec qualifiers dynamiques\n"
             report += "- ✅ **Structure HCD** : MAP<TEXT, TEXT> avec colonnes dérivées\n"
             report += "- 💡 **En production** : Utiliser Spark pour migration batch (transformation + import)\n"
-        
+
         report += "---\n\n"
 
 report += f"""## ✅ Conclusion

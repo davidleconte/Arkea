@@ -16,13 +16,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import division, unicode_literals, print_function
+from __future__ import division, print_function, unicode_literals
 
+import argparse
 import cmd
 import codecs
 import csv
 import getpass
-import argparse
 import os
 import platform
 import re
@@ -38,11 +38,11 @@ if sys.version_info < (3, 6) and sys.version_info[0:2] != (2, 7):
     sys.exit("\ncqlsh requires Python 3.6+ or Python 2.7 (deprecated)\n")
 
 # see CASSANDRA-10428
-if platform.python_implementation().startswith('Jython'):
+if platform.python_implementation().startswith("Jython"):
     sys.exit("\nCQL Shell does not run on Jython\n")
 
-UTF8 = 'utf-8'
-CP65001 = 'cp65001'  # Win utf-8 variant
+UTF8 = "utf-8"
+CP65001 = "cp65001"  # Win utf-8 variant
 
 description = "CQL Shell for Apache Cassandra"
 version = "6.0.0"
@@ -57,18 +57,18 @@ try:
 except ImportError:
     pass
 
-CQL_LIB_PREFIX = 'cassandra-driver-internal-only-'
+CQL_LIB_PREFIX = "cassandra-driver-internal-only-"
 
-CASSANDRA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
-CASSANDRA_CQL_HTML_FALLBACK = 'https://cassandra.apache.org/doc/latest/cql/index.html'
+CASSANDRA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
+CASSANDRA_CQL_HTML_FALLBACK = "https://cassandra.apache.org/doc/latest/cql/index.html"
 
 # default location of local CQL.html
-if os.path.exists(CASSANDRA_PATH + '/doc/cql3/CQL.html'):
+if os.path.exists(CASSANDRA_PATH + "/doc/cql3/CQL.html"):
     # default location of local CQL.html
-    CASSANDRA_CQL_HTML = 'file://' + CASSANDRA_PATH + '/doc/cql3/CQL.html'
-elif os.path.exists('/usr/share/doc/cassandra/CQL.html'):
+    CASSANDRA_CQL_HTML = "file://" + CASSANDRA_PATH + "/doc/cql3/CQL.html"
+elif os.path.exists("/usr/share/doc/cassandra/CQL.html"):
     # fallback to package file
-    CASSANDRA_CQL_HTML = 'file:///usr/share/doc/cassandra/CQL.html'
+    CASSANDRA_CQL_HTML = "file:///usr/share/doc/cassandra/CQL.html"
 else:
     # fallback to online version
     CASSANDRA_CQL_HTML = CASSANDRA_CQL_HTML_FALLBACK
@@ -82,44 +82,49 @@ try:
     webbrowser.register_standard_browsers()  # registration is otherwise lazy in Python3
 except AttributeError:
     pass
-if webbrowser._tryorder and webbrowser._tryorder[0] == 'xdg-open' and os.environ.get('XDG_DATA_DIRS', '') == '':
+if (
+    webbrowser._tryorder
+    and webbrowser._tryorder[0] == "xdg-open"
+    and os.environ.get("XDG_DATA_DIRS", "") == ""
+):
     # only on Linux (some OS with xdg-open)
-    webbrowser._tryorder.remove('xdg-open')
-    webbrowser._tryorder.append('xdg-open')
+    webbrowser._tryorder.remove("xdg-open")
+    webbrowser._tryorder.append("xdg-open")
 
 # use bundled lib for python-cql if available. if there
 # is a ../lib dir, use bundled libs there preferentially.
-ZIPLIB_DIRS = [os.path.join(CASSANDRA_PATH, 'lib')]
+ZIPLIB_DIRS = [os.path.join(CASSANDRA_PATH, "lib")]
 myplatform = platform.system()
-is_win = myplatform == 'Windows'
+is_win = myplatform == "Windows"
 
 # Workaround for supporting CP65001 encoding on python < 3.3 (https://bugs.python.org/issue13216)
 if is_win and sys.version_info < (3, 3):
     codecs.register(lambda name: codecs.lookup(UTF8) if name == CP65001 else None)
 
-if myplatform == 'Linux':
-    ZIPLIB_DIRS.append('/usr/share/cassandra/lib')
+if myplatform == "Linux":
+    ZIPLIB_DIRS.append("/usr/share/cassandra/lib")
 
-if os.environ.get('CQLSH_NO_BUNDLED', ''):
+if os.environ.get("CQLSH_NO_BUNDLED", ""):
     ZIPLIB_DIRS = ()
 
 
 def find_zip(libprefix):
     for ziplibdir in ZIPLIB_DIRS:
-        zips = glob(os.path.join(ziplibdir, libprefix + '*.zip'))
+        zips = glob(os.path.join(ziplibdir, libprefix + "*.zip"))
         if zips:
-            return max(zips)   # probably the highest version, if multiple
+            return max(zips)  # probably the highest version, if multiple
 
 
 cql_zip = find_zip(CQL_LIB_PREFIX)
 if cql_zip:
-    ver = os.path.splitext(os.path.basename(cql_zip))[0][len(CQL_LIB_PREFIX):]
-    sys.path.insert(0, os.path.join(cql_zip, 'cassandra-driver-' + ver))
+    ver = os.path.splitext(os.path.basename(cql_zip))[0][len(CQL_LIB_PREFIX) :]
+    sys.path.insert(0, os.path.join(cql_zip, "cassandra-driver-" + ver))
 
 # the driver needs dependencies
 # First, try to import six from system before loading ZIPs
 # This ensures system six (with six.moves) is used if available
 import site
+
 six_available = False
 try:
     # Add site-packages to path first to check for system six
@@ -134,19 +139,20 @@ try:
         pass
     # Try importing six from system
     import six
+    from six import StringIO, ensure_str, ensure_text
     from six.moves import configparser, input
-    from six import StringIO, ensure_text, ensure_str
+
     six_available = True
 except (ImportError, AttributeError):
     # System six not available, will use ZIP version
     pass
 
 # Load ZIP dependencies (but skip six if system version is available)
-third_parties = ('futures-', 'six-', 'geomet-', 'pure_sasl-', 'datastax_db_*-')
+third_parties = ("futures-", "six-", "geomet-", "pure_sasl-", "datastax_db_*-")
 
 for lib in third_parties:
     # Skip six ZIP if system six is already available
-    if lib == 'six-' and six_available:
+    if lib == "six-" and six_available:
         continue
     lib_zip = find_zip(lib)
     if lib_zip:
@@ -156,66 +162,93 @@ for lib in third_parties:
 if not six_available:
     try:
         import six
+        from six import StringIO, ensure_str, ensure_text
         from six.moves import configparser, input
-        from six import StringIO, ensure_text, ensure_str
     except ImportError:
         # Last resort: try to find six in common locations
         import os
+
         common_paths = [
-            '/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages',
-            '/opt/homebrew/lib/python3.11/site-packages',
-            '/usr/local/lib/python3.9/site-packages',
+            "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages",
+            "/opt/homebrew/lib/python3.11/site-packages",
+            "/usr/local/lib/python3.9/site-packages",
         ]
         for path in common_paths:
             if os.path.exists(path) and path not in sys.path:
                 sys.path.insert(0, path)
         import six
+        from six import StringIO, ensure_str, ensure_text
         from six.moves import configparser, input
-        from six import StringIO, ensure_text, ensure_str
 
 warnings.filterwarnings("ignore", r".*blist.*")
 try:
     import cassandra
 except ImportError as e:
-    sys.exit("\nPython Cassandra driver not installed, or not on PYTHONPATH.\n"
-             'You might try "pip install cassandra-driver".\n\n'
-             'Python: %s\n'
-             'Module load path: %r\n\n'
-             'Error: %s\n' % (sys.executable, sys.path, e))
+    sys.exit(
+        "\nPython Cassandra driver not installed, or not on PYTHONPATH.\n"
+        'You might try "pip install cassandra-driver".\n\n'
+        "Python: %s\n"
+        "Module load path: %r\n\n"
+        "Error: %s\n" % (sys.executable, sys.path, e)
+    )
 
 from cassandra.auth import PlainTextAuthProvider
 from cassandra.cqltypes import cql_typename
 from cassandra.marshal import int64_unpack
-from cassandra.metadata import (ColumnMetadata, KeyspaceMetadata,
-                                TableMetadata, protect_name, protect_names)
-from cassandra.query import SimpleStatement, ordered_dict_factory, TraceUnavailable
+from cassandra.metadata import (
+    ColumnMetadata,
+    KeyspaceMetadata,
+    TableMetadata,
+    protect_name,
+    protect_names,
+)
+from cassandra.query import SimpleStatement, TraceUnavailable, ordered_dict_factory
 from cassandra.util import datetime_from_timestamp
 
 # cqlsh should run correctly when run out of a Cassandra source tree,
 # out of an unpacked Cassandra tarball, and after a proper package install.
-cqlshlibdir = os.path.join(CASSANDRA_PATH, 'pylib')
+cqlshlibdir = os.path.join(CASSANDRA_PATH, "pylib")
 if os.path.isdir(cqlshlibdir):
     sys.path.insert(0, cqlshlibdir)
 
-from cqlshlib import cql3handling, cqlhandling, pylexotron, sslhandling, cqlshhandling, authproviderhandling
-from cqlshlib.copyutil import ExportTask, ImportTask, ImportConversion
-from cqlshlib.displaying import (ANSI_RESET, BLUE, COLUMN_NAME_COLORS, CYAN,
-                                 RED, WHITE, FormattedValue, colorme)
-from cqlshlib.formatting import (DEFAULT_DATE_FORMAT, DEFAULT_NANOTIME_FORMAT,
-                                 DEFAULT_TIMESTAMP_FORMAT, CqlType, DateTimeFormat,
-                                 format_by_type, formatter_for)
+from cqlshlib import (
+    authproviderhandling,
+    cql3handling,
+    cqlhandling,
+    cqlshhandling,
+    pylexotron,
+    sslhandling,
+)
+from cqlshlib.copyutil import ExportTask, ImportConversion, ImportTask
+from cqlshlib.daterangetype import patch_daterange_import_conversion  # nopep
+from cqlshlib.displaying import (
+    ANSI_RESET,
+    BLUE,
+    COLUMN_NAME_COLORS,
+    CYAN,
+    RED,
+    WHITE,
+    FormattedValue,
+    colorme,
+)
+from cqlshlib.driver import cluster_factory
+from cqlshlib.formatting import (
+    DEFAULT_DATE_FORMAT,
+    DEFAULT_NANOTIME_FORMAT,
+    DEFAULT_TIMESTAMP_FORMAT,
+    CqlType,
+    DateTimeFormat,
+    format_by_type,
+    formatter_for,
+)
+from cqlshlib.geotypes import patch_geotypes_import_conversion  # nopep8
 from cqlshlib.tracing import print_trace, print_trace_session
 from cqlshlib.util import get_file_encoding_bomsize, is_file_secure, trim_if_present
-
-from cqlshlib.geotypes import patch_geotypes_import_conversion  # nopep8
-from cqlshlib.daterangetype import patch_daterange_import_conversion  # nopep
-
-from cqlshlib.driver import cluster_factory
 
 patch_geotypes_import_conversion(ImportConversion)
 patch_daterange_import_conversion(ImportConversion)
 
-DEFAULT_HOST = '127.0.0.1'
+DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 9042
 DEFAULT_SSL = False
 DEFAULT_CONNECT_TIMEOUT_SECONDS = 5
@@ -226,104 +259,155 @@ DEFAULT_FLOAT_PRECISION = 5
 DEFAULT_DOUBLE_PRECISION = 5
 DEFAULT_MAX_TRACE_WAIT = 10
 
-if readline is not None and readline.__doc__ is not None and 'libedit' in readline.__doc__:
-    DEFAULT_COMPLETEKEY = '\t'
+if readline is not None and readline.__doc__ is not None and "libedit" in readline.__doc__:
+    DEFAULT_COMPLETEKEY = "\t"
 else:
-    DEFAULT_COMPLETEKEY = 'tab'
+    DEFAULT_COMPLETEKEY = "tab"
 
 cqldocs = None
 cqlruleset = None
 
-epilog = """Connects to %(DEFAULT_HOST)s:%(DEFAULT_PORT)d by default. These
+epilog = (
+    """Connects to %(DEFAULT_HOST)s:%(DEFAULT_PORT)d by default. These
 defaults can be changed by setting $CQLSH_HOST and/or $CQLSH_PORT. When a
 host (and optional port number) are given on the command line, they take
-precedence over any defaults.""" % globals()
+precedence over any defaults."""
+    % globals()
+)
 
-parser = argparse.ArgumentParser(description=description, epilog=epilog,
-                                 usage="Usage: %(prog)s [options] [host [port]]",
-                                 prog='cqlsh')
-parser.add_argument('-v', '--version', action='version', version='cqlsh ' + version)
-parser.add_argument("-C", "--color", action='store_true', dest='color',
-                    help='Always use color output')
-parser.add_argument("--no-color", action='store_false', dest='color',
-                    help='Never use color output')
-parser.add_argument("--browser", dest='browser', help="""The browser to use to display CQL help, where BROWSER can be:
+parser = argparse.ArgumentParser(
+    description=description,
+    epilog=epilog,
+    usage="Usage: %(prog)s [options] [host [port]]",
+    prog="cqlsh",
+)
+parser.add_argument("-v", "--version", action="version", version="cqlsh " + version)
+parser.add_argument(
+    "-C", "--color", action="store_true", dest="color", help="Always use color output"
+)
+parser.add_argument("--no-color", action="store_false", dest="color", help="Never use color output")
+parser.add_argument(
+    "--browser",
+    dest="browser",
+    help="""The browser to use to display CQL help, where BROWSER can be:
                                                     - one of the supported browsers in https://docs.python.org/3/library/webbrowser.html.
-                                                    - browser path followed by %%s, example: /usr/bin/google-chrome-stable %%s""")
-parser.add_argument('--ssl', action='store_true', help='Use SSL', default=False)
+                                                    - browser path followed by %%s, example: /usr/bin/google-chrome-stable %%s""",
+)
+parser.add_argument("--ssl", action="store_true", help="Use SSL", default=False)
 parser.add_argument("-u", "--username", help="Authenticate as user.")
 parser.add_argument("-p", "--password", help="Authenticate using password.")
-parser.add_argument('-k', '--keyspace', help='Authenticate to the given keyspace.')
-parser.add_argument('-b', '--secure-connect-bundle',
-                    help="Connect using secure connect bundle. If this option is specified host, port settings are ignored.")
+parser.add_argument("-k", "--keyspace", help="Authenticate to the given keyspace.")
+parser.add_argument(
+    "-b",
+    "--secure-connect-bundle",
+    help="Connect using secure connect bundle. If this option is specified host, port settings are ignored.",
+)
 parser.add_argument("-f", "--file", help="Execute commands from FILE, then exit")
-parser.add_argument('--debug', action='store_true',
-                    help='Show additional debugging information')
-parser.add_argument('--coverage', action='store_true',
-                    help='Collect coverage data')
-parser.add_argument("--encoding", help="Specify a non-default encoding for output."
-                    + " (Default: %s)" % (UTF8,))
+parser.add_argument("--debug", action="store_true", help="Show additional debugging information")
+parser.add_argument("--coverage", action="store_true", help="Collect coverage data")
+parser.add_argument(
+    "--encoding", help="Specify a non-default encoding for output." + " (Default: %s)" % (UTF8,)
+)
 parser.add_argument("--cqlshrc", help="Specify an alternative cqlshrc file location.")
-parser.add_argument('--cqlversion', default=None,
-                    help='Specify a particular CQL version, '
-                    'by default the highest version supported by the server will be used.'
-                    ' Examples: "3.0.3", "3.1.0"')
-parser.add_argument("--protocol-version", type=int, default=None,
-                    help='Specify a specific protcol version otherwise the client will default and downgrade as necessary')
+parser.add_argument(
+    "--cqlversion",
+    default=None,
+    help="Specify a particular CQL version, "
+    "by default the highest version supported by the server will be used."
+    ' Examples: "3.0.3", "3.1.0"',
+)
+parser.add_argument(
+    "--protocol-version",
+    type=int,
+    default=None,
+    help="Specify a specific protcol version otherwise the client will default and downgrade as necessary",
+)
 
-parser.add_argument("-e", "--execute", help='Execute the statement and quit.')
-parser.add_argument("--connect-timeout", default=DEFAULT_CONNECT_TIMEOUT_SECONDS, dest='connect_timeout',
-                    help='Specify the connection timeout in seconds (default: %(default)s seconds).')
-parser.add_argument("--request-timeout", default=DEFAULT_REQUEST_TIMEOUT_SECONDS, dest='request_timeout',
-                    help='Specify the default request timeout in seconds (default: %(default)s seconds)')
-parser.add_argument("--consistency-level", dest='consistency_level',
-                    help='Specify the initial consistency level.')
-parser.add_argument("--serial-consistency-level", dest='serial_consistency_level',
-                    help='Specify the initial serial consistency level.')
-parser.add_argument("-t", "--tty", action='store_true', dest='tty',
-                    help='Force tty mode (command prompt).')
+parser.add_argument("-e", "--execute", help="Execute the statement and quit.")
+parser.add_argument(
+    "--connect-timeout",
+    default=DEFAULT_CONNECT_TIMEOUT_SECONDS,
+    dest="connect_timeout",
+    help="Specify the connection timeout in seconds (default: %(default)s seconds).",
+)
+parser.add_argument(
+    "--request-timeout",
+    default=DEFAULT_REQUEST_TIMEOUT_SECONDS,
+    dest="request_timeout",
+    help="Specify the default request timeout in seconds (default: %(default)s seconds)",
+)
+parser.add_argument(
+    "--consistency-level", dest="consistency_level", help="Specify the initial consistency level."
+)
+parser.add_argument(
+    "--serial-consistency-level",
+    dest="serial_consistency_level",
+    help="Specify the initial serial consistency level.",
+)
+parser.add_argument(
+    "-t", "--tty", action="store_true", dest="tty", help="Force tty mode (command prompt)."
+)
 # This is a hidden option to suppress the warning when the -p/--password command line option is used.
 # Power users may use this option if they know no other people have access to the system where cqlsh is run or don't care about security.
 # Use of this option in scripting is discouraged. Please use a (temporary) credentials file where possible.
 # The Cassandra distributed tests (dtests) also use this option in some tests when a well-known password is supplied via the command line.
-parser.add_argument("--insecure-password-without-warning", action='store_true', dest='insecure_password_without_warning',
-                    help=argparse.SUPPRESS)
-parser.add_argument("--no-file-io", action='store_true', dest='no_file_io',
-                    help='Disable cqlsh commands that perform file I/O.')
-parser.add_argument('--disable-history', action='store_true', help='Disable saving of history', default=False)
+parser.add_argument(
+    "--insecure-password-without-warning",
+    action="store_true",
+    dest="insecure_password_without_warning",
+    help=argparse.SUPPRESS,
+)
+parser.add_argument(
+    "--no-file-io",
+    action="store_true",
+    dest="no_file_io",
+    help="Disable cqlsh commands that perform file I/O.",
+)
+parser.add_argument(
+    "--disable-history", action="store_true", help="Disable saving of history", default=False
+)
 
 cfarguments, args = parser.parse_known_args()
 
 
 # BEGIN history/config definition
-HISTORY_DIR = os.path.expanduser(os.path.join('~', '.cassandra'))
+HISTORY_DIR = os.path.expanduser(os.path.join("~", ".cassandra"))
 
 if cfarguments.cqlshrc is not None:
     CONFIG_FILE = cfarguments.cqlshrc
     if not os.path.exists(CONFIG_FILE):
-        print('\nWarning: Specified cqlshrc location `%s` does not exist.  Using `%s` instead.\n' % (CONFIG_FILE, HISTORY_DIR))
-        CONFIG_FILE = os.path.join(HISTORY_DIR, 'cqlshrc')
+        print(
+            "\nWarning: Specified cqlshrc location `%s` does not exist.  Using `%s` instead.\n"
+            % (CONFIG_FILE, HISTORY_DIR)
+        )
+        CONFIG_FILE = os.path.join(HISTORY_DIR, "cqlshrc")
 else:
-    CONFIG_FILE = os.path.join(HISTORY_DIR, 'cqlshrc')
+    CONFIG_FILE = os.path.join(HISTORY_DIR, "cqlshrc")
 
-HISTORY = os.path.join(HISTORY_DIR, 'cqlsh_history')
+HISTORY = os.path.join(HISTORY_DIR, "cqlsh_history")
 if not os.path.exists(HISTORY_DIR):
     try:
         os.mkdir(HISTORY_DIR)
     except OSError:
-        print('\nWarning: Cannot create directory at `%s`. Command history will not be saved.\n' % HISTORY_DIR)
+        print(
+            "\nWarning: Cannot create directory at `%s`. Command history will not be saved.\n"
+            % HISTORY_DIR
+        )
 
-OLD_CONFIG_FILE = os.path.expanduser(os.path.join('~', '.cqlshrc'))
+OLD_CONFIG_FILE = os.path.expanduser(os.path.join("~", ".cqlshrc"))
 if os.path.exists(OLD_CONFIG_FILE):
     if os.path.exists(CONFIG_FILE):
-        print('\nWarning: cqlshrc config files were found at both the old location ({0})'
-              + ' and the new location ({1}), the old config file will not be migrated to the new'
-              + ' location, and the new location will be used for now.  You should manually'
-              + ' consolidate the config files at the new location and remove the old file.'
-              .format(OLD_CONFIG_FILE, CONFIG_FILE))
+        print(
+            "\nWarning: cqlshrc config files were found at both the old location ({0})"
+            + " and the new location ({1}), the old config file will not be migrated to the new"
+            + " location, and the new location will be used for now.  You should manually"
+            + " consolidate the config files at the new location and remove the old file.".format(
+                OLD_CONFIG_FILE, CONFIG_FILE
+            )
+        )
     else:
         os.rename(OLD_CONFIG_FILE, CONFIG_FILE)
-OLD_HISTORY = os.path.expanduser(os.path.join('~', '.cqlsh_history'))
+OLD_HISTORY = os.path.expanduser(os.path.join("~", ".cqlsh_history"))
 if os.path.exists(OLD_HISTORY):
     os.rename(OLD_HISTORY, HISTORY)
 # END history/config definition
@@ -332,20 +416,25 @@ CQL_DIR = os.path.dirname(CONFIG_FILE)
 
 CQL_TRACED_ERRORS = (
     cassandra.CoordinationFailure,  # superclass of ReadFailure
-    cassandra.Timeout,              # superclass of ReadTimeout
+    cassandra.Timeout,  # superclass of ReadTimeout
     cassandra.OperationTimedOut,
     cassandra.protocol.InternalError,
-    cassandra.cluster.NoHostAvailable
+    cassandra.cluster.NoHostAvailable,
 )
 CQL_ERRORS = CQL_TRACED_ERRORS + (
-    cassandra.AlreadyExists, cassandra.AuthenticationFailed,
-    cassandra.InvalidRequest, cassandra.Unauthorized,
-    cassandra.connection.ConnectionBusy, cassandra.connection.ProtocolError, cassandra.connection.ConnectionException,
-    cassandra.protocol.ErrorMessage, cassandra.query.TraceUnavailable
+    cassandra.AlreadyExists,
+    cassandra.AuthenticationFailed,
+    cassandra.InvalidRequest,
+    cassandra.Unauthorized,
+    cassandra.connection.ConnectionBusy,
+    cassandra.connection.ProtocolError,
+    cassandra.connection.ConnectionException,
+    cassandra.protocol.ErrorMessage,
+    cassandra.query.TraceUnavailable,
 )
 
-debug_completion = bool(os.environ.get('CQLSH_DEBUG_COMPLETION', '') == 'YES')
-trace_all_errors = bool(os.environ.get('CQLSH_TRACE_ALL_ERRORS', '') == 'YES')
+debug_completion = bool(os.environ.get("CQLSH_DEBUG_COMPLETION", "") == "YES")
+trace_all_errors = bool(os.environ.get("CQLSH_TRACE_ALL_ERRORS", "") == "YES")
 
 
 class NoKeyspaceError(Exception):
@@ -389,7 +478,7 @@ class AggregateNotFound(Exception):
 
 
 class DecodeError(Exception):
-    verb = 'decode'
+    verb = "decode"
 
     def __init__(self, thebytes, err, colname=None):
         self.thebytes = thebytes
@@ -400,14 +489,13 @@ class DecodeError(Exception):
         return str(self.thebytes)
 
     def message(self):
-        what = 'value %r' % (self.thebytes,)
+        what = "value %r" % (self.thebytes,)
         if self.colname is not None:
-            what = 'value %r (for column %r)' % (self.thebytes, self.colname)
-        return 'Failed to %s %s : %s' \
-               % (self.verb, what, self.err)
+            what = "value %r (for column %r)" % (self.thebytes, self.colname)
+        return "Failed to %s %s : %s" % (self.verb, what, self.err)
 
     def __repr__(self):
-        return '<%s %s>' % (self.__class__.__name__, self.message())
+        return "<%s %s>" % (self.__class__.__name__, self.message())
 
 
 def maybe_ensure_text(val):
@@ -415,44 +503,58 @@ def maybe_ensure_text(val):
 
 
 class FormatError(DecodeError):
-    verb = 'format'
+    verb = "format"
 
 
 def full_cql_version(ver):
-    while ver.count('.') < 2:
-        ver += '.0'
-    ver_parts = ver.split('-', 1) + ['']
-    vertuple = tuple(list(map(int, ver_parts[0].split('.'))) + [ver_parts[1]])
+    while ver.count(".") < 2:
+        ver += ".0"
+    ver_parts = ver.split("-", 1) + [""]
+    vertuple = tuple(list(map(int, ver_parts[0].split("."))) + [ver_parts[1]])
     return ver, vertuple
 
 
-def format_value(val, cqltype, encoding, addcolor=False, date_time_format=None,
-                 float_precision=None, colormap=None, nullval=None):
+def format_value(
+    val,
+    cqltype,
+    encoding,
+    addcolor=False,
+    date_time_format=None,
+    float_precision=None,
+    colormap=None,
+    nullval=None,
+):
     if isinstance(val, DecodeError):
         if addcolor:
-            return colorme(repr(val.thebytes), colormap, 'error')
+            return colorme(repr(val.thebytes), colormap, "error")
         else:
             return FormattedValue(repr(val.thebytes))
-    return format_by_type(val, cqltype=cqltype, encoding=encoding, colormap=colormap,
-                          addcolor=addcolor, nullval=nullval, date_time_format=date_time_format,
-                          float_precision=float_precision)
+    return format_by_type(
+        val,
+        cqltype=cqltype,
+        encoding=encoding,
+        colormap=colormap,
+        addcolor=addcolor,
+        nullval=nullval,
+        date_time_format=date_time_format,
+        float_precision=float_precision,
+    )
 
 
 def show_warning_without_quoting_line(message, category, filename, lineno, file=None, line=None):
     if file is None:
         file = sys.stderr
     try:
-        file.write(warnings.formatwarning(message, category, filename, lineno, line=''))
+        file.write(warnings.formatwarning(message, category, filename, lineno, line=""))
     except IOError:
         pass
 
 
 warnings.showwarning = show_warning_without_quoting_line
-warnings.filterwarnings('always', category=cql3handling.UnexpectedTableStructure)
+warnings.filterwarnings("always", category=cql3handling.UnexpectedTableStructure)
 
 
 def insert_driver_hooks():
-
     class DateOverFlowWarning(RuntimeWarning):
         pass
 
@@ -462,13 +564,17 @@ def insert_driver_hooks():
         try:
             return datetime_from_timestamp(timestamp_ms / 1000.0)
         except OverflowError:
-            warnings.warn(DateOverFlowWarning("Some timestamps are larger than Python datetime can represent. "
-                                              "Timestamps are displayed in milliseconds from epoch."))
+            warnings.warn(
+                DateOverFlowWarning(
+                    "Some timestamps are larger than Python datetime can represent. "
+                    "Timestamps are displayed in milliseconds from epoch."
+                )
+            )
             return timestamp_ms
 
     cassandra.cqltypes.DateType.deserialize = staticmethod(deserialize_date_fallback_int)
 
-    if hasattr(cassandra, 'deserializers'):
+    if hasattr(cassandra, "deserializers"):
         del cassandra.deserializers.DesDateType
 
     # Return cassandra.cqltypes.EMPTY instead of None for empty values
@@ -476,8 +582,8 @@ def insert_driver_hooks():
 
 
 class Shell(cmd.Cmd):
-    custom_prompt = ensure_text(os.getenv('CQLSH_PROMPT', ''))
-    if custom_prompt != '':
+    custom_prompt = ensure_text(os.getenv("CQLSH_PROMPT", ""))
+    if custom_prompt != "":
         custom_prompt += "\n"
     default_prompt = custom_prompt + "cqlsh> "
     continue_prompt = "   ... "
@@ -497,29 +603,42 @@ class Shell(cmd.Cmd):
     consistency_level = None
     serial_consistency_level = None
 
-    def __init__(self, hostname, port, color=False,
-                 username=None, encoding=None, stdin=None, tty=True,
-                 completekey=DEFAULT_COMPLETEKEY, browser=None, use_conn=None,
-                 cqlver=None, keyspace=None,
-                 secure_connect_bundle=None,
-                 consistency_level=None, serial_consistency_level=None,
-                 tracing_style='off', expand_enabled=False,
-                 display_nanotime_format=DEFAULT_NANOTIME_FORMAT,
-                 display_timestamp_format=DEFAULT_TIMESTAMP_FORMAT,
-                 display_date_format=DEFAULT_DATE_FORMAT,
-                 display_float_precision=DEFAULT_FLOAT_PRECISION,
-                 display_double_precision=DEFAULT_DOUBLE_PRECISION,
-                 display_timezone=None,
-                 max_trace_wait=DEFAULT_MAX_TRACE_WAIT,
-                 ssl=False,
-                 single_statement=None,
-                 request_timeout=DEFAULT_REQUEST_TIMEOUT_SECONDS,
-                 protocol_version=None,
-                 connect_timeout=DEFAULT_CONNECT_TIMEOUT_SECONDS,
-                 no_file_io=DEFAULT_NO_FILE_IO,
-                 is_subshell=False,
-                 debug=False,
-                 auth_provider=None):
+    def __init__(
+        self,
+        hostname,
+        port,
+        color=False,
+        username=None,
+        encoding=None,
+        stdin=None,
+        tty=True,
+        completekey=DEFAULT_COMPLETEKEY,
+        browser=None,
+        use_conn=None,
+        cqlver=None,
+        keyspace=None,
+        secure_connect_bundle=None,
+        consistency_level=None,
+        serial_consistency_level=None,
+        tracing_style="off",
+        expand_enabled=False,
+        display_nanotime_format=DEFAULT_NANOTIME_FORMAT,
+        display_timestamp_format=DEFAULT_TIMESTAMP_FORMAT,
+        display_date_format=DEFAULT_DATE_FORMAT,
+        display_float_precision=DEFAULT_FLOAT_PRECISION,
+        display_double_precision=DEFAULT_DOUBLE_PRECISION,
+        display_timezone=None,
+        max_trace_wait=DEFAULT_MAX_TRACE_WAIT,
+        ssl=False,
+        single_statement=None,
+        request_timeout=DEFAULT_REQUEST_TIMEOUT_SECONDS,
+        protocol_version=None,
+        connect_timeout=DEFAULT_CONNECT_TIMEOUT_SECONDS,
+        no_file_io=DEFAULT_NO_FILE_IO,
+        is_subshell=False,
+        debug=False,
+        auth_provider=None,
+    ):
         cmd.Cmd.__init__(self, completekey=completekey)
         self.debug = debug
         self.hostname = hostname
@@ -532,7 +651,9 @@ class Shell(cmd.Cmd):
             if not auth_provider.password:
                 # if no password is provided, we need to query the user to get one.
                 password = getpass.getpass()
-                self.auth_provider = PlainTextAuthProvider(username=auth_provider.username, password=password)
+                self.auth_provider = PlainTextAuthProvider(
+                    username=auth_provider.username, password=password
+                )
 
         self.keyspace = keyspace
         self.ssl = ssl
@@ -541,9 +662,9 @@ class Shell(cmd.Cmd):
         self.expand_enabled = expand_enabled
 
         if not consistency_level:
-            raise Exception('Argument consistency_level must not be None')
+            raise Exception("Argument consistency_level must not be None")
         if not serial_consistency_level:
-            raise Exception('Argument serial_consistency_level must not be None')
+            raise Exception("Argument serial_consistency_level must not be None")
         self.consistency_level = consistency_level
         self.serial_consistency_level = serial_consistency_level
 
@@ -554,7 +675,7 @@ class Shell(cmd.Cmd):
         else:
             kwargs = {}
             if protocol_version is not None:
-                kwargs['protocol_version'] = protocol_version
+                kwargs["protocol_version"] = protocol_version
             self.conn = cluster_factory(
                 self.hostname,
                 port=self.port,
@@ -566,7 +687,8 @@ class Shell(cmd.Cmd):
                 secure_connect_bundle=secure_connect_bundle,
                 application_name=description,
                 application_version=version,
-                **kwargs)
+                **kwargs,
+            )
 
         self.owns_connection = not use_conn
 
@@ -595,7 +717,7 @@ class Shell(cmd.Cmd):
         self.session.default_serial_consistency_level = self.serial_consistency_level
 
         self.get_connection_versions()
-        self.set_expanded_cql_version(self.connection_versions['cql'])
+        self.set_expanded_cql_version(self.connection_versions["cql"])
 
         self.current_keyspace = keyspace
 
@@ -612,7 +734,7 @@ class Shell(cmd.Cmd):
         self.lineno = 1
         self.in_comment = False
 
-        self.prompt = ''
+        self.prompt = ""
         if stdin is None:
             stdin = sys.stdin
 
@@ -620,7 +742,7 @@ class Shell(cmd.Cmd):
             self.reset_prompt()
             self.maybe_warn_py2()
             self.report_connection()
-            print('Use HELP for help.')
+            print("Use HELP for help.")
         else:
             self.show_line_nums = True
         self.stdin = stdin
@@ -638,15 +760,22 @@ class Shell(cmd.Cmd):
     @property
     def is_using_utf8(self):
         # utf8 encodings from https://docs.python.org/{2,3}/library/codecs.html
-        return self.encoding.replace('-', '_').lower() in ['utf', 'utf_8', 'u8', 'utf8', CP65001]
+        return self.encoding.replace("-", "_").lower() in ["utf", "utf_8", "u8", "utf8", CP65001]
 
     def check_windows_encoding(self):
-        if is_win and os.name == 'nt' and self.tty and \
-           self.is_using_utf8 and sys.stdout.encoding != CP65001:
-            self.printerr("\nWARNING: console codepage must be set to cp65001 "
-                          "to support {} encoding on Windows platforms.\n"
-                          "If you experience encoding problems, change your console"
-                          " codepage with 'chcp 65001' before starting cqlsh.\n".format(self.encoding))
+        if (
+            is_win
+            and os.name == "nt"
+            and self.tty
+            and self.is_using_utf8
+            and sys.stdout.encoding != CP65001
+        ):
+            self.printerr(
+                "\nWARNING: console codepage must be set to cp65001 "
+                "to support {} encoding on Windows platforms.\n"
+                "If you experience encoding problems, change your console"
+                " codepage with 'chcp 65001' before starting cqlsh.\n".format(self.encoding)
+            )
 
     def set_expanded_cql_version(self, ver):
         ver, vertuple = full_cql_version(ver)
@@ -660,18 +789,32 @@ class Shell(cmd.Cmd):
         if isinstance(val, DecodeError):
             self.decoding_errors.append(val)
         try:
-            dtformats = DateTimeFormat(timestamp_format=self.display_timestamp_format,
-                                       date_format=self.display_date_format, nanotime_format=self.display_nanotime_format,
-                                       timezone=self.display_timezone)
-            precision = self.display_double_precision if cqltype is not None and cqltype.type_name == 'double' \
+            dtformats = DateTimeFormat(
+                timestamp_format=self.display_timestamp_format,
+                date_format=self.display_date_format,
+                nanotime_format=self.display_nanotime_format,
+                timezone=self.display_timezone,
+            )
+            precision = (
+                self.display_double_precision
+                if cqltype is not None and cqltype.type_name == "double"
                 else self.display_float_precision
-            return format_value(val, cqltype=cqltype, encoding=self.output_codec.name,
-                                addcolor=self.color, date_time_format=dtformats,
-                                float_precision=precision, **kwargs)
+            )
+            return format_value(
+                val,
+                cqltype=cqltype,
+                encoding=self.output_codec.name,
+                addcolor=self.color,
+                date_time_format=dtformats,
+                float_precision=precision,
+                **kwargs,
+            )
         except Exception as e:
             err = FormatError(val, e)
             self.decoding_errors.append(err)
-            return format_value(err, cqltype=cqltype, encoding=self.output_codec.name, addcolor=self.color)
+            return format_value(
+                err, cqltype=cqltype, encoding=self.output_codec.name, addcolor=self.color
+            )
 
     def myformat_colname(self, name, table_meta=None):
         column_colors = COLUMN_NAME_COLORS.copy()
@@ -690,34 +833,40 @@ class Shell(cmd.Cmd):
         self.show_version()
 
     def show_host(self):
-        print("Connected to {0} at {1}:{2}"
-              .format(self.applycolor(self.get_cluster_name(), BLUE),
-                      self.hostname,
-                      self.port))
+        print(
+            "Connected to {0} at {1}:{2}".format(
+                self.applycolor(self.get_cluster_name(), BLUE), self.hostname, self.port
+            )
+        )
 
     def show_version(self):
         vers = self.connection_versions.copy()
-        vers['shver'] = version
+        vers["shver"] = version
         # system.Versions['cql'] apparently does not reflect changes with
         # set_cql_version.
-        vers['cql'] = self.cql_version
-        print("[cqlsh %(shver)s | Cassandra %(build)s | CQL spec %(cql)s | Native protocol v%(protocol)s]" % vers)
+        vers["cql"] = self.cql_version
+        print(
+            "[cqlsh %(shver)s | Cassandra %(build)s | CQL spec %(cql)s | Native protocol v%(protocol)s]"
+            % vers
+        )
 
     def maybe_warn_py2(self):
-        py2_suppress_warn = 'CQLSH_NO_WARN_PY2'
+        py2_suppress_warn = "CQLSH_NO_WARN_PY2"
         if sys.version_info[0:2] == (2, 7) and not os.environ.get(py2_suppress_warn):
-            print("Python 2.7 support is deprecated. "
-                  "Install Python 3.6+ or set %s to suppress this message.\n" % (py2_suppress_warn,))
+            print(
+                "Python 2.7 support is deprecated. "
+                "Install Python 3.6+ or set %s to suppress this message.\n" % (py2_suppress_warn,)
+            )
 
     def show_session(self, sessionid, partial_session=False):
         print_trace_session(self, self.tracing_style, self.session, sessionid, partial_session)
 
     def get_connection_versions(self):
-        result, = self.session.execute("select * from system.local where key = 'local'")
+        (result,) = self.session.execute("select * from system.local where key = 'local'")
         vers = {
-            'build': result['release_version'],
-            'protocol': self.conn.protocol_version,
-            'cql': result['cql_version'],
+            "build": result["release_version"],
+            "protocol": self.conn.protocol_version,
+            "cql": result["cql_version"],
         }
         self.connection_versions = vers
 
@@ -789,7 +938,7 @@ class Shell(cmd.Cmd):
         if ksname in self.conn.metadata.keyspaces:
             return self.conn.metadata.keyspaces[ksname]
 
-        raise KeyspaceNotFound('Keyspace %r not found.' % ksname)
+        raise KeyspaceNotFound("Keyspace %r not found." % ksname)
 
     def get_keyspaces(self):
         return list(self.conn.metadata.keyspaces.values())
@@ -803,7 +952,7 @@ class Shell(cmd.Cmd):
             ksname = self.current_keyspace
         ksmeta = self.get_keyspace_meta(ksname)
         if tablename not in ksmeta.tables:
-            if ksname == 'system_auth' and tablename in ['roles', 'role_permissions']:
+            if ksname == "system_auth" and tablename in ["roles", "role_permissions"]:
                 self.get_fake_auth_table_meta(ksname, tablename)
             else:
                 raise ColumnFamilyNotFound("Column family {} not found".format(tablename))
@@ -814,18 +963,30 @@ class Shell(cmd.Cmd):
         # may be using external auth implementation so internal tables
         # aren't actually defined in schema. In this case, we'll fake
         # them up
-        if tablename == 'roles':
+        if tablename == "roles":
             ks_meta = KeyspaceMetadata(ksname, True, None, None)
-            table_meta = TableMetadata(ks_meta, 'roles')
-            table_meta.columns['role'] = ColumnMetadata(table_meta, 'role', cassandra.cqltypes.UTF8Type)
-            table_meta.columns['is_superuser'] = ColumnMetadata(table_meta, 'is_superuser', cassandra.cqltypes.BooleanType)
-            table_meta.columns['can_login'] = ColumnMetadata(table_meta, 'can_login', cassandra.cqltypes.BooleanType)
-        elif tablename == 'role_permissions':
+            table_meta = TableMetadata(ks_meta, "roles")
+            table_meta.columns["role"] = ColumnMetadata(
+                table_meta, "role", cassandra.cqltypes.UTF8Type
+            )
+            table_meta.columns["is_superuser"] = ColumnMetadata(
+                table_meta, "is_superuser", cassandra.cqltypes.BooleanType
+            )
+            table_meta.columns["can_login"] = ColumnMetadata(
+                table_meta, "can_login", cassandra.cqltypes.BooleanType
+            )
+        elif tablename == "role_permissions":
             ks_meta = KeyspaceMetadata(ksname, True, None, None)
-            table_meta = TableMetadata(ks_meta, 'role_permissions')
-            table_meta.columns['role'] = ColumnMetadata(table_meta, 'role', cassandra.cqltypes.UTF8Type)
-            table_meta.columns['resource'] = ColumnMetadata(table_meta, 'resource', cassandra.cqltypes.UTF8Type)
-            table_meta.columns['permission'] = ColumnMetadata(table_meta, 'permission', cassandra.cqltypes.UTF8Type)
+            table_meta = TableMetadata(ks_meta, "role_permissions")
+            table_meta.columns["role"] = ColumnMetadata(
+                table_meta, "role", cassandra.cqltypes.UTF8Type
+            )
+            table_meta.columns["resource"] = ColumnMetadata(
+                table_meta, "resource", cassandra.cqltypes.UTF8Type
+            )
+            table_meta.columns["permission"] = ColumnMetadata(
+                table_meta, "permission", cassandra.cqltypes.UTF8Type
+            )
         else:
             raise ColumnFamilyNotFound("Column family {} not found".format(tablename))
 
@@ -883,9 +1044,11 @@ class Shell(cmd.Cmd):
         if ksname is None:
             ksname = self.current_keyspace
 
-        return [trigger.name
-                for table in list(self.get_keyspace_meta(ksname).tables.values())
-                for trigger in list(table.triggers.values())]
+        return [
+            trigger.name
+            for table in list(self.get_keyspace_meta(ksname).tables.values())
+            for trigger in list(table.triggers.values())
+        ]
 
     def reset_statement(self):
         self.reset_prompt()
@@ -901,13 +1064,15 @@ class Shell(cmd.Cmd):
 
     def set_continue_prompt(self):
         if self.empty_lines >= 3:
-            self.set_prompt("Statements are terminated with a ';'.  You can press CTRL-C to cancel an incomplete statement.")
+            self.set_prompt(
+                "Statements are terminated with a ';'.  You can press CTRL-C to cancel an incomplete statement."
+            )
             self.empty_lines = 0
             return
         if self.current_keyspace is None:
             self.set_prompt(self.continue_prompt)
         else:
-            spaces = ' ' * len(str(self.current_keyspace))
+            spaces = " " * len(str(self.current_keyspace))
             self.set_prompt(self.keyspace_continue_prompt.format(spaces))
         self.empty_lines = self.empty_lines + 1 if not self.lastcmd else 0
 
@@ -919,12 +1084,14 @@ class Shell(cmd.Cmd):
                 import readline
             except ImportError:
                 if is_win:
-                    print("WARNING: pyreadline dependency missing.  Install to enable tab completion.")
+                    print(
+                        "WARNING: pyreadline dependency missing.  Install to enable tab completion."
+                    )
                 pass
             else:
                 old_completer = readline.get_completer()
                 readline.set_completer(self.complete)
-                if readline.__doc__ is not None and 'libedit' in readline.__doc__:
+                if readline.__doc__ is not None and "libedit" in readline.__doc__:
                     readline.parse_and_bind("bind -e")
                     readline.parse_and_bind("bind '" + self.completekey + "' rl_complete")
                     readline.parse_and_bind("bind ^R em-inc-search-prev")
@@ -934,17 +1101,21 @@ class Shell(cmd.Cmd):
         if self.coverage and not self.is_subshell:
             # check for coveragerc file, write it if missing
             if os.path.exists(HISTORY_DIR):
-                self.coveragerc_path = os.path.join(HISTORY_DIR, '.coveragerc')
-                covdata_path = os.path.join(HISTORY_DIR, '.coverage')
+                self.coveragerc_path = os.path.join(HISTORY_DIR, ".coveragerc")
+                covdata_path = os.path.join(HISTORY_DIR, ".coverage")
                 if not os.path.isfile(self.coveragerc_path):
-                    with open(self.coveragerc_path, 'w') as f:
-                        f.writelines(["[run]\n",
-                                      "concurrency = multiprocessing\n",
-                                      "data_file = {}\n".format(covdata_path),
-                                      "parallel = true\n"]
-                                     )
+                    with open(self.coveragerc_path, "w") as f:
+                        f.writelines(
+                            [
+                                "[run]\n",
+                                "concurrency = multiprocessing\n",
+                                "data_file = {}\n".format(covdata_path),
+                                "parallel = true\n",
+                            ]
+                        )
                 # start coverage
                 import coverage
+
                 self.cov = coverage.Coverage(config_file=self.coveragerc_path)
                 self.cov.start()
         try:
@@ -955,10 +1126,10 @@ class Shell(cmd.Cmd):
             if self.coverage and not self.is_subshell:
                 self.stop_coverage()
 
-    def get_input_line(self, prompt=''):
+    def get_input_line(self, prompt=""):
         if self.tty:
             self.lastcmd = input(ensure_str(prompt))
-            line = ensure_text(self.lastcmd) + '\n'
+            line = ensure_text(self.lastcmd) + "\n"
         else:
             self.lastcmd = ensure_text(self.stdin.readline())
             line = self.lastcmd
@@ -968,8 +1139,8 @@ class Shell(cmd.Cmd):
         line = ensure_text(line)
         return line
 
-    def use_stdin_reader(self, until='', prompt=''):
-        until += '\n'
+    def use_stdin_reader(self, until="", prompt=""):
+        until += "\n"
         while True:
             try:
                 newline = self.get_input_line(prompt=prompt)
@@ -1002,22 +1173,24 @@ class Shell(cmd.Cmd):
                     self.printerr(cqlerr.message)
                 except KeyboardInterrupt:
                     self.reset_statement()
-                    print('')
+                    print("")
 
     def strip_comment_blocks(self, statementtext):
         comment_block_in_literal_string = re.search('["].*[/][*].*[*][/].*["]', statementtext)
         if not comment_block_in_literal_string:
-            result = re.sub('[/][*].*[*][/]', "", statementtext)
-            if '*/' in result and '/*' not in result and not self.in_comment:
-                raise SyntaxError("Encountered comment block terminator without being in comment block")
-            if '/*' in result:
-                result = re.sub('[/][*].*', "", result)
+            result = re.sub("[/][*].*[*][/]", "", statementtext)
+            if "*/" in result and "/*" not in result and not self.in_comment:
+                raise SyntaxError(
+                    "Encountered comment block terminator without being in comment block"
+                )
+            if "/*" in result:
+                result = re.sub("[/][*].*", "", result)
                 self.in_comment = True
-            if '*/' in result:
-                result = re.sub('.*[*][/]', "", result)
+            if "*/" in result:
+                result = re.sub(".*[*][/]", "", result)
                 self.in_comment = False
-            if self.in_comment and not re.findall('[/][*]|[*][/]', statementtext):
-                result = ''
+            if self.in_comment and not re.findall("[/][*]|[*][/]", statementtext):
+                result = ""
             return result
         return statementtext
 
@@ -1032,20 +1205,19 @@ class Shell(cmd.Cmd):
             statements, endtoken_escaped = cqlruleset.cql_split_statements(statementtext)
         except pylexotron.LexingError as e:
             if self.show_line_nums:
-                self.printerr('Invalid syntax at line {0}, char {1}'
-                              .format(e.linenum, e.charnum))
+                self.printerr("Invalid syntax at line {0}, char {1}".format(e.linenum, e.charnum))
             else:
-                self.printerr('Invalid syntax at char {0}'.format(e.charnum))
-            statementline = statementtext.split('\n')[e.linenum - 1]
-            self.printerr('  {0}'.format(statementline))
-            self.printerr(' {0}^'.format(' ' * e.charnum))
+                self.printerr("Invalid syntax at char {0}".format(e.charnum))
+            statementline = statementtext.split("\n")[e.linenum - 1]
+            self.printerr("  {0}".format(statementline))
+            self.printerr(" {0}^".format(" " * e.charnum))
             return True
 
         while statements and not statements[-1]:
             statements = statements[:-1]
         if not statements:
             return True
-        if endtoken_escaped or statements[-1][-1][0] != 'endtoken':
+        if endtoken_escaped or statements[-1][-1][0] != "endtoken":
             self.set_continue_prompt()
             return
         for st in statements:
@@ -1060,11 +1232,11 @@ class Shell(cmd.Cmd):
 
     def handle_eof(self):
         if self.tty:
-            print('')
+            print("")
         statement = self.statement.getvalue()
         if statement.strip():
             if not self.onecmd(statement):
-                self.printerr('Incomplete statement at end of file')
+                self.printerr("Incomplete statement at end of file")
         self.do_exit()
 
     def handle_statement(self, tokens, srcstr):
@@ -1079,12 +1251,13 @@ class Shell(cmd.Cmd):
 
             self.last_hist = new_hist
         cmdword = tokens[0][1]
-        if cmdword == '?':
-            cmdword = 'help'
-        custom_handler = getattr(self, 'do_' + cmdword.lower(), None)
+        if cmdword == "?":
+            cmdword = "help"
+        custom_handler = getattr(self, "do_" + cmdword.lower(), None)
         if custom_handler:
-            parsed = cqlruleset.cql_whole_parse_tokens(tokens, srcstr=srcstr,
-                                                       startsymbol='cqlshCommand')
+            parsed = cqlruleset.cql_whole_parse_tokens(
+                tokens, srcstr=srcstr, startsymbol="cqlshCommand"
+            )
             if parsed and not parsed.remainder:
                 # successful complete parse
                 return custom_handler(parsed)
@@ -1093,19 +1266,30 @@ class Shell(cmd.Cmd):
         return self.perform_statement(cqlruleset.cql_extract_orig(tokens, srcstr))
 
     def handle_parse_error(self, cmdword, tokens, parsed, srcstr):
-        if cmdword.lower() in ('select', 'insert', 'update', 'delete', 'truncate',
-                               'create', 'drop', 'alter', 'grant', 'revoke',
-                               'batch', 'list'):
+        if cmdword.lower() in (
+            "select",
+            "insert",
+            "update",
+            "delete",
+            "truncate",
+            "create",
+            "drop",
+            "alter",
+            "grant",
+            "revoke",
+            "batch",
+            "list",
+        ):
             # hey, maybe they know about some new syntax we don't. type
             # assumptions won't work, but maybe the query will.
             return self.perform_statement(cqlruleset.cql_extract_orig(tokens, srcstr))
         if parsed:
-            self.printerr('Improper %s command (problem at %r).' % (cmdword, parsed.remainder[0]))
+            self.printerr("Improper %s command (problem at %r)." % (cmdword, parsed.remainder[0]))
         else:
-            self.printerr('Improper %s command.' % cmdword)
+            self.printerr("Improper %s command." % cmdword)
 
     def do_use(self, parsed):
-        ksname = parsed.get_binding('ksname')
+        ksname = parsed.get_binding("ksname")
         success, _ = self.perform_simple_statement(SimpleStatement(parsed.extract_orig()))
         if success:
             if ksname[0] == '"' and ksname[-1] == '"':
@@ -1115,8 +1299,10 @@ class Shell(cmd.Cmd):
 
     def do_select(self, parsed):
         tracing_was_enabled = self.tracing_style
-        ksname = parsed.get_binding('ksname')
-        stop_tracing = ksname == 'system_traces' or (ksname is None and self.current_keyspace == 'system_traces')
+        ksname = parsed.get_binding("ksname")
+        stop_tracing = ksname == "system_traces" or (
+            ksname is None and self.current_keyspace == "system_traces"
+        )
         self.tracing_style = "off" if stop_tracing else self.tracing_style
         statement = parsed.extract_orig()
         self.perform_statement(statement)
@@ -1125,7 +1311,12 @@ class Shell(cmd.Cmd):
     def perform_statement(self, statement):
         statement = ensure_text(statement)
 
-        stmt = SimpleStatement(statement, consistency_level=self.consistency_level, serial_consistency_level=self.serial_consistency_level, fetch_size=self.page_size if self.use_paging else None)
+        stmt = SimpleStatement(
+            statement,
+            consistency_level=self.consistency_level,
+            serial_consistency_level=self.serial_consistency_level,
+            fetch_size=self.page_size if self.use_paging else None,
+        )
         success, future = self.perform_simple_statement(stmt)
 
         if future:
@@ -1134,10 +1325,15 @@ class Shell(cmd.Cmd):
 
             if self.tracing_style:
                 try:
-                    for trace in future.get_all_query_traces(max_wait_per=self.max_trace_wait, query_cl=self.consistency_level):
+                    for trace in future.get_all_query_traces(
+                        max_wait_per=self.max_trace_wait, query_cl=self.consistency_level
+                    ):
                         print_trace(self, self.tracing_style, trace)
                 except TraceUnavailable:
-                    msg = "Statement trace did not complete within %d seconds; trace data may be incomplete." % (self.session.max_trace_wait,)
+                    msg = (
+                        "Statement trace did not complete within %d seconds; trace data may be incomplete."
+                        % (self.session.max_trace_wait,)
+                    )
                     self.writeresult(msg, color=RED)
                     for trace_id in future.get_query_trace_ids():
                         self.show_session(trace_id, partial_session=True)
@@ -1151,8 +1347,8 @@ class Shell(cmd.Cmd):
             parsed = cqlruleset.cql_parse(query_string)[1]
         except IndexError:
             return None
-        ks = self.cql_unprotect_name(parsed.get_binding('ksname', None))
-        name = self.cql_unprotect_name(parsed.get_binding('cfname', None))
+        ks = self.cql_unprotect_name(parsed.get_binding("ksname", None))
+        name = self.cql_unprotect_name(parsed.get_binding("cfname", None))
         try:
             return self.get_table_meta(ks, name)
         except ColumnFamilyNotFound:
@@ -1166,8 +1362,8 @@ class Shell(cmd.Cmd):
             parsed = cqlruleset.cql_parse(query_string)[1]
         except IndexError:
             return None
-        ks = self.cql_unprotect_name(parsed.get_binding('ksname', None))
-        cf = self.cql_unprotect_name(parsed.get_binding('cfname'))
+        ks = self.cql_unprotect_name(parsed.get_binding("ksname", None))
+        cf = self.cql_unprotect_name(parsed.get_binding("cfname"))
         return self.get_table_meta(ks, cf)
 
     def perform_simple_statement(self, statement):
@@ -1175,10 +1371,12 @@ class Shell(cmd.Cmd):
             return False, None
 
         def print_cql_error(err):
-            err_msg = ensure_text(err.message if hasattr(err, 'message') else str(err))
+            err_msg = ensure_text(err.message if hasattr(err, "message") else str(err))
             self.printerr(str(err.__class__.__name__) + ": " + err_msg)
 
-        future = self.session.execute_async(statement, trace=self.tracing_style in ["full", "compact"])
+        future = self.session.execute_async(
+            statement, trace=self.tracing_style in ["full", "compact"]
+        )
         result = None
         traced_err = None
         try:
@@ -1190,15 +1388,20 @@ class Shell(cmd.Cmd):
             print_cql_error(err)
         except Exception:
             import traceback
+
             self.printerr(traceback.format_exc())
 
         # Even if statement failed we try to refresh schema if not agreed (see CASSANDRA-9689)
         if not future.is_schema_agreed:
             try:
-                self.conn.refresh_schema_metadata(5)  # will throw exception if there is a schema mismatch
+                self.conn.refresh_schema_metadata(
+                    5
+                )  # will throw exception if there is a schema mismatch
             except Exception:
-                self.printerr("Warning: schema version mismatch detected; check the schema versions of your "
-                              "nodes in system.local and system.peers.")
+                self.printerr(
+                    "Warning: schema version mismatch detected; check the schema versions of your "
+                    "nodes in system.local and system.peers."
+                )
                 self.conn.refresh_schema_metadata(-1)
 
         if result is None:
@@ -1207,16 +1410,23 @@ class Shell(cmd.Cmd):
             else:
                 return False, None
 
-        if statement.query_string[:6].lower() == 'select':
+        if statement.query_string[:6].lower() == "select":
             self.print_result(result, self.parse_for_select_meta(statement.query_string))
-        elif statement.query_string.lower().startswith("list users") or statement.query_string.lower().startswith("list roles"):
-            self.print_result(result, self.get_table_meta('system_auth', 'roles'))
+        elif statement.query_string.lower().startswith(
+            "list users"
+        ) or statement.query_string.lower().startswith("list roles"):
+            self.print_result(result, self.get_table_meta("system_auth", "roles"))
         elif statement.query_string.lower().startswith("list"):
-            self.print_result(result, self.get_table_meta('system_auth', 'role_permissions'))
+            self.print_result(result, self.get_table_meta("system_auth", "role_permissions"))
         elif result:
             # CAS INSERT/UPDATE
             self.writeresult("")
-            self.print_static_result(result, self.parse_for_update_meta(statement.query_string), with_header=True, tty=self.tty)
+            self.print_static_result(
+                result,
+                self.parse_for_update_meta(statement.query_string),
+                with_header=True,
+                tty=self.tty,
+            )
         self.flush_output()
         return True, future
 
@@ -1254,8 +1464,10 @@ class Shell(cmd.Cmd):
             for err in self.decoding_errors[:2]:
                 self.writeresult(err.message(), color=RED)
             if len(self.decoding_errors) > 2:
-                self.writeresult('%d more decoding errors suppressed.'
-                                 % (len(self.decoding_errors) - 2), color=RED)
+                self.writeresult(
+                    "%d more decoding errors suppressed." % (len(self.decoding_errors) - 2),
+                    color=RED,
+                )
 
     def print_static_result(self, result, table_meta, with_header, tty, row_count_offset=0):
         if not result.column_names and not table_meta:
@@ -1274,14 +1486,21 @@ class Shell(cmd.Cmd):
             ks_meta = self.conn.metadata.keyspaces.get(ks_name, None)
             cql_types = [CqlType(cql_typename(t), ks_meta) for t in result.column_types]
 
-        formatted_values = [list(map(self.myformat_value, [row[c] for c in column_names], cql_types)) for row in result.current_rows]
+        formatted_values = [
+            list(map(self.myformat_value, [row[c] for c in column_names], cql_types))
+            for row in result.current_rows
+        ]
 
         if self.expand_enabled:
-            self.print_formatted_result_vertically(formatted_names, formatted_values, row_count_offset)
+            self.print_formatted_result_vertically(
+                formatted_names, formatted_values, row_count_offset
+            )
         else:
             self.print_formatted_result(formatted_names, formatted_values, with_header, tty)
 
-    def print_formatted_result(self, formatted_names, formatted_values, with_header, tty, justify_last=True):
+    def print_formatted_result(
+        self, formatted_names, formatted_values, with_header, tty, justify_last=True
+    ):
         # determine column widths
         widths = [n.displaywidth for n in formatted_names]
         if formatted_values is not None:
@@ -1291,9 +1510,11 @@ class Shell(cmd.Cmd):
 
         # print header
         if with_header:
-            header = ' | '.join(hdr.ljust(w, color=self.color) for (hdr, w) in zip(formatted_names, widths))
-            self.writeresult(' ' + header.rstrip())
-            self.writeresult('-%s-' % '-+-'.join('-' * w for w in widths))
+            header = " | ".join(
+                hdr.ljust(w, color=self.color) for (hdr, w) in zip(formatted_names, widths)
+            )
+            self.writeresult(" " + header.rstrip())
+            self.writeresult("-%s-" % "-+-".join("-" * w for w in widths))
 
         # stop if there are no rows
         if formatted_values is None:
@@ -1303,38 +1524,45 @@ class Shell(cmd.Cmd):
         # print row data
         for row in formatted_values:
             if justify_last:
-                line = ' | '.join(col.rjust(w, color=self.color) for (col, w) in zip(row, widths))
+                line = " | ".join(col.rjust(w, color=self.color) for (col, w) in zip(row, widths))
             else:
-                line = ' | '.join(col.rjust(w, color=self.color) for (col, w) in zip(row[:-1], widths[:-1])) + ' | ' + \
-                       row[-1].coloredval
-            self.writeresult(' ' + line)
+                line = (
+                    " | ".join(
+                        col.rjust(w, color=self.color) for (col, w) in zip(row[:-1], widths[:-1])
+                    )
+                    + " | "
+                    + row[-1].coloredval
+                )
+            self.writeresult(" " + line)
 
         if tty:
             self.writeresult("")
 
-    def print_formatted_result_vertically(self, formatted_names, formatted_values, row_count_offset):
+    def print_formatted_result_vertically(
+        self, formatted_names, formatted_values, row_count_offset
+    ):
         max_col_width = max([n.displaywidth for n in formatted_names])
         max_val_width = max([n.displaywidth for row in formatted_values for n in row])
 
         # for each row returned, list all the column-value pairs
         for i, row in enumerate(formatted_values):
             self.writeresult("@ Row %d" % (row_count_offset + i + 1))
-            self.writeresult('-%s-' % '-+-'.join(['-' * max_col_width, '-' * max_val_width]))
+            self.writeresult("-%s-" % "-+-".join(["-" * max_col_width, "-" * max_val_width]))
             for field_id, field in enumerate(row):
                 column = formatted_names[field_id].ljust(max_col_width, color=self.color)
                 value = field.ljust(field.displaywidth, color=self.color)
-                self.writeresult(' ' + " | ".join([column, value]))
-            self.writeresult('')
+                self.writeresult(" " + " | ".join([column, value]))
+            self.writeresult("")
 
     def print_warnings(self, warnings):
         if warnings is None or len(warnings) == 0:
             return
 
-        self.writeresult('')
-        self.writeresult('Warnings :')
+        self.writeresult("")
+        self.writeresult("Warnings :")
         for warning in warnings:
             self.writeresult(warning)
-            self.writeresult('')
+            self.writeresult("")
 
     def emptyline(self):
         pass
@@ -1352,6 +1580,7 @@ class Shell(cmd.Cmd):
             except Exception:
                 if debug_completion:
                     import traceback
+
                     traceback.print_exc()
                 else:
                     raise
@@ -1366,8 +1595,13 @@ class Shell(cmd.Cmd):
         wholestmt = prevlines + curline
         begidx = readline.get_begidx() + len(prevlines)
         stuff_to_complete = wholestmt[:begidx]
-        return cqlruleset.cql_complete(stuff_to_complete, text, cassandra_conn=self,
-                                       debug=debug_completion, startsymbol='cqlshCommand')
+        return cqlruleset.cql_complete(
+            stuff_to_complete,
+            text,
+            cassandra_conn=self,
+            debug=debug_completion,
+            startsymbol="cqlshCommand",
+        )
 
     def set_prompt(self, prompt, prepend_user=False):
         if prepend_user and self.username:
@@ -1390,10 +1624,9 @@ class Shell(cmd.Cmd):
         """
         names = [n for n in name_list]
         cmd.Cmd.columnize(self, names)
-        print('')
+        print("")
 
     def do_describe(self, parsed):
-
         """
         DESCRIBE [cqlsh only]
 
@@ -1484,34 +1717,41 @@ class Shell(cmd.Cmd):
           where object can be either a keyspace or a table or an index or a materialized
           view (in this order).
         """
-        stmt = SimpleStatement(parsed.extract_orig(), consistency_level=cassandra.ConsistencyLevel.LOCAL_ONE, fetch_size=self.page_size if self.use_paging else None)
+        stmt = SimpleStatement(
+            parsed.extract_orig(),
+            consistency_level=cassandra.ConsistencyLevel.LOCAL_ONE,
+            fetch_size=self.page_size if self.use_paging else None,
+        )
         future = self.session.execute_async(stmt)
 
-        if self.connection_versions['build'][0] < '4':
-            print('\nWARN: DESCRIBE|DESC was moved to server side in Cassandra 4.0. As a consequence DESRIBE|DESC '
-                  'will not work in cqlsh %r connected to Cassandra %r, the version that you are connected to. '
-                  'DESCRIBE does not exist server side prior Cassandra 4.0.'
-                  % (version, self.connection_versions['build']))
+        if self.connection_versions["build"][0] < "4":
+            print(
+                "\nWARN: DESCRIBE|DESC was moved to server side in Cassandra 4.0. As a consequence DESRIBE|DESC "
+                "will not work in cqlsh %r connected to Cassandra %r, the version that you are connected to. "
+                "DESCRIBE does not exist server side prior Cassandra 4.0."
+                % (version, self.connection_versions["build"])
+            )
         else:
             try:
                 result = future.result()
 
                 what = parsed.matched[1][1].lower()
 
-                if what in ('columnfamilies', 'tables', 'types', 'functions', 'aggregates'):
+                if what in ("columnfamilies", "tables", "types", "functions", "aggregates"):
                     self.describe_list(result)
-                elif what == 'keyspaces':
+                elif what == "keyspaces":
                     self.describe_keyspaces(result)
-                elif what == 'cluster':
+                elif what == "cluster":
                     self.describe_cluster(result)
                 elif what:
                     self.describe_element(result)
 
             except CQL_ERRORS as err:
-                err_msg = ensure_text(err.message if hasattr(err, 'message') else str(err))
+                err_msg = ensure_text(err.message if hasattr(err, "message") else str(err))
                 self.printerr(err_msg.partition("message=")[2].strip('"'))
             except Exception:
                 import traceback
+
                 self.printerr(traceback.format_exc())
 
             if future:
@@ -1524,11 +1764,11 @@ class Shell(cmd.Cmd):
         """
         Print the output for a DESCRIBE KEYSPACES query
         """
-        names = [ensure_str(r['name']) for r in rows]
+        names = [ensure_str(r["name"]) for r in rows]
 
-        print('')
+        print("")
         cmd.Cmd.columnize(self, names)
-        print('')
+        print("")
 
     def describe_list(self, rows):
         """
@@ -1537,24 +1777,24 @@ class Shell(cmd.Cmd):
         keyspace = None
         names = list()
         for row in rows:
-            if row['keyspace_name'] != keyspace:
+            if row["keyspace_name"] != keyspace:
                 if keyspace is not None:
                     self.print_keyspace_element_names(keyspace, names)
 
-                keyspace = row['keyspace_name']
+                keyspace = row["keyspace_name"]
                 names = list()
 
-            names.append(ensure_str(row['name']))
+            names.append(ensure_str(row["name"]))
 
         if keyspace is not None:
             self.print_keyspace_element_names(keyspace, names)
-            print('')
+            print("")
 
     def print_keyspace_element_names(self, keyspace, names):
-        print('')
+        print("")
         if self.current_keyspace is None:
-            print('Keyspace %s' % (keyspace))
-            print('---------%s' % ('-' * len(keyspace)))
+            print("Keyspace %s" % (keyspace))
+            print("---------%s" % ("-" * len(keyspace)))
         cmd.Cmd.columnize(self, names)
 
     def describe_element(self, rows):
@@ -1562,9 +1802,9 @@ class Shell(cmd.Cmd):
         Print the output for all the DESCRIBE queries where an element name as been specified (e.g DESCRIBE TABLE, DESCRIBE INDEX ...)
         """
         for row in rows:
-            print('')
-            self.query_out.write(row['create_statement'])
-            print('')
+            print("")
+            self.query_out.write(row["create_statement"])
+            print("")
 
     def describe_cluster(self, rows):
         """
@@ -1574,14 +1814,14 @@ class Shell(cmd.Cmd):
         otherwise not.
         """
         for row in rows:
-            print('\nCluster: %s' % row['cluster'])
-            print('Partitioner: %s' % row['partitioner'])
-            print('Snitch: %s\n' % row['snitch'])
-            if 'range_ownership' in row:
+            print("\nCluster: %s" % row["cluster"])
+            print("Partitioner: %s" % row["partitioner"])
+            print("Snitch: %s\n" % row["snitch"])
+            if "range_ownership" in row:
                 print("Range ownership:")
-                for entry in list(row['range_ownership'].items()):
-                    print(' %39s  [%s]' % (entry[0], ', '.join([host for host in entry[1]])))
-                print('')
+                for entry in list(row["range_ownership"].items()):
+                    print(" %39s  [%s]" % (entry[0], ", ".join([host for host in entry[1]])))
+                print("")
 
     def do_copy(self, parsed):
         r"""
@@ -1666,35 +1906,39 @@ class Shell(cmd.Cmd):
         """
 
         if self.no_file_io:
-            self.printerr('No file I/O permitted')
+            self.printerr("No file I/O permitted")
             return
 
-        ks = self.cql_unprotect_name(parsed.get_binding('ksname', None))
+        ks = self.cql_unprotect_name(parsed.get_binding("ksname", None))
         if ks is None:
             ks = self.current_keyspace
             if ks is None:
                 raise NoKeyspaceError("Not in any keyspace.")
-        table = self.cql_unprotect_name(parsed.get_binding('cfname'))
-        columns = parsed.get_binding('colnames', None)
+        table = self.cql_unprotect_name(parsed.get_binding("cfname"))
+        columns = parsed.get_binding("colnames", None)
         if columns is not None:
             columns = list(map(self.cql_unprotect_name, columns))
         else:
             # default to all known columns
             columns = self.get_column_names(ks, table)
 
-        fname = parsed.get_binding('fname', None)
+        fname = parsed.get_binding("fname", None)
         if fname is not None:
             fname = self.cql_unprotect_value(fname)
 
-        copyoptnames = list(map(six.text_type.lower, parsed.get_binding('optnames', ())))
-        copyoptvals = list(map(self.cql_unprotect_value, parsed.get_binding('optvals', ())))
+        copyoptnames = list(map(six.text_type.lower, parsed.get_binding("optnames", ())))
+        copyoptvals = list(map(self.cql_unprotect_value, parsed.get_binding("optvals", ())))
         opts = dict(list(zip(copyoptnames, copyoptvals)))
 
-        direction = parsed.get_binding('dir').upper()
-        if direction == 'FROM':
-            task = ImportTask(self, ks, table, columns, fname, opts, self.conn.protocol_version, CONFIG_FILE)
-        elif direction == 'TO':
-            task = ExportTask(self, ks, table, columns, fname, opts, self.conn.protocol_version, CONFIG_FILE)
+        direction = parsed.get_binding("dir").upper()
+        if direction == "FROM":
+            task = ImportTask(
+                self, ks, table, columns, fname, opts, self.conn.protocol_version, CONFIG_FILE
+            )
+        elif direction == "TO":
+            task = ExportTask(
+                self, ks, table, columns, fname, opts, self.conn.protocol_version, CONFIG_FILE
+            )
         else:
             raise SyntaxError("Unknown direction %s" % direction)
 
@@ -1721,17 +1965,17 @@ class Shell(cmd.Cmd):
 
           Pretty-prints the requested tracing session.
         """
-        showwhat = parsed.get_binding('what').lower()
-        if showwhat == 'version':
+        showwhat = parsed.get_binding("what").lower()
+        if showwhat == "version":
             self.get_connection_versions()
             self.show_version()
-        elif showwhat == 'host':
+        elif showwhat == "host":
             self.show_host()
-        elif showwhat.startswith('session'):
-            session_id = parsed.get_binding('sessionid').lower()
+        elif showwhat.startswith("session"):
+            session_id = parsed.get_binding("sessionid").lower()
             self.show_session(UUID(session_id))
         else:
-            self.printerr('Wait, how do I show %r?' % (showwhat,))
+            self.printerr("Wait, how do I show %r?" % (showwhat,))
 
     def do_source(self, parsed):
         """
@@ -1755,37 +1999,46 @@ class Shell(cmd.Cmd):
         """
 
         if self.no_file_io:
-            self.printerr('No file I/O permitted')
+            self.printerr("No file I/O permitted")
             return
 
-        fname = parsed.get_binding('fname')
+        fname = parsed.get_binding("fname")
         fname = os.path.expanduser(self.cql_unprotect_value(fname))
         try:
             encoding, bom_size = get_file_encoding_bomsize(fname)
-            f = codecs.open(fname, 'r', encoding)
+            f = codecs.open(fname, "r", encoding)
             f.seek(bom_size)
         except IOError as e:
-            self.printerr('Could not open %r: %s' % (fname, e))
+            self.printerr("Could not open %r: %s" % (fname, e))
             return
-        subshell = Shell(self.hostname, self.port, color=self.color,
-                         username=self.username,
-                         encoding=self.encoding, stdin=f, tty=False, use_conn=self.conn,
-                         cqlver=self.cql_version, keyspace=self.current_keyspace,
-                         consistency_level=self.consistency_level,
-                         serial_consistency_level=self.serial_consistency_level,
-                         tracing_style=self.tracing_style,
-                         display_nanotime_format=self.display_nanotime_format,
-                         display_timestamp_format=self.display_timestamp_format,
-                         display_date_format=self.display_date_format,
-                         display_float_precision=self.display_float_precision,
-                         display_double_precision=self.display_double_precision,
-                         display_timezone=self.display_timezone,
-                         max_trace_wait=self.max_trace_wait, ssl=self.ssl,
-                         request_timeout=self.session.default_timeout,
-                         connect_timeout=self.conn.connect_timeout,
-                         no_file_io=self.no_file_io,
-                         is_subshell=True,
-                         auth_provider=self.auth_provider)
+        subshell = Shell(
+            self.hostname,
+            self.port,
+            color=self.color,
+            username=self.username,
+            encoding=self.encoding,
+            stdin=f,
+            tty=False,
+            use_conn=self.conn,
+            cqlver=self.cql_version,
+            keyspace=self.current_keyspace,
+            consistency_level=self.consistency_level,
+            serial_consistency_level=self.serial_consistency_level,
+            tracing_style=self.tracing_style,
+            display_nanotime_format=self.display_nanotime_format,
+            display_timestamp_format=self.display_timestamp_format,
+            display_date_format=self.display_date_format,
+            display_float_precision=self.display_float_precision,
+            display_double_precision=self.display_double_precision,
+            display_timezone=self.display_timezone,
+            max_trace_wait=self.max_trace_wait,
+            ssl=self.ssl,
+            request_timeout=self.session.default_timeout,
+            connect_timeout=self.conn.connect_timeout,
+            no_file_io=self.no_file_io,
+            is_subshell=True,
+            auth_provider=self.auth_provider,
+        )
         # duplicate coverage related settings in subshell
         if self.coverage:
             subshell.coverage = True
@@ -1822,10 +2075,10 @@ class Shell(cmd.Cmd):
         """
 
         if self.no_file_io:
-            self.printerr('No file I/O permitted')
+            self.printerr("No file I/O permitted")
             return
 
-        fname = parsed.get_binding('fname')
+        fname = parsed.get_binding("fname")
         if fname is None:
             if self.shunted_query_out is not None:
                 print("Currently capturing query output to %r." % (self.query_out.name,))
@@ -1833,9 +2086,9 @@ class Shell(cmd.Cmd):
                 print("Currently not capturing query output.")
             return
 
-        if fname.upper() == 'OFF':
+        if fname.upper() == "OFF":
             if self.shunted_query_out is None:
-                self.printerr('Not currently capturing output.')
+                self.printerr("Not currently capturing output.")
                 return
             self.query_out.close()
             self.query_out = self.shunted_query_out
@@ -1845,21 +2098,23 @@ class Shell(cmd.Cmd):
             return
 
         if self.shunted_query_out is not None:
-            self.printerr('Already capturing output to %s. Use CAPTURE OFF'
-                          ' to disable.' % (self.query_out.name,))
+            self.printerr(
+                "Already capturing output to %s. Use CAPTURE OFF"
+                " to disable." % (self.query_out.name,)
+            )
             return
 
         fname = os.path.expanduser(self.cql_unprotect_value(fname))
         try:
-            f = open(fname, 'a')
+            f = open(fname, "a")
         except IOError as e:
-            self.printerr('Could not open %r for append: %s' % (fname, e))
+            self.printerr("Could not open %r for append: %s" % (fname, e))
             return
         self.shunted_query_out = self.query_out
         self.shunted_color = self.color
         self.query_out = f
         self.color = False
-        print('Now capturing query output to %r.' % (fname,))
+        print("Now capturing query output to %r." % (fname,))
 
     def do_tracing(self, parsed):
         """
@@ -1883,17 +2138,18 @@ class Shell(cmd.Cmd):
 
           TRACING with no arguments shows the current tracing status.
         """
-        switch = parsed.get_binding('switch')
+        switch = parsed.get_binding("switch")
         if switch is None:
-            print(f"Tracing is currently set to {self.tracing_style.upper()}. Use TRACING [OFF|FULL|COMPACT] to change.")
+            print(
+                f"Tracing is currently set to {self.tracing_style.upper()}. Use TRACING [OFF|FULL|COMPACT] to change."
+            )
             return
 
         switch = switch.upper()
-        if switch in ['ON', 'OFF', 'FULL', 'COMPACT']:
-            self.tracing_style = {'ON': 'full',
-                                    'FULL': 'full',
-                                    'OFF': 'off',
-                                    'COMPACT': 'compact'}[switch]
+        if switch in ["ON", "OFF", "FULL", "COMPACT"]:
+            self.tracing_style = {"ON": "full", "FULL": "full", "OFF": "off", "COMPACT": "compact"}[
+                switch
+            ]
             print(f"Tracing set to {self.tracing_style.upper()}.")
         else:
             self.printerr(f"Invalid tracing option: {switch}. Use TRACING [OFF|FULL|COMPACT].")
@@ -1916,7 +2172,9 @@ class Shell(cmd.Cmd):
 
           EXPAND with no arguments shows the current value of expand setting.
         """
-        self.expand_enabled = SwitchCommand("EXPAND", "Expanded output").execute(self.expand_enabled, parsed, self.printerr)
+        self.expand_enabled = SwitchCommand("EXPAND", "Expanded output").execute(
+            self.expand_enabled, parsed, self.printerr
+        )
 
     def do_consistency(self, parsed):
         """
@@ -1938,13 +2196,16 @@ class Shell(cmd.Cmd):
 
            CONSISTENCY with no arguments shows the current consistency level.
         """
-        level = parsed.get_binding('level')
+        level = parsed.get_binding("level")
         if level is None:
-            print('Current consistency level is %s.' % (cassandra.ConsistencyLevel.value_to_name[self.consistency_level]))
+            print(
+                "Current consistency level is %s."
+                % (cassandra.ConsistencyLevel.value_to_name[self.consistency_level])
+            )
             return
 
         self.consistency_level = cassandra.ConsistencyLevel.name_to_value[level.upper()]
-        print('Consistency level set to %s.' % (level.upper(),))
+        print("Consistency level set to %s." % (level.upper(),))
 
     def do_serial(self, parsed):
         """
@@ -1964,13 +2225,16 @@ class Shell(cmd.Cmd):
 
            SERIAL CONSISTENCY with no arguments shows the current consistency level.
         """
-        level = parsed.get_binding('level')
+        level = parsed.get_binding("level")
         if level is None:
-            print('Current serial consistency level is %s.' % (cassandra.ConsistencyLevel.value_to_name[self.serial_consistency_level]))
+            print(
+                "Current serial consistency level is %s."
+                % (cassandra.ConsistencyLevel.value_to_name[self.serial_consistency_level])
+            )
             return
 
         self.serial_consistency_level = cassandra.ConsistencyLevel.name_to_value[level.upper()]
-        print('Serial consistency level set to %s.' % (level.upper(),))
+        print("Serial consistency level set to %s." % (level.upper(),))
 
     def do_login(self, parsed):
         """
@@ -1984,8 +2248,8 @@ class Shell(cmd.Cmd):
            If password is specified it should be wrapped with single quotes.
            If not specified you will be prompted to enter.
         """
-        username = parsed.get_binding('username')
-        password = parsed.get_binding('password')
+        username = parsed.get_binding("username")
+        password = parsed.get_binding("password")
         if password is None:
             password = getpass.getpass()
         else:
@@ -2002,7 +2266,8 @@ class Shell(cmd.Cmd):
             ssl_options=self.conn.ssl_options,
             control_connection_timeout=self.conn.connect_timeout,
             connect_timeout=self.conn.connect_timeout,
-            secure_connect_bundle=self.secure_connect_bundle)
+            secure_connect_bundle=self.secure_connect_bundle,
+        )
 
         if self.current_keyspace:
             session = conn.connect(self.current_keyspace)
@@ -2031,6 +2296,7 @@ class Shell(cmd.Cmd):
         self.stop = True
         if self.owns_connection:
             self.conn.shutdown()
+
     do_quit = do_exit
 
     def do_clear(self, parsed):
@@ -2040,21 +2306,25 @@ class Shell(cmd.Cmd):
         Clears the console.
         """
         import subprocess
-        subprocess.call(['clear', 'cls'][is_win], shell=True)
+
+        subprocess.call(["clear", "cls"][is_win], shell=True)
+
     do_cls = do_clear
 
     def do_debug(self, parsed):
-
         if self.no_file_io:
-            self.printerr('No file I/O permitted')
+            self.printerr("No file I/O permitted")
             return
 
         import pdb
+
         pdb.set_trace()
 
     def get_help_topics(self):
-        topics = [t[3:] for t in dir(self) if t.startswith('do_') and getattr(self, t, None).__doc__]
-        for hide_from_help in ('quit',):
+        topics = [
+            t[3:] for t in dir(self) if t.startswith("do_") and getattr(self, t, None).__doc__
+        ]
+        for hide_from_help in ("quit",):
             topics.remove(hide_from_help)
         return topics
 
@@ -2069,7 +2339,7 @@ class Shell(cmd.Cmd):
         enter "HELP" without any arguments. To see help on a topic,
         use "HELP <topic>".
         """
-        topics = parsed.get_binding('topic', ())
+        topics = parsed.get_binding("topic", ())
         if not topics:
             shell_topics = [t.upper() for t in self.get_help_topics()]
             self.print_topics("\nDocumented shell commands:", shell_topics, 15, 80)
@@ -2078,7 +2348,7 @@ class Shell(cmd.Cmd):
             return
         for t in topics:
             if t.lower() in self.get_help_topics():
-                doc = getattr(self, 'do_' + t.lower()).__doc__
+                doc = getattr(self, "do_" + t.lower()).__doc__
                 self.stdout.write(doc + "\n")
             elif t.lower() in cqldocs.get_help_topics():
                 urlpart = cqldocs.get_help_topic(t)
@@ -2089,7 +2359,10 @@ class Shell(cmd.Cmd):
                     else:
                         opened = webbrowser.open_new_tab(url)
                     if not opened:
-                        self.printerr("*** No browser to display CQL help. URL for help topic %s : %s" % (t, url))
+                        self.printerr(
+                            "*** No browser to display CQL help. URL for help topic %s : %s"
+                            % (t, url)
+                        )
             else:
                 self.printerr("*** No help on %s" % (t,))
 
@@ -2129,7 +2402,8 @@ class Shell(cmd.Cmd):
           PAGING with no arguments shows the current query paging status.
         """
         (self.use_paging, requested_page_size) = SwitchCommandWithValue(
-            "PAGING", "Query paging", value_type=int).execute(self.use_paging, parsed, self.printerr)
+            "PAGING", "Query paging", value_type=int
+        ).execute(self.use_paging, parsed, self.printerr)
         if self.use_paging and requested_page_size is not None:
             self.page_size = requested_page_size
         if self.use_paging:
@@ -2150,7 +2424,7 @@ class Shell(cmd.Cmd):
         if not isinstance(text, six.text_type):
             text = "{}".format(text)
 
-        to_write = self.applycolor(text, color) + ('\n' if newline else '')
+        to_write = self.applycolor(text, color) + ("\n" if newline else "")
         to_write = ensure_str(to_write)
         out.write(to_write)
 
@@ -2162,7 +2436,7 @@ class Shell(cmd.Cmd):
         if shownum is None:
             shownum = self.show_line_nums
         if shownum:
-            text = '%s:%d:%s' % (self.stdin.name, self.lineno, text)
+            text = "%s:%d:%s" % (self.stdin.name, self.lineno, text)
         self.writeresult(text, color, newline=newline, out=sys.stderr)
 
     def stop_coverage(self):
@@ -2181,29 +2455,35 @@ class SwitchCommand(object):
         self.description = desc
 
     def execute(self, state, parsed, printerr):
-        switch = parsed.get_binding('switch')
+        switch = parsed.get_binding("switch")
         if switch is None:
             if state:
-                print("%s is currently enabled. Use %s OFF to disable"
-                      % (self.description, self.command))
+                print(
+                    "%s is currently enabled. Use %s OFF to disable"
+                    % (self.description, self.command)
+                )
             else:
-                print("%s is currently disabled. Use %s ON to enable."
-                      % (self.description, self.command))
+                print(
+                    "%s is currently disabled. Use %s ON to enable."
+                    % (self.description, self.command)
+                )
             return state
 
-        if switch.upper() == 'ON':
+        if switch.upper() == "ON":
             if state:
-                printerr('%s is already enabled. Use %s OFF to disable.'
-                         % (self.description, self.command))
+                printerr(
+                    "%s is already enabled. Use %s OFF to disable."
+                    % (self.description, self.command)
+                )
                 return state
-            print('Now %s is enabled' % (self.description,))
+            print("Now %s is enabled" % (self.description,))
             return True
 
-        if switch.upper() == 'OFF':
+        if switch.upper() == "OFF":
             if not state:
-                printerr('%s is not enabled.' % (self.description,))
+                printerr("%s is not enabled." % (self.description,))
                 return state
-            print('Disabled %s.' % (self.description,))
+            print("Disabled %s." % (self.description,))
             return False
 
 
@@ -2217,13 +2497,14 @@ class SwitchCommandWithValue(SwitchCommand):
 
     The value_type must match for the PASSED_VALUE, otherwise it will return None.
     """
+
     def __init__(self, command, desc, value_type=int):
         SwitchCommand.__init__(self, command, desc)
         self.value_type = value_type
 
     def execute(self, state, parsed, printerr):
         binary_switch_value = SwitchCommand.execute(self, state, parsed, printerr)
-        switch = parsed.get_binding('switch')
+        switch = parsed.get_binding("switch")
         try:
             value = self.value_type(switch)
             binary_switch_value = True
@@ -2253,11 +2534,12 @@ def raw_option_with_default(configs, section, option, default=None):
 def should_use_color():
     if not sys.stdout.isatty():
         return False
-    if os.environ.get('TERM', '') in ('dumb', ''):
+    if os.environ.get("TERM", "") in ("dumb", ""):
         return False
     try:
         import subprocess
-        p = subprocess.Popen(['tput', 'colors'], stdout=subprocess.PIPE)
+
+        p = subprocess.Popen(["tput", "colors"], stdout=subprocess.PIPE)
         stdout, _ = p.communicate()
         if int(stdout.strip()) < 8:
             return False
@@ -2269,69 +2551,103 @@ def should_use_color():
 
 
 def read_options(cmdlineargs, environment):
-    configs = configparser.SafeConfigParser() if sys.version_info < (3, 2) else configparser.ConfigParser()
+    configs = (
+        configparser.SafeConfigParser()
+        if sys.version_info < (3, 2)
+        else configparser.ConfigParser()
+    )
     configs.read(CONFIG_FILE)
 
     rawconfigs = configparser.RawConfigParser()
     rawconfigs.read(CONFIG_FILE)
 
-    username_from_cqlshrc = option_with_default(configs.get, 'authentication', 'username')
-    password_from_cqlshrc = option_with_default(rawconfigs.get, 'authentication', 'password')
+    username_from_cqlshrc = option_with_default(configs.get, "authentication", "username")
+    password_from_cqlshrc = option_with_default(rawconfigs.get, "authentication", "password")
     if username_from_cqlshrc or password_from_cqlshrc:
         if password_from_cqlshrc and not is_file_secure(os.path.expanduser(CONFIG_FILE)):
-            print("\nWarning: Password is found in an insecure cqlshrc file. The file is owned or readable by other users on the system.",
-                  end='', file=sys.stderr)
-        print("\nNotice: Credentials in the cqlshrc file is deprecated and will be ignored in the future."
-              "\nPlease use a credentials file to specify the username and password.\n", file=sys.stderr)
+            print(
+                "\nWarning: Password is found in an insecure cqlshrc file. The file is owned or readable by other users on the system.",
+                end="",
+                file=sys.stderr,
+            )
+        print(
+            "\nNotice: Credentials in the cqlshrc file is deprecated and will be ignored in the future."
+            "\nPlease use a credentials file to specify the username and password.\n",
+            file=sys.stderr,
+        )
 
     argvalues = argparse.Namespace()
 
     argvalues.username = None
     argvalues.password = None
-    argvalues.credentials = os.path.expanduser(option_with_default(configs.get, 'authentication', 'credentials',
-                                                                   os.path.join(CQL_DIR, 'credentials')))
-    argvalues.keyspace = option_with_default(configs.get, 'authentication', 'keyspace')
-    argvalues.secure_connect_bundle = option_with_default(configs.get, 'connection', 'secure_connect_bundle')
-    argvalues.browser = option_with_default(configs.get, 'ui', 'browser', None)
-    argvalues.completekey = option_with_default(configs.get, 'ui', 'completekey',
-                                                DEFAULT_COMPLETEKEY)
-    argvalues.color = option_with_default(configs.getboolean, 'ui', 'color')
-    argvalues.time_format = raw_option_with_default(configs, 'ui', 'time_format',
-                                                    DEFAULT_TIMESTAMP_FORMAT)
-    argvalues.nanotime_format = raw_option_with_default(configs, 'ui', 'nanotime_format',
-                                                        DEFAULT_NANOTIME_FORMAT)
-    argvalues.date_format = raw_option_with_default(configs, 'ui', 'date_format',
-                                                    DEFAULT_DATE_FORMAT)
-    argvalues.float_precision = option_with_default(configs.getint, 'ui', 'float_precision',
-                                                    DEFAULT_FLOAT_PRECISION)
-    argvalues.double_precision = option_with_default(configs.getint, 'ui', 'double_precision',
-                                                     DEFAULT_DOUBLE_PRECISION)
-    argvalues.field_size_limit = option_with_default(configs.getint, 'csv', 'field_size_limit', csv.field_size_limit())
-    argvalues.max_trace_wait = option_with_default(configs.getfloat, 'tracing', 'max_trace_wait',
-                                                   DEFAULT_MAX_TRACE_WAIT)
-    argvalues.timezone = option_with_default(configs.get, 'ui', 'timezone', None)
+    argvalues.credentials = os.path.expanduser(
+        option_with_default(
+            configs.get, "authentication", "credentials", os.path.join(CQL_DIR, "credentials")
+        )
+    )
+    argvalues.keyspace = option_with_default(configs.get, "authentication", "keyspace")
+    argvalues.secure_connect_bundle = option_with_default(
+        configs.get, "connection", "secure_connect_bundle"
+    )
+    argvalues.browser = option_with_default(configs.get, "ui", "browser", None)
+    argvalues.completekey = option_with_default(
+        configs.get, "ui", "completekey", DEFAULT_COMPLETEKEY
+    )
+    argvalues.color = option_with_default(configs.getboolean, "ui", "color")
+    argvalues.time_format = raw_option_with_default(
+        configs, "ui", "time_format", DEFAULT_TIMESTAMP_FORMAT
+    )
+    argvalues.nanotime_format = raw_option_with_default(
+        configs, "ui", "nanotime_format", DEFAULT_NANOTIME_FORMAT
+    )
+    argvalues.date_format = raw_option_with_default(
+        configs, "ui", "date_format", DEFAULT_DATE_FORMAT
+    )
+    argvalues.float_precision = option_with_default(
+        configs.getint, "ui", "float_precision", DEFAULT_FLOAT_PRECISION
+    )
+    argvalues.double_precision = option_with_default(
+        configs.getint, "ui", "double_precision", DEFAULT_DOUBLE_PRECISION
+    )
+    argvalues.field_size_limit = option_with_default(
+        configs.getint, "csv", "field_size_limit", csv.field_size_limit()
+    )
+    argvalues.max_trace_wait = option_with_default(
+        configs.getfloat, "tracing", "max_trace_wait", DEFAULT_MAX_TRACE_WAIT
+    )
+    argvalues.timezone = option_with_default(configs.get, "ui", "timezone", None)
 
     argvalues.debug = False
 
     argvalues.coverage = False
-    if 'CQLSH_COVERAGE' in environment.keys():
+    if "CQLSH_COVERAGE" in environment.keys():
         argvalues.coverage = True
 
     argvalues.file = None
-    argvalues.ssl = option_with_default(configs.getboolean, 'connection', 'ssl', DEFAULT_SSL)
-    argvalues.encoding = option_with_default(configs.get, 'ui', 'encoding', UTF8)
+    argvalues.ssl = option_with_default(configs.getboolean, "connection", "ssl", DEFAULT_SSL)
+    argvalues.encoding = option_with_default(configs.get, "ui", "encoding", UTF8)
 
-    argvalues.consistency_level = option_with_default(configs.get, 'cql', 'consistency_level', None)
-    argvalues.serial_consistency_level = option_with_default(configs.get, 'cql', 'serial_consistency_level', 'SERIAL')
+    argvalues.consistency_level = option_with_default(configs.get, "cql", "consistency_level", None)
+    argvalues.serial_consistency_level = option_with_default(
+        configs.get, "cql", "serial_consistency_level", "SERIAL"
+    )
 
-    argvalues.tty = option_with_default(configs.getboolean, 'ui', 'tty', sys.stdin.isatty())
-    argvalues.protocol_version = option_with_default(configs.getint, 'protocol', 'version', None)
-    argvalues.cqlversion = option_with_default(configs.get, 'cql', 'version', None)
-    argvalues.connect_timeout = option_with_default(configs.getint, 'connection', 'timeout', DEFAULT_CONNECT_TIMEOUT_SECONDS)
-    argvalues.request_timeout = option_with_default(configs.getint, 'connection', 'request_timeout', DEFAULT_REQUEST_TIMEOUT_SECONDS)
+    argvalues.tty = option_with_default(configs.getboolean, "ui", "tty", sys.stdin.isatty())
+    argvalues.protocol_version = option_with_default(configs.getint, "protocol", "version", None)
+    argvalues.cqlversion = option_with_default(configs.get, "cql", "version", None)
+    argvalues.connect_timeout = option_with_default(
+        configs.getint, "connection", "timeout", DEFAULT_CONNECT_TIMEOUT_SECONDS
+    )
+    argvalues.request_timeout = option_with_default(
+        configs.getint, "connection", "request_timeout", DEFAULT_REQUEST_TIMEOUT_SECONDS
+    )
     argvalues.execute = None
-    argvalues.no_file_io = option_with_default(configs.getboolean, 'ui', 'no_file_io', DEFAULT_NO_FILE_IO)
-    argvalues.disable_history = option_with_default(configs.getboolean, 'history', 'disabled', False)
+    argvalues.no_file_io = option_with_default(
+        configs.getboolean, "ui", "no_file_io", DEFAULT_NO_FILE_IO
+    )
+    argvalues.disable_history = option_with_default(
+        configs.getboolean, "history", "disabled", False
+    )
 
     options, arguments = parser.parse_known_args(cmdlineargs, argvalues)
 
@@ -2343,15 +2659,17 @@ def read_options(cmdlineargs, environment):
     options.credentials = os.path.expanduser(options.credentials)
 
     if not is_file_secure(options.credentials):
-        print("\nWarning: Credentials file '{0}' exists but is not used, because:"
-              "\n  a. the file owner is not the current user; or"
-              "\n  b. the file is readable by group or other."
-              "\nPlease ensure the file is owned by the current user and is not readable by group or other."
-              "\nOn a Linux or UNIX-like system, you often can do this by using the `chown` and `chmod` commands:"
-              "\n  chown YOUR_USERNAME credentials"
-              "\n  chmod 600 credentials\n".format(options.credentials),
-              file=sys.stderr)
-        options.credentials = ''  # ConfigParser.read() will ignore unreadable files
+        print(
+            "\nWarning: Credentials file '{0}' exists but is not used, because:"
+            "\n  a. the file owner is not the current user; or"
+            "\n  b. the file is readable by group or other."
+            "\nPlease ensure the file is owned by the current user and is not readable by group or other."
+            "\nOn a Linux or UNIX-like system, you often can do this by using the `chown` and `chmod` commands:"
+            "\n  chown YOUR_USERNAME credentials"
+            "\n  chmod 600 credentials\n".format(options.credentials),
+            file=sys.stderr,
+        )
+        options.credentials = ""  # ConfigParser.read() will ignore unreadable files
 
     if not options.username:
         credentials = configparser.ConfigParser()
@@ -2365,11 +2683,16 @@ def read_options(cmdlineargs, environment):
         rawcredentials.read(options.credentials)
 
         # handling password in the same way as username, priority cli > credentials > cqlshrc
-        options.password = option_with_default(rawcredentials.get, 'plain_text_auth', 'password', password_from_cqlshrc)
+        options.password = option_with_default(
+            rawcredentials.get, "plain_text_auth", "password", password_from_cqlshrc
+        )
         options.password = password_from_cqlshrc
     elif not options.insecure_password_without_warning:
-        print("\nWarning: Using a password on the command line interface can be insecure."
-              "\nRecommendation: use the credentials file to securely provide the password.\n", file=sys.stderr)
+        print(
+            "\nWarning: Using a password on the command line interface can be insecure."
+            "\nRecommendation: use the credentials file to securely provide the password.\n",
+            file=sys.stderr,
+        )
 
     # Make sure some user values read from the command line are in unicode
     options.execute = maybe_ensure_text(options.execute)
@@ -2380,7 +2703,7 @@ def read_options(cmdlineargs, environment):
     serial_levels = [cassandra.ConsistencyLevel.SERIAL, cassandra.ConsistencyLevel.LOCAL_SERIAL]
 
     # If unspecified, set the proper defaut CL
-    default_cl = 'LOCAL_QUORUM' if options.secure_connect_bundle else 'ONE'
+    default_cl = "LOCAL_QUORUM" if options.secure_connect_bundle else "ONE"
     if options.consistency_level is None:
         options.consistency_level = default_cl
 
@@ -2398,10 +2721,12 @@ def read_options(cmdlineargs, environment):
             raise KeyError
         options.serial_consistency_level = cl
     except KeyError:
-        parser.error('"{}" is not a valid serial consistency level'.format(options.serial_consistency_level))
+        parser.error(
+            '"{}" is not a valid serial consistency level'.format(options.serial_consistency_level)
+        )
 
-    hostname = option_with_default(configs.get, 'connection', 'hostname', DEFAULT_HOST)
-    port = option_with_default(configs.get, 'connection', 'port', DEFAULT_PORT)
+    hostname = option_with_default(configs.get, "connection", "hostname", DEFAULT_HOST)
+    port = option_with_default(configs.get, "connection", "port", DEFAULT_PORT)
 
     try:
         options.connect_timeout = int(options.connect_timeout)
@@ -2415,8 +2740,8 @@ def read_options(cmdlineargs, environment):
         parser.error('"%s" is not a valid request timeout.' % (options.request_timeout,))
         options.request_timeout = DEFAULT_REQUEST_TIMEOUT_SECONDS
 
-    hostname = environment.get('CQLSH_HOST', hostname)
-    port = environment.get('CQLSH_PORT', port)
+    hostname = environment.get("CQLSH_HOST", hostname)
+    port = environment.get("CQLSH_PORT", port)
 
     if len(arguments) > 0:
         hostname = arguments[0]
@@ -2426,8 +2751,8 @@ def read_options(cmdlineargs, environment):
     if options.file or options.execute:
         options.tty = False
 
-    if options.execute and not options.execute.endswith(';'):
-        options.execute += ';'
+    if options.execute and not options.execute.endswith(";"):
+        options.execute += ";"
 
     if argvalues.color in (True, False):
         options.color = argvalues.color
@@ -2440,13 +2765,13 @@ def read_options(cmdlineargs, environment):
     if options.cqlversion is not None:
         options.cqlversion, cqlvertup = full_cql_version(options.cqlversion)
         if cqlvertup[0] < 3:
-            parser.error('%r is not a supported CQL version.' % options.cqlversion)
+            parser.error("%r is not a supported CQL version." % options.cqlversion)
     options.cqlmodule = cql3handling
 
     try:
         port = int(port)
     except ValueError:
-        parser.error('%r is not a valid port number.' % port)
+        parser.error("%r is not a valid port number." % port)
     return options, hostname, port
 
 
@@ -2472,7 +2797,7 @@ def init_history():
             pass
         delims = readline.get_completer_delims()
         delims.replace("'", "")
-        delims += '.'
+        delims += "."
         readline.set_completer_delims(delims)
 
 
@@ -2495,7 +2820,7 @@ def main(options, hostname, port):
     else:
         try:
             encoding, bom_size = get_file_encoding_bomsize(options.file)
-            stdin = codecs.open(options.file, 'r', encoding)
+            stdin = codecs.open(options.file, "r", encoding)
             stdin.seek(bom_size)
         except IOError as e:
             sys.exit("Can't open %r: %s" % (options.file, e))
@@ -2503,84 +2828,102 @@ def main(options, hostname, port):
     if options.debug:
         sys.stderr.write("Using CQL driver: %s\n" % (cassandra,))
         sys.stderr.write("Using connect timeout: %s seconds\n" % (options.connect_timeout,))
-        sys.stderr.write("Using consistency level: %s\n" % (cassandra.ConsistencyLevel.value_to_name[options.consistency_level],))
+        sys.stderr.write(
+            "Using consistency level: %s\n"
+            % (cassandra.ConsistencyLevel.value_to_name[options.consistency_level],)
+        )
         sys.stderr.write("Using '%s' encoding\n" % (options.encoding,))
         sys.stderr.write("Using ssl: %s\n" % (options.ssl,))
         if options.secure_connect_bundle:
-            sys.stderr.write("Using secure connect bundle: %s\n" % (options.secure_connect_bundle, ))
+            sys.stderr.write("Using secure connect bundle: %s\n" % (options.secure_connect_bundle,))
 
     # create timezone based on settings, environment or auto-detection
     timezone = None
-    if options.timezone or 'TZ' in os.environ:
+    if options.timezone or "TZ" in os.environ:
         try:
             import pytz
+
             if options.timezone:
                 try:
                     timezone = pytz.timezone(options.timezone)
                 except Exception:
-                    sys.stderr.write("Warning: could not recognize timezone '%s' specified in cqlshrc\n\n" % (options.timezone))
-            if 'TZ' in os.environ:
+                    sys.stderr.write(
+                        "Warning: could not recognize timezone '%s' specified in cqlshrc\n\n"
+                        % (options.timezone)
+                    )
+            if "TZ" in os.environ:
                 try:
-                    timezone = pytz.timezone(os.environ['TZ'])
+                    timezone = pytz.timezone(os.environ["TZ"])
                 except Exception:
-                    sys.stderr.write("Warning: could not recognize timezone '%s' from environment value TZ\n\n" % (os.environ['TZ']))
+                    sys.stderr.write(
+                        "Warning: could not recognize timezone '%s' from environment value TZ\n\n"
+                        % (os.environ["TZ"])
+                    )
         except ImportError:
-            sys.stderr.write("Warning: Timezone defined and 'pytz' module for timezone conversion not installed. Timestamps will be displayed in UTC timezone.\n\n")
+            sys.stderr.write(
+                "Warning: Timezone defined and 'pytz' module for timezone conversion not installed. Timestamps will be displayed in UTC timezone.\n\n"
+            )
 
     # try auto-detect timezone if tzlocal is installed
     if not timezone:
         try:
             from tzlocal import get_localzone
+
             timezone = get_localzone()
         except ImportError:
             # we silently ignore and fallback to UTC unless a custom timestamp format (which likely
             # does contain a TZ part) was specified
             if options.time_format != DEFAULT_TIMESTAMP_FORMAT:
-                sys.stderr.write("Warning: custom timestamp format specified in cqlshrc, "
-                                 + "but local timezone could not be detected.\n"
-                                 + "Either install Python 'tzlocal' module for auto-detection "
-                                 + "or specify client timezone in your cqlshrc.\n\n")
+                sys.stderr.write(
+                    "Warning: custom timestamp format specified in cqlshrc, "
+                    + "but local timezone could not be detected.\n"
+                    + "Either install Python 'tzlocal' module for auto-detection "
+                    + "or specify client timezone in your cqlshrc.\n\n"
+                )
 
     try:
-        shell = Shell(hostname,
-                      port,
-                      color=options.color,
-                      username=options.username,
-                      stdin=stdin,
-                      tty=options.tty,
-                      completekey=options.completekey,
-                      browser=options.browser,
-                      debug=options.debug,
-                      protocol_version=options.protocol_version,
-                      cqlver=options.cqlversion,
-                      keyspace=options.keyspace,
-                      secure_connect_bundle=options.secure_connect_bundle,
-                      consistency_level=options.consistency_level,
-                      serial_consistency_level=options.serial_consistency_level,
-                      display_timestamp_format=options.time_format,
-                      display_nanotime_format=options.nanotime_format,
-                      display_date_format=options.date_format,
-                      display_float_precision=options.float_precision,
-                      display_double_precision=options.double_precision,
-                      display_timezone=timezone,
-                      max_trace_wait=options.max_trace_wait,
-                      ssl=options.ssl,
-                      single_statement=options.execute,
-                      request_timeout=options.request_timeout,
-                      connect_timeout=options.connect_timeout,
-                      no_file_io=options.no_file_io,
-                      encoding=options.encoding,
-                      auth_provider=authproviderhandling.load_auth_provider(
-                          config_file=CONFIG_FILE,
-                          cred_file=options.credentials,
-                          username=options.username,
-                          password=options.password))
+        shell = Shell(
+            hostname,
+            port,
+            color=options.color,
+            username=options.username,
+            stdin=stdin,
+            tty=options.tty,
+            completekey=options.completekey,
+            browser=options.browser,
+            debug=options.debug,
+            protocol_version=options.protocol_version,
+            cqlver=options.cqlversion,
+            keyspace=options.keyspace,
+            secure_connect_bundle=options.secure_connect_bundle,
+            consistency_level=options.consistency_level,
+            serial_consistency_level=options.serial_consistency_level,
+            display_timestamp_format=options.time_format,
+            display_nanotime_format=options.nanotime_format,
+            display_date_format=options.date_format,
+            display_float_precision=options.float_precision,
+            display_double_precision=options.double_precision,
+            display_timezone=timezone,
+            max_trace_wait=options.max_trace_wait,
+            ssl=options.ssl,
+            single_statement=options.execute,
+            request_timeout=options.request_timeout,
+            connect_timeout=options.connect_timeout,
+            no_file_io=options.no_file_io,
+            encoding=options.encoding,
+            auth_provider=authproviderhandling.load_auth_provider(
+                config_file=CONFIG_FILE,
+                cred_file=options.credentials,
+                username=options.username,
+                password=options.password,
+            ),
+        )
     except KeyboardInterrupt:
-        sys.exit('Connection aborted.')
+        sys.exit("Connection aborted.")
     except CQL_ERRORS as e:
-        sys.exit('Connection error: %s' % (e,))
+        sys.exit("Connection error: %s" % (e,))
     except VersionNotSupported as e:
-        sys.exit('Unsupported CQL version: %s' % (e,))
+        sys.exit("Unsupported CQL version: %s" % (e,))
     if options.coverage:
         shell.coverage = True
         import signal
@@ -2602,7 +2945,7 @@ def main(options, hostname, port):
 # on Windows then the module name is not __main__, see CASSANDRA-9304
 insert_driver_hooks()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(*read_options(sys.argv[1:], os.environ))
 
 # vim: set ft=python et ts=4 sw=4 :

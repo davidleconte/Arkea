@@ -21,6 +21,7 @@ Ce document consolide les concepts clés de la documentation officielle IBM/Data
 **Hyper-Converged Database (HCD)** est une base de données auto-gérée construite sur **Apache Cassandra®**, une base de données NoSQL distribuée open-source. HCD permet de gérer l'infrastructure hyper-convergée (HCI) dans une plateforme unifiée pour les charges de travail de données, IA et analytiques.
 
 **Caractéristiques principales** :
+
 - **Self-managed** : Gestion autonome de la base de données
 - **Built on Cassandra** : Basé sur Apache Cassandra
 - **HCI support** : Support de l'infrastructure hyper-convergée
@@ -33,6 +34,7 @@ Ce document consolide les concepts clés de la documentation officielle IBM/Data
 ### Cas d'Usage
 
 **Vector search applications** :
+
 - Generative AI (GenAI)
 - Semantic search
 - Geospatial search
@@ -43,6 +45,7 @@ Ce document consolide les concepts clés de la documentation officielle IBM/Data
 - Personalization
 
 **Schema-driven applications** :
+
 - E-commerce
 - Financial services
 - IoT
@@ -57,6 +60,7 @@ Ce document consolide les concepts clés de la documentation officielle IBM/Data
 **Storage-Attached Indexing (SAI)** est un moteur d'indexation distribué profondément intégré à Cassandra/HCD qui offre des fonctionnalités d'indexation avancées.
 
 **Avantages** :
+
 - Indexation secondaire efficace
 - Recherche full-text avec analyseurs Lucene
 - Indexation vectorielle pour recherche par similarité
@@ -99,6 +103,7 @@ WITH OPTIONS = {
 HCD supporte les **analyseurs Lucene** pour la recherche full-text avec tokenisation, normalisation et stemming.
 
 **Fonctionnalités** :
+
 - Tokenisation standard
 - Filtres de langue (français, anglais, etc.)
 - Normalisation Unicode
@@ -147,6 +152,7 @@ WHERE code_si = '01' AND contrat = '12345'
 La **recherche vectorielle** permet de stocker et rechercher des **embeddings** (vecteurs numériques) pour la recherche par similarité sémantique.
 
 **Cas d'usage** :
+
 - RAG (Retrieval-Augmented Generation)
 - Semantic search
 - Similarity matching
@@ -199,6 +205,7 @@ HCD utilise **JVector** (Approximate Nearest Neighbor) basé sur **DiskANN** pou
 La **Data API** est une API moderne (REST/GraphQL) pour accéder à HCD sans nécessiter de driver binaire ou de connexion CQL directe. Elle s'appuie sur **Stargate**.
 
 **Avantages** :
+
 - Accès HTTP/HTTPS simple
 - REST et GraphQL supportés
 - Authentification par token
@@ -274,6 +281,7 @@ cqlsh -f schema.cql localhost 9042
 **Référence complète** : [CQL Reference](https://docs.datastax.com/en/cql/hcd/index.html)
 
 **Concepts clés** :
+
 - Keyspaces (équivalent databases)
 - Tables avec Primary Key (partition + clustering)
 - Types de données (text, int, decimal, timestamp, blob, vector, etc.)
@@ -291,6 +299,7 @@ cqlsh -f schema.cql localhost 9042
 **Référence** : [Data Modeling Methodology](https://docs.datastax.com/en/cql/hcd/data-modeling/methodology.html)
 
 **Étapes** :
+
 1. **Conceptual Data Model** : Identifier les entités et relations
 2. **Application Workflow** : Définir les requêtes (queries)
 3. **Logical Data Model** : Créer les tables pour chaque query
@@ -303,6 +312,7 @@ cqlsh -f schema.cql localhost 9042
 **Référence** : [Data Modeling Best Practices](https://docs.datastax.com/en/cql/hcd/data-modeling/best-practices.html)
 
 **Règles importantes** :
+
 1. **Partition Key** : Choisir pour distribuer les données uniformément
 2. **Clustering Key** : Pour trier les données dans une partition
 3. **Éviter les partitions trop grandes** : Limiter à ~100 MB par partition
@@ -391,6 +401,7 @@ df.write
 **Mission Control** est un service cloud-based qui fournit une console de gestion unifiée pour les clusters HCD.
 
 **Fonctionnalités** :
+
 - Déploiement de clusters
 - Monitoring
 - Patching
@@ -416,6 +427,7 @@ df.write
 ### Concepts Clés pour le POC
 
 **Migration HBase → HCD** :
+
 - ✅ TTL natif (remplace TTL HBase)
 - ✅ SAI (remplace Solr/Elasticsearch)
 - ✅ Vector search (nouveau, pour IA)
@@ -424,12 +436,14 @@ df.write
 - ✅ Kafka Connector (ingestion temps réel)
 
 **Schémas de données** :
+
 - Partition key = distribution des données
 - Clustering key = tri dans la partition
 - SAI = indexation secondaire
 - TTL = purge automatique
 
 **Performance** :
+
 - Lectures par partition key = très rapides
 - SAI = recherche full-text native
 - Vector search = recherche sémantique
@@ -464,6 +478,7 @@ df.write
 ### 5. Migration des Données
 
 **Outils** :
+
 - Spark Cassandra Connector (ETL)
 - DSBulk (chargement massif)
 - Data API (petits volumes)
@@ -471,8 +486,3 @@ df.write
 ---
 
 **Document de référence créé pour le POC !** ✅
-
-
-
-
-

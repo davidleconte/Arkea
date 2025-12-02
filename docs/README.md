@@ -1,28 +1,51 @@
 # 📚 Documentation du POC - Migration HBase → HCD
 
-**Date de création** : 2025-11-25  
-**Organisation** : Fichiers triés du plus récent au plus ancien
+**Date de mise à jour** : 2025-12-02  
+**Organisation** : Fichiers triés du plus récent au plus ancien  
+**Statut** : ✅ Documentation à jour et portable cross-platform
+
+---
+
+## 🌍 Guides d'Installation Cross-Platform
+
+### Installation par OS
+
+- **GUIDE_INSTALLATION_HCD.md** ⭐ - Guide HCD (macOS, Linux, Windows WSL2)
+- **GUIDE_INSTALLATION_LINUX.md** ⭐ - Guide Linux complet
+- **GUIDE_INSTALLATION_WINDOWS.md** ⭐ - Guide Windows (WSL2)
+- **GUIDE_INSTALLATION_SPARK_KAFKA.md** - Guide Spark/Kafka (cross-platform)
+- **DEPLOYMENT.md** - Guide de déploiement complet
 
 ---
 
 ## 📋 Liste des Documents (du plus récent au plus ancien)
 
-1. **REFERENCE_HCD_DOCUMENTATION.md** - Référence complète de la documentation officielle IBM/DataStax HCD 1.2 (nouveau)
-2. **ANALYSE_PROPOSITION_IBM_MECE.md** - Analyse de la proposition MECE IBM pour la migration HBase → HCD
-2. **ANALYSE_INPUTS_CLIENTS_COMPLETE.md** - Analyse détaillée de tous les inputs clients
-3. **INDEX.md** - Index complet de la documentation
-4. **STRUCTURE_PROJET.md** - Structure complète du projet (la plus récente et complète)
-5. **ORGANISATION_FINALE.md** - Organisation finale du projet
-6. **ORGANISATION.md** - Organisation du projet
-7. **ORDRE_EXECUTION_SCRIPTS.md** - Guide d'ordre d'exécution des scripts
-8. **SCRIPTS_A_JOUR.md** - Documentation complète de tous les scripts disponibles
-9. **RESULTATS_TEST_KAFKA_HCD.md** - Résultats détaillés du test complet du pipeline Kafka → HCD
-10. **KAFKA_HCD_STREAMING_READY.md** - Guide complet pour utiliser le streaming Kafka → HCD
-11. **GUIDE_INSTALLATION_SPARK_KAFKA.md** - Guide détaillé d'installation de Spark, Kafka et spark-cassandra-connector
-12. **ARCHITECTURE_POC_COMPLETE.md** - Architecture complète du POC (composants, flux de données, schémas)
-13. **GUIDE_INSTALLATION_HCD_MAC.md** - Guide détaillé d'installation de HCD sur MacBook Pro M3
-14. **ANALYSE_ETAT_ART_HBASE.md** - Analyse complète du document "État de l'art HBase chez Arkéa"
-15. **DOCUMENTATION_FINALE.md** - Index de la documentation (ancien)
+### 🔍 Audits et Analyses Récentes
+
+1. **AUDIT_COMPLET_PROJET_ARKEA_2025_V2.md** ⭐ - Audit complet V2 du projet ARKEA (corrections et enrichissements)
+2. **AUDIT_COMPLET_RACINE_ARKEA_2025.md** ⭐ - Audit complet de la racine ARKEA (corrections et enrichissements)
+3. **EXPLICATION_NETTOYAGE_STRUCTURE.md** ⭐ - Explication détaillée du nettoyage de structure
+4. **AUDIT_DOCUMENTATION_2025.md** ⭐ - Audit complet de la documentation
+5. **AUDIT_PORTABILITE_CROSS_PLATFORM_2025.md** ⭐ - Audit de portabilité cross-platform
+6. **REFERENCE_HCD_DOCUMENTATION.md** - Référence complète HCD 1.2
+7. **ANALYSE_PROPOSITION_IBM_MECE.md** - Analyse proposition MECE IBM
+8. **ANALYSE_INPUTS_CLIENTS_COMPLETE.md** - Analyse détaillée inputs clients
+
+### 📚 Guides et Documentation
+
+6. **GUIDE_CHOIX_POC.md** ⭐ - Guide pour choisir entre BIC, domirama2, domiramaCatOps **NOUVEAU**
+7. **GUIDE_COMPARAISON_POCS.md** ⭐ - Comparaison technique détaillée des POCs **NOUVEAU**
+8. **GUIDE_CONTRIBUTION_POCS.md** ⭐ - Standards pour contribuer aux POCs **NOUVEAU**
+9. **GUIDE_MAINTENANCE.md** ⭐ - Processus de maintenance et archivage **NOUVEAU**
+10. **INDEX.md** - Index complet de la documentation
+11. **STRUCTURE_PROJET.md** - Structure complète du projet
+12. **ORGANISATION_FINALE.md** - Organisation finale du projet
+13. **ORDRE_EXECUTION_SCRIPTS.md** - Guide ordre d'exécution scripts
+14. **SCRIPTS_A_JOUR.md** - Documentation complète des scripts
+11. **RESULTATS_TEST_KAFKA_HCD.md** - Résultats tests Kafka → HCD
+12. **KAFKA_HCD_STREAMING_READY.md** - Guide streaming Kafka → HCD
+13. **ARCHITECTURE_POC_COMPLETE.md** - Architecture complète du POC
+14. **ANALYSE_ETAT_ART_HBASE.md** - Analyse "État de l'art HBase chez Arkéa"
 
 ---
 
@@ -30,8 +53,11 @@
 
 ### Installation
 
-- **GUIDE_INSTALLATION_HCD_MAC.md** : Guide pas à pas pour installer HCD 1.2.3 sur MacBook Pro M3 Pro
-- **GUIDE_INSTALLATION_SPARK_KAFKA.md** : Guide pour installer Spark 3.5.1, Kafka 4.1.1 et spark-cassandra-connector
+- **GUIDE_INSTALLATION_HCD.md** ⭐ : Guide cross-platform pour installer HCD 1.2.3 (macOS, Linux, Windows WSL2)
+- **GUIDE_INSTALLATION_LINUX.md** ⭐ : Guide complet d'installation Linux
+- **GUIDE_INSTALLATION_WINDOWS.md** ⭐ : Guide d'installation Windows (WSL2)
+- **GUIDE_INSTALLATION_SPARK_KAFKA.md** : Guide cross-platform pour installer Spark 3.5.1, Kafka 4.1.1 et spark-cassandra-connector
+- **DEPLOYMENT.md** : Guide de déploiement complet cross-platform
 
 ### Architecture et Analyse
 
@@ -99,8 +125,13 @@
 4. Lire **ARCHITECTURE_POC_COMPLETE.md** pour comprendre l'architecture
 
 ### Pour installer
-1. Suivre **GUIDE_INSTALLATION_HCD_MAC.md** pour HCD
-2. Suivre **GUIDE_INSTALLATION_SPARK_KAFKA.md** pour Spark/Kafka
+
+**Choisir selon votre OS** :
+1. **GUIDE_INSTALLATION_HCD.md** - Installer HCD (cross-platform)
+2. **GUIDE_INSTALLATION_LINUX.md** - Guide Linux complet (si Linux)
+3. **GUIDE_INSTALLATION_WINDOWS.md** - Guide Windows WSL2 (si Windows)
+4. **GUIDE_INSTALLATION_SPARK_KAFKA.md** - Installer Spark/Kafka (cross-platform)
+5. **DEPLOYMENT.md** - Guide de déploiement complet
 
 ### Pour utiliser
 1. Consulter **KAFKA_HCD_STREAMING_READY.md** pour le streaming

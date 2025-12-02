@@ -88,4 +88,3 @@ $CQLSH -e "USE domiramacatops_poc; SELECT index_name FROM system_schema.indexes 
 
 echo ""
 success "✅ Script terminé"
-

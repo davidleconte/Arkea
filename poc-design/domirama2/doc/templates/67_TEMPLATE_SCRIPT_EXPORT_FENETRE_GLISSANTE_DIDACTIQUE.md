@@ -32,7 +32,7 @@ Un script d'export avec fenêtre glissante didactique doit :
 # OBJECTIF :
 #   Ce script démontre la fenêtre glissante pour les exports incrémentaux,
 #   équivalent au TIMERANGE HBase avec décalage progressif.
-#   
+#  
 #   Cette version didactique affiche :
 #   - Le code Spark complet pour chaque fenêtre avec explications
 #   - Les équivalences HBase → HCD détaillées
@@ -172,11 +172,11 @@ export_window() {
     local start_date=$2
     local end_date=$3
     local output_path=$4
-    
+
     info "📅 Fenêtre $window_id : $start_date → $end_date"
     code "   Output : $output_path"
     echo ""
-    
+
     # Afficher le code Spark qui sera exécuté
     info "📝 Code Spark qui sera exécuté :"
     echo ""
@@ -211,7 +211,7 @@ export_window() {
     echo "   - Export Parquet avec partitionnement par date_op"
     echo "   - Mode overwrite pour idempotence (rejeux possibles)"
     echo ""
-    
+
     # Créer le script Scala temporaire
     TEMP_SCRIPT=$(mktemp "/tmp/window_${window_id}_$(date +%s)_XXXXXX.scala")
     cat > "$TEMP_SCRIPT" <<EOFSCRIPT
@@ -294,7 +294,7 @@ EOFSCRIPT
     # Exécuter avec spark-shell
     info "🚀 Exécution de l'export pour la fenêtre $window_id..."
     echo ""
-    
+
     spark-shell \
       --packages com.datastax.spark:spark-cassandra-connector_2.12:3.5.0 \
       --conf spark.cassandra.connection.host=localhost \
@@ -304,17 +304,17 @@ EOFSCRIPT
       --executor-memory 2g \
       -i "$TEMP_SCRIPT" \
       2>&1 | tee -a "$TEMP_OUTPUT" | grep -v "^scala>" | grep -v "^     |" | grep -v "^Welcome to" | grep -v "WARN NativeCodeLoader" | grep -E "(✅|⚠️|📥|📊|💾|🔍|opérations|Export|Terminé|count|Statistiques|Vérification)" | head -20
-    
+
     # Extraire les résultats
     local count=$(grep -E "✅ [0-9]+ opérations trouvées" "$TEMP_OUTPUT" | tail -1 | grep -oE "[0-9]+" | head -1 || echo "0")
     local count_read=$(grep -E "✅ Vérification : [0-9]+ opérations lues" "$TEMP_OUTPUT" | tail -1 | grep -oE "[0-9]+" | head -1 || echo "0")
-    
+
     # Stocker les résultats
     WINDOW_RESULTS+=("$window_id|$start_date|$end_date|$output_path|$count|$count_read")
-    
+
     # Nettoyer
     rm -f "$TEMP_SCRIPT"
-    
+
     echo ""
     if [ "$count" -gt 0 ]; then
         success "✅ Fenêtre $window_id exportée : $count opérations"
@@ -552,7 +552,3 @@ rm -f "$TEMP_RESULTS"
 echo ""
 success "✅ Démonstration fenêtre glissante terminée"
 echo ""
-
-
-
-

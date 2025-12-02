@@ -7,7 +7,7 @@
 # OBJECTIF :
 #   Ce script exécute une série de tests de recherche par catégorie sur la table
 #   'operations_by_account' en utilisant les index SAI.
-#   
+#
 #   Cette version didactique affiche :
 #   - Les équivalences HBase → HCD
 #   - Les requêtes CQL détaillées avec explications
@@ -156,21 +156,21 @@ execute_query() {
     local query_cql="$5"
     local expected_result="$6"
     local sai_value="$7"
-    
+
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "  🔍 TEST $query_num/10 : $query_title"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-    
+
     info "📚 DÉFINITION - $query_title :"
     echo "   $query_description"
     echo ""
-    
+
     info "🔄 ÉQUIVALENT HBase :"
     code "   $hbase_equivalent"
     echo ""
-    
+
     info "📝 Requête CQL :"
     echo "$query_cql" | while IFS= read -r line; do
         if [ -n "$line" ]; then
@@ -178,16 +178,16 @@ execute_query() {
         fi
     done
     echo ""
-    
+
     if [ -n "$sai_value" ]; then
         info "💡 VALEUR AJOUTÉE SAI :"
         echo "   $sai_value" | sed 's/^/   /'
         echo ""
     fi
-    
+
     expected "📋 Résultat attendu : $expected_result"
     echo ""
-    
+
     # Créer un fichier temporaire pour la requête
     TEMP_QUERY_FILE=$(mktemp "/tmp/query_${query_num}_$(date +%s).cql")
     cat > "$TEMP_QUERY_FILE" <<EOF
@@ -195,16 +195,16 @@ USE domiramacatops_poc;
 TRACING ON;
 $query_cql
 EOF
-    
+
     # Exécuter la requête et mesurer le temps (avec timeout de 10 secondes)
     info "🚀 Exécution de la requête..."
     START_TIME=$(date +%s.%N)
-    
+
     # Exécuter cqlsh en arrière-plan avec timeout
     QUERY_OUTPUT_FILE=$(mktemp "/tmp/query_output_${query_num}_$(date +%s).txt")
     ($CQLSH -f "$TEMP_QUERY_FILE" > "$QUERY_OUTPUT_FILE" 2>&1) &
     CQLSH_PID=$!
-    
+
     # Attendre max 15 secondes (augmenté pour les requêtes complexes)
     EXIT_CODE=0
     for i in {1..15}; do
@@ -215,18 +215,18 @@ EOF
         fi
         sleep 1
     done
-    
+
     # Si le processus est toujours en cours, le tuer
     if kill -0 $CQLSH_PID 2>/dev/null; then
         kill -9 $CQLSH_PID 2>/dev/null || true
         EXIT_CODE=1
         echo "TIMEOUT_OR_ERROR" > "$QUERY_OUTPUT_FILE"
     fi
-    
+
     QUERY_OUTPUT=$(cat "$QUERY_OUTPUT_FILE" | tee -a "$TEMP_OUTPUT")
     rm -f "$QUERY_OUTPUT_FILE"
     END_TIME=$(date +%s.%N)
-    
+
     # Si timeout ou erreur Python, traiter comme une erreur
     if echo "$QUERY_OUTPUT" | grep -q "TIMEOUT_OR_ERROR\|ModuleNotFoundError\|asyncore"; then
         EXIT_CODE=1
@@ -235,28 +235,28 @@ EOF
             warn "⚠️  Le rapport sera généré avec les requêtes et résultats attendus"
         fi
     fi
-    
+
     # Calculer le temps d'exécution (compatible macOS)
     if command -v bc >/dev/null 2>&1; then
         QUERY_TIME=$(echo "$END_TIME - $START_TIME" | bc 2>/dev/null || echo "0.000")
     else
         QUERY_TIME=$(python3 -c "print($END_TIME - $START_TIME)" 2>/dev/null || echo "0.000")
     fi
-    
+
     # Extraire les métriques du tracing
     COORDINATOR_TIME=$(echo "$QUERY_OUTPUT" | grep -i "coordinator" | head -1 | awk -F'|' '{print $NF}' | tr -d ' ' | head -1 || echo "")
     TOTAL_TIME=$(echo "$QUERY_OUTPUT" | grep -i "total" | head -1 | awk -F'|' '{print $NF}' | tr -d ' ' | head -1 || echo "")
-    
+
     # Compter les lignes retournées (utiliser UNIQUEMENT le message "(X rows)" de cqlsh qui est fiable)
     ROW_COUNT=$(echo "$QUERY_OUTPUT" | grep -E "\([0-9]+ rows\)" | grep -oE "[0-9]+" | head -1 || echo "0")
     # Si pas trouvé dans le message standard, chercher dans différentes variantes
     if [ "$ROW_COUNT" -eq 0 ] || [ -z "$ROW_COUNT" ]; then
         ROW_COUNT=$(echo "$QUERY_OUTPUT" | grep -iE "\([0-9]+ row\)|\([0-9]+ rows\)" | grep -oE "[0-9]+" | head -1 || echo "0")
     fi
-    
+
     # Extraire le plan d'exécution
     EXECUTION_PLAN=$(echo "$QUERY_OUTPUT" | grep -E "(Executing|single-partition|Read|Scanned|Merging)" | head -3 | tr '\n' '; ' || echo "")
-    
+
     # Filtrer les résultats pour affichage (sans tracing, mais garder les données)
     # Garder uniquement les lignes qui ressemblent à des données réelles :
     # - En-têtes de colonnes (code_si au début)
@@ -264,7 +264,7 @@ EOF
     # - Lignes de données (commencent par un nombre suivi de |, contiennent des valeurs)
     # Exclure TOUTES les lignes de tracing
     QUERY_RESULTS_FILTERED=$(echo "$QUERY_OUTPUT" | grep -E "^[[:space:]]*code_si|^[[:space:]]*-{3,}|^[[:space:]]*[0-9]+[[:space:]]*\|" | grep -vE "activity|timestamp|source|client|Processing|Request|Executing|Tracing|coordinator|total|Parsing|Sending|MULTI_RANGE|Query execution|Limit|Filter|Fetch|LiteralIndexScan|single-partition|stage READ|RequestResponse" | grep -v "^[[:space:]]*$" | head -20)
-    
+
     # Afficher les résultats
     if [ $EXIT_CODE -eq 0 ]; then
         result "📊 Résultats obtenus ($ROW_COUNT ligne(s)) en ${QUERY_TIME}s :"
@@ -278,7 +278,7 @@ EOF
             echo "   (Aucun résultat)"
         fi
         echo ""
-        
+
         if [ -n "$COORDINATOR_TIME" ] && [ "$COORDINATOR_TIME" != "" ]; then
             info "   ⏱️  Temps coordinateur : ${COORDINATOR_TIME}"
         fi
@@ -288,9 +288,9 @@ EOF
         if [ -n "$EXECUTION_PLAN" ]; then
             info "   📋 Plan d'exécution : $EXECUTION_PLAN"
         fi
-        
+
         success "✅ Test $query_num exécuté avec succès"
-        
+
         # Stocker les résultats pour le rapport (format: num|title|rows|time|coord|total|status|output)
         # Prendre les 5 premières lignes de résultats, utiliser un séparateur spécial pour les nouvelles lignes (compatible macOS)
         OUTPUT_FOR_REPORT=$(echo "$QUERY_RESULTS_FILTERED" | head -5 | awk '{printf "%s___NL___", $0}')
@@ -300,7 +300,7 @@ EOF
         echo "$QUERY_OUTPUT" | tail -10 | sed 's/^/   /'
         QUERY_RESULTS+=("$query_num|$query_title|0|$QUERY_TIME|||ERROR|${QUERY_OUTPUT:0:200}")
     fi
-    
+
     # Nettoyer
     rm -f "$TEMP_QUERY_FILE"
     echo ""
@@ -509,7 +509,7 @@ info "Génération du rapport markdown structuré..."
     cat << 'EOF'
 # 🔍 Démonstration : Tests de Recherche par Catégorie
 
-**Date** : 
+**Date** :
 EOF
     date +"%Y-%m-%d %H:%M:%S"
     cat << 'EOF'
@@ -584,7 +584,7 @@ EOF
         if [ "$status" != "OK" ]; then
             status_display="❌ ERROR"
         fi
-        
+
         cat << EOF
 ### Test $num : $title
 
@@ -598,7 +598,7 @@ EOF
             echo "- **Temps total** : ${total}"
         fi
         echo "- **Statut** : $status_display"
-        
+
         if [ -n "$output" ] && [ "$output" != "" ] && [ "$rows" -gt 0 ]; then
             echo ""
             echo "**Aperçu des résultats :**"
@@ -672,7 +672,7 @@ La stratégie multi-version est démontrée avec succès :
 
 ---
 
-**Date de génération** : 
+**Date de génération** :
 EOF
     date +"%Y-%m-%d %H:%M:%S"
 } > "$REPORT_FILE"

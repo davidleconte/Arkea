@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Fonctions Utilitaires pour Scripts Didactiques
 # ============================================
@@ -84,33 +85,33 @@ execute_and_display() {
     local description="$2"
     local expected="$3"
     local cqlsh_bin="${HCD_DIR}/bin/cqlsh"
-    
+
     if [ -z "$expected" ]; then
         expected="Résultats de la requête"
     fi
-    
+
     expected "📋 Résultat attendu :"
     echo "   $expected"
     echo ""
-    
+
     info "📝 Requête CQL (DML) :"
     show_cql_query "$query"
     echo ""
-    
+
     if [ -n "$description" ]; then
         info "   Explication de la requête :"
         echo "      $description"
         echo ""
     fi
-    
+
     echo "🚀 Exécution de la requête..."
     start_time=$(date +%s.%N)
-    
+
     # Exécuter la requête
     result=$("$cqlsh_bin" localhost 9042 -e "$query" 2>&1)
     exit_code=$?
     end_time=$(date +%s.%N)
-    
+
     # Calculer la durée (macOS compatible)
     if command -v bc &> /dev/null; then
         duration=$(echo "$end_time - $start_time" | bc)
@@ -118,7 +119,7 @@ execute_and_display() {
         # Fallback pour macOS sans bc
         duration=$(python3 -c "print($end_time - $start_time)")
     fi
-    
+
     if [ $exit_code -eq 0 ]; then
         success "✅ Requête exécutée en ${duration}s"
         echo ""
@@ -150,18 +151,18 @@ show_test_section() {
     local expected="$3"
     local test_num="${4:-1}"
     local total_tests="${5:-1}"
-    
+
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "  TEST $test_num/$total_tests : $title"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-    
+
     if [ -n "$description" ]; then
         info "📝 Description : $description"
         echo ""
     fi
-    
+
     if [ -n "$expected" ]; then
         expected "📋 Résultat attendu :"
         echo "   $expected"
@@ -179,7 +180,7 @@ show_hbase_context() {
     local feature="$1"
     local hbase_desc="$2"
     local hcd_desc="$3"
-    
+
     info "📚 CONTEXTE - $feature :"
     echo ""
     echo "   HBase :"
@@ -199,7 +200,7 @@ show_hbase_context() {
 show_partie() {
     local num="$1"
     local title="$2"
-    
+
     echo ""
     section "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     section "  📋 PARTIE $num: $title"
@@ -217,13 +218,13 @@ generate_report() {
     local report_file="$1"
     local title="$2"
     local content="$3"
-    
+
     mkdir -p "$(dirname "$report_file")"
-    
+
     cat > "$report_file" << EOF
 # $title
 
-**Date** : $(date +"%Y-%m-%d %H:%M:%S")  
+**Date** : $(date +"%Y-%m-%d %H:%M:%S")
 **Script** : $(basename "${BASH_SOURCE[1]}")
 
 ---
@@ -244,7 +245,7 @@ $content
 
 **✅ Démonstration terminée avec succès !**
 EOF
-    
+
     success "📝 Rapport généré : $report_file"
 }
 
@@ -258,9 +259,9 @@ check_schema() {
     local column="$1"
     local index="$2"
     local cqlsh_bin="${HCD_DIR}/bin/cqlsh"
-    
+
     info "🔍 Vérification du schéma..."
-    
+
     if [ -n "$column" ]; then
         column_check=$("$cqlsh_bin" localhost 9042 -e "USE domirama2_poc; DESCRIBE TABLE operations_by_account;" 2>&1 | grep -c "$column" || echo "0")
         if [ "$column_check" -gt 0 ]; then
@@ -270,7 +271,7 @@ check_schema() {
             return 1
         fi
     fi
-    
+
     if [ -n "$index" ]; then
         index_check=$("$cqlsh_bin" localhost 9042 -e "USE domirama2_poc; DESCRIBE INDEX $index;" 2>&1 | grep -c "$index" || echo "0")
         if [ "$index_check" -gt 0 ]; then
@@ -280,7 +281,7 @@ check_schema() {
             return 1
         fi
     fi
-    
+
     return 0
 }
 
@@ -292,7 +293,7 @@ check_schema() {
 #
 show_demo_header() {
     local title="$1"
-    
+
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "  🎯 DÉMONSTRATION DIDACTIQUE : $title"
@@ -318,13 +319,13 @@ show_summary() {
     local points="$1"
     local advantages="$2"
     local limitations="$3"
-    
+
     echo ""
     section "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     section "  📊 PARTIE FINALE: RÉSUMÉ ET CONCLUSION"
     section "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-    
+
     info "📊 Résumé de la démonstration :"
     echo ""
     while IFS= read -r line; do
@@ -333,7 +334,7 @@ show_summary() {
         fi
     done <<< "$points"
     echo ""
-    
+
     if [ -n "$advantages" ]; then
         info "💡 Avantages :"
         echo ""
@@ -344,7 +345,7 @@ show_summary() {
         done <<< "$advantages"
         echo ""
     fi
-    
+
     if [ -n "$limitations" ]; then
         info "⚠️  Limitations :"
         echo ""
@@ -372,7 +373,7 @@ setup_paths() {
     # Note: Cette fonction doit être appelée depuis un script, pas directement
     local caller_script="${BASH_SOURCE[1]:-${BASH_SOURCE[0]}}"
     SCRIPT_DIR="$(cd "$(dirname "$caller_script")" && pwd)"
-    
+
     # Détecter INSTALL_DIR (racine du projet Arkea) pour localiser .poc-config.sh
     # Priorité 1: Variable d'environnement ARKEA_HOME
     # Priorité 2: Détection automatique (2 niveaux au-dessus de domirama2/domiramaCatOps)
@@ -382,29 +383,29 @@ setup_paths() {
     else
         detected_install_dir="$ARKEA_HOME"
     fi
-    
+
     # Charger la configuration centralisée EN PREMIER (priorité maximale)
     local config_file="${ARKEA_HOME:-${detected_install_dir}}/.poc-config.sh"
     if [ -f "$config_file" ]; then
         # shellcheck source=/dev/null
         source "$config_file"
     fi
-    
+
     # Maintenant utiliser les valeurs de .poc-config.sh ou fallback
     # INSTALL_DIR (alias de ARKEA_HOME pour compatibilité)
     INSTALL_DIR="${ARKEA_HOME:-${detected_install_dir}}"
     export ARKEA_HOME="$INSTALL_DIR"
-    
+
     # Configuration HCD (déjà chargée par .poc-config.sh, mais fallback si nécessaire)
     HCD_DIR="${HCD_DIR:-${HCD_HOME:-${INSTALL_DIR}/binaire/hcd-1.2.3}}"
-    
+
     # Configuration Spark (déjà chargée par .poc-config.sh, mais fallback si nécessaire)
     SPARK_HOME="${SPARK_HOME:-${INSTALL_DIR}/binaire/spark-3.5.1}"
-    
+
     # Configuration HCD Host/Port (déjà chargée par .poc-config.sh, mais fallback si nécessaire)
     HCD_HOST="${HCD_HOST:-localhost}"
     HCD_PORT="${HCD_PORT:-9042}"
-    
+
     # Exporter les variables pour qu'elles soient disponibles dans le script appelant
     export SCRIPT_DIR INSTALL_DIR HCD_DIR SPARK_HOME HCD_HOST HCD_PORT
 }
@@ -422,18 +423,13 @@ check_hcd_prerequisites() {
         error "Exécutez d'abord: ./scripts/setup/03_start_hcd.sh (depuis la racine du projet)"
         return 1
     fi
-    
+
     # Vérifier que HCD est accessible
     if ! nc -z "$HCD_HOST" "$HCD_PORT" 2>/dev/null; then
         error "HCD n'est pas accessible sur $HCD_HOST:$HCD_PORT"
         error "Vérifiez que HCD est démarré et accessible"
         return 1
     fi
-    
+
     return 0
 }
-
-
-
-
-

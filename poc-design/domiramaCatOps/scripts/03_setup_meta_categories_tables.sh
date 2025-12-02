@@ -7,7 +7,7 @@
 # OBJECTIF :
 #   Ce script crée les 7 tables HCD correspondant à la table HBase
 #   'B997X04:domirama-meta-categories' (7 "KeySpaces" logiques).
-#   
+#
 #   Cette version didactique affiche :
 #   - Le DDL complet pour chaque table avec explications
 #   - Les équivalences HBase → HCD pour chaque concept
@@ -439,8 +439,8 @@ info "📝 Génération du rapport de démonstration..."
 cat > "$REPORT_FILE" << EOF
 # 🏗️ Démonstration : Configuration des Tables Meta-Categories
 
-**Date** : $(date +"%Y-%m-%d %H:%M:%S")  
-**Script** : $(basename "$0")  
+**Date** : $(date +"%Y-%m-%d %H:%M:%S")
+**Script** : $(basename "$0")
 **Objectif** : Démontrer la création complète des 7 tables HCD pour domirama-meta-categories
 
 ---
@@ -470,10 +470,10 @@ cat > "$REPORT_FILE" << EOF
 
 ### Améliorations HCD
 
-✅ **Schéma fixe et typé** (vs schéma flexible HBase)  
-✅ **7 tables distinctes** (vs 1 table avec KeySpaces logiques)  
-✅ **Historique illimité** (vs VERSIONS => '50')  
-✅ **Type COUNTER natif** (vs INCREMENT sur colonnes dynamiques)  
+✅ **Schéma fixe et typé** (vs schéma flexible HBase)
+✅ **7 tables distinctes** (vs 1 table avec KeySpaces logiques)
+✅ **Historique illimité** (vs VERSIONS => '50')
+✅ **Type COUNTER natif** (vs INCREMENT sur colonnes dynamiques)
 ✅ **Recherche par catégorie** (vs colonnes dynamiques)
 
 ---
@@ -667,9 +667,9 @@ CREATE TABLE IF NOT EXISTS decisions_salaires (
 
 Les 7 tables meta-categories ont été créées avec succès :
 
-✅ **Keyspace** : domiramacatops_poc  
-✅ **Tables** : 7 tables créées  
-✅ **Index** : $INDEXES index SAI créés  
+✅ **Keyspace** : domiramacatops_poc
+✅ **Tables** : 7 tables créées
+✅ **Index** : $INDEXES index SAI créés
 ✅ **Conformité** : 100% conforme à la proposition IBM
 
 ### Prochaines Étapes
@@ -685,4 +685,3 @@ EOF
 
 success "✅ Rapport généré : $REPORT_FILE"
 echo ""
-

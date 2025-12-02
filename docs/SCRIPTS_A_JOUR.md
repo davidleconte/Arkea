@@ -1,7 +1,7 @@
 # ✅ Scripts d'Installation, Configuration et Tests - À Jour
 
-**Date de mise à jour** : 2025-11-25  
-**Statut** : ✅ Tous les scripts sont à jour et cohérents
+**Date de mise à jour** : 2025-12-02  
+**Statut** : ✅ Tous les scripts sont à jour, cohérents et portables cross-platform
 
 ---
 
@@ -9,37 +9,44 @@
 
 ### 📦 Installation
 
-| Script | Description | Statut |
-|--------|-------------|--------|
-| `install_hcd.sh` | Installe HCD 1.2.3 avec vérification Java 11 | ✅ À jour |
-| `install_spark_kafka.sh` | Installe Spark 3.5.1, Kafka et spark-cassandra-connector | ✅ À jour |
+| Script | Description | Statut | Plateformes |
+|--------|-------------|--------|-------------|
+| `scripts/setup/01_install_hcd.sh` | Installe HCD 1.2.3 avec vérification Java 11 | ✅ À jour | macOS, Linux, Windows (WSL2) |
+| `scripts/setup/02_install_spark_kafka.sh` | Installe Spark 3.5.1, Kafka et spark-cassandra-connector | ✅ À jour | macOS, Linux |
+| `scripts/setup/02_install_kafka_linux.sh` | Installe Kafka 4.1.1 pour Linux | ✅ Nouveau | Linux uniquement |
 
 ### 🚀 Démarrage
 
-| Script | Description | Statut |
-|--------|-------------|--------|
-| `start_hcd.sh` | Démarre HCD (premier plan ou arrière-plan) | ✅ À jour |
-| `start_kafka.sh` | Démarre Kafka (premier plan ou arrière-plan) | ✅ À jour |
+| Script | Description | Statut | Plateformes |
+|--------|-------------|--------|-------------|
+| `scripts/setup/03_start_hcd.sh` | Démarre HCD (premier plan ou arrière-plan) | ✅ À jour | macOS, Linux, Windows (WSL2) |
+| `scripts/setup/04_start_kafka.sh` | Démarre Kafka (premier plan ou arrière-plan) | ✅ À jour | macOS, Linux, Windows (WSL2) |
 
 ### 🔧 Configuration
 
-| Script | Description | Statut |
-|--------|-------------|--------|
-| `setup_kafka_hcd_streaming.sh` | Configure le streaming Kafka → HCD | ✅ À jour |
-
-### 🧪 Tests
-
-| Script | Description | Statut |
-|--------|-------------|--------|
-| `test_kafka_hcd_streaming.sh` | Test complet du pipeline Kafka → HCD | ✅ À jour |
+| Script | Description | Statut | Plateformes |
+|--------|-------------|--------|-------------|
+| `scripts/setup/05_setup_kafka_hcd_streaming.sh` | Configure le streaming Kafka → HCD | ✅ À jour | Toutes |
+| `scripts/setup/06_test_kafka_hcd_streaming.sh` | Test complet du pipeline Kafka → HCD | ✅ À jour | Toutes |
 
 ### 🛠️ Utilitaires
 
-| Script | Description | Statut |
-|--------|-------------|--------|
-| `kafka-helper.sh` | Helper pour utiliser Kafka avec Java 17 | ✅ À jour |
-| `verify_all.sh` | Vérifie l'état de tous les composants | ✅ Nouveau |
-| `list_scripts.sh` | Liste tous les scripts disponibles | ✅ Nouveau |
+| Script | Description | Statut | Plateformes |
+|--------|-------------|--------|-------------|
+| `scripts/utils/70_kafka-helper.sh` | Helper pour utiliser Kafka avec Java 17 | ✅ À jour | macOS, Linux |
+| `scripts/utils/80_verify_all.sh` | Vérifie l'état de tous les composants | ✅ À jour | Toutes |
+| `scripts/utils/90_list_scripts.sh` | Liste tous les scripts disponibles | ✅ À jour | Toutes |
+| `scripts/utils/91_check_consistency.sh` | Vérification de cohérence (chemins hardcodés, scripts, documentation) | ✅ Nouveau | Toutes |
+| `scripts/utils/92_generate_docs.sh` | Génération automatique de documentation (index, listes, tableaux) | ✅ Nouveau | Toutes |
+| `scripts/utils/93_fix_hardcoded_paths.sh` | Correction automatique des chemins hardcodés | ✅ Nouveau | Toutes |
+| `scripts/utils/95_cleanup.sh` | Nettoyage automatique (UNLOAD_*, fichiers temporaires, logs anciens) | ✅ Nouveau | Toutes |
+| `scripts/utils/portable_functions.sh` | Fonctions portables cross-platform | ✅ Nouveau | Toutes |
+
+**Nouvelles Fonctions Portables** :
+- `get_realpath()` - Chemin réel portable (macOS/Linux/Windows)
+- `check_port()` - Vérification de port portable
+- `kill_process()` - Arrêt de processus portable
+- `detect_os()` - Détection de l'OS
 
 ---
 
@@ -93,11 +100,19 @@
 ### Installation complète (ordre recommandé)
 
 ```bash
-# 1. Installer HCD
-./install_hcd.sh
+# Charger la configuration (détection automatique de l'OS)
+source .poc-profile
+
+# 1. Installer HCD (cross-platform)
+./scripts/setup/01_install_hcd.sh
 
 # 2. Installer Spark et Kafka
-./install_spark_kafka.sh
+# macOS : Utilise Homebrew automatiquement
+# Linux : Utilise les scripts d'installation automatique
+./scripts/setup/02_install_spark_kafka.sh
+
+# Linux uniquement : Installer Kafka si nécessaire
+# ./scripts/setup/02_install_kafka_linux.sh
 
 # 3. Démarrer HCD
 ./start_hcd.sh background

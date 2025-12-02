@@ -162,11 +162,13 @@
 ## 🎯 Parcours de Lecture Recommandé
 
 ### Pour Comprendre le POC (Débutant)
+
 1. [guides/01_README.md](guides/01_README.md)
 2. [design/02_VALUE_PROPOSITION_DOMIRAMA2.md](design/02_VALUE_PROPOSITION_DOMIRAMA2.md)
 3. [design/03_GAPS_ANALYSIS.md](design/03_GAPS_ANALYSIS.md)
 
 ### Pour Implémenter une Fonctionnalité
+
 - **Recherche** : [guides/06_README_INDEX_AVANCES.md](guides/06_README_INDEX_AVANCES.md), [guides/07_README_FUZZY_SEARCH.md](guides/07_README_FUZZY_SEARCH.md), [guides/08_README_HYBRID_SEARCH.md](guides/08_README_HYBRID_SEARCH.md)
 - **Multi-version** : [guides/09_README_MULTI_VERSION.md](guides/09_README_MULTI_VERSION.md), [implementation/10_TIME_TRAVEL_IMPLEMENTATION.md](implementation/10_TIME_TRAVEL_IMPLEMENTATION.md)
 - **Exports** : [guides/11_README_EXPORT_INCREMENTAL.md](guides/11_README_EXPORT_INCREMENTAL.md), [guides/12_README_EXPORT_SPARK_SUBMIT.md](guides/12_README_EXPORT_SPARK_SUBMIT.md), [guides/13_README_REQUETES_TIMERANGE_STARTROW.md](guides/13_README_REQUETES_TIMERANGE_STARTROW.md)
@@ -174,6 +176,7 @@
 - **Data API** : [guides/18_README_DATA_API.md](guides/18_README_DATA_API.md), [implementation/19_VALEUR_AJOUTEE_DATA_API.md](implementation/19_VALEUR_AJOUTEE_DATA_API.md), [implementation/20_IMPLEMENTATION_OFFICIELLE_DATA_API.md](implementation/20_IMPLEMENTATION_OFFICIELLE_DATA_API.md), [implementation/21_STATUT_DATA_API.md](implementation/21_STATUT_DATA_API.md)
 
 ### Pour Auditer/Valider
+
 - [design/04_BILAN_ECARTS_FONCTIONNELS.md](design/04_BILAN_ECARTS_FONCTIONNELS.md)
 - [design/05_AUDIT_COMPLET_GAP_FONCTIONNEL.md](design/05_AUDIT_COMPLET_GAP_FONCTIONNEL.md)
 - [results/22_DEMONSTRATION_RESUME.md](results/22_DEMONSTRATION_RESUME.md)
@@ -229,6 +232,7 @@ doc/
 **✅ Documentation organisée par catégories pour faciliter la navigation !**
 
 **Mise à jour** : 2025-01-XX
+
 - ✅ **83 documents** organisés en 6 catégories
 - ✅ **18 démonstrations** .md générées automatiquement dans `doc/demonstrations/`
 - ✅ **12 templates** réutilisables dans `doc/templates/`

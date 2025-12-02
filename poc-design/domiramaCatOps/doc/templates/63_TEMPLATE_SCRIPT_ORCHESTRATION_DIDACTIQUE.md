@@ -300,7 +300,7 @@ if [ $EXIT_CODE -eq 0 ]; then
         fi
     done
     echo "   └─────────────────────────────────────────────────────────┘"
-    
+
     if [ "$RESULT_COUNT" -gt 0 ]; then
         SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
         success "✅ Démonstration $DEMO_NUM réussie"
@@ -454,9 +454,9 @@ for demo in demos:
     query_time = demo.get('query_time', 0)
     success = demo.get('success', False)
     output = demo.get('output', '')
-    
+
     status = "✅ Succès" if success else "⚠️  Échec"
-    
+
     report += f"""### DÉMONSTRATION {num} : {title}
 
 **Description** : {desc}
@@ -486,6 +486,7 @@ for demo in demos:
 """
 
 # Ajouter le résumé final
+
 report += f"""## 📊 Statistiques Globales
 
 - **Total opérations dans HCD** : [Nombre]
@@ -516,6 +517,7 @@ report += f"""## 📊 Statistiques Globales
 """
 
 # Écrire le rapport
+
 with open("$REPORT_FILE", "w") as f:
     f.write(report)
 
@@ -535,6 +537,7 @@ echo ""
 
 success "✅ DÉMONSTRATION COMPLÈTE TERMINÉE"
 echo ""
+
 ```
 
 ---
@@ -653,11 +656,13 @@ EOF
 ## 💡 Exemples d'Utilisation
 
 ### Script 18 : Démonstration Complète Full-Text Search
+
 - 5 étapes d'orchestration
 - 10 démonstrations (full-text, stemming, asciifolding, etc.)
 - Rapport : `doc/demonstrations/18_DEMONSTRATION.md`
 
 ### Script Futur : Démonstration Complète Multi-Version
+
 - 4 étapes d'orchestration
 - N démonstrations (time travel, priorité client, etc.)
 - Rapport : `doc/demonstrations/XX_MULTI_VERSION_DEMONSTRATION.md`
@@ -665,5 +670,3 @@ EOF
 ---
 
 *Template créé le 2025-11-26 pour standardiser les scripts d'orchestration/démonstration complète*
-
-

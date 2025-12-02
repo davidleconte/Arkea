@@ -32,7 +32,7 @@ Un script de test avec embeddings didactique doit :
 # OBJECTIF :
 #   Ce script démontre de manière très didactique [fonctionnalité]
 #   qui utilise des embeddings [modèle] pour [objectif].
-#   
+#  
 #   Cette version améliorée affiche :
 #   - Le DDL complet (schéma avec embeddings)
 #   - Vérification des dépendances Python
@@ -447,26 +447,31 @@ success "📝 Documentation générée : $REPORT_FILE"
 ## 📋 Sections Détaillées
 
 ### 1. **PARTIE 1 : DDL - Schéma avec Embeddings**
+
 - Affiche le DDL complet (table, colonne VECTOR, index vectoriel)
 - Contexte HBase → HCD
 - Explications détaillées
 
 ### 2. **PARTIE 2 : Vérification des Dépendances Python**
+
 - Vérifie Python, transformers, torch, cassandra-driver
 - Installation automatique si nécessaire
 - Configuration Hugging Face
 
 ### 3. **PARTIE 3 : Démonstration de Génération d'Embeddings**
+
 - Définition des embeddings
 - Génération d'un embedding de démonstration
 - Affichage du vecteur généré
 
 ### 4. **PARTIE 4 : Définition et Principe avec Comparaison**
+
 - Définition du concept
 - **Tableau comparatif détaillé** (Full-Text vs Vector vs Hybrid)
 - Recommandations par cas d'usage
 
 ### 5. **PARTIE 5 : Tests Multiples (Boucle Python)**
+
 - Structure de test_cases avec :
   - query
   - description
@@ -485,12 +490,14 @@ success "📝 Documentation générée : $REPORT_FILE"
   - Stockage dans JSON
 
 ### 6. **PARTIE 6 : Contrôles de Cohérence** (Nouveau)
+
 - Vérification présence données
 - Vérification couverture embeddings
 - Vérification pertinence résultats
 - Métriques de performance
 
 ### 7. **PARTIE 7 : Résumé et Conclusion**
+
 - Résumé de la démonstration
 - Comparaison détaillée des approches (tableau)
 - Avantages et limitations
@@ -532,5 +539,3 @@ success "📝 Documentation générée : $REPORT_FILE"
 ---
 
 *Template créé le 2025-11-26 pour standardiser les scripts de test avec embeddings*
-
-

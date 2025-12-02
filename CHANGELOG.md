@@ -16,6 +16,57 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [1.3.0] - 2025-12-02
+
+### Ajouté
+
+#### Guides de Documentation
+- **GUIDE_CHOIX_POC.md** - Guide pour choisir entre BIC, domirama2, domiramaCatOps
+- **GUIDE_COMPARAISON_POCS.md** - Comparaison technique détaillée des POCs
+- **GUIDE_CONTRIBUTION_POCS.md** - Standards pour contribuer aux POCs
+- **GUIDE_MAINTENANCE.md** - Processus de maintenance et archivage
+
+#### Scripts Utilitaires
+- **scripts/utils/91_check_consistency.sh** - Vérification de cohérence (chemins hardcodés, scripts, documentation)
+- **scripts/utils/92_generate_docs.sh** - Génération automatique de documentation (index, listes, tableaux)
+- **scripts/utils/93_fix_hardcoded_paths.sh** - Correction automatique des chemins hardcodés
+
+#### Tests
+- **tests/unit/test_portability.sh** - Tests de portabilité cross-platform (5 tests)
+- **tests/unit/test_consistency.sh** - Tests de cohérence du projet (6 tests)
+- **tests/integration/test_poc_structure.sh** - Tests de structure des POCs
+- **tests/run_portability_tests.sh** - Exécution des tests de portabilité
+- **tests/run_consistency_tests.sh** - Exécution des tests de cohérence
+
+### Modifié
+
+#### Configuration
+- **.poc-profile** - Fallback hardcodé remplacé par détection automatique portable
+
+#### Scripts
+- **12 scripts** corrigés avec ajout de `set -euo pipefail`
+- **4 scripts** avec références `localhost` remplacées par variables d'environnement
+
+#### CI/CD
+- **.github/workflows/test-multi-os.yml** - Enrichi avec vérifications de cohérence et chemins hardcodés
+
+#### Documentation
+- **tests/README.md** - Mis à jour avec les nouveaux tests
+- **tests/run_all_tests.sh** - Mis à jour pour inclure les nouveaux tests
+- **docs/INDEX.md** - Ajout des nouveaux guides
+- **docs/README.md** - Ajout des nouveaux guides
+- **docs/SCRIPTS_A_JOUR.md** - Ajout des nouveaux scripts utilitaires
+- **scripts/utils/90_list_scripts.sh** - Ajout des descriptions des nouveaux scripts
+- **README.md** - Ajout des nouveaux scripts et guides
+
+### Supprimé
+
+- **binaire/hcd-1.2.3/=** - Fichier étrange supprimé
+- **binaire/hcd-1.2.3/$REPORT_FILE** - Fichier étrange supprimé
+- **binaire/hcd-1.2.3/${REPORT_FILE}** - Fichier étrange supprimé
+
+---
+
 ## [1.1.0] - 2025-12-02
 
 ### Ajouté
@@ -33,6 +84,19 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/lang/fr/).
 
 - ✅ **`poc-design/domiramaCatOps/README.md`** : README mis à jour et complété (509 lignes) avec structure alignée sur BIC
 
+**Audits et Documentation**
+
+- ✅ **`docs/AUDIT_COMPLET_RACINE_ARKEA_2025.md`** : Audit complet de la racine ARKEA avec corrections et enrichissements identifiés (score ~85%)
+- ✅ **`docs/EXPLICATION_NETTOYAGE_STRUCTURE.md`** : Explication détaillée du nettoyage de structure (data/, logs/UNLOAD_*, fichiers étranges)
+
+**Scripts Utilitaires**
+
+- ✅ **`scripts/utils/95_cleanup.sh`** : Script de nettoyage automatique
+  - Nettoyage des répertoires UNLOAD_* de plus de 30 jours
+  - Nettoyage des fichiers temporaires (.tmp, .bak, .swp, etc.)
+  - Nettoyage des logs anciens de plus de 90 jours
+  - Options : `--dry-run`, `--age DAYS`, `--help`
+
 ### Modifié
 
 **Configuration**
@@ -42,6 +106,19 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/lang/fr/).
   - Ajout formats `.orc`, `.avro` et leurs répertoires
   - Ajout patterns pour répertoires Parquet (`_SUCCESS`, `part-*.parquet`)
   - Ajout patterns pour `checkpoints/`, `export/`, `temp/`, `tmp/`
+
+**Documentation**
+
+- ✅ **`docs/INDEX.md`** : Ajout des nouveaux fichiers d'audit et d'explication
+- ✅ **`docs/SCRIPTS_A_JOUR.md`** : Ajout du script `95_cleanup.sh`
+- ✅ **`scripts/utils/90_list_scripts.sh`** : Ajout du script `95_cleanup.sh` dans la liste
+
+### Supprimé
+
+**Nettoyage de Structure**
+
+- ✅ **Répertoire `data/`** : Supprimé (répertoire vide à la racine)
+- ✅ **Répertoires `logs/UNLOAD_*`** : 37 répertoires temporaires supprimés de `logs/archive/2025-11/`
 
 ---
 

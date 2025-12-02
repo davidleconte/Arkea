@@ -9,9 +9,9 @@
 #   Ce script exporte les données d'opérations depuis HCD vers des fichiers
 #   Parquet via DSBulk (HCD → JSON) puis Spark (JSON → Parquet), avec filtrage
 #   par dates (équivalent TIMERANGE HBase).
-#   
+#
 #   DSBulk est utilisé au lieu de Spark direct pour éviter le problème du type VECTOR.
-#   
+#
 #   Cette version didactique affiche :
 #   - Le code DSBulk et Spark complet avec explications
 #   - Les équivalences HBase → HCD détaillées
@@ -252,15 +252,15 @@ PYCOUNT
 if [ "$PARQUET_COUNT" -gt 0 ]; then
     success "✅ Export Parquet réussi : $PARQUET_COUNT fichiers créés"
     success "✅ Opérations exportées : $OPERATIONS_COUNT"
-    
+
     # Validation avancée (P1 - Recommandation Priorité 1)
     info "🔍 Validation avancée des données exportées (P1 - Améliorée)..."
-    
+
     # Utiliser le script de validation avancée
     if [ -f "${SCRIPT_DIR}/14_validate_export_advanced.py" ]; then
         python3 "${SCRIPT_DIR}/14_validate_export_advanced.py" "$OUTPUT_PATH" "$OPERATIONS_COUNT"
         VALIDATION_EXIT_CODE=$?
-        
+
         if [ $VALIDATION_EXIT_CODE -eq 0 ]; then
             success "✅ Validation avancée réussie"
         else
@@ -276,36 +276,36 @@ parquet_path = "$OUTPUT_PATH"
 try:
     dataset = pq.ParquetDataset(parquet_path)
     schema = dataset.schema
-    
+
     required_columns = ['code_si', 'contrat', 'date_op', 'numero_op', 'libelle', 'libelle_embedding']
     missing_columns = [col for col in required_columns if col not in schema.names]
-    
+
     if missing_columns:
         print(f"⚠️  Colonnes manquantes : {', '.join(missing_columns)}")
     else:
         print("✅ Toutes les colonnes critiques présentes")
-    
+
     if 'libelle_embedding' in schema.names:
         print("✅ Colonne libelle_embedding (VECTOR) présente")
     else:
         print("❌ Colonne libelle_embedding (VECTOR) absente")
-    
+
     partitions = set()
     for root, dirs, files in os.walk(parquet_path):
         for d in dirs:
             if d.startswith('date_partition='):
                 partitions.add(d)
-    
+
     if len(partitions) > 0:
         print(f"✅ {len(partitions)} partitions créées")
     else:
         print("⚠️  Aucune partition détectée")
-        
+
 except Exception as e:
     print(f"⚠️  Erreur lors de la validation : {e}")
 PYVALIDATION
     fi
-    
+
 else
     warn "⚠️  Aucun fichier Parquet créé"
     OPERATIONS_COUNT="0"
@@ -347,7 +347,7 @@ if [ "$EXPORT_MODE" = "startrow_stoprow" ] && [ -n "$CODE_SI_FILTER" ] && [ -n "
     if [ -n "$NUMERO_OP_START" ] && [ -n "$NUMERO_OP_END" ]; then
         info "   ET numero_op >= $NUMERO_OP_START AND numero_op < $NUMERO_OP_END"
     fi
-    
+
     # Pour STARTROW/STOPROW, on doit spécifier code_si et contrat (partition keys)
     # Si contrat_end est fourni, on doit itérer sur les contrats
     if [ -n "$CONTRAT_END" ]; then
@@ -357,7 +357,7 @@ if [ "$EXPORT_MODE" = "startrow_stoprow" ] && [ -n "$CODE_SI_FILTER" ] && [ -n "
     else
         WHERE_CLAUSE="code_si = '$CODE_SI_FILTER' AND contrat = '$CONTRAT_START'"
     fi
-    
+
     # Ajouter les filtres sur clustering keys
     if [ -n "$START_DATE" ] && [ -n "$END_DATE" ]; then
         WHERE_CLAUSE="$WHERE_CLAUSE AND date_op >= '$START_DATE' AND date_op < '$END_DATE'"
@@ -378,11 +378,11 @@ else
         DEFAULT_CODE_SI="${CODE_SI_FILTER:-TEST_EXPORT}"
         DEFAULT_CONTRAT="${CONTRAT_START:-TEST_CONTRAT}"
     fi
-    
+
     info "📝 Mode d'export : TIMERANGE (avec partition keys)"
     info "   Note : Pour un export complet, il faudrait itérer sur toutes les partitions"
     info "   Utilisation : code_si = '$DEFAULT_CODE_SI' AND contrat = '$DEFAULT_CONTRAT'"
-    
+
     WHERE_CLAUSE="code_si = '$DEFAULT_CODE_SI' AND contrat = '$DEFAULT_CONTRAT' AND date_op >= '$START_DATE' AND date_op < '$END_DATE'"
     # PAS DE ALLOW FILTERING
 fi
@@ -418,7 +418,7 @@ info "📝 Clause WHERE : $WHERE_CLAUSE_FINAL"
 
 cat > "$TEMP_CQL_QUERY" <<EOFCQL
 SELECT code_si, contrat, date_op, numero_op, libelle, montant, devise, date_valeur, type_operation, sens_operation, operation_data, meta_flags, cat_auto, cat_confidence, cat_user, cat_date_user, cat_validee, libelle_prefix, libelle_tokens, libelle_embedding, meta_source, meta_device, meta_channel, meta_fraud_score, meta_ip, meta_location
-FROM domiramacatops_poc.operations_by_account 
+FROM domiramacatops_poc.operations_by_account
 WHERE $WHERE_CLAUSE_FINAL
 EOFCQL
 
@@ -599,8 +599,8 @@ val df_final = df_json
 
 // Convertir date_op en timestamp si nécessaire
 // Gérer différents formats de date possibles (ISO, standard, etc.)
-val dfWithDate = df_final.withColumn("date_op", 
-  when(col("date_op").isNotNull, 
+val dfWithDate = df_final.withColumn("date_op",
+  when(col("date_op").isNotNull,
     coalesce(
       to_timestamp(col("date_op"), "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
       to_timestamp(col("date_op"), "yyyy-MM-dd'T'HH:mm:ss'Z'"),
@@ -629,8 +629,8 @@ println(s"   Compression : \$compression")
 println(s"   Partitionnement : par date_op (format: yyyy-MM-dd)")
 
 // Créer une colonne de partitionnement par date (sans heure) pour éviter les partitions trop nombreuses
-val dfWithPartition = dfWithDate.withColumn("date_partition", 
-  when(col("date_op").isNotNull, 
+val dfWithPartition = dfWithDate.withColumn("date_partition",
+  when(col("date_op").isNotNull,
     date_format(col("date_op"), "yyyy-MM-dd")
   ).otherwise(lit("unknown"))
 )
@@ -801,15 +801,15 @@ for code_si_val, contrat_val in partitions:
     # Requête CQL sans ALLOW FILTERING
     query = f'''
     SELECT code_si, contrat, date_op, numero_op, libelle, montant, ...
-    FROM domiramacatops_poc.operations_by_account 
-    WHERE code_si = '{{code_si_val}}' AND contrat = '{{contrat_val}}' 
+    FROM domiramacatops_poc.operations_by_account
+    WHERE code_si = '{{code_si_val}}' AND contrat = '{{contrat_val}}'
       AND date_op >= {{start_ts}} AND date_op < {{end_ts}}
     '''
-    
+
     # Exécuter et exporter vers Parquet
     result = session.execute(query)
     df = pd.DataFrame([row._asdict() for row in result])
-    
+
     # Export Parquet avec partitionnement
     pq.write_to_dataset(
         table, root_path=output_path,

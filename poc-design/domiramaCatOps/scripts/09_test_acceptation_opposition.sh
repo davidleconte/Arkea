@@ -8,7 +8,7 @@
 # OBJECTIF :
 #   Ce script démontre les fonctionnalités acceptation/opposition en exécutant
 #   6 requêtes CQL directement via "${HCD_HOME}/bin/cqlsh".
-#   
+#
 #   Cette version didactique affiche :
 #   - Les équivalences HBase → HCD détaillées
 #   - Les requêtes CQL complètes avant exécution
@@ -167,21 +167,21 @@ execute_query() {
     local hbase_equivalent="$4"
     local query_cql="$5"
     local expected_result="$6"
-    
+
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "  🔍 TEST $query_num : $query_title"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-    
+
     info "📚 DÉFINITION - $query_title :"
     echo "   $query_description"
     echo ""
-    
+
     info "🔄 ÉQUIVALENT HBase :"
     code "   $hbase_equivalent"
     echo ""
-    
+
     info "📝 Requête CQL :"
     echo "$query_cql" | while IFS= read -r line; do
         if [ -n "$line" ]; then
@@ -189,10 +189,10 @@ execute_query() {
         fi
     done
     echo ""
-    
+
     expected "📋 Résultat attendu : $expected_result"
     echo ""
-    
+
     # Créer un fichier temporaire pour la requête
     TEMP_QUERY_FILE=$(mktemp "/tmp/query_${query_num}_$(date +%s).cql")
     cat > "$TEMP_QUERY_FILE" <<EOF
@@ -200,25 +200,25 @@ USE domiramacatops_poc;
 TRACING ON;
 $query_cql
 EOF
-    
+
     # Exécuter la requête
     info "🚀 Exécution de la requête..."
     START_TIME=$(date +%s.%N)
     QUERY_OUTPUT=$($CQLSH -f "$TEMP_QUERY_FILE" 2>&1 | tee -a "$TEMP_OUTPUT")
     EXIT_CODE=$?
     END_TIME=$(date +%s.%N)
-    
+
     # Calculer le temps d'exécution
     if command -v bc >/dev/null 2>&1; then
         QUERY_TIME=$(echo "$END_TIME - $START_TIME" | bc 2>/dev/null || echo "0.000")
     else
         QUERY_TIME=$(python3 -c "print($END_TIME - $START_TIME)" 2>/dev/null || echo "0.000")
     fi
-    
+
     # Extraire les métriques
     COORDINATOR_TIME=$(echo "$QUERY_OUTPUT" | grep "coordinator" | awk -F'|' '{print $4}' | tr -d ' ' | head -1 || echo "")
     TOTAL_TIME=$(echo "$QUERY_OUTPUT" | grep "total" | awk -F'|' '{print $4}' | tr -d ' ' | head -1 || echo "")
-    
+
     # Compter les lignes retournées (utiliser UNIQUEMENT le message "(X rows)" de cqlsh qui est fiable)
     ROW_COUNT=$(echo "$QUERY_OUTPUT" | grep -E "\([0-9]+ rows\)" | grep -oE "[0-9]+" | head -1 || echo "0")
     # Pour les UPDATE/INSERT, il n'y a pas de "(X rows)", donc ROW_COUNT reste 0
@@ -226,30 +226,30 @@ EOF
     if [ -z "$ROW_COUNT" ] || [ "$ROW_COUNT" = "" ]; then
         ROW_COUNT="0"
     fi
-    
+
     # Filtrer les résultats (garder les en-têtes et les lignes de données, exclure les séparateurs vides)
     # Capturer aussi les valeurs booléennes (True/False) pour les tests 2 et 4
     # Essayer d'abord avec le pattern standard
     QUERY_RESULTS_FILTERED=$(echo "$QUERY_OUTPUT" | grep -vE "^Warnings|^\([0-9]+ rows\)|coordinator|total|Executing|Read|Scanned|Merging|Tracing|Activity|Requests|responses|Parsing|Sending|MULTI_RANGE|Query execution|Limit|Filter|Fetch|LiteralIndexScan|single-partition|stage READ|RequestResponse|activity|timestamp|source|client|Processing|Request complete|Tracing session|^[[:space:]]*$" | grep -E "^[[:space:]]*code_efs|^[[:space:]]*accepted|^[[:space:]]*opposed|^[[:space:]]*-{3,}|^[[:space:]]*[0-9]+[[:space:]]*\||^[[:space:]]*[[:alpha:]]+[[:space:]]*\|" | grep -vE "^[[:space:]]*-+[[:space:]]*\|[[:space:]]*-+[[:space:]]*\|" | head -20)
-    
+
     # Si QUERY_RESULTS_FILTERED est vide, essayer une autre méthode pour capturer les données
     if [ -z "$QUERY_RESULTS_FILTERED" ] || [ "$QUERY_RESULTS_FILTERED" = "" ]; then
         # Capturer les lignes qui contiennent des données (avec | et des valeurs, y compris True/False)
         QUERY_RESULTS_FILTERED=$(echo "$QUERY_OUTPUT" | grep -E "\|" | grep -vE "^Warnings|^\([0-9]+ rows\)|coordinator|total|Executing|Read|Scanned|Merging|Tracing|Activity|Requests|responses|Parsing|Sending|MULTI_RANGE|Query execution|Limit|Filter|Fetch|LiteralIndexScan|single-partition|stage READ|RequestResponse|activity|timestamp|source|client|Processing|Request complete|Tracing session" | head -20)
     fi
-    
+
     # Extraire les lignes de données réelles (commencent par un nombre ou une valeur booléenne)
     DATA_ROWS=$(echo "$QUERY_OUTPUT" | grep -E "^[[:space:]]*[0-9]+[[:space:]]*\|" | grep -vE "activity|timestamp|source|client|Processing|Request|Executing|Tracing" | head -20)
     # Pour les tests avec valeurs booléennes uniquement (tests 2 et 4), aussi capturer les lignes avec True/False
     if [ -z "$DATA_ROWS" ] || [ "$DATA_ROWS" = "" ]; then
         DATA_ROWS=$(echo "$QUERY_OUTPUT" | grep -E "^[[:space:]]+(True|False)[[:space:]]*$" | head -20)
     fi
-    
+
     # Afficher les résultats
     if [ $EXIT_CODE -eq 0 ]; then
         result "📊 Résultats obtenus ($ROW_COUNT ligne(s)) en ${QUERY_TIME}s :"
         echo ""
-        
+
         # Si aucune ligne retournée, expliquer pourquoi
         if [ "$ROW_COUNT" = "0" ] || [ -z "$DATA_ROWS" ] || [ "$DATA_ROWS" = "" ]; then
             warn "⚠️  Aucune ligne retournée"
@@ -275,7 +275,7 @@ EOF
                 echo "... (affichage limité à 15 lignes sur $ROW_COUNT)"
             fi
             echo ""
-            
+
             # Validation et explication du résultat
             info "✅ Validation du résultat :"
             echo "   - Requête exécutée avec succès"
@@ -296,16 +296,16 @@ EOF
             fi
             echo ""
         fi
-        
+
         if [ -n "$COORDINATOR_TIME" ]; then
             info "   ⏱️  Temps coordinateur : ${COORDINATOR_TIME}μs"
         fi
         if [ -n "$TOTAL_TIME" ]; then
             info "   ⏱️  Temps total : ${TOTAL_TIME}μs"
         fi
-        
+
         success "✅ Test $query_num exécuté avec succès"
-        
+
         # Stocker les résultats avec les données filtrées pour le rapport
         # Si QUERY_RESULTS_FILTERED est vide mais qu'on a des DATA_ROWS, utiliser DATA_ROWS
         if [ -z "$QUERY_RESULTS_FILTERED" ] || [ "$QUERY_RESULTS_FILTERED" = "" ]; then
@@ -328,7 +328,7 @@ EOF
         else
             OUTPUT_FOR_REPORT=$(echo "$QUERY_RESULTS_FILTERED" | head -15 | awk '{printf "%s___NL___", $0}')
         fi
-        
+
         # Pour les tests 2 et 4, vérifier que OUTPUT_FOR_REPORT contient bien la valeur booléenne
         if ([ "$query_num" = "2" ] || [ "$query_num" = "4" ]) && ([ -z "$OUTPUT_FOR_REPORT" ] || [ "$OUTPUT_FOR_REPORT" = "" ] || ! echo "$OUTPUT_FOR_REPORT" | grep -qE "(True|False)"); then
             # Reconstruire OUTPUT_FOR_REPORT depuis QUERY_OUTPUT si nécessaire
@@ -351,7 +351,7 @@ EOF
                 OUTPUT_FOR_REPORT="${OUTPUT_FOR_REPORT}${BOOLEAN_LINE}___NL___"
             fi
         fi
-        
+
         # Si OUTPUT_FOR_REPORT est toujours vide, essayer de capturer directement depuis QUERY_OUTPUT
         if [ -z "$OUTPUT_FOR_REPORT" ] || [ "$OUTPUT_FOR_REPORT" = "" ]; then
             # Capturer l'en-tête, le séparateur et la valeur booléenne
@@ -371,7 +371,7 @@ EOF
                 fi
             fi
         fi
-        
+
         # Fallback supplémentaire pour les tests 2 et 4 : capturer avec une méthode plus permissive
         if ([ "$query_num" = "2" ] || [ "$query_num" = "4" ]) && ([ -z "$OUTPUT_FOR_REPORT" ] || [ "$OUTPUT_FOR_REPORT" = "" ]); then
             # Méthode plus permissive : chercher True/False n'importe où dans la ligne (sans contrainte de début)
@@ -390,14 +390,14 @@ EOF
                 OUTPUT_FOR_REPORT="${OUTPUT_FOR_REPORT}${BOOLEAN_LINE}___NL___"
             fi
         fi
-        
+
         # Stocker dans le tableau (format simplifié pour compatibilité)
         QUERY_RESULTS+=("$query_num|$query_title|$ROW_COUNT|$QUERY_TIME|$COORDINATOR_TIME|$TOTAL_TIME|$EXIT_CODE|OK|${OUTPUT_FOR_REPORT}")
-        
+
         # Stocker aussi dans le fichier JSON pour un accès plus fiable (avec la requête dans un fichier temporaire)
         QUERY_TEMP_FILE=$(mktemp "/tmp/query_${query_num}_$(date +%s).txt")
         echo "$query_cql" > "$QUERY_TEMP_FILE"
-        
+
         # Stocker aussi dans le fichier JSON pour un accès plus fiable (avec la requête dans un fichier temporaire)
         # Utiliser la même approche que les scripts 10 et 11 : passer OUTPUT_FOR_REPORT directement dans le heredoc Python
         # Pour les tests 2 et 4, s'assurer que OUTPUT_FOR_REPORT contient bien les données avant de le passer à Python
@@ -417,7 +417,7 @@ EOF
                 OUTPUT_FOR_REPORT="${OUTPUT_FOR_REPORT}${BOOLEAN_LINE}___NL___"
             fi
         fi
-        
+
         python3 << PYEOF
 import json
 import os
@@ -451,10 +451,10 @@ results.append({
 with open(results_file, 'w') as f:
     json.dump(results, f, indent=2)
 PYEOF
-        
+
         # Nettoyer le fichier temporaire de la requête
         rm -f "$QUERY_TEMP_FILE"
-        
+
         # Nettoyer le fichier temporaire de la requête
         rm -f "$QUERY_TEMP_FILE"
     else
@@ -462,7 +462,7 @@ PYEOF
         echo "$QUERY_OUTPUT" | tail -10
         QUERY_RESULTS+=("$query_num|$query_title|0|$QUERY_TIME|||$EXIT_CODE|ERROR||$query_cql")
     fi
-    
+
     rm -f "$TEMP_QUERY_FILE"
     echo ""
 }
@@ -481,16 +481,16 @@ if [ -f "$PREPARE_SCRIPT" ]; then
 else
     warn "⚠️  Script de préparation non trouvé : $PREPARE_SCRIPT"
     info "📝 Insertion manuelle des données de test..."
-    
+
     # Valeurs de test cohérentes
     TEST_CODE_EFS="1"
     TEST_NO_CONTRAT="100000043"
     TEST_NO_PSE="PSE002"
     TEST_NO_PSE_2="PSE001"
-    
+
     # Insérer données acceptation_client
     $CQLSH -e "USE domiramacatops_poc; INSERT INTO acceptation_client (code_efs, no_contrat, no_pse, accepted, accepted_at, updated_at, updated_by) VALUES ('${TEST_CODE_EFS}', '${TEST_NO_CONTRAT}', '${TEST_NO_PSE}', true, toTimestamp(now()), toTimestamp(now()), 'TEST_SCRIPT');" 2>&1 | grep -vE "^Warnings|^$|^\([0-9]+ rows\)|coordinator|total|Executing|Read|Scanned|Merging|Tracing|Activity|Requests|responses|Parsing|Sending" || true
-    
+
     # Vérifier/Créer opposition_categorisation
     CHECK_OPPOSITION=$($CQLSH -e "USE domiramacatops_poc; SELECT COUNT(*) FROM opposition_categorisation WHERE code_efs = '${TEST_CODE_EFS}' AND no_pse = '${TEST_NO_PSE_2}';" 2>&1 | grep -E "^\s+[0-9]+" | tr -d ' ' || echo "0")
     if [ "$CHECK_OPPOSITION" = "0" ] || [ -z "$CHECK_OPPOSITION" ]; then
@@ -722,7 +722,7 @@ for r in results:
     if r['total_time']:
         report += f"- **Temps total** : {r['total_time']}μs\n"
     report += f"- **Statut** : {'✅ OK' if r['status'] == 'OK' else '❌ ERROR'}\n\n"
-    
+
     # Afficher la requête
     if r['query']:
         report += "**Requête CQL exécutée :**\n\n"
@@ -731,7 +731,7 @@ for r in results:
         # Utiliser des triple backticks Python pour éviter l'interprétation bash
         code_marker = chr(96) * 3  # Triple backticks
         report += code_marker + "cql\n" + query_lines + "\n" + code_marker + "\n\n"
-    
+
     # Afficher les résultats ou explication
     if r['rows'] == '0' or not r['rows'] or r['rows'] == '':
         report += "**Résultat :** Aucune ligne retournée\n\n"
@@ -756,14 +756,14 @@ for r in results:
             report += "```\n"
             report += "Données retournées mais format non capturé dans le rapport\n"
             report += "```\n\n"
-        
+
         report += "**Validation :**\n\n"
         report += "- ✅ Requête exécutée avec succès\n"
         report += "- ✅ " + str(r['rows']) + " ligne(s) retournée(s)\n"
         if r['rows'] != '0':
             report += "- ✅ Les données correspondent aux critères de recherche\n"
             report += "- ✅ Le résultat est conforme aux attentes\n"
-            
+
             # Validation de cohérence pour accepted/accepted_at
             if 'accepted' in r.get('query', '') or 'accepted_at' in r.get('query', ''):
                 report += "\n**Validation de cohérence (accepted/accepted_at) :**\n\n"
@@ -772,7 +772,7 @@ for r in results:
                 report += "- 💡 Si accepted = false, accepted_at = date du refus (cohérent)\n"
                 report += "- 💡 Si accepted = true, accepted_at = date de l'acceptation\n"
                 report += "- 💡 Voir [doc/ANALYSE_COHERENCE_ACCEPTED_AT.md](../ANALYSE_COHERENCE_ACCEPTED_AT.md) pour plus de détails\n"
-            
+
             # Validation de cohérence pour opposed/opposed_at
             if 'opposed' in r.get('query', '') or 'opposed_at' in r.get('query', ''):
                 report += "\n**Validation de cohérence (opposed/opposed_at) :**\n\n"
@@ -780,9 +780,9 @@ for r in results:
                 report += "- 💡 opposed_at = date de la décision d'opposition\n"
                 report += "- 💡 Si opposed = true, opposed_at = date d'activation de l'opposition\n"
                 report += "- 💡 Si opposed = false, opposed_at = date de désactivation de l'opposition\n"
-        
+
         report += "\n"
-    
+
     # Pour les tests UPDATE (5, 6), afficher les valeurs avant/après
     if r.get('before_value') and r.get('after_value'):
         report += "**Démonstration de la modification :**\n\n"
@@ -842,4 +842,3 @@ code "  ✅ Lecture opposition (GET équivalent)"
 code "  ✅ Vérification avant catégorisation"
 code "  ✅ Activation/désactivation opposition"
 echo ""
-

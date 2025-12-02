@@ -9,7 +9,7 @@
 #   Ce script démontre de manière très didactique l'équivalent REPLICATION_SCOPE HBase
 #   avec les Consistency Levels HCD, permettant de contrôler la réplication et la
 #   cohérence des données dans un environnement multi-cluster ou multi-datacenter.
-#   
+#
 #   Cette version didactique affiche :
 #   - Le DDL complet (configuration de réplication)
 #   - Les équivalences HBase → HCD détaillées
@@ -325,9 +325,9 @@ REPORT_CONTENT=$(cat << EOF
 
 ### Avantages HCD vs HBase
 
-✅ **Consistency Levels** : Contrôle de la consistance (QUORUM, LOCAL_QUORUM, etc.)  
-✅ **Réplication synchrone** : Garantie de consistance (vs asynchrone HBase)  
-✅ **Performance vs Consistance** : Trade-off configurable  
+✅ **Consistency Levels** : Contrôle de la consistance (QUORUM, LOCAL_QUORUM, etc.)
+✅ **Réplication synchrone** : Garantie de consistance (vs asynchrone HBase)
+✅ **Performance vs Consistance** : Trade-off configurable
 ✅ **LOCAL_QUORUM** : Performance locale (multi-datacenter)
 
 ---
@@ -375,7 +375,7 @@ SELECT keyspace_name, replication
 FROM system_schema.keyspaces
 WHERE keyspace_name = '$KEYSPACE_NAME';
 \`\`\`
-**Résultat** : SimpleStrategy avec replication_factor=1 (POC single-node).  
+**Résultat** : SimpleStrategy avec replication_factor=1 (POC single-node).
 **Équivalent HBase** : REPLICATION_SCOPE => '0' (pas de réplication).
 
 ### Test 2 : Consistency Level par Requête
@@ -386,7 +386,7 @@ CONSISTENCY ONE;
 SELECT COUNT(*) FROM $KEYSPACE_NAME.operations_by_account
 WHERE code_si = '1' AND contrat = '5913101072';
 \`\`\`
-**Résultat** : Performance maximale (1 réplica répond).  
+**Résultat** : Performance maximale (1 réplica répond).
 **Valeur ajoutée HCD** : Contrôle de la consistance (non disponible avec HBase).
 
 **Test B - CONSISTENCY QUORUM** :
@@ -395,7 +395,7 @@ CONSISTENCY QUORUM;
 SELECT COUNT(*) FROM $KEYSPACE_NAME.operations_by_account
 WHERE code_si = '1' AND contrat = '5913101072';
 \`\`\`
-**Résultat** : Bon équilibre (RF/2 + 1 réplicas répondent).  
+**Résultat** : Bon équilibre (RF/2 + 1 réplicas répondent).
 **Valeur ajoutée HCD** : Trade-off performance vs consistance configurable.
 
 ### Test 3 : Configuration Production
@@ -409,7 +409,7 @@ WITH REPLICATION = {
   'lyon': 2     -- Cluster secondaire (2 réplicas)
 };
 \`\`\`
-**Résultat** : Réplication activée vers plusieurs datacenters.  
+**Résultat** : Réplication activée vers plusieurs datacenters.
 **Équivalent HBase** : REPLICATION_SCOPE => '1' (réplication activée).
 
 ---
@@ -418,9 +418,9 @@ WITH REPLICATION = {
 
 La démonstration du REPLICATION_SCOPE équivalent a été réalisée avec succès, mettant en évidence :
 
-✅ **Équivalence HBase** : SimpleStrategy (RF=1) = REPLICATION_SCOPE => '0', NetworkTopologyStrategy = REPLICATION_SCOPE => '1'.  
-✅ **Consistency Levels** : Contrôle de la consistance (QUORUM, LOCAL_QUORUM, etc.).  
-✅ **Réplication synchrone** : Garantie de consistance (vs asynchrone HBase).  
+✅ **Équivalence HBase** : SimpleStrategy (RF=1) = REPLICATION_SCOPE => '0', NetworkTopologyStrategy = REPLICATION_SCOPE => '1'.
+✅ **Consistency Levels** : Contrôle de la consistance (QUORUM, LOCAL_QUORUM, etc.).
+✅ **Réplication synchrone** : Garantie de consistance (vs asynchrone HBase).
 ✅ **Valeur ajoutée** : Performance vs Consistance configurable (ONE vs QUORUM vs ALL).
 
 ---
@@ -429,4 +429,3 @@ La démonstration du REPLICATION_SCOPE équivalent a été réalisée avec succ�
 EOF
 )
 generate_report "$REPORT_FILE" "🔄 Démonstration : REPLICATION_SCOPE Équivalent DomiramaCatOps" "$REPORT_CONTENT"
-

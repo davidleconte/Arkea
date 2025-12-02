@@ -106,18 +106,18 @@ entries = []
 for i in range(30):
     # Status alterné pour avoir des deux types
     status = "opposé" if i % 2 == 0 else "autorisé"
-    
+
     # Timestamp réparti sur l'année
     days_offset = random.randint(0, 364)
     timestamp = start_date + timedelta(days=days_offset)
-    
+
     # Raison aléatoire
     raison = random.choice(raisons)
-    
+
     # TIMEUUID basé sur le timestamp (approximation)
     # Utiliser uuid1 qui est basé sur le temps
     horodate = uuid1()
-    
+
     entries.append({
         'horodate': str(horodate),
         'status': status,
@@ -136,9 +136,9 @@ inserted = 0
 for entry in entries:
     # Échapper les apostrophes dans la raison
     raison_escaped = entry['raison'].replace("'", "''")
-    
+
     cql_query = f"""USE domiramacatops_poc; INSERT INTO historique_opposition (code_efs, no_pse, horodate, status, timestamp, raison) VALUES ('{code_efs}', '{no_pse}', {entry['horodate']}, '{entry['status']}', '{entry['timestamp']}', '{raison_escaped}');"""
-    
+
     # Exécuter via cqlsh
     try:
         result = subprocess.run(
@@ -165,17 +165,17 @@ FINAL_COUNT=$($CQLSH -e "USE domiramacatops_poc; SELECT COUNT(*) FROM historique
 
 if [ "$FINAL_COUNT" -gt 0 ]; then
     success "✅ Données de test préparées : $FINAL_COUNT entrées pour (code_efs=${TEST_CODE_EFS}, no_pse=${TEST_NO_PSE})"
-    
+
     # Afficher un résumé
     info "📋 Résumé des données :"
     echo "   - Total entrées : $FINAL_COUNT"
-    
+
     # Compter les status (côté application, car GROUP BY n'est pas supporté sur status et ALLOW FILTERING est interdit)
     # Récupérer toutes les données et compter côté application
     ALL_DATA=$($CQLSH -e "USE domiramacatops_poc; SELECT status FROM historique_opposition WHERE code_efs = '${TEST_CODE_EFS}' AND no_pse = '${TEST_NO_PSE}';" 2>&1)
     OPPOSE_COUNT=$(echo "$ALL_DATA" | grep -c "opposé" || echo "0")
     AUTORISE_COUNT=$(echo "$ALL_DATA" | grep -c "autorisé" || echo "0")
-    
+
     echo "   - Status 'opposé' : $OPPOSE_COUNT"
     echo "   - Status 'autorisé' : $AUTORISE_COUNT"
 else
@@ -185,4 +185,3 @@ fi
 echo ""
 success "✅ Préparation des données de test terminée"
 echo ""
-

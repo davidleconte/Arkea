@@ -10,6 +10,7 @@
 ### 1. Séparation des Préoccupations (Separation of Concerns)
 
 ✅ **Conforme** :
+
 - `inputs-clients/` - Inputs du client séparés
 - `inputs-ibm/` - Inputs IBM séparés
 - `software/` - Archives séparées des logiciels extraits
@@ -21,6 +22,7 @@
 ### 2. Documentation Centralisée
 
 ✅ **Conforme** :
+
 - Tous les fichiers `.md` dans `docs/`
 - README.md dans chaque répertoire
 - Documentation triée chronologiquement
@@ -30,6 +32,7 @@
 ### 3. Scripts Organisés et Numérotés
 
 ✅ **Conforme** :
+
 - Scripts numérotés selon l'ordre d'exécution (01-06)
 - Scripts utilitaires séparés (70-90)
 - Noms explicites et descriptifs
@@ -39,6 +42,7 @@
 ### 4. Configuration d'Environnement
 
 ✅ **Conforme** :
+
 - Fichier `.poc-profile` pour variables d'environnement
 - Variables centralisées et documentées
 - Fonctions utilitaires incluses
@@ -48,6 +52,7 @@
 ### 5. Versioning et Traçabilité
 
 ✅ **Conforme** :
+
 - README dans chaque répertoire
 - Documentation datée
 - Structure claire et documentée
@@ -59,6 +64,7 @@
 ### 1. Fichier `.gitignore` Manquant
 
 ❌ **Manquant** :
+
 - Pas de `.gitignore` pour exclure :
   - Logs (`*.log`)
   - Données temporaires (`/tmp/`)
@@ -71,6 +77,7 @@
 ### 2. Fichier `README.md` Principal Manquant
 
 ❌ **Manquant** :
+
 - Pas de `README.md` à la racine du projet
 - Pas de vue d'ensemble rapide du projet
 
@@ -79,6 +86,7 @@
 ### 3. Structure de Configuration
 
 ⚠️ **À améliorer** :
+
 - Pas de répertoire `config/` pour fichiers de configuration
 - Fichiers `.cql` à la racine (pourraient être dans `config/` ou `schemas/`)
 
@@ -87,6 +95,7 @@
 ### 4. Tests et Validation
 
 ⚠️ **À améliorer** :
+
 - Pas de répertoire `tests/` ou `scripts/tests/`
 - Tests intégrés dans les scripts principaux
 
@@ -95,6 +104,7 @@
 ### 5. Logs et Monitoring
 
 ⚠️ **À améliorer** :
+
 - Pas de répertoire `logs/` centralisé
 - Logs dans les répertoires des logiciels
 
@@ -103,6 +113,7 @@
 ### 6. Données et Schémas
 
 ⚠️ **À améliorer** :
+
 - Pas de répertoire `schemas/` pour schémas CQL
 - Pas de répertoire `data/` pour données de test
 - Fichiers `.cql` à la racine
@@ -152,6 +163,7 @@ Thumbs.db
 ### 2. Créer un `README.md` Principal
 
 À la racine du projet avec :
+
 - Description du projet
 - Structure rapide
 - Installation rapide
@@ -237,8 +249,3 @@ Si le projet doit être partagé
 ---
 
 **Projet bien structuré avec quelques améliorations possibles !** ✅
-
-
-
-
-

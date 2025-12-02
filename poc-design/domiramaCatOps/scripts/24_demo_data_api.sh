@@ -8,7 +8,7 @@
 #   Ce script démontre de manière très didactique l'utilisation et la valeur ajoutée
 #   de la Data API HCD, qui permet un accès simplifié à HCD via des requêtes HTTP
 #   REST/GraphQL, sans nécessiter de drivers binaires CQL.
-#   
+#
 #   Cette version didactique affiche :
 #   - Le contexte et les avantages de la Data API
 #   - Les équivalences CQL → Data API REST/GraphQL
@@ -389,11 +389,11 @@ La **Data API** est une API REST/GraphQL fournie par HCD pour simplifier l'accè
 
 ### Avantages
 
-✅ **Simplification** : Accès HTTP standard (REST/JSON)  
-✅ **Découplage** : Front-end/mobile indépendants du backend  
-✅ **GraphQL** : Requêtes flexibles côté client  
-✅ **Sécurité** : Authentification token centralisée  
-✅ **Documentation** : API auto-documentée  
+✅ **Simplification** : Accès HTTP standard (REST/JSON)
+✅ **Découplage** : Front-end/mobile indépendants du backend
+✅ **GraphQL** : Requêtes flexibles côté client
+✅ **Sécurité** : Authentification token centralisée
+✅ **Documentation** : API auto-documentée
 ✅ **Exposition** : Possibilité d'exposer aux partenaires
 
 ### Comparaison
@@ -495,10 +495,10 @@ Headers: X-Cassandra-Token: <token>
 
 La démonstration de la Data API a été réalisée avec succès, mettant en évidence :
 
-✅ **Simplification** : Accès HTTP standard (REST/JSON)  
-✅ **Découplage** : Front-end/mobile indépendants du backend  
-✅ **GraphQL** : Requêtes flexibles côté client  
-✅ **Sécurité** : Authentification token centralisée  
+✅ **Simplification** : Accès HTTP standard (REST/JSON)
+✅ **Découplage** : Front-end/mobile indépendants du backend
+✅ **GraphQL** : Requêtes flexibles côté client
+✅ **Sécurité** : Authentification token centralisée
 ✅ **Exposition** : Possibilité d'exposer aux partenaires
 
 ### Quand utiliser Data API vs CQL Direct
@@ -522,4 +522,3 @@ La démonstration de la Data API a été réalisée avec succès, mettant en év
 EOF
 )
 generate_report "$REPORT_FILE" "📡 Démonstration : Data API REST/GraphQL DomiramaCatOps" "$REPORT_CONTENT"
-

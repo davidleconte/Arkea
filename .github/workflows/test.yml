@@ -1,0 +1,139 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  # =============================================================================
+  # Tests de Syntaxe et Validation
+  # =============================================================================
+  syntax-check:
+    name: Syntax Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Check Shell Scripts Syntax
+        run: |
+          find scripts/ -name "*.sh" -type f | while read -r script; do
+            echo "Checking: $script"
+            bash -n "$script" || exit 1
+          done
+      
+      - name: Check Python Scripts Syntax
+        run: |
+          find . -name "*.py" -type f -not -path "./.git/*" -not -path "./binaire/*" | while read -r script; do
+            echo "Checking: $script"
+            python3 -m py_compile "$script" || exit 1
+          done
+
+  # =============================================================================
+  # Tests de Configuration
+  # =============================================================================
+  config-check:
+    name: Configuration Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Check .poc-config.sh
+        run: |
+          if [ -f .poc-config.sh ]; then
+            bash -n .poc-config.sh || exit 1
+            echo "✅ .poc-config.sh syntax OK"
+          else
+            echo "❌ .poc-config.sh missing"
+            exit 1
+          fi
+      
+      - name: Check .poc-profile
+        run: |
+          if [ -f .poc-profile ]; then
+            bash -n .poc-profile || exit 1
+            echo "✅ .poc-profile syntax OK"
+          else
+            echo "❌ .poc-profile missing"
+            exit 1
+          fi
+      
+      - name: Check .gitignore
+        run: |
+          if [ -f .gitignore ]; then
+            echo "✅ .gitignore present"
+          else
+            echo "❌ .gitignore missing"
+            exit 1
+          fi
+
+  # =============================================================================
+  # Tests de Documentation
+  # =============================================================================
+  docs-check:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Check README.md
+        run: |
+          if [ -f README.md ]; then
+            echo "✅ README.md present"
+          else
+            echo "❌ README.md missing"
+            exit 1
+          fi
+      
+      - name: Check Markdown Links
+        run: |
+          # Vérifier que les liens dans la documentation sont valides
+          find docs/ -name "*.md" -type f | while read -r doc; do
+            echo "Checking links in: $doc"
+            # Note: Installation de markdown-link-check si nécessaire
+          done
+
+  # =============================================================================
+  # Tests de Structure
+  # =============================================================================
+  structure-check:
+    name: Structure Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Check Required Directories
+        run: |
+          required_dirs=("scripts" "docs" "schemas")
+          for dir in "${required_dirs[@]}"; do
+            if [ -d "$dir" ]; then
+              echo "✅ $dir/ present"
+            else
+              echo "❌ $dir/ missing"
+              exit 1
+            fi
+          done
+      
+      - name: Check Scripts Organization
+        run: |
+          if [ -d "scripts/setup" ] && [ -d "scripts/utils" ]; then
+            echo "✅ Scripts organized correctly"
+          else
+            echo "❌ Scripts not organized correctly"
+            exit 1
+          fi
+

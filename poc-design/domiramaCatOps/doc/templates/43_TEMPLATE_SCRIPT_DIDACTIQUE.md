@@ -179,40 +179,40 @@ echo ""
 # Pour chaque test
 for i in "${!tests[@]}"; do
     test_case="${tests[$i]}"
-    
+
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "  TEST $((i+1))/${#tests[@]} : [Titre]"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-    
+
     expected "📋 Résultat attendu :"
     echo "   [Description du résultat attendu]"
     echo ""
-    
+
     info "📝 Requête CQL (DML) :"
     echo "   ┌─────────────────────────────────────────────────────────┐"
     code "[Requête CQL formatée]"
     echo "   └─────────────────────────────────────────────────────────┘"
     echo ""
-    
+
     info "   Explication de la requête :"
     echo "      - [Point 1]"
     echo "      - [Point 2]"
     echo "      - [Point 3]"
     echo ""
-    
+
     # Exécution
     echo "🚀 Exécution de la requête..."
     # [Code d'exécution]
-    
+
     # Résultats
     result "📊 Résultats obtenus :"
     echo "   ┌─────────────────────────────────────────────────────────┐"
     # [Affichage des résultats]
     echo "   └─────────────────────────────────────────────────────────┘"
     echo ""
-    
+
     # Validation
     # [Code de validation]
     echo ""
@@ -276,27 +276,27 @@ execute_and_display() {
     local query="$1"
     local description="$2"
     local expected="$3"
-    
+
     expected "📋 Résultat attendu :"
     echo "   $expected"
     echo ""
-    
+
     info "📝 Requête CQL (DML) :"
     show_cql_query "$query"
     echo ""
-    
+
     info "   Explication :"
     echo "      [Explications détaillées]"
     echo ""
-    
+
     echo "🚀 Exécution de la requête..."
     start_time=$(date +%s.%N)
-    
+
     result=$(./bin/cqlsh localhost 9042 -e "$query" 2>&1)
     exit_code=$?
     end_time=$(date +%s.%N)
     duration=$(echo "$end_time - $start_time" | bc)
-    
+
     if [ $exit_code -eq 0 ]; then
         success "✅ Requête exécutée en ${duration}s"
         echo ""
@@ -317,7 +317,7 @@ execute_and_display() {
 generate_report() {
     local report_file="$1"
     local title="$2"
-    
+
     cat > "$report_file" << EOF
 # $title
 
@@ -387,5 +387,3 @@ Voir les scripts de test dans `scripts/` pour des exemples complets.
 ---
 
 **✅ Ce template est spécifiquement conçu pour les scripts de démonstration DomiramaCatOps !**
-
-

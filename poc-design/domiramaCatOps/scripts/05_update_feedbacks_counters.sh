@@ -7,7 +7,7 @@
 # OBJECTIF :
 #   Ce script exécute les UPDATE COUNTER pour mettre à jour les compteurs
 #   dans feedback_par_libelle après le chargement batch des opérations.
-#   
+#
 #   IMPORTANT :
 #   - Spark Cassandra Connector ne supporte pas directement UPDATE COUNTER
 #   - Solution : Générer un script CQL et l'exécuter via cqlsh
@@ -167,9 +167,9 @@ total_ops = 0
 for i, p in enumerate(partitions):
     if (i + 1) % 100 == 0:
         print(f"   Partition {i+1}/{len(partitions)}...")
-    
+
     rows = list(session.execute(select_prep, [p.code_si, p.contrat]))
-    
+
     for row in rows:
         total_ops += 1
         if row.cat_auto and row.cat_auto.strip():
@@ -190,27 +190,27 @@ with open(CQL_OUTPUT, 'w') as f:
     f.write("-- Mise à jour des compteurs feedbacks (généré automatiquement)\n")
     f.write("-- Divisé en batches de 100 UPDATE pour éviter les timeouts\n")
     f.write("\n")
-    
+
     items = list(feedbacks_count.items())
     total_batches = (len(items) + BATCH_SIZE - 1) // BATCH_SIZE
-    
+
     for batch_num in range(total_batches):
         start_idx = batch_num * BATCH_SIZE
         end_idx = min(start_idx + BATCH_SIZE, len(items))
         batch_items = items[start_idx:end_idx]
-        
+
         f.write(f"-- Batch {batch_num + 1}/{total_batches} ({len(batch_items)} UPDATE)\n")
         f.write("BEGIN COUNTER BATCH\n")
-        
+
         for (type_op, sens_op, libelle, categorie), count in batch_items:
             # Échapper les quotes
             type_op_escaped = type_op.replace("'", "''")
             sens_op_escaped = sens_op.replace("'", "''")
             libelle_escaped = libelle.replace("'", "''")
             categorie_escaped = categorie.replace("'", "''")
-            
+
             f.write(f"UPDATE feedback_par_libelle SET count_engine = count_engine + {count} WHERE type_operation = '{type_op_escaped}' AND sens_operation = '{sens_op_escaped}' AND libelle_simplifie = '{libelle_escaped}' AND categorie = '{categorie_escaped}';\n")
-        
+
         f.write("APPLY BATCH;\n")
         f.write("\n")
 
@@ -338,4 +338,3 @@ echo "   - Utilisation de LOCAL_QUORUM pour convergence rapide"
 echo ""
 
 success "✅ Script terminé !"
-

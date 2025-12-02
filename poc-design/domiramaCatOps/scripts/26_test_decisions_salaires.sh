@@ -8,7 +8,7 @@
 # OBJECTIF :
 #   Ce script démontre de manière très didactique les fonctionnalités de gestion des
 #   décisions salaires (méthode de catégorisation sur libellés taggés salaires).
-#   
+#
 #   Cette version didactique affiche :
 #   - Les équivalences HBase → HCD détaillées
 #   - Les requêtes CQL complètes avant exécution
@@ -397,9 +397,9 @@ WHERE actif = true ALLOW FILTERING;
 
 La démonstration des Décisions Salaires a été réalisée avec succès, mettant en évidence :
 
-✅ **Structure normalisée** : Table dédiée (vs colonnes dynamiques HBase).  
-✅ **Métadonnées** : created_at, updated_at (traçabilité).  
-✅ **Soft delete** : actif = false (vs suppression HBase).  
+✅ **Structure normalisée** : Table dédiée (vs colonnes dynamiques HBase).
+✅ **Métadonnées** : created_at, updated_at (traçabilité).
+✅ **Soft delete** : actif = false (vs suppression HBase).
 ✅ **Index SAI** : Possibilité d'indexer sur 'actif' (performance).
 
 ---
@@ -408,4 +408,3 @@ La démonstration des Décisions Salaires a été réalisée avec succès, metta
 EOF
 )
 generate_report "$REPORT_FILE" "💰 Tests : Décisions Salaires DomiramaCatOps" "$REPORT_CONTENT"
-

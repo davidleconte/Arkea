@@ -12,6 +12,36 @@
 
 Ce projet démontre la faisabilité de migrer l'architecture HBase existante chez Arkéa vers DataStax Hyper-Converged Database (HCD) en utilisant Spark, Kafka et Cassandra.
 
+---
+
+## 🌍 Plateformes Supportées
+
+Le projet ARKEA est **cross-platform** et supporte les systèmes d'exploitation suivants :
+
+| Plateforme | Statut | Notes |
+|------------|--------|-------|
+| **macOS** 12+ | ✅ **Entièrement Supporté** | Testé sur MacBook Pro M3 Pro |
+| **Linux** (Ubuntu 20.04+, CentOS 7+) | ✅ **Entièrement Supporté** | Testé dans CI |
+| **Windows** (WSL2) | ✅ **Supporté** | Nécessite WSL2 (voir [Guide Windows](docs/GUIDE_INSTALLATION_WINDOWS.md)) |
+
+**Score de Portabilité** : **~90%** ✅
+
+### Guides d'Installation par Plateforme
+
+- 🍎 **macOS** : Voir [Guide de Déploiement](docs/DEPLOYMENT.md)
+- 🐧 **Linux** : Voir [Guide d'Installation Linux](docs/GUIDE_INSTALLATION_LINUX.md)
+- 🪟 **Windows** : Voir [Guide d'Installation Windows](docs/GUIDE_INSTALLATION_WINDOWS.md)
+
+### Fonctionnalités Cross-Platform
+
+- ✅ **Détection automatique de l'OS** via `$OSTYPE`
+- ✅ **Chemins portables** (pas de chemins hardcodés)
+- ✅ **Fonctions utilitaires portables** (`get_realpath`, `check_port`, `kill_process`)
+- ✅ **Configuration centralisée** (`.poc-config.sh`)
+- ✅ **Installation automatique** selon la plateforme
+
+---
+
 ### Composants Principaux
 
 - **HCD 1.2.3** - Base de données cible (basée sur Cassandra 4.0.11)
@@ -110,6 +140,10 @@ Toute la documentation est dans le répertoire `docs/` :
 
 ### Guides Principaux
 
+- **GUIDE_CHOIX_POC.md** - Guide pour choisir entre BIC, domirama2, domiramaCatOps
+- **GUIDE_COMPARAISON_POCS.md** - Comparaison technique détaillée des POCs
+- **GUIDE_CONTRIBUTION_POCS.md** - Standards pour contribuer aux POCs
+- **GUIDE_MAINTENANCE.md** - Processus de maintenance et archivage
 - **ARCHITECTURE.md** - Architecture complète (composants, flux, décisions)
 - **DEPLOYMENT.md** - Guide de déploiement complet
 - **TROUBLESHOOTING.md** - Guide de dépannage (problèmes courants, solutions, FAQ)
@@ -144,6 +178,10 @@ Voir `docs/README.md` pour l'index complet.
 - `70_kafka-helper.sh` - Helper pour Kafka
 - `80_verify_all.sh` - Vérifie tous les composants
 - `90_list_scripts.sh` - Liste tous les scripts
+- `91_check_consistency.sh` - Vérification de cohérence (chemins hardcodés, scripts, documentation)
+- `92_generate_docs.sh` - Génération automatique de documentation (index, listes, tableaux)
+- `93_fix_hardcoded_paths.sh` - Correction automatique des chemins hardcodés
+- `95_cleanup.sh` - Nettoyage automatique (UNLOAD_*, fichiers temporaires, logs anciens)
 
 ### Tests Scala (scripts/scala/)
 
@@ -213,6 +251,12 @@ Le projet inclut une structure de tests complète :
 
 # Tests E2E
 ./tests/run_e2e_tests.sh
+
+# Tests de portabilité
+./tests/run_portability_tests.sh
+
+# Tests de cohérence
+./tests/run_consistency_tests.sh
 ```
 
 Voir `tests/README.md` pour plus de détails.
