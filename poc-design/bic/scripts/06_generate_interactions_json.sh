@@ -37,7 +37,7 @@ else
         medium) NUM_EVENEMENTS=10000 ;;
         large) NUM_EVENEMENTS=100000 ;;
         huge) NUM_EVENEMENTS=1000000 ;;
-        *) 
+        *)
             warn "Volume '$VOLUME' non reconnu, utilisation de 'small' (1000)"
             NUM_EVENEMENTS=1000
             VOLUME="small"
@@ -81,8 +81,8 @@ success "Python 3 disponible"
 cat > "$REPORT_FILE" << EOF
 # 📥 Démonstration : Génération des Données Interactions JSON (Kafka)
 
-**Date** : $(date +'%Y-%m-%d %H:%M:%S')  
-**Script** : \`06_generate_interactions_json.sh\`  
+**Date** : $(date +'%Y-%m-%d %H:%M:%S')
+**Script** : \`06_generate_interactions_json.sh\`
 **Use Cases** : BIC-02 (Ingestion Kafka temps réel), BIC-07 (Format JSON)
 
 ---
@@ -211,21 +211,21 @@ def generer_evenement_json(i):
     canal = random.choices(CANAUX, weights=CANAUX_WEIGHTS)[0]
     type_interaction = random.choices(TYPES, weights=TYPES_WEIGHTS)[0]
     resultat = random.choices(RESULTATS, weights=RESULTATS_WEIGHTS)[0]
-    
+
     # Date aléatoire sur 30 derniers jours
     random_seconds = random.randint(0, TOTAL_SECONDS)
     date_interaction = START_DATE + timedelta(seconds=random_seconds)
-    
+
     # ID technique unique
     year_str = date_interaction.strftime("%Y")
     idt_tech = f"INT-{year_str}-{uuid4().hex[:6].upper()}"
-    
+
     # Conseiller
     conseiller = random.choice(CONSEILLERS)
-    
+
     # Détails
     details = random.choice(TEXTES_DETAILS.get(type_interaction, ["Interaction standard."]))
-    
+
     # Événement JSON
     evenement = {
         "id_interaction": idt_tech,
@@ -252,7 +252,7 @@ def generer_evenement_json(i):
             "timestamp_kafka": date_interaction.isoformat() + "Z"
         }
     }
-    
+
     return evenement
 
 # Génération des événements
@@ -261,7 +261,7 @@ evenements = []
 for i in range(NUM_EVENEMENTS):
     evenement = generer_evenement_json(i)
     evenements.append(evenement)
-    
+
     if (i + 1) % 100 == 0:
         print(f"  {i + 1}/{NUM_EVENEMENTS} événements générés...")
 
@@ -379,8 +379,8 @@ cat >> "$REPORT_FILE" << EOF
 
 ## ✅ Résultats
 
-**Fichier généré** : \`$OUTPUT_FILE\`  
-**Nombre d'événements** : $JSON_LINES  
+**Fichier généré** : \`$OUTPUT_FILE\`
+**Nombre d'événements** : $JSON_LINES
 **Format** : JSONL (une ligne JSON par événement)
 
 **Distribution** :
@@ -396,7 +396,7 @@ cat >> "$REPORT_FILE" << EOF
 
 ---
 
-**Date** : $(date +'%Y-%m-%d %H:%M:%S')  
+**Date** : $(date +'%Y-%m-%d %H:%M:%S')
 **Script** : \`06_generate_interactions_json.sh\`
 EOF
 
@@ -407,4 +407,3 @@ echo ""
 result "📄 Fichier JSON : $OUTPUT_FILE"
 result "📄 Rapport : $REPORT_FILE"
 echo ""
-

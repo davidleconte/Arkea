@@ -8,7 +8,7 @@
 # OBJECTIF :
 #   Ce script exécute une série de tests de recherche full-text sur la table
 #   'operations_by_account' en utilisant les index SAI (Storage-Attached Index).
-#   
+#
 #   Cette version didactique affiche :
 #   - Les opérateurs SAI expliqués (':' vs '=')
 #   - Les équivalences HBase → HCD (Solr → SAI)
@@ -465,8 +465,8 @@ info "📝 Génération du rapport de démonstration..."
 cat > "$REPORT_FILE" << EOF
 # 🔍 Démonstration : Tests de Recherche Domirama2 (SAI)
 
-**Date** : $(date +"%Y-%m-%d %H:%M:%S")  
-**Script** : $(basename "$0")  
+**Date** : $(date +"%Y-%m-%d %H:%M:%S")
+**Script** : $(basename "$0")
 **Objectif** : Démontrer les tests de recherche full-text avec SAI
 
 ---
@@ -565,9 +565,9 @@ Application → HCD → Application
 
 ### Avantages HCD
 
-✅ **Pas de système externe** : Solr n'est plus nécessaire  
-✅ **Performance améliorée** : Pas de réseau entre systèmes  
-✅ **Simplicité** : Une seule requête CQL  
+✅ **Pas de système externe** : Solr n'est plus nécessaire
+✅ **Performance améliorée** : Pas de réseau entre systèmes
+✅ **Simplicité** : Une seule requête CQL
 ✅ **Cohérence garantie** : Données et index dans la même base
 
 ---
@@ -674,26 +674,26 @@ LIMIT 10;
 
 ### Test 1 : Recherche 'loyer'
 
-**Attendu** : Opérations contenant 'loyer' (LOYER, loyers, etc.)  
-**Obtenu** : $RESULT1 résultat(s)  
+**Attendu** : Opérations contenant 'loyer' (LOYER, loyers, etc.)
+**Obtenu** : $RESULT1 résultat(s)
 **Statut** : ✅ Validé
 
 ### Test 4 : Recherche cat_auto = 'HABITATION'
 
-**Attendu** : Opérations avec catégorie exacte 'HABITATION'  
-**Obtenu** : $RESULT4 résultat(s)  
+**Attendu** : Opérations avec catégorie exacte 'HABITATION'
+**Obtenu** : $RESULT4 résultat(s)
 **Statut** : ✅ Validé
 
 ### Test 10 : Recherche 'Loyer' (insensible à la casse)
 
-**Attendu** : Opérations contenant 'LOYER' (grâce à l'analyzer lowercase)  
-**Obtenu** : $RESULT10 résultat(s)  
+**Attendu** : Opérations contenant 'LOYER' (grâce à l'analyzer lowercase)
+**Obtenu** : $RESULT10 résultat(s)
 **Statut** : ✅ Validé
 
 ### Test 11 : Recherche 'loyers' (avec stemming)
 
-**Attendu** : Opérations contenant 'LOYER' (grâce au stemming français)  
-**Obtenu** : $RESULT11 résultat(s)  
+**Attendu** : Opérations contenant 'LOYER' (grâce au stemming français)
+**Obtenu** : $RESULT11 résultat(s)
 **Statut** : ✅ Validé
 
 ---
@@ -702,17 +702,17 @@ LIMIT 10;
 
 Les tests de recherche full-text avec SAI ont été exécutés avec succès :
 
-✅ **12 tests de recherche** exécutés  
-✅ **Opérateurs SAI validés** (':' et '=')  
-✅ **Équivalences HBase → HCD** démontrées  
+✅ **12 tests de recherche** exécutés
+✅ **Opérateurs SAI validés** (':' et '=')
+✅ **Équivalences HBase → HCD** démontrées
 ✅ **Pertinence des résultats** validée
 
 ### Points Clés Démontrés
 
-✅ **Opérateur ':'** : Full-text search avec analyse  
-✅ **Opérateur '='** : Exact match sans analyse  
-✅ **Analyzer français** : Lowercase, stemming, asciifolding  
-✅ **Remplacement de Solr** : Par SAI intégré  
+✅ **Opérateur ':'** : Full-text search avec analyse
+✅ **Opérateur '='** : Exact match sans analyse
+✅ **Analyzer français** : Lowercase, stemming, asciifolding
+✅ **Remplacement de Solr** : Par SAI intégré
 ✅ **Performance améliorée** : Pas de système externe
 
 ### Prochaines Étapes
@@ -727,4 +727,3 @@ EOF
 
 success "✅ Rapport généré : $REPORT_FILE"
 echo ""
-

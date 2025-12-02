@@ -42,9 +42,11 @@
 | **Aucun set -e** | 1/61 | 2% | ⚠️ À corriger |
 
 **Scripts à corriger** :
+
 - `compact_table_prepare.sh` - Manque `set -euo pipefail`
 
 **Scripts à corriger** :
+
 - `compact_table_prepare.sh` - Manque `set -euo pipefail`
 
 **Recommandation** : ✅ **Excellent** - Presque tous les scripts utilisent `set -euo pipefail`
@@ -61,6 +63,7 @@
 **Note** : Les chemins hardcodés peuvent être dans les commentaires ou exemples, à vérifier.
 
 **Scripts sans setup_paths()** (19 scripts) :
+
 - `24_demonstration_fuzzy_search.sh`
 - `27_export_incremental_parquet_spark_shell.sh`
 - `28_demo_fenetre_glissante.sh`
@@ -87,6 +90,7 @@
 **Note** : Le "localhost hardcodé" détecté dans 50 scripts est probablement dans les commentaires ou exemples. Seuls 2 scripts ont localhost dans le code actif.
 
 **Scripts avec localhost hardcodé** :
+
 - `compact_table_prepare.sh`
 - `demo_data_api_http.sh`
 
@@ -110,12 +114,14 @@
 ### Scripts Setup (9 scripts)
 
 #### 10_setup_domirama2_poc.sh
+
 - ✅ **set -euo pipefail** : OUI
 - ✅ **setup_paths()** : OUI
 - ⚠️ **localhost hardcodé** : OUI (dans commentaires ou exemples ?)
 - ✅ **Documentation** : Complète
 
 #### 16_setup_advanced_indexes.sh
+
 - ✅ **set -euo pipefail** : OUI
 - ✅ **setup_paths()** : OUI
 - ⚠️ **localhost hardcodé** : OUI
@@ -128,6 +134,7 @@
 ### Scripts Load (6 scripts)
 
 #### 11_load_domirama2_data_parquet.sh
+
 - ✅ **set -euo pipefail** : OUI
 - ✅ **setup_paths()** : OUI
 - ⚠️ **localhost hardcodé** : OUI
@@ -138,6 +145,7 @@
 ### Scripts Test (17 scripts)
 
 Tous les scripts de test suivent les standards :
+
 - ✅ **set -euo pipefail** : OUI
 - ✅ **setup_paths()** : OUI (la plupart)
 - ✅ **Documentation** : Complète
@@ -147,6 +155,7 @@ Tous les scripts de test suivent les standards :
 ### Scripts Export (10 scripts)
 
 #### 27_export_incremental_parquet_spark_shell.sh
+
 - ✅ **set -euo pipefail** : OUI
 - ❌ **setup_paths()** : NON
 - ⚠️ **À améliorer** : Ajouter setup_paths()
@@ -156,6 +165,7 @@ Tous les scripts de test suivent les standards :
 ### Scripts Demo (15 scripts)
 
 Plusieurs scripts demo n'utilisent pas `setup_paths()` :
+
 - `24_demonstration_fuzzy_search.sh`
 - `28_demo_fenetre_glissante.sh`
 - `31_demo_bloomfilter_equivalent_v2.sh`

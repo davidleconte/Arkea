@@ -9,7 +9,7 @@
 #   'operations_by_account' avec toutes les colonnes de catégorisation
 #   (cat_auto, cat_confidence, cat_user, cat_date_user, cat_validee).
 #   Il crée également les index SAI pour la recherche full-text.
-#   
+#
 #   Cette version didactique affiche :
 #   - Le DDL complet (keyspace, table, index) avec explications
 #   - Les équivalences HBase → HCD pour chaque concept
@@ -310,16 +310,16 @@ TABLE_CHECK=$(./bin/cqlsh "$HCD_HOST" "$HCD_PORT" -e "DESCRIBE TABLE domirama2_p
 if echo "$TABLE_CHECK" | grep -q "operations_by_account"; then
     success "✅ Table operations_by_account créée"
     echo ""
-    
+
     # Compter les colonnes de catégorisation
     COLUMNS=$(echo "$TABLE_CHECK" | grep -E "(cat_auto|cat_confidence|cat_user|cat_date_user|cat_validée)" | wc -l | tr -d ' ')
-    
+
     if [ "$COLUMNS" -ge 5 ]; then
         success "✅ Toutes les colonnes de catégorisation présentes ($COLUMNS/5)"
     else
         warn "⚠️  Certaines colonnes manquantes (trouvé: $COLUMNS/5)"
     fi
-    
+
     echo ""
     result "📊 Structure de la table (extrait) :"
     echo "   ┌─────────────────────────────────────────────────────────┐"
@@ -522,8 +522,8 @@ info "📝 Génération du rapport de démonstration..."
 cat > "$REPORT_FILE" << EOF
 # 🏗️ Démonstration : Configuration du Schéma Domirama2
 
-**Date** : $(date +"%Y-%m-%d %H:%M:%S")  
-**Script** : $(basename "$0")  
+**Date** : $(date +"%Y-%m-%d %H:%M:%S")
+**Script** : $(basename "$0")
 **Objectif** : Démontrer la création complète du schéma HCD pour Domirama2
 
 ---
@@ -556,9 +556,9 @@ cat > "$REPORT_FILE" << EOF
 
 ### Améliorations HCD
 
-✅ **Schéma fixe et typé** (vs schéma flexible HBase)  
-✅ **Index intégrés** (vs Elasticsearch externe)  
-✅ **Support vectoriel natif** (vs ML externe)  
+✅ **Schéma fixe et typé** (vs schéma flexible HBase)
+✅ **Index intégrés** (vs Elasticsearch externe)
+✅ **Support vectoriel natif** (vs ML externe)
 ✅ **Stratégie multi-version native** (vs logique applicative HBase)
 
 ---
@@ -597,24 +597,24 @@ CREATE TABLE IF NOT EXISTS operations_by_account (
     -- Partition Keys
     code_si           TEXT,
     contrat           TEXT,
-    
+
     -- Clustering Keys
     date_op           TIMESTAMP,
     numero_op         INT,
-    
+
     -- Colonnes principales
     libelle           TEXT,
     montant           DECIMAL,
     type_operation    TEXT,
     operation_data    BLOB,
-    
+
     -- Colonnes de catégorisation
     cat_auto          TEXT,
     cat_confidence    DECIMAL,
     cat_user          TEXT,
     cat_date_user     TIMESTAMP,
     cat_validee       BOOLEAN,
-    
+
     PRIMARY KEY ((code_si, contrat), date_op, numero_op)
 ) WITH CLUSTERING ORDER BY (date_op DESC, numero_op ASC)
   AND default_time_to_live = 315360000;
@@ -641,7 +641,7 @@ CREATE TABLE IF NOT EXISTS operations_by_account (
 
 ### Vérification
 
-✅ Table 'operations_by_account' créée  
+✅ Table 'operations_by_account' créée
 ✅ Colonnes de catégorisation : $COLUMNS/5
 
 ---
@@ -659,7 +659,7 @@ CREATE TABLE IF NOT EXISTS operations_by_account (
 ### Index Full-Text (Analyzer Français)
 
 \`\`\`cql
-CREATE CUSTOM INDEX IF NOT EXISTS idx_libelle_fulltext 
+CREATE CUSTOM INDEX IF NOT EXISTS idx_libelle_fulltext
 ON operations_by_account(libelle)
 USING 'StorageAttachedIndex'
 WITH OPTIONS = {
@@ -697,10 +697,10 @@ WITH OPTIONS = {
 
 Le schéma Domirama2 a été créé avec succès :
 
-✅ **Keyspace** : domirama2_poc  
-✅ **Table** : operations_by_account  
-✅ **Colonnes** : Toutes les colonnes nécessaires présentes  
-✅ **Index** : Tous les index SAI créés  
+✅ **Keyspace** : domirama2_poc
+✅ **Table** : operations_by_account
+✅ **Colonnes** : Toutes les colonnes nécessaires présentes
+✅ **Index** : Tous les index SAI créés
 ✅ **Conformité** : 95% conforme à la proposition IBM
 
 ### Prochaines Étapes
@@ -716,4 +716,3 @@ EOF
 
 success "✅ Rapport généré : $REPORT_FILE"
 echo ""
-

@@ -7,7 +7,7 @@
 #   Ce script déploie Stargate (gateway HTTP pour HCD) pour rendre la Data API
 #   accessible via HTTP REST/GraphQL, permettant d'utiliser la Data API sans
 #   nécessiter de drivers binaires CQL.
-#   
+#
 #   Fonctionnalités :
 #   - Déploiement de Stargate avec Podman (conforme aux contraintes)
 #   - Configuration de l'endpoint Data API (http://localhost:8080)
@@ -157,11 +157,11 @@ EXISTING_CONTAINER=$($CONTAINER_CMD ps -a --filter "name=$STARGATE_CONTAINER" --
 
 if [ -n "$EXISTING_CONTAINER" ]; then
     success "Conteneur Stargate trouvé : $EXISTING_CONTAINER"
-    
+
     # Vérifier si le conteneur est en cours d'exécution
     if $CONTAINER_CMD ps --filter "name=$STARGATE_CONTAINER" --format "{{.Names}}" 2>/dev/null | grep -q "$STARGATE_CONTAINER"; then
         success "Stargate est déjà en cours d'exécution"
-        
+
         # Tester l'endpoint
         info "Test de l'endpoint..."
         if curl -s -o /dev/null -w "%{http_code}" --connect-timeout 2 "http://localhost:$STARGATE_PORT/v1/status" 2>&1 | grep -qE "200|404"; then
@@ -202,17 +202,17 @@ if [ -z "$EXISTING_CONTAINER" ]; then
     echo ""
     info "📋 Partie 2 : Téléchargement de l'Image Stargate"
     echo ""
-    
+
     info "Image : $STARGATE_IMAGE"
     info "Téléchargement en cours..."
-    
+
     if $CONTAINER_CMD pull "$STARGATE_IMAGE" 2>&1 | grep -E "(Pulling|Downloading|Downloaded|Already exists)"; then
         success "Image Stargate téléchargée"
     else
         error "Échec du téléchargement de l'image"
         exit 1
     fi
-    
+
     echo ""
 fi
 
@@ -224,16 +224,16 @@ if [ -z "$EXISTING_CONTAINER" ]; then
     echo ""
     info "📋 Partie 3 : Déploiement Stargate"
     echo ""
-    
+
     info "Configuration :"
     code "  Container : $STARGATE_CONTAINER"
     code "  Ports : 8080, 8081, 8082"
     code "  Cluster Seed : "$HCD_HOST:$HCD_PORT""
     code "  Mode : DEVELOPER_MODE=true"
     echo ""
-    
+
     info "Démarrage du conteneur Stargate..."
-    
+
     $CONTAINER_CMD run -d \
         --name "$STARGATE_CONTAINER" \
         -p 8080:8080 \
@@ -248,9 +248,9 @@ if [ -z "$EXISTING_CONTAINER" ]; then
         error "Échec du déploiement Stargate"
         exit 1
     }
-    
+
     success "Conteneur Stargate créé"
-    
+
     # Attendre que Stargate démarre
     info "Attente du démarrage de Stargate (30 secondes)..."
     sleep 30
@@ -287,12 +287,12 @@ HTTP_STATUS="000"
 
 while [ $RETRY -lt $MAX_RETRIES ]; do
     HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 2 "http://localhost:$STARGATE_PORT/v1/status" 2>&1 || echo "000")
-    
+
     if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "404" ]; then
         success "Endpoint accessible (HTTP Status: $HTTP_STATUS)"
         break
     fi
-    
+
     RETRY=$((RETRY + 1))
     if [ $RETRY -lt $MAX_RETRIES ]; then
         info "Tentative $RETRY/$MAX_RETRIES... (attente 5 secondes)"
@@ -335,7 +335,7 @@ if [ -f "$INSTALL_DIR/.poc-profile" ]; then
         echo "export API_ENDPOINT=\"$API_ENDPOINT\"" >> "$INSTALL_DIR/.poc-profile"
         success "API_ENDPOINT ajouté à .poc-profile"
     fi
-    
+
     # S'assurer que DATA_API_ENDPOINT est aussi défini (pour compatibilité)
     if ! grep -q "^export DATA_API_ENDPOINT=" "$INSTALL_DIR/.poc-profile"; then
         echo "export DATA_API_ENDPOINT=\"$API_ENDPOINT\"" >> "$INSTALL_DIR/.poc-profile"
@@ -357,9 +357,9 @@ echo ""
 
 if python3 -c "import astrapy" 2>/dev/null; then
     success "Client astrapy installé"
-    
+
     info "Test de connexion avec le client Python..."
-    
+
     # Créer un script de test temporaire
     TEST_SCRIPT=$(mktemp /tmp/test_stargate_XXXXXX.py)
     cat > "$TEST_SCRIPT" <<EOF
@@ -386,7 +386,7 @@ except Exception as e:
     print(f"❌ Erreur : {e}")
     sys.exit(1)
 EOF
-    
+
     # Exécuter le test
     if API_ENDPOINT="$API_ENDPOINT" python3 "$TEST_SCRIPT" 2>&1; then
         success "Test de connexion réussi"
@@ -395,7 +395,7 @@ EOF
         warn "   → Vérifiez que Stargate est complètement démarré"
         warn "   → Attendez quelques secondes et réessayez"
     fi
-    
+
     rm -f "$TEST_SCRIPT"
 else
     warn "Client astrapy non installé"
@@ -427,4 +427,3 @@ code "  podman stop $STARGATE_CONTAINER  # Arrêter Stargate"
 code "  podman start $STARGATE_CONTAINER # Démarrer Stargate"
 code "  podman rm -f $STARGATE_CONTAINER # Supprimer Stargate"
 echo ""
-

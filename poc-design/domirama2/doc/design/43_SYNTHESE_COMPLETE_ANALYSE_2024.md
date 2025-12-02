@@ -13,6 +13,7 @@
 #### Table Domirama (B997X04:domirama)
 
 **Configuration HBase** :
+
 - **Table** : `B997X04:domirama`
 - **Namespace** : `B997X04`
 - **Column Families** : `data`, `meta`, `category`
@@ -21,16 +22,19 @@
 - **REPLICATION_SCOPE** : `1` (réplication multi-cluster)
 
 **Key Design HBase** :
+
 - **Rowkey** : `code_si` + `contrat` + `binaire(date_op + numero_op)`
 - **Tri** : Antichronologique (plus récent en premier)
 - **Structure** : Binaire combinant date et numéro d'opération
 
 **Format de Stockage** :
+
 - **Données COBOL** : Thrift encodé en binaire Base64
 - **Colonnes dynamiques** : Calquées sur propriétés du POJO Thrift
 - **Optimisation** : BLOOMFILTER ROWCOL pour filtres sur valeurs
 
 **Écriture (Write Operations)** :
+
 1. **Batch (MapReduce)** :
    - Écriture HBase dans un programme MapReduce en bulkLoad
    - Format : SequenceFile → MapReduce → HBase bulkLoad
@@ -42,6 +46,7 @@
    - Temporalité des cellules (batch écrit sur timestamp fixe, client sur timestamp réel)
 
 **Lecture (Read Operations)** :
+
 1. **Temps Réel (API)** :
    - Lecture Temps réel par l'API à l'aide de SCAN + value filter
    - Utilisé pour recherche avec filtres
@@ -52,12 +57,14 @@
    - FullScan + STARTROW + STOPROW + TIMERANGE pour fenêtre glissante
 
 **Fonctionnalités Spécifiques** :
+
 - **TTL automatique** : Purge automatique des données expirées (10 ans)
 - **Temporalité des cellules** : Le batch écrit toujours sur le même timestamp, le client écrit sur le timestamp réel de son action
 - **BLOOMFILTER** : Optimisation pour lectures par rowkey + column qualifier
 - **REPLICATION_SCOPE** : Réplication multi-cluster activée
 
 **Limitations Identifiées** :
+
 - ⚠️ **Scan complet** : Nécessaire pour créer l'index Solr à chaque connexion (performance)
 - ⚠️ **Architecture complexe** : HBase + Solr + MapReduce + PIG (maintenance)
 - ⚠️ **Scalabilité** : Solr in-memory ne scale pas bien
@@ -72,6 +79,7 @@
 #### Recommandations Techniques
 
 **Schéma CQL Recommandé** :
+
 ```cql
 CREATE TABLE operations_by_account (
     code_si TEXT,
@@ -91,31 +99,37 @@ CREATE TABLE operations_by_account (
 ```
 
 **Stratégie Multi-Version** :
+
 - Batch écrit **UNIQUEMENT** `cat_auto` et `cat_confidence`
 - Client écrit dans `cat_user`, `cat_date_user`, `cat_validee`
 - Application priorise `cat_user` si non nul (remplace temporalité HBase)
 
 **Recherche Full-Text** :
+
 - **SAI (Storage-Attached Indexing)** : Index persistant intégré
 - **Analyzer Lucene** : Stemming français, asciifolding, lowercase
 - **Avantage** : Pas de scan complet, index mis à jour en temps réel
 
 **Recherche Vectorielle** (Optionnel) :
+
 - **Embeddings** : Vecteurs pour recherche sémantique
 - **ANN** : Approximate Nearest Neighbor pour similarité
 - **Avantage** : Tolère les typos, recherche sémantique
 
 **Ingestion** :
+
 - **Spark** : Remplace MapReduce/PIG
 - **Spark Cassandra Connector** : Intégration native
 - **DSBulk** : Pour bulk loads massifs
 - **Format** : CSV (POC1) ou SequenceFile (POC2)
 
 **Exposition** :
+
 - **Data API** : REST/GraphQL (remplace drivers binaires)
 - **CQL** : Pour accès direct
 
 **Export** :
+
 - **Export incrémental** : SELECT WHERE date_op BETWEEN
 - **Format** : Parquet recommandé (cohérent avec ingestion)
 
@@ -126,12 +140,14 @@ CREATE TABLE operations_by_account (
 ### Scripts par Catégorie
 
 #### Configuration et Setup (Scripts 10)
+
 - ✅ `10_setup_domirama2_poc.sh` : Version standard
 - ✅ `10_setup_domirama2_poc_v2_didactique.sh` : Version didactique avec documentation automatique
 - **Fonctionnalités** : Création keyspace, table, index SAI de base
 - **Démonstration** : `10_SETUP_DEMONSTRATION.md`
 
 #### Ingestion (Scripts 11, 14)
+
 - ✅ `11_load_domirama2_data_parquet.sh` : Version standard (recommandé)
 - ✅ `11_load_domirama2_data_parquet_v2_didactique.sh` : Version didactique
 - ✅ `11_load_domirama2_data_fixed.sh` : Version avec corrections
@@ -141,6 +157,7 @@ CREATE TABLE operations_by_account (
 - **Démonstrations** : `11_INGESTION_DEMONSTRATION.md`, `11_INGESTION_PARQUET_DEMONSTRATION.md`
 
 #### Recherche de Base (Scripts 12-13)
+
 - ✅ `12_test_domirama2_search.sh` : Tests de recherche de base
 - ✅ `12_test_domirama2_search_v2_didactique.sh` : Version didactique
 - ✅ `13_test_domirama2_api_client.sh` : Tests API correction client
@@ -149,6 +166,7 @@ CREATE TABLE operations_by_account (
 - **Démonstrations** : `12_SEARCH_DEMONSTRATION.md`, `13_API_CLIENT_DEMONSTRATION.md`
 
 #### Recherche Avancée (Scripts 15-20)
+
 - ✅ `15_test_fulltext_complex.sh` : Tests full-text complexes
 - ✅ `15_test_fulltext_complex_v2_didactique.sh` : Version didactique
 - ✅ `16_setup_advanced_indexes.sh` : Configuration index SAI avancés
@@ -167,6 +185,7 @@ CREATE TABLE operations_by_account (
 - **Démonstrations** : `15_FULLTEXT_COMPLEX_DEMONSTRATION.md`, `17_ADVANCED_SEARCH_DEMONSTRATION.md`, `18_DEMONSTRATION.md`
 
 #### Fuzzy/Vector Search (Scripts 21-25)
+
 - ✅ `21_setup_fuzzy_search.sh` : Configuration fuzzy search (VECTOR column)
 - ✅ `21_setup_fuzzy_search_v2_didactique.sh` : Version didactique
 - ✅ `22_generate_embeddings.sh` : Génération embeddings ByteT5
@@ -180,12 +199,14 @@ CREATE TABLE operations_by_account (
 - **Démonstrations** : `21_FUZZY_SEARCH_SETUP.md`, `23_FUZZY_SEARCH_DEMONSTRATION.md`, `24_FUZZY_SEARCH_COMPLETE_DEMONSTRATION.md`, `25_HYBRID_SEARCH_DEMONSTRATION.md`, `25_TEST_IMPROVEMENTS_AND_VALIDATION.md`
 
 #### Multi-Version et Time Travel (Scripts 26)
+
 - ✅ `26_test_multi_version_time_travel.sh` : Tests multi-version avec time travel
 - ✅ `26_test_multi_version_time_travel_v2_didactique.sh` : Version didactique
 - **Fonctionnalités** : Logique multi-version, time travel, priorité client > batch, aucune perte de correction client
 - **Démonstration** : `26_MULTI_VERSION_TIME_TRAVEL_DEMONSTRATION.md`
 
 #### Exports (Scripts 27-28)
+
 - ✅ `27_export_incremental_parquet.sh` : Export incrémental Parquet (spark-submit)
 - ✅ `27_export_incremental_parquet_spark_shell.sh` : Alternative spark-shell
 - ✅ `27_export_incremental_parquet_v2_didactique.sh` : Version didactique (DSBulk + Spark)
@@ -196,6 +217,7 @@ CREATE TABLE operations_by_account (
 - **Démonstrations** : `27_EXPORT_DEMONSTRATION.md`, `28_FENETRE_GLISSANTE_DEMONSTRATION.md`
 
 #### Requêtes In-Base (Scripts 29-30)
+
 - ✅ `29_demo_requetes_fenetre_glissante.sh` : Requêtes fenêtre glissante
 - ✅ `29_demo_requetes_fenetre_glissante_v2_didactique.sh` : Version didactique
 - ✅ `30_demo_requetes_startrow_stoprow.sh` : Requêtes STARTROW/STOPROW
@@ -204,6 +226,7 @@ CREATE TABLE operations_by_account (
 - **Démonstrations** : `29_FENETRE_GLISSANTE_REQUETES_DEMONSTRATION.md`, `30_STARTROW_STOPROW_REQUETES_DEMONSTRATION.md`
 
 #### Fonctionnalités HBase (Scripts 31-35)
+
 - ✅ `31_demo_bloomfilter_equivalent_v2.sh` : BLOOMFILTER équivalent
 - ✅ `32_demo_performance_comparison.sh` : Comparaison performance détaillée
 - ✅ `33_demo_colonnes_dynamiques_v2.sh` : Colonnes dynamiques (10 parties)
@@ -213,6 +236,7 @@ CREATE TABLE operations_by_account (
 - **Documentation** : `14_README_BLOOMFILTER_EQUIVALENT.md`, `15_README_COLONNES_DYNAMIQUES.md`, `16_README_REPLICATION_SCOPE.md`, `17_README_DSBULK.md`
 
 #### Data API (Scripts 36-41)
+
 - ✅ `36_setup_data_api.sh` : Configuration Data API
 - ✅ `37_demo_data_api.sh` : Démonstration valeur ajoutée
 - ✅ `38_verifier_endpoint_data_api.sh` : Vérification endpoint
@@ -229,19 +253,23 @@ CREATE TABLE operations_by_account (
 ### Démonstrations par Catégorie
 
 #### Setup et Ingestion (3 démonstrations)
+
 - ✅ `10_SETUP_DEMONSTRATION.md` : Configuration complète du schéma
 - ✅ `11_INGESTION_DEMONSTRATION.md` : Ingestion avec stratégie multi-version
 - ✅ `11_INGESTION_PARQUET_DEMONSTRATION.md` : Ingestion Parquet optimisée
 
 #### Recherche (3 démonstrations)
+
 - ✅ `12_SEARCH_DEMONSTRATION.md` : Recherche de base
 - ✅ `15_FULLTEXT_COMPLEX_DEMONSTRATION.md` : Full-text complexe
 - ✅ `17_ADVANCED_SEARCH_DEMONSTRATION.md` : Recherche avancée (20 tests)
 
 #### Démonstration Complète (1 démonstration)
+
 - ✅ `18_DEMONSTRATION.md` : Orchestration complète (20 démonstrations pédagogiques)
 
 #### Fuzzy/Vector/Hybrid Search (4 démonstrations)
+
 - ✅ `21_FUZZY_SEARCH_SETUP.md` : Configuration fuzzy search
 - ✅ `23_FUZZY_SEARCH_DEMONSTRATION.md` : Démonstration fuzzy search
 - ✅ `24_FUZZY_SEARCH_COMPLETE_DEMONSTRATION.md` : Démonstration complète fuzzy search
@@ -249,14 +277,17 @@ CREATE TABLE operations_by_account (
 - ✅ `25_TEST_IMPROVEMENTS_AND_VALIDATION.md` : Tests et améliorations script 25
 
 #### Multi-Version (1 démonstration)
+
 - ✅ `26_MULTI_VERSION_TIME_TRAVEL_DEMONSTRATION.md` : Logique multi-version avec time travel
 
 #### Exports (3 démonstrations)
+
 - ✅ `27_EXPORT_DEMONSTRATION.md` : Export incrémental Parquet (DSBulk + Spark)
 - ✅ `28_FENETRE_GLISSANTE_DEMONSTRATION.md` : Fenêtre glissante (DSBulk + Spark)
 - ✅ `29_FENETRE_GLISSANTE_REQUETES_DEMONSTRATION.md` : Requêtes fenêtre glissante
 
 #### Requêtes In-Base (1 démonstration)
+
 - ✅ `30_STARTROW_STOPROW_REQUETES_DEMONSTRATION.md` : Requêtes STARTROW/STOPROW
 
 ---
@@ -319,6 +350,7 @@ Tous les besoins fonctionnels majeurs sont satisfaits.
 ### Gaps Mineurs : **1** 🟡
 
 #### DSBulk (Optionnel)
+
 - **Statut** : ⚠️ Optionnel (Spark utilisé à la place, acceptable)
 - **Justification** : Spark fonctionne bien pour le POC, DSBulk peut être évalué si volumes très importants
 - **Script disponible** : `35_demo_dsbulk_v2.sh`
@@ -459,6 +491,3 @@ Tous les besoins fonctionnels majeurs sont satisfaits.
 ---
 
 **✅ Synthèse complète prête pour mise à jour des fichiers .md**
-
-
-

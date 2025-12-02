@@ -81,8 +81,8 @@ success "HCD est démarré"
 cat > "$REPORT_FILE" << 'EOF'
 # ⏱️ Démonstration : TTL (Time-To-Live) 2 ans
 
-**Date** : 2025-12-01  
-**Script** : `15_test_ttl.sh`  
+**Date** : 2025-12-01
+**Script** : `15_test_ttl.sh`
 **Use Cases** : BIC-06 (TTL 2 ans)
 
 ---
@@ -182,7 +182,7 @@ IDT_TECH="TTL-TEST-001"
 RESULTAT="succès"
 JSON_DATA='{"id_interaction":"TTL-TEST-001","test":"ttl_default"}'
 
-QUERY2="INSERT INTO $KEYSPACE.$TABLE 
+QUERY2="INSERT INTO $KEYSPACE.$TABLE
 (code_efs, numero_client, date_interaction, canal, type_interaction, idt_tech, resultat, json_data, created_at, updated_at, version)
 VALUES ('$CODE_EFS', '$NUMERO_CLIENT', '$DATE_INTERACTION', '$CANAL', '$TYPE_INTERACTION', '$IDT_TECH', '$RESULTAT', '$JSON_DATA', toTimestamp(now()), toTimestamp(now()), 1);"
 
@@ -205,22 +205,22 @@ echo "🚀 Exécution de l'insertion..."
 $CQLSH -e "$QUERY2" > /dev/null 2>&1 || true
 if [ $? -eq 0 ]; then
     success "✅ Interaction insérée avec succès"
-    
+
     # Vérifier le TTL restant
-    QUERY2_CHECK="SELECT code_efs, numero_client, date_interaction, TTL(json_data) as ttl_remaining 
-FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+    QUERY2_CHECK="SELECT code_efs, numero_client, date_interaction, TTL(json_data) as ttl_remaining
+FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND date_interaction = '$DATE_INTERACTION'
   AND canal = '$CANAL'
   AND type_interaction = '$TYPE_INTERACTION'
   AND idt_tech = '$IDT_TECH';"
-    
+
     echo ""
     info "🔍 Vérification du TTL restant..."
     RESULT2_CHECK=$($CQLSH -e "$QUERY2_CHECK" 2>&1)
     echo "$RESULT2_CHECK"
-    
+
     TTL_REMAINING=$(echo "$RESULT2_CHECK" | grep -E "^[[:space:]]*EFS001" | awk '{print $NF}' | tr -d '[:space:]' || echo "0")
     if [ "$TTL_REMAINING" != "0" ] && [ "$TTL_REMAINING" -gt 60000000 ]; then
         success "✅ TTL restant : $TTL_REMAINING secondes (~$(echo "scale=1; $TTL_REMAINING / 86400" | bc) jours)"
@@ -249,7 +249,7 @@ IDT_TECH2="TTL-TEST-002"
 JSON_DATA2='{"id_interaction":"TTL-TEST-002","test":"ttl_custom_60s"}'
 TTL_CUSTOM=60
 
-QUERY3="INSERT INTO $KEYSPACE.$TABLE 
+QUERY3="INSERT INTO $KEYSPACE.$TABLE
 (code_efs, numero_client, date_interaction, canal, type_interaction, idt_tech, resultat, json_data, created_at, updated_at, version)
 VALUES ('$CODE_EFS', '$NUMERO_CLIENT', '$DATE_INTERACTION2', '$CANAL', '$TYPE_INTERACTION', '$IDT_TECH2', '$RESULTAT', '$JSON_DATA2', toTimestamp(now()), toTimestamp(now()), 1)
 USING TTL $TTL_CUSTOM;"
@@ -275,22 +275,22 @@ echo "🚀 Exécution de l'insertion avec TTL $TTL_CUSTOM secondes..."
 $CQLSH -e "$QUERY3" > /dev/null 2>&1 || true
 if [ $? -eq 0 ]; then
     success "✅ Interaction insérée avec succès (TTL $TTL_CUSTOM secondes)"
-    
+
     # Vérifier le TTL restant AVANT expiration
-    QUERY3_CHECK="SELECT code_efs, numero_client, date_interaction, TTL(json_data) as ttl_remaining 
-FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+    QUERY3_CHECK="SELECT code_efs, numero_client, date_interaction, TTL(json_data) as ttl_remaining
+FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND date_interaction = '$DATE_INTERACTION2'
   AND canal = '$CANAL'
   AND type_interaction = '$TYPE_INTERACTION'
   AND idt_tech = '$IDT_TECH2';"
-    
+
     echo ""
     info "🔍 Vérification du TTL restant AVANT expiration..."
     RESULT3_BEFORE=$($CQLSH -e "$QUERY3_CHECK" 2>&1)
     echo "$RESULT3_BEFORE"
-    
+
     TTL_REMAINING3_BEFORE=$(echo "$RESULT3_BEFORE" | grep -E "^[[:space:]]*EFS001" | awk '{print $NF}' | tr -d '[:space:]' || echo "0")
     if [ "$TTL_REMAINING3_BEFORE" != "0" ] && [ "$TTL_REMAINING3_BEFORE" -le 60 ] && [ "$TTL_REMAINING3_BEFORE" -gt 50 ]; then
         success "✅ TTL restant AVANT expiration : $TTL_REMAINING3_BEFORE secondes (attendu ~60s)"
@@ -299,19 +299,19 @@ WHERE code_efs = '$CODE_EFS'
         warn "⚠️  TTL restant inattendu : $TTL_REMAINING3_BEFORE secondes"
         RESULT3_BEFORE_STATUS="UNEXPECTED"
     fi
-    
+
     # Attendre 65 secondes pour démontrer l'expiration
     echo ""
     info "⏱️  Attente de 65 secondes pour démontrer la purge automatique..."
     echo "   (En production, le TTL serait de 2 ans, pas 60 secondes)"
     sleep 65
-    
+
     # Vérifier APRÈS expiration
     echo ""
     info "🔍 Vérification APRÈS expiration (la ligne devrait être expirée)..."
     RESULT3_AFTER=$($CQLSH -e "$QUERY3_CHECK" 2>&1)
     echo "$RESULT3_AFTER"
-    
+
     COUNT3_AFTER=$(echo "$RESULT3_AFTER" | grep -c "TTL-TEST-002" || echo "0")
     ROW_COUNT=$(echo "$RESULT3_AFTER" | grep -c "^[[:space:]]*EFS001" || echo "0")
     # Nettoyer les valeurs (enlever les retours à la ligne et espaces)
@@ -342,9 +342,9 @@ echo ""
 
 demo "Objectif : Vérifier le TTL restant sur des interactions existantes"
 
-QUERY4="SELECT code_efs, numero_client, date_interaction, TTL(json_data) as ttl_remaining 
-FROM $KEYSPACE.$TABLE 
-WHERE code_efs = 'EFS001' 
+QUERY4="SELECT code_efs, numero_client, date_interaction, TTL(json_data) as ttl_remaining
+FROM $KEYSPACE.$TABLE
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
 LIMIT 5;"
 
@@ -360,7 +360,7 @@ if [ $? -eq 0 ]; then
     result "📊 Résultats obtenus :"
     echo "$RESULT4" | head -10
     echo ""
-    
+
     # Extraire les TTL restants (dernière colonne)
     TTL_VALUES=$(echo "$RESULT4" | grep -E "^[[:space:]]*EFS001" | awk '{print $NF}' | grep -E "^[0-9]+" || echo "")
     if [ -n "$TTL_VALUES" ] && [ "$(echo "$TTL_VALUES" | wc -l | tr -d ' ')" -gt 0 ]; then
@@ -396,16 +396,16 @@ for i in {1..10}; do
     START_TIME_PERF=$(date +%s.%N)
     $CQLSH -e "$QUERY4" > /dev/null 2>&1
     END_TIME_PERF=$(date +%s.%N)
-    
+
     if command -v bc &> /dev/null; then
         DURATION_PERF=$(echo "$END_TIME_PERF - $START_TIME_PERF" | bc)
     else
         DURATION_PERF=$(python3 -c "print($END_TIME_PERF - $START_TIME_PERF)")
     fi
-    
+
     TIMES_PERF+=("$DURATION_PERF")
     TOTAL_TIME_PERF=$(echo "$TOTAL_TIME_PERF + $DURATION_PERF" | bc 2>/dev/null || python3 -c "print($TOTAL_TIME_PERF + $DURATION_PERF)")
-    
+
     # Min/Max
     if (( $(echo "$DURATION_PERF < $MIN_TIME_PERF" | bc -l 2>/dev/null || echo "0") )); then
         MIN_TIME_PERF=$DURATION_PERF
@@ -479,27 +479,27 @@ for i in "${!TTL_VALUES[@]}"; do
     DATE_TTL="2024-01-01 12:0$i:00+0000"
     IDT_TTL="TTL-TEST-MULTI-$i"
     JSON_TTL="{\"id_interaction\":\"$IDT_TTL\",\"test\":\"ttl_multi_${TTL_VAL}s\"}"
-    
-    QUERY_TTL="INSERT INTO $KEYSPACE.$TABLE 
+
+    QUERY_TTL="INSERT INTO $KEYSPACE.$TABLE
     (code_efs, numero_client, date_interaction, canal, type_interaction, idt_tech, resultat, json_data, created_at, updated_at, version)
     VALUES ('$CODE_EFS', '$NUMERO_CLIENT', '$DATE_TTL', '$CANAL', '$TYPE_INTERACTION', '$IDT_TTL', '$RESULTAT', '$JSON_TTL', toTimestamp(now()), toTimestamp(now()), 1)
     USING TTL $TTL_VAL;"
-    
+
     $CQLSH -e "$QUERY_TTL" > /dev/null 2>&1 || true
-    
+
     # Vérifier le TTL restant
-    QUERY_TTL_CHECK="SELECT TTL(json_data) as ttl_remaining 
-    FROM $KEYSPACE.$TABLE 
-    WHERE code_efs = '$CODE_EFS' 
+    QUERY_TTL_CHECK="SELECT TTL(json_data) as ttl_remaining
+    FROM $KEYSPACE.$TABLE
+    WHERE code_efs = '$CODE_EFS'
       AND numero_client = '$NUMERO_CLIENT'
       AND date_interaction = '$DATE_TTL'
       AND canal = '$CANAL'
       AND type_interaction = '$TYPE_INTERACTION'
       AND idt_tech = '$IDT_TTL';"
-    
+
     RESULT_TTL_CHECK=$($CQLSH -e "$QUERY_TTL_CHECK" 2>&1)
     TTL_REMAINING_CHECK=$(echo "$RESULT_TTL_CHECK" | grep -E "^[[:space:]]*EFS001" | awk '{print $NF}' | tr -d '[:space:]' || echo "0")
-    
+
     if [ "$TTL_REMAINING_CHECK" != "0" ] && [ "$TTL_REMAINING_CHECK" -le "$TTL_VAL" ] && [ "$TTL_REMAINING_CHECK" -gt $((TTL_VAL - 10)) ]; then
         success "✅ TTL $TTL_VAL s : TTL restant = $TTL_REMAINING_CHECK s (cohérent)"
         TTL_COUNTS+=("$TTL_REMAINING_CHECK")
@@ -562,23 +562,23 @@ for i in "${!TTL_LOAD_VALUES[@]}"; do
     DATE_LOAD="2024-01-01 13:0$i:00+0000"
     IDT_LOAD="TTL-LOAD-$i"
     JSON_LOAD="{\"id_interaction\":\"$IDT_LOAD\",\"test\":\"ttl_load_${TTL_LOAD}s\"}"
-    
-    QUERY_LOAD_TTL="INSERT INTO $KEYSPACE.$TABLE 
+
+    QUERY_LOAD_TTL="INSERT INTO $KEYSPACE.$TABLE
     (code_efs, numero_client, date_interaction, canal, type_interaction, idt_tech, resultat, json_data, created_at, updated_at, version)
     VALUES ('$CODE_EFS', '$NUMERO_CLIENT', '$DATE_LOAD', '$CANAL', '$TYPE_INTERACTION', '$IDT_LOAD', '$RESULTAT', '$JSON_LOAD', toTimestamp(now()), toTimestamp(now()), 1)
     USING TTL $TTL_LOAD;"
-    
+
     START_TIME_LOAD_TTL=$(date +%s.%N)
     RESULT_LOAD_TTL=$($CQLSH -e "$QUERY_LOAD_TTL" 2>&1)
     EXIT_CODE_LOAD_TTL=$?
     END_TIME_LOAD_TTL=$(date +%s.%N)
-    
+
     if command -v bc &> /dev/null; then
         DURATION_LOAD_TTL=$(echo "$END_TIME_LOAD_TTL - $START_TIME_LOAD_TTL" | bc)
     else
         DURATION_LOAD_TTL=$(python3 -c "print($END_TIME_LOAD_TTL - $START_TIME_LOAD_TTL)")
     fi
-    
+
     if [ $EXIT_CODE_LOAD_TTL -eq 0 ]; then
         SUCCESSFUL_INSERTS_TTL=$((SUCCESSFUL_INSERTS_TTL + 1))
         LOAD_TIMES_TTL+=("$DURATION_LOAD_TTL")
@@ -588,19 +588,19 @@ done
 
 if [ "$SUCCESSFUL_INSERTS_TTL" -gt 0 ]; then
     AVG_LOAD_TIME_TTL=$(echo "scale=4; $TOTAL_LOAD_TIME_TTL / $SUCCESSFUL_INSERTS_TTL" | bc 2>/dev/null || python3 -c "print($TOTAL_LOAD_TIME_TTL / $SUCCESSFUL_INSERTS_TTL)")
-    
+
     result "📊 Résultats test de charge multi-TTL :"
     echo "   - Insertions réussies : $SUCCESSFUL_INSERTS_TTL / ${#TTL_LOAD_VALUES[@]}"
     echo "   - Temps moyen par insertion : ${AVG_LOAD_TIME_TTL}s"
     echo "   - Temps total : ${TOTAL_LOAD_TIME_TTL}s"
-    
+
     # VALIDATION : Performance sous charge
     if (( $(echo "$AVG_LOAD_TIME_TTL < 0.2" | bc -l 2>/dev/null || echo "0") )); then
         success "✅ Performance sous charge validée : Temps moyen acceptable (< 0.2s)"
     else
         warn "⚠️  Performance sous charge : Temps moyen ${AVG_LOAD_TIME_TTL}s (peut être améliorée)"
     fi
-    
+
     # VALIDATION COMPLÈTE
     validate_complete \
         "TEST 7 : Test de Charge Multi-TTL" \
@@ -628,9 +628,9 @@ demo "Objectif : Analyser la distribution statistique des TTL restants sur un é
 info "📝 Analyse de la distribution des TTL restants..."
 
 # Récupérer les TTL restants pour plusieurs interactions
-QUERY_DIST="SELECT TTL(json_data) as ttl_remaining 
-FROM $KEYSPACE.$TABLE 
-WHERE code_efs = 'EFS001' 
+QUERY_DIST="SELECT TTL(json_data) as ttl_remaining
+FROM $KEYSPACE.$TABLE
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
 LIMIT 20;"
 
@@ -644,7 +644,7 @@ if [ -n "$TTL_DIST_VALUES" ]; then
     SUM_TTL=0
     MIN_TTL_DIST=999999999
     MAX_TTL_DIST=0
-    
+
     for ttl_val in "${TTL_ARRAY[@]}"; do
         SUM_TTL=$((SUM_TTL + ttl_val))
         if [ "$ttl_val" -lt "$MIN_TTL_DIST" ]; then
@@ -654,17 +654,17 @@ if [ -n "$TTL_DIST_VALUES" ]; then
             MAX_TTL_DIST=$ttl_val
         fi
     done
-    
+
     if [ "$TOTAL_TTL_DIST" -gt 0 ]; then
         AVG_TTL_DIST=$(echo "scale=0; $SUM_TTL / $TOTAL_TTL_DIST" | bc 2>/dev/null || python3 -c "print(int($SUM_TTL / $TOTAL_TTL_DIST))")
-        
+
         result "📊 Distribution des TTL restants :"
         echo "   - Nombre d'interactions analysées : $TOTAL_TTL_DIST"
         echo "   - TTL moyen restant : $AVG_TTL_DIST secondes (~$(echo "scale=1; $AVG_TTL_DIST / 86400" | bc 2>/dev/null || echo "N/A") jours)"
         echo "   - TTL minimum restant : $MIN_TTL_DIST secondes (~$(echo "scale=1; $MIN_TTL_DIST / 86400" | bc 2>/dev/null || echo "N/A") jours)"
         echo "   - TTL maximum restant : $MAX_TTL_DIST secondes (~$(echo "scale=1; $MAX_TTL_DIST / 86400" | bc 2>/dev/null || echo "N/A") jours)"
         echo "   - Écart : $((MAX_TTL_DIST - MIN_TTL_DIST)) secondes"
-        
+
         # VALIDATION : Distribution réaliste (TTL moyen proche de 2 ans)
         TTL_2_YEARS=63072000
         TTL_TOLERANCE=8640000  # 100 jours de tolérance
@@ -674,7 +674,7 @@ if [ -n "$TTL_DIST_VALUES" ]; then
         else
             warn "⚠️  Distribution : TTL moyen ($AVG_TTL_DIST s) éloigné de 2 ans ($TTL_2_YEARS s)"
         fi
-        
+
         # VALIDATION COMPLÈTE
         validate_complete \
             "TEST 8 : Analyse Distribution TTL Restants" \
@@ -740,7 +740,7 @@ $QUERY3
 
 **⏱️ Attente de 65 secondes pour démontrer la purge automatique...**
 
-**Résultat APRÈS expiration** : 
+**Résultat APRÈS expiration** :
 EOF
 
 if [ "$RESULT3_AFTER_STATUS" = "EXPIRED" ]; then
@@ -881,7 +881,7 @@ $QUERY4
 
 ---
 
-**Date** : 2025-12-01  
+**Date** : 2025-12-01
 **Script** : \`15_test_ttl.sh\`
 EOF
 
@@ -891,4 +891,3 @@ success "✅ Tests terminés avec succès"
 echo ""
 result "📄 Rapport généré : $REPORT_FILE"
 echo ""
-

@@ -8,7 +8,7 @@
 #   Ce script démontre de manière très didactique la recherche hybride qui
 #   combine Full-Text Search (SAI) et Vector Search (ByteT5) pour améliorer
 #   la pertinence des résultats.
-#   
+#
 #   Cette version améliorée affiche :
 #   - Le DDL complet (schéma pour recherche hybride)
 #   - Les requêtes CQL détaillées (DML) pour chaque stratégie
@@ -471,11 +471,11 @@ def load_model():
     print(f"   Modèle : {MODEL_NAME}")
     print(f"   Dimensions : {VECTOR_DIMENSION}")
     print()
-    
+
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, token=HF_API_KEY)
     model = AutoModel.from_pretrained(MODEL_NAME, token=HF_API_KEY)
     model.eval()
-    
+
     print("✅ Modèle chargé avec succès")
     print()
     return tokenizer, model
@@ -484,7 +484,7 @@ def encode_text(tokenizer, model, text):
     """Encode un texte en vecteur d'embedding."""
     if not text or text.strip() == "":
         return [0.0] * VECTOR_DIMENSION
-    
+
     inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
     with torch.no_grad():
         encoder_outputs = model.encoder(**inputs)
@@ -550,7 +550,7 @@ test_cases = [
         "strategy": "Vector seul avec fallback (typos sévères)",
         "explanation": "Démontre le fallback automatique : Full-Text ne trouve rien à cause de la typo ('carrefur' au lieu de 'carrefour'), donc fallback sur Vector Search qui tolère la typo grâce à la similarité sémantique."
     },
-    
+
     # ============================================
     # CATÉGORIE 1 : TYPOS PARTIELLES (2 tests)
     # ============================================
@@ -572,7 +572,7 @@ test_cases = [
         "category": "Typos Partielles",
         "complexity": "Moyenne"
     },
-    
+
     # ============================================
     # CATÉGORIE 2 : MULTI-TERMES 3+ (2 tests)
     # ============================================
@@ -594,7 +594,7 @@ test_cases = [
         "category": "Multi-Termes",
         "complexity": "Élevée"
     },
-    
+
     # ============================================
     # CATÉGORIE 3 : VARIATIONS LINGUISTIQUES (2 tests)
     # ============================================
@@ -616,7 +616,7 @@ test_cases = [
         "category": "Variations Linguistiques",
         "complexity": "Élevée"
     },
-    
+
     # ============================================
     # CATÉGORIE 4 : RECHERCHES CONTEXTUELLES (2 tests)
     # ============================================
@@ -638,7 +638,7 @@ test_cases = [
         "category": "Recherches Contextuelles",
         "complexity": "Élevée"
     },
-    
+
     # ============================================
     # CATÉGORIE 5 : SYNONYMES SÉMANTIQUES (2 tests)
     # ============================================
@@ -660,7 +660,7 @@ test_cases = [
         "category": "Synonymes Sémantiques",
         "complexity": "Très Élevée"
     },
-    
+
     # ============================================
     # CATÉGORIE 6 : NOMS PROPRES/CODES (2 tests)
     # ============================================
@@ -682,7 +682,7 @@ test_cases = [
         "category": "Noms Propres/Codes",
         "complexity": "Moyenne"
     },
-    
+
     # ============================================
     # CATÉGORIE 7 : LOCALISATION (2 tests)
     # ============================================
@@ -704,7 +704,7 @@ test_cases = [
         "category": "Localisation",
         "complexity": "Moyenne"
     },
-    
+
     # ============================================
     # CATÉGORIE 8 : CATÉGORIES/TYPES (1 test)
     # ============================================
@@ -717,7 +717,7 @@ test_cases = [
         "category": "Catégories/Types",
         "complexity": "Élevée"
     },
-    
+
     # ============================================
     # CATÉGORIE 9 : CONTEXTE TEMPOREL (1 test)
     # ============================================
@@ -730,7 +730,7 @@ test_cases = [
         "category": "Contexte Temporel",
         "complexity": "Moyenne"
     },
-    
+
     # ============================================
     # CATÉGORIE 10 : INVERSIONS (1 test)
     # ============================================
@@ -758,14 +758,14 @@ for i, test_case in enumerate(test_cases, 1):
     description = test_case["description"]
     expected = test_case["expected"]
     strategy = test_case["strategy"]
-    
+
     print(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     print(f"  TEST {i}/{len(test_cases)} : '{query_text}'")
     print(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     print()
-    
+
     explanation = test_case.get("explanation", "Aucune explication fournie")
-    
+
     print(f"📝 Description : {description}")
     print(f"📋 Résultat attendu : {expected}")
     print(f"🎯 Stratégie : {strategy}")
@@ -773,21 +773,21 @@ for i, test_case in enumerate(test_cases, 1):
     print(f"💡 Explication détaillée :")
     print(f"   {explanation}")
     print()
-    
+
     # Générer l'embedding de la requête
     print("🔄 Génération de l'embedding de la requête...")
     start_time = time.time()
     query_embedding = encode_text(tokenizer, model, query_text)
     encoding_time = time.time() - start_time
-    
+
     print(f"✅ Embedding généré en {encoding_time:.3f}s")
     print(f"   Vecteur : {format_vector_preview(query_embedding)}")
     print()
-    
+
     # Stratégie 1: Essayer Full-Text + Vector
     terms = query_text.lower().split()
     main_term = terms[0] if terms and len(terms[0]) > 2 else query_text.lower()
-    
+
     # Afficher la requête hybride
     print("📝 Requête CQL (DML) - Stratégie Hybride :")
     print("   ┌─────────────────────────────────────────────────────────┐")
@@ -805,14 +805,14 @@ for i, test_case in enumerate(test_cases, 1):
             print(f"   │ {line.strip()}")
     print("   └─────────────────────────────────────────────────────────┘")
     print()
-    
+
     print("   Explication de la requête hybride :")
     print("      - WHERE code_si = ... AND contrat = ... : Cible la partition")
     print(f"      - AND libelle : '{main_term}' : Filtre Full-Text (précision)")
     print("      - ORDER BY libelle_embedding ANN OF [...] : Tri Vector (pertinence)")
     print("      - LIMIT 5 : Retourne les 5 résultats les plus pertinents")
     print()
-    
+
     # Structure pour stocker les résultats de ce test
     test_result = {
         "test_number": i,
@@ -830,25 +830,25 @@ for i, test_case in enumerate(test_cases, 1):
         "success": False,
         "error": None
     }
-    
+
     # Exécuter la requête hybride
     print("🚀 Exécution de la requête hybride...")
     start_time = time.time()
-    
+
     try:
         statement = SimpleStatement(cql_query_hybrid, fetch_size=5)
         results = list(session.execute(statement))
         query_time = time.time() - start_time
         test_result["query_time"] = query_time
-        
+
         if results:
             print(f"✅ Requête hybride exécutée en {query_time:.3f}s")
             print(f"   Stratégie utilisée : Full-Text + Vector")
             print()
-            
+
             print(f"📊 Résultats obtenus ({len(results)} résultat(s)) :")
             print("   ┌─────────────────────────────────────────────────────────┐")
-            
+
             # Capturer les résultats pour la documentation
             for j, row in enumerate(results, 1):
                 libelle = row.libelle[:50] if row.libelle else "N/A"
@@ -856,7 +856,7 @@ for i, test_case in enumerate(test_cases, 1):
                 cat = row.cat_auto if row.cat_auto else "N/A"
                 print(f"   │ {j}. {libelle}")
                 print(f"   │    Montant: {montant} | Catégorie: {cat}")
-                
+
                 # Stocker le résultat complet
                 test_result["results"].append({
                     "rank": j,
@@ -864,13 +864,13 @@ for i, test_case in enumerate(test_cases, 1):
                     "montant": float(row.montant) if row.montant else None,
                     "cat_auto": row.cat_auto if row.cat_auto else None
                 })
-            
+
             print("   └─────────────────────────────────────────────────────────┘")
             print()
-            
+
             test_result["strategy_used"] = "Full-Text + Vector"
             test_result["success"] = True
-            
+
             # Validation
             first_result = results[0].libelle.upper() if results[0].libelle else ""
             if main_term.upper() in first_result or any(main_term.upper()[:3] in r.libelle.upper()[:10] for r in results if r.libelle):
@@ -883,7 +883,7 @@ for i, test_case in enumerate(test_cases, 1):
             print(f"⚠️  Aucun résultat avec Full-Text + Vector")
             print("   → Fallback sur Vector Search seul...")
             print()
-            
+
             # Stratégie 2: Fallback sur Vector seul
             print("📝 Requête CQL (DML) - Stratégie Vector Seul (Fallback) :")
             print("   ┌─────────────────────────────────────────────────────────┐")
@@ -899,44 +899,44 @@ for i, test_case in enumerate(test_cases, 1):
                     print(f"   │ {line.strip()}")
             print("   └─────────────────────────────────────────────────────────┘")
             print()
-            
+
             print("   Explication de la requête vectorielle (fallback) :")
             print("      - WHERE code_si = ... AND contrat = ... : Cible la partition")
             print("      - ORDER BY libelle_embedding ANN OF [...] : Tri Vector seul")
             print("      - LIMIT 100 : Plus de résultats pour filtrage côté client")
             print()
-            
+
             test_result["cql_query_vector"] = cql_query_vector.strip()
-            
+
             print("🚀 Exécution de la requête vectorielle (fallback)...")
             start_time = time.time()
-            
+
             statement = SimpleStatement(cql_query_vector, fetch_size=100)
             results = list(session.execute(statement))
             query_time = time.time() - start_time
             test_result["query_time"] = query_time
-            
+
             if results:
                 print(f"✅ Requête vectorielle exécutée en {query_time:.3f}s")
                 print(f"   Stratégie utilisée : Vector seul (fallback)")
                 print()
-                
+
                 # Filtrer côté client pour améliorer la pertinence avec correspondance floue améliorée
                 # AMÉLIORATION : Utilise distance de Levenshtein complète + similarité cosinus + score multi-facteurs
                 query_lower = query_text.lower()
                 terms_filter = [t for t in query_lower.split() if len(t) > 2]
-                
+
                 # Import numpy pour calculs vectoriels
                 import numpy as np
-                
+
                 def levenshtein_distance(s1, s2):
                     """Calcule la distance de Levenshtein complète entre deux chaînes."""
                     if len(s1) < len(s2):
                         return levenshtein_distance(s2, s1)
-                    
+
                     if len(s2) == 0:
                         return len(s1)
-                    
+
                     previous_row = range(len(s2) + 1)
                     for i, c1 in enumerate(s1):
                         current_row = [i + 1]
@@ -946,37 +946,37 @@ for i, test_case in enumerate(test_cases, 1):
                             substitutions = previous_row[j] + (c1 != c2)
                             current_row.append(min(insertions, deletions, substitutions))
                         previous_row = current_row
-                    
+
                     return previous_row[-1]
-                
+
                 def cosine_similarity(vec1, vec2):
                     """Calcule la similarité cosinus entre deux vecteurs."""
                     if vec1 is None or vec2 is None:
                         return 0.0
-                    
+
                     try:
                         vec1_array = np.array(vec1)
                         vec2_array = np.array(vec2)
                         dot_product = np.dot(vec1_array, vec2_array)
                         norm1 = np.linalg.norm(vec1_array)
                         norm2 = np.linalg.norm(vec2_array)
-                        
+
                         if norm1 == 0 or norm2 == 0:
                             return 0.0
-                        
+
                         return dot_product / (norm1 * norm2)
                     except:
                         return 0.0
-                
+
                 def fuzzy_match_improved(term, text):
                     """Calcule un score de correspondance floue amélioré avec Levenshtein complète."""
                     term_lower = term.lower()
                     text_lower = text.lower()
-                    
+
                     # Correspondance exacte
                     if term_lower in text_lower:
                         return 10, text_lower.find(term_lower)
-                    
+
                     # Correspondance avec variations communes (typos)
                     variations = {
                         'loyr': ['loyer', 'loyers'],
@@ -1002,19 +1002,19 @@ for i, test_case in enumerate(test_cases, 1):
                         'regularisation': ['regularisation'],
                         'maison': ['maison']
                     }
-                    
+
                     if term_lower in variations:
                         for variant in variations[term_lower]:
                             pos = text_lower.find(variant)
                             if pos >= 0:
                                 return 8, pos
-                    
+
                     # AMÉLIORATION 1 : Distance de Levenshtein complète (au lieu de simplifiée)
                     if len(term_lower) >= 3:
                         best_score = float('inf')
                         best_position = -1
                         max_distance = max(1, len(term_lower) // 3)  # Seuil adaptatif
-                        
+
                         # Essayer toutes les sous-chaînes de longueur similaire
                         for i in range(len(text_lower) - len(term_lower) + 1):
                             substring = text_lower[i:i+len(term_lower)]
@@ -1022,22 +1022,22 @@ for i, test_case in enumerate(test_cases, 1):
                             if distance < best_score:
                                 best_score = distance
                                 best_position = i
-                        
+
                         if best_score <= max_distance:
                             # Score inversement proportionnel à la distance
                             # Distance 0 → score 10, distance 1 → score 8, distance 2 → score 6, etc.
                             score = max(0, 10 - (best_score * 2))
                             return score, best_position
-                    
+
                     # Correspondance par préfixe (au moins 3 caractères)
                     if len(term_lower) >= 3:
                         prefix = term_lower[:3]
                         pos = text_lower.find(prefix)
                         if pos >= 0:
                             return 5, pos
-                    
+
                     return 0, -1
-                
+
                 if terms_filter:
                     # AMÉLIORATION 3 : Score combiné multi-facteurs (lexical + vectoriel)
                     # Pour les recherches avec typos, on combine :
@@ -1045,27 +1045,27 @@ for i, test_case in enumerate(test_cases, 1):
                     # - Score vectoriel (similarité cosinus) : 40%
                     # - Bonus multi-termes : 20%
                     scored_results = []
-                    
+
                     for idx, result in enumerate(results):
                         if result.libelle:
                             libelle_lower = result.libelle.lower()
-                            
+
                             # 1. Score lexical amélioré (40% du score total)
                             lexical_score = 0
                             matched_terms = 0
                             total_positions = []
-                            
+
                             for term in terms_filter:
                                 score, position = fuzzy_match_improved(term, libelle_lower)
                                 if score > 0:
                                     matched_terms += 1
                                     total_positions.append(position)
                                 lexical_score += score
-                            
+
                             # Normaliser le score lexical (0-10)
                             if len(terms_filter) > 0:
                                 lexical_score = min(10, lexical_score / len(terms_filter))
-                            
+
                             # 2. AMÉLIORATION 2 : Score vectoriel (similarité cosinus) (40% du score total)
                             vector_score = 0
                             try:
@@ -1073,7 +1073,7 @@ for i, test_case in enumerate(test_cases, 1):
                                 libelle_embedding = None
                                 if hasattr(result, 'libelle_embedding'):
                                     libelle_embedding = result.libelle_embedding
-                                
+
                                 if libelle_embedding is not None:
                                     similarity = cosine_similarity(query_embedding, libelle_embedding)
                                     # Convertir similarité (-1 à 1) en score (0 à 10)
@@ -1084,10 +1084,10 @@ for i, test_case in enumerate(test_cases, 1):
                             except Exception as e:
                                 # En cas d'erreur, utiliser le score lexical
                                 vector_score = lexical_score * 0.8
-                            
+
                             # 3. Score combiné multi-facteurs
                             combined_score = (lexical_score * 0.4) + (vector_score * 0.4)
-                            
+
                             # 4. Bonus multi-termes (20% du score total)
                             if len(terms_filter) > 1:
                                 if matched_terms == len(terms_filter):
@@ -1099,7 +1099,7 @@ for i, test_case in enumerate(test_cases, 1):
                                 else:
                                     # Un seul terme matche : pénalité légère
                                     combined_score -= 2
-                            
+
                             # Bonus de position : favoriser les termes au début
                             if total_positions:
                                 avg_position = sum(total_positions) / len(total_positions)
@@ -1108,13 +1108,13 @@ for i, test_case in enumerate(test_cases, 1):
                                     combined_score += 2
                                 elif normalized_position < 0.5:  # Premier 50%
                                     combined_score += 1
-                            
+
                             # Stocker le score combiné avec l'index original
                             scored_results.append((combined_score, idx, result, lexical_score, vector_score))
-                    
+
                     # Trier par score combiné décroissant, puis par index (ordre original du Vector Search)
                     scored_results.sort(key=lambda x: (x[0], -x[1]), reverse=True)
-                    
+
                     # Filtrer selon le score combiné
                     if len(terms_filter) > 1:
                         # Pour recherches multi-termes, favoriser les résultats avec tous les termes
@@ -1127,25 +1127,25 @@ for i, test_case in enumerate(test_cases, 1):
                     else:
                         # Pour recherche mono-terme, garder les 5 meilleurs
                         filtered = [r[2] for r in scored_results[:5]]
-                    
+
                     results = filtered
                 else:
                     # Si pas de filtrage, garder les 5 premiers (triés par Vector Search)
                     results = results[:5]
-                
+
                 print(f"📊 Résultats obtenus ({len(results)} résultat(s) après filtrage) :")
                 print("   ┌─────────────────────────────────────────────────────────┐")
-                
+
                 # Réinitialiser les résultats pour le fallback
                 test_result["results"] = []
-                
+
                 for j, row in enumerate(results, 1):
                     libelle = row.libelle[:50] if row.libelle else "N/A"
                     montant = row.montant if row.montant else "N/A"
                     cat = row.cat_auto if row.cat_auto else "N/A"
                     print(f"   │ {j}. {libelle}")
                     print(f"   │    Montant: {montant} | Catégorie: {cat}")
-                    
+
                     # Stocker le résultat complet
                     test_result["results"].append({
                         "rank": j,
@@ -1153,14 +1153,14 @@ for i, test_case in enumerate(test_cases, 1):
                         "montant": float(row.montant) if row.montant else None,
                         "cat_auto": row.cat_auto if row.cat_auto else None
                     })
-                
+
                 print("   └─────────────────────────────────────────────────────────┘")
                 print()
-                
+
                 test_result["strategy_used"] = "Vector seul (fallback)"
                 test_result["success"] = True
                 test_result["validation"] = "Trouvés avec fallback"
-                
+
                 print("✅ Validation : Résultats trouvés avec fallback Vector Search")
             else:
                 print("⚠️  Aucun résultat trouvé même avec Vector Search")
@@ -1169,7 +1169,7 @@ for i, test_case in enumerate(test_cases, 1):
                 print("   - Aucune opération dans cette partition")
                 print("   - Embeddings non générés pour cette partition")
                 print("   - Typo trop sévère (essayer avec un terme plus proche)")
-        
+
     except Exception as e:
         print(f"❌ Erreur lors de l'exécution : {str(e)}")
         print()
@@ -1178,13 +1178,13 @@ for i, test_case in enumerate(test_cases, 1):
         print("   - Les embeddings ont-ils été générés ?")
         print("   - L'index idx_libelle_embedding_vector existe-t-il ?")
         print("   - L'index idx_libelle_fulltext existe-t-il ?")
-        
+
         test_result["success"] = False
         test_result["error"] = str(e)
-    
+
     # Ajouter les résultats de ce test à la liste
     all_results.append(test_result)
-    
+
     print()
     print("-" * 70)
     print()
@@ -1313,23 +1313,23 @@ for test in all_results:
     keywords = [word.upper() for word in query.split() if len(word) > 2]
     # CORRECTION : Utiliser les mots-clés corrigés pour les typos
     corrected_keywords = get_corrected_keywords_for_presence(keywords)
-    
+
     # Chercher les libellés pertinents dans la partition
     all_libelles_query = f"""
     SELECT libelle, libelle_embedding, cat_auto, type_operation
-    FROM operations_by_account 
-    WHERE code_si = '{CODE_SI}' 
+    FROM operations_by_account
+    WHERE code_si = '{CODE_SI}'
       AND contrat = '{CONTRAT}';
     """
     all_libelles = list(session.execute(all_libelles_query))
-    
+
     relevant_libelles = []
     for libelle_row in all_libelles:
         if libelle_row.libelle:
             libelle_upper = libelle_row.libelle.upper()
             cat_auto_upper = (libelle_row.cat_auto or "").upper()
             type_op_upper = (libelle_row.type_operation or "").upper()
-            
+
             # CORRECTION : Chercher avec les mots-clés corrigés
             # Chercher dans le libellé ET dans la catégorie/type pour certains termes
             matched_keywords = []
@@ -1341,7 +1341,7 @@ for test in all_results:
                 elif corrected_keyword in ["HABITATION", "TRANSPORT", "LOISIRS", "DIVERS", "ALIMENTATION", "RETRAIT", "REVENUS", "VIREMENT"]:
                     if corrected_keyword in cat_auto_upper or corrected_keyword in type_op_upper:
                         matched_keywords.append(corrected_keyword)
-            
+
             # Si au moins un mot-clé corrigé est trouvé, le libellé est pertinent
             if matched_keywords:
                 relevant_libelles.append({
@@ -1351,7 +1351,7 @@ for test in all_results:
                     "type_operation": libelle_row.type_operation,
                     "matched_keywords": matched_keywords
                 })
-    
+
     coherence["data_presence"][query] = {
         "expected_keywords": keywords,
         "corrected_keywords": corrected_keywords,
@@ -1366,8 +1366,8 @@ print()
 print("🔍 Vérification de la couverture des embeddings...")
 total_query = f"""
 SELECT COUNT(*) as total
-FROM operations_by_account 
-WHERE code_si = '{CODE_SI}' 
+FROM operations_by_account
+WHERE code_si = '{CODE_SI}'
   AND contrat = '{CONTRAT}';
 """
 total_result = list(session.execute(total_query))
@@ -1376,8 +1376,8 @@ total_rows = total_result[0].total if total_result else 0
 # Récupérer toutes les lignes pour vérifier les embeddings (on ne peut pas utiliser != NULL avec index vectoriel)
 all_rows_query = f"""
 SELECT libelle_embedding
-FROM operations_by_account 
-WHERE code_si = '{CODE_SI}' 
+FROM operations_by_account
+WHERE code_si = '{CODE_SI}'
   AND contrat = '{CONTRAT}';
 """
 all_rows = list(session.execute(all_rows_query))
@@ -1448,7 +1448,7 @@ for test in all_results:
     # Corriger les typos pour obtenir les mots-clés attendus
     corrected_keywords = get_corrected_keywords(keywords)
     test_results = test.get("results", [])
-    
+
     relevant_results = []
     for result in test_results:
         libelle = result.get("libelle", "")
@@ -1473,10 +1473,10 @@ for test in all_results:
                             "keyword_found": keyword
                         })
                         break
-    
+
     is_coherent = len(relevant_results) > 0
     validation = "Cohérent" if is_coherent else "Non cohérent"
-    
+
     coherence["result_relevance"][query] = {
         "expected_keywords": keywords,
         "corrected_keywords": corrected_keywords,
@@ -1613,8 +1613,8 @@ info "📝 Génération du rapport de démonstration..."
 cat > "$REPORT_FILE" << EOF
 # 🔍 Démonstration : Recherche Hybride (Full-Text + Vector Search)
 
-**Date** : $(date +"%Y-%m-%d %H:%M:%S")  
-**Script** : \`25_test_hybrid_search_v2_didactique.sh\`  
+**Date** : $(date +"%Y-%m-%d %H:%M:%S")
+**Script** : \`25_test_hybrid_search_v2_didactique.sh\`
 **Objectif** : Démontrer la recherche hybride qui combine Full-Text Search (SAI) et Vector Search (ByteT5)
 
 ---
@@ -1720,7 +1720,7 @@ Les embeddings sont des représentations vectorielles des textes qui capturent l
 
 ### Exemple de Génération
 
-**Texte** : "LOYER IMPAYE PARIS"  
+**Texte** : "LOYER IMPAYE PARIS"
 **Résultat** : Vecteur de 1472 dimensions généré
 
 ---
@@ -1795,7 +1795,7 @@ try:
     # Lire directement depuis le fichier
     with open('$TEMP_RESULTS', 'r', encoding='utf-8') as f:
         results = json.load(f)
-    
+
     for i, test in enumerate(results, 1):
         query = test.get("query", "N/A")
         description = test.get("description", "N/A")
@@ -1804,7 +1804,7 @@ try:
         success = test.get("success", False)
         strategy_used = test.get("strategy_used", "N/A")
         num_results = len(test.get("results", []))
-        
+
         status = "✅" if success else "❌"
         print(f"{i}. **TEST {i}** : '{query}' ({description})")
         print(f"   - Stratégie prévue : {strategy}")
@@ -1859,13 +1859,13 @@ LIMIT 15
 
 ### Résumé de la Démonstration
 
-✅ **PARTIE 1** : DDL - Index Full-Text (SAI) + Colonne VECTOR + Index Vectoriel  
-✅ **PARTIE 2** : Dépendances Python vérifiées/installées  
-✅ **PARTIE 3** : Génération d'embeddings démontrée  
-✅ **PARTIE 4** : Définition et principe de la recherche hybride  
-✅ **PARTIE 5** : Tests - 23 requêtes testées (6 de base + 17 complexes)  
-✅ **Catégories** : 10 catégories de complexité croissante  
-✅ **Stratégies** : Full-Text + Vector, Full-Text partiel + Vector, Fallback Vector seul  
+✅ **PARTIE 1** : DDL - Index Full-Text (SAI) + Colonne VECTOR + Index Vectoriel
+✅ **PARTIE 2** : Dépendances Python vérifiées/installées
+✅ **PARTIE 3** : Génération d'embeddings démontrée
+✅ **PARTIE 4** : Définition et principe de la recherche hybride
+✅ **PARTIE 5** : Tests - 23 requêtes testées (6 de base + 17 complexes)
+✅ **Catégories** : 10 catégories de complexité croissante
+✅ **Stratégies** : Full-Text + Vector, Full-Text partiel + Vector, Fallback Vector seul
 ✅ **Résultats** : Recherche hybride fonctionne avec fallback et gère tous les cas complexes
 
 ### Résultats Réels des Requêtes CQL
@@ -1879,7 +1879,7 @@ try:
     # Lire directement depuis le fichier
     with open('$TEMP_RESULTS', 'r', encoding='utf-8') as f:
         results = json.load(f)
-    
+
     for i, test in enumerate(results, 1):
         query = test.get("query", "N/A")
         description = test.get("description", "N/A")
@@ -1892,7 +1892,7 @@ try:
         validation = test.get("validation", "N/A")
         test_results = test.get("results", [])
         cql_query = test.get("cql_query_hybrid") or test.get("cql_query_vector", "N/A")
-        
+
         print(f"#### TEST {i} : '{query}'")
         print()
         print(f"**Description** : {description}")
@@ -1905,7 +1905,7 @@ try:
             print(f"**Erreur** : {error}")
         print(f"**Validation** : {validation}")
         print()
-        
+
         print("**Requête CQL exécutée :**")
         print()
         print("\\\`\\\`\\\`cql")
@@ -1919,7 +1919,7 @@ try:
             print(cql_query)
         print("\\\`\\\`\\\`")
         print()
-        
+
         if test_results:
             print(f"**Résultats obtenus ({len(test_results)} résultat(s)) :**")
             print()
@@ -1939,10 +1939,10 @@ try:
         else:
             print("**Aucun résultat trouvé**")
             print()
-        
+
         print("---")
         print()
-        
+
 except Exception as e:
     print("Erreur lors de la génération des résultats détaillés")
     print(f"Erreur : {str(e)}")
@@ -1965,20 +1965,20 @@ coherence_file = '$TEMP_COHERENCE'
 if os.path.exists(coherence_file):
     with open(coherence_file, 'r', encoding='utf-8') as f:
         coherence = json.load(f)
-    
+
     # 1. Présence des données
     print("### 1. Vérification de la Présence des Données Attendues")
     print()
     print("Cette vérification contrôle que les libellés attendus sont présents dans la partition testée.")
     print()
-    
+
     data_presence = coherence.get("data_presence", {})
     for query, data in data_presence.items():
         keywords = data.get("expected_keywords", [])
         corrected_keywords = data.get("corrected_keywords", [])
         count = data.get("relevant_libelles_count", 0)
         examples = data.get("relevant_libelles", [])
-        
+
         print(f"#### Test '{query}'")
         print()
         print(f"**Mots-clés de la requête** : {', '.join(keywords) if keywords else 'Aucun'}")
@@ -1989,7 +1989,7 @@ if os.path.exists(coherence_file):
             print("💡 **Note** : Pour les tests avec typos, on cherche les mots-clés corrigés dans les libellés.")
         print(f"**Nombre de libellés pertinents trouvés** : {count}")
         print()
-        
+
         if examples:
             print("**Exemples de libellés pertinents :**")
             print()
@@ -2006,23 +2006,23 @@ if os.path.exists(coherence_file):
             print()
         print("---")
         print()
-    
+
     # 2. Couverture des embeddings
     print("### 2. Vérification de la Couverture des Embeddings")
     print()
     print("Cette vérification contrôle que tous les libellés ont des embeddings générés.")
     print()
-    
+
     embedding_coverage = coherence.get("embedding_coverage", {})
     total = embedding_coverage.get("total_rows", 0)
     with_emb = embedding_coverage.get("rows_with_embedding", 0)
     coverage = embedding_coverage.get("coverage_percentage", 0)
-    
+
     print(f"**Total de lignes dans la partition** : {total}")
     print(f"**Lignes avec embeddings** : {with_emb}")
     print(f"**Couverture** : {coverage:.1f}%")
     print()
-    
+
     if coverage == 100:
         print("✅ **Toutes les lignes ont des embeddings**")
     else:
@@ -2033,13 +2033,13 @@ if os.path.exists(coherence_file):
     print()
     print("---")
     print()
-    
+
     # 3. Pertinence des résultats
     print("### 3. Vérification de la Pertinence des Résultats")
     print()
     print("Cette vérification contrôle que les résultats obtenus contiennent les mots-clés attendus.")
     print()
-    
+
     result_relevance = coherence.get("result_relevance", {})
     for query, data in result_relevance.items():
         keywords = data.get("expected_keywords", [])
@@ -2049,7 +2049,7 @@ if os.path.exists(coherence_file):
         relevant_results = data.get("relevant_results", [])
         is_coherent = data.get("is_coherent", False)
         validation = data.get("validation", "N/A")
-        
+
         print(f"#### Test '{query}'")
         print()
         print(f"**Mots-clés de la requête** : {', '.join(keywords) if keywords else 'Aucun'}")
@@ -2062,7 +2062,7 @@ if os.path.exists(coherence_file):
         print(f"**Résultats pertinents** : {relevant_count}")
         print(f"**Validation** : {validation}")
         print()
-        
+
         if is_coherent:
             print("✅ **Cohérent** : Les résultats contiennent les mots-clés attendus")
             print()
@@ -2088,27 +2088,27 @@ if os.path.exists(coherence_file):
             print()
         print("---")
         print()
-    
+
     # 4. Métriques de performance
     print("### 4. Métriques de Performance")
     print()
     print("Cette vérification contrôle les temps d'exécution et d'encodage.")
     print()
-    
+
     performance = coherence.get("performance_metrics", {})
     total_tests = performance.get("total_tests", 0)
     total_encoding = performance.get("total_encoding_time", 0)
     total_query = performance.get("total_query_time", 0)
     avg_encoding = performance.get("avg_encoding_time", 0)
     avg_query = performance.get("avg_query_time", 0)
-    
+
     print(f"**Nombre de tests** : {total_tests}")
     print(f"**Temps total d'encodage** : {total_encoding:.3f}s")
     print(f"**Temps total d'exécution** : {total_query:.3f}s")
     print(f"**Temps moyen d'encodage** : {avg_encoding:.3f}s")
     print(f"**Temps moyen d'exécution** : {avg_query:.3f}s")
     print()
-    
+
     if avg_query < 0.01:
         print("✅ **Performance excellente** : Temps d'exécution très rapide (< 10ms)")
     elif avg_query < 0.1:
@@ -2118,18 +2118,18 @@ if os.path.exists(coherence_file):
     print()
     print("---")
     print()
-    
+
     # Résumé global
     print("### Résumé Global des Contrôles de Cohérence")
     print()
-    
+
     coherent_tests = sum(1 for data in result_relevance.values() if data.get("is_coherent", False))
     total_tests_coherence = len(result_relevance)
-    
+
     print(f"**Tests cohérents** : {coherent_tests}/{total_tests_coherence}")
     print(f"**Couverture embeddings** : {coverage:.1f}%")
     print()
-    
+
     if coherent_tests == total_tests_coherence and coverage == 100:
         print("✅ **Tous les contrôles sont satisfaisants**")
     elif coherent_tests == total_tests_coherence:
@@ -2155,16 +2155,16 @@ rm -f "$TEMP_COHERENCE"
 
 ### Avantages de la Recherche Hybride
 
-✅ **Précision du Full-Text Search** (filtre initial)  
-✅ **Tolérance aux typos du Vector Search** (tri par similarité)  
-✅ **Fallback automatique** si Full-Text ne trouve rien  
-✅ **Meilleure pertinence** que chaque approche seule  
+✅ **Précision du Full-Text Search** (filtre initial)
+✅ **Tolérance aux typos du Vector Search** (tri par similarité)
+✅ **Fallback automatique** si Full-Text ne trouve rien
+✅ **Meilleure pertinence** que chaque approche seule
 ✅ **Adaptatif** : détecte automatiquement les typos
 
 ### Limitations
 
-⚠️  **Nécessite génération d'embeddings** (coût computationnel)  
-⚠️  **Stockage supplémentaire** (1472 floats par libellé)  
+⚠️  **Nécessite génération d'embeddings** (coût computationnel)
+⚠️  **Stockage supplémentaire** (1472 floats par libellé)
 ⚠️  **Latence légèrement supérieure** (génération embedding requête)
 
 ---
@@ -2189,11 +2189,10 @@ Utiliser la recherche hybride pour :
 
 **✅ Démonstration terminée avec succès !**
 
-**Script** : \`25_test_hybrid_search_v2_didactique.sh\`  
+**Script** : \`25_test_hybrid_search_v2_didactique.sh\`
 **Documentation complémentaire** : \`doc/08_README_HYBRID_SEARCH.md\`
 EOF
 
 success "✅ Démonstration terminée !"
 success "📝 Documentation générée : $REPORT_FILE"
 info "📝 Script suivant : Consulter doc/08_README_HYBRID_SEARCH.md"
-

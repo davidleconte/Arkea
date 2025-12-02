@@ -89,6 +89,7 @@ WHERE code_si = 'DEMO_DYN' AND contrat = 'DEMO_001'
 ### 1. Structure
 
 **HBase** :
+
 ```
 Column Family: 'meta'
 Column Qualifier: 'source'
@@ -96,18 +97,21 @@ Column Value: 'mobile'
 ```
 
 **HCD** :
+
 ```cql
 meta_flags MAP<TEXT, TEXT>
 {'source': 'mobile'}
 ```
 
 **Équivalence** :
+
 - ✅ **Column qualifier HBase** = **Clé MAP HCD**
 - ✅ **Column value HBase** = **Valeur MAP HCD**
 
 ### 2. Filtrage
 
 **HBase** :
+
 ```java
 Filter filter = new SingleColumnValueFilter(
     Bytes.toBytes("meta"),
@@ -118,22 +122,26 @@ Filter filter = new SingleColumnValueFilter(
 ```
 
 **HCD** :
+
 ```cql
 WHERE meta_flags['source'] = 'mobile'
 ```
 
 **Équivalence** :
+
 - ✅ **ColumnFilter HBase** = **WHERE meta_flags['key'] HCD**
 
 ### 3. Vérification Présence
 
 **HBase** :
+
 ```java
 // Vérifier si column qualifier existe
 Filter filter = new ColumnPrefixFilter(Bytes.toBytes("source"));
 ```
 
 **HCD** :
+
 ```cql
 -- Vérifier si clé existe
 WHERE meta_flags CONTAINS KEY 'source'
@@ -143,6 +151,7 @@ WHERE meta_flags CONTAINS 'mobile'
 ```
 
 **Équivalence** :
+
 - ✅ **Vérification présence HBase** = **CONTAINS KEY / CONTAINS HCD**
 
 ---
@@ -152,6 +161,7 @@ WHERE meta_flags CONTAINS 'mobile'
 ### Test 1 : Filtrage par Clé MAP
 
 **Requête** :
+
 ```cql
 SELECT * FROM operations_by_account
 WHERE code_si = 'DEMO_DYN' AND contrat = 'DEMO_001'
@@ -159,14 +169,17 @@ WHERE code_si = 'DEMO_DYN' AND contrat = 'DEMO_001'
 ```
 
 **Équivalent HBase** :
+
 - ColumnFilter sur qualifier `meta:source`
 
 **Résultat** :
+
 - ✅ Filtre les opérations avec `source = 'mobile'`
 
 ### Test 2 : Filtrage par Clé MAP avec Valeur Spécifique
 
 **Requête** :
+
 ```cql
 SELECT * FROM operations_by_account
 WHERE code_si = 'DEMO_DYN' AND contrat = 'DEMO_001'
@@ -174,14 +187,17 @@ WHERE code_si = 'DEMO_DYN' AND contrat = 'DEMO_001'
 ```
 
 **Équivalent HBase** :
+
 - ColumnFilter sur qualifier `meta:device`
 
 **Résultat** :
+
 - ✅ Filtre les opérations avec `device = 'iphone'`
 
 ### Test 3 : Filtrage Combiné (MAP + Index SAI)
 
 **Requête** :
+
 ```cql
 SELECT * FROM operations_by_account
 WHERE code_si = 'DEMO_DYN' AND contrat = 'DEMO_001'
@@ -190,15 +206,18 @@ WHERE code_si = 'DEMO_DYN' AND contrat = 'DEMO_001'
 ```
 
 **Équivalent HBase** :
+
 - ❌ Non disponible (pas de recherche full-text native)
 
 **Valeur ajoutée HCD** :
+
 - ✅ **Filtrage combiné** : MAP + Index SAI full-text
 - ✅ **Performance optimale** : Index sur les deux filtres
 
 ### Test 4 : Vérification Présence Clé (CONTAINS KEY)
 
 **Requête** :
+
 ```cql
 SELECT * FROM operations_by_account
 WHERE code_si = 'DEMO_DYN' AND contrat = 'DEMO_001'
@@ -206,14 +225,17 @@ WHERE code_si = 'DEMO_DYN' AND contrat = 'DEMO_001'
 ```
 
 **Équivalent HBase** :
+
 - Vérifier si column qualifier existe
 
 **Résultat** :
+
 - ✅ Filtre les opérations avec clé `ip` présente
 
 ### Test 5 : Vérification Présence Valeur (CONTAINS)
 
 **Requête** :
+
 ```cql
 SELECT * FROM operations_by_account
 WHERE code_si = 'DEMO_DYN' AND contrat = 'DEMO_001'
@@ -221,9 +243,11 @@ WHERE code_si = 'DEMO_DYN' AND contrat = 'DEMO_001'
 ```
 
 **Équivalent HBase** :
+
 - Vérifier si column value existe
 
 **Résultat** :
+
 - ✅ Filtre les opérations avec valeur `paris` présente
 
 ---
@@ -233,6 +257,7 @@ WHERE code_si = 'DEMO_DYN' AND contrat = 'DEMO_001'
 ### Cas d'Usage 1 : Filtrer par Canal (Mobile vs Web)
 
 **Requête** :
+
 ```cql
 SELECT COUNT(*) FROM operations_by_account
 WHERE code_si = 'DEMO_DYN' AND contrat = 'DEMO_001'
@@ -240,12 +265,14 @@ WHERE code_si = 'DEMO_DYN' AND contrat = 'DEMO_001'
 ```
 
 **Usage** :
+
 - ✅ Analyser les opérations par canal
 - ✅ Statistiques par source (mobile, web, etc.)
 
 ### Cas d'Usage 2 : Filtrer par IP (Sécurité)
 
 **Requête** :
+
 ```cql
 SELECT * FROM operations_by_account
 WHERE code_si = 'DEMO_DYN' AND contrat = 'DEMO_001'
@@ -253,12 +280,14 @@ WHERE code_si = 'DEMO_DYN' AND contrat = 'DEMO_001'
 ```
 
 **Usage** :
+
 - ✅ Détecter les opérations avec IP
 - ✅ Analyse de sécurité
 
 ### Cas d'Usage 3 : Filtrage Combiné (Canal + Type)
 
 **Requête** :
+
 ```cql
 SELECT * FROM operations_by_account
 WHERE code_si = 'DEMO_DYN' AND contrat = 'DEMO_001'
@@ -267,6 +296,7 @@ WHERE code_si = 'DEMO_DYN' AND contrat = 'DEMO_001'
 ```
 
 **Usage** :
+
 - ✅ Recherche combinée (MAP + full-text)
 - ✅ Analyse multi-critères
 
@@ -277,39 +307,47 @@ WHERE code_si = 'DEMO_DYN' AND contrat = 'DEMO_001'
 ### 1. Structure Typée
 
 **HBase** :
+
 - ❌ Colonnes dynamiques non typées
 - ❌ Nécessite conversion manuelle
 
 **HCD** :
+
 - ✅ **MAP<TEXT, TEXT>** : Structure typée
 - ✅ Validation automatique
 
 ### 2. Filtrage Combiné
 
 **HBase** :
+
 - ❌ Limité aux ColumnFilters
 - ❌ Pas de recherche full-text native
 
 **HCD** :
+
 - ✅ **Filtrage combiné** : MAP + Index SAI full-text
 - ✅ Performance optimale
 
 ### 3. Requêtes CQL Standard
 
 **HBase** :
+
 - ❌ API Java spécifique
 - ❌ Code complexe
 
 **HCD** :
+
 - ✅ **CQL standard** : Requêtes simples
 - ✅ Compatible avec tous les outils CQL
 
 ### 4. Performance
 
 **HBase** :
+
 - ⚠️ Nécessite scan complet pour filtrage
 
 **HCD** :
+
 - ✅ **Index SAI** : Peut optimiser les filtres MAP
 - ✅ Performance meilleure
 
@@ -333,6 +371,7 @@ WHERE code_si = 'DEMO_DYN' AND contrat = 'DEMO_001'
 ### Valeur Ajoutée
 
 **HCD avec MAP** apporte :
+
 - ✅ **Filtrage combiné** : MAP + Index SAI full-text (non disponible avec HBase)
 - ✅ **Structure typée** : Validation automatique
 - ✅ **Requêtes CQL** : Plus simple que API HBase
@@ -346,6 +385,7 @@ WHERE code_si = 'DEMO_DYN' AND contrat = 'DEMO_001'
 **Fichier** : `33_demo_colonnes_dynamiques_v2.sh`
 
 **Contenu** :
+
 - Explication colonnes dynamiques HBase vs MAP HCD
 - Insertion de données avec MAP
 - Filtrage simple sur MAP
@@ -357,6 +397,7 @@ WHERE code_si = 'DEMO_DYN' AND contrat = 'DEMO_001'
 **Fichier** : `33_demo_colonnes_dynamiques_v2.sh`
 
 **Améliorations** :
+
 - ✅ Mesures de performance précises (latence, throughput)
 - ✅ Cas d'usage avancés (filtrage multi-clés, mise à jour)
 - ✅ Comparaison avec/sans filtrage MAP
@@ -366,6 +407,7 @@ WHERE code_si = 'DEMO_DYN' AND contrat = 'DEMO_001'
 - ✅ Mise à jour dynamique des MAP
 
 **Usage** :
+
 ```bash
 ./33_demo_colonnes_dynamiques_v2.sh
 ```
@@ -379,51 +421,62 @@ WHERE code_si = 'DEMO_DYN' AND contrat = 'DEMO_001'
 **Résultats** (10 parties démontrées) :
 
 #### PARTIE 1 : Préparation des Données (MAP Complexes)
+
 - ✅ **5 opérations insérées** avec `meta_flags` complexes
 - ✅ **Données avec plusieurs clés MAP** : source, device, os, location, etc.
 
 #### PARTIE 2 : Filtrage Simple avec Mesures de Performance
+
 - ✅ **Filtrage par source = 'mobile'** : Fonctionne correctement
 - ✅ **Équivalent HBase** : ColumnFilter sur qualifier 'meta:source'
 
 #### PARTIE 3 : Filtrage Multi-Clés (Avancé)
+
 - ✅ **Filtrage combiné** (source + device) : Fonctionne
 - ✅ **Filtrage avec CONTAINS KEY 'ip'** : Fonctionne
 - ✅ **Valeur ajoutée** : Filtrage multi-clés MAP (non disponible avec HBase simple)
 
 #### PARTIE 4 : Filtrage Combiné (MAP + Index SAI Full-Text)
+
 - ✅ **Filtrage MAP + full-text search** : Fonctionne
 - ✅ **Valeur ajoutée HCD** : Non disponible avec HBase
 
 #### PARTIE 5 : Mise à Jour Dynamique des Colonnes MAP
+
 - ✅ **Ajout de clé 'fraud_score'** : Mise à jour atomique réussie
 - ✅ **Avantage HCD** : Pas besoin de réécrire toute la row
 - ✅ **Équivalent HBase** : Put avec nouveau column qualifier
 
 #### PARTIE 6 : Tests de Charge (Requêtes Multiples)
+
 - ✅ **10 requêtes consécutives** : Exécutées avec succès
 - ✅ **Temps moyen** : 602ms
 - ✅ **Throughput** : 1 requête/seconde
 - ✅ **Performance stable** : Pas de dégradation
 
 #### PARTIE 7 : Requêtes Complexes (Plusieurs Clés MAP)
+
 - ✅ **Filtrage avec plusieurs conditions MAP** : Fonctionne
 - ✅ **Avantage HCD** : Filtrage multi-clés en une seule requête
 
 #### PARTIE 8 : Comparaison Performance
+
 - ✅ **Sans filtrage MAP** : Scan complet
 - ✅ **Avec filtrage MAP** : Performance meilleure
 - ✅ **Équivalent ColumnFilter HBase** mais avec structure typée
 
 #### PARTIE 9 : Cas d'Usage Avancés
+
 - ✅ **Analyse par canal** (mobile vs web) : Fonctionne
 - ✅ **Détection fraude** (fraud_score) : Fonctionne
 
 #### PARTIE 10 : Résumé et Conclusion
+
 - ✅ **Colonnes dynamiques démontrées** avec `MAP<TEXT, TEXT>`
 - ✅ **Avantages vs HBase** : Structure typée, filtrage combiné, multi-clés
 
 **Conclusion** :
+
 - ✅ Tous les tests passés avec succès
 - ✅ Performance validée (tests de charge)
 - ✅ Avantages significatifs vs colonnes dynamiques HBase
@@ -431,4 +484,3 @@ WHERE code_si = 'DEMO_DYN' AND contrat = 'DEMO_001'
 ---
 
 **✅ Le filtrage sur colonnes MAP est démontré, avec des avantages significatifs !**
-

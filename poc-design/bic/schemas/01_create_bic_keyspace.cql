@@ -17,4 +17,3 @@ USE bic_poc;
 
 -- Afficher la confirmation
 DESCRIBE KEYSPACE bic_poc;
-

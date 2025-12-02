@@ -62,14 +62,17 @@ database = client.get_database("http://localhost:8080", ...)
 ### Pourquoi le Client Python Échoue
 
 Le client `astrapy` avec `Environment.HCD` est conçu pour :
+
 - **Astra DB** (cloud DataStax)
 - **HCD en production** avec Data API déployée (Stargate/gateway)
 
 Il **ne peut pas** se connecter à :
+
 - ❌ HCD local sans gateway Data API
 - ❌ Cassandra standalone sans Stargate
 
 **Erreur rencontrée** :
+
 ```
 InvalidEnvironmentException: Environments outside of Astra DB are not supported
 ```
@@ -77,6 +80,7 @@ InvalidEnvironmentException: Environments outside of Astra DB are not supported
 ### Ce qui est Configuré vs Déployé
 
 **✅ Configuré** :
+
 - Variables d'environnement (conformes au quickstart)
 - Token d'authentification
 - Client Python installé
@@ -84,6 +88,7 @@ InvalidEnvironmentException: Environments outside of Astra DB are not supported
 - Documentation complète
 
 **❌ NON Déployé** :
+
 - Gateway Stargate
 - Service Data API
 - Endpoint HTTP accessible
@@ -95,6 +100,7 @@ InvalidEnvironmentException: Environments outside of Astra DB are not supported
 ### Option 1 : Déployer Stargate (Pour Tests Réels)
 
 **Via Podman** :
+
 ```bash
 podman run -d \
   --name stargate \
@@ -109,12 +115,14 @@ podman run -d \
 ```
 
 **Vérification** :
+
 ```bash
 curl http://localhost:8080/v1/status
 # Devrait retourner un statut HTTP 200
 ```
 
 **Après déploiement** :
+
 - ✅ Endpoint accessible
 - ✅ Client Python fonctionnel
 - ✅ Tests réels possibles
@@ -122,12 +130,14 @@ curl http://localhost:8080/v1/status
 ### Option 2 : Utiliser CQL Direct (Recommandé pour POC)
 
 **Au lieu de Data API** :
+
 - ✅ Utiliser directement les drivers Cassandra (CQL)
 - ✅ Déjà démontré dans le POC
 - ✅ Performance optimale
 - ✅ Pas de dépendance Stargate
 
 **Exemple** :
+
 ```python
 from cassandra.cluster import Cluster
 
@@ -139,6 +149,7 @@ session = cluster.connect('domirama2_poc')
 ### Option 3 : Démonstration Conceptuelle (Actuel)
 
 **Suffisant pour POC** :
+
 - ✅ Configuration documentée
 - ✅ Exemples de code créés (prêts pour Stargate)
 - ✅ Valeur ajoutée expliquée
@@ -148,16 +159,18 @@ session = cluster.connect('domirama2_poc')
 
 ## 📋 Conformité au Quickstart
 
-**Référence** : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/quickstart.html
+**Référence** : <https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/quickstart.html>
 
 ### Variables Conformes
 
 Le quickstart requiert :
+
 - `API_ENDPOINT` : `http://CLUSTER_HOST:GATEWAY_PORT`
 - `USERNAME` : Username du cluster
 - `PASSWORD` : Password du cluster
 
 **Notre configuration** :
+
 - ✅ `API_ENDPOINT` (ou `DATA_API_ENDPOINT` pour fallback)
 - ✅ `USERNAME` (ou `DATA_API_USERNAME` pour fallback)
 - ✅ `PASSWORD` (ou `DATA_API_PASSWORD` pour fallback)
@@ -167,11 +180,13 @@ Le quickstart requiert :
 ### Endpoint Requis
 
 Le quickstart suppose un endpoint Data API **réellement déployé** :
+
 - Kubernetes : Service avec NodePort
 - Production : Gateway HCD configuré
 - POC local : Stargate déployé
 
 **Notre situation** :
+
 - ❌ Endpoint non déployé (Stargate manquant)
 - ⚠️ Configuration théorique uniquement
 
@@ -184,6 +199,7 @@ Le quickstart suppose un endpoint Data API **réellement déployé** :
 **Non, l'endpoint Data API n'est PAS réellement configuré et accessible.**
 
 **État** :
+
 - ✅ **Configuration** : Complète (variables, token, client, exemples)
 - ✅ **Conformité Quickstart** : Variables conformes
 - ❌ **Déploiement** : Manquant (Stargate non installé)
@@ -193,18 +209,21 @@ Le quickstart suppose un endpoint Data API **réellement déployé** :
 ### Pour POC
 
 **Démonstration Conceptuelle** : ✅ **Suffisante**
+
 - Configuration documentée
 - Exemples de code prêts (fonctionneront une fois Stargate déployé)
 - Valeur ajoutée expliquée
 - Documentation complète
 
 **Tests Réels** : ❌ **Nécessite Stargate**
+
 - Déployer Stargate via Podman
 - Ou utiliser CQL direct (déjà démontré)
 
 ### Pour Production
 
 **Obligatoire** : Déploiement Data API via :
+
 - Kubernetes Service (HCD en production)
 - Mission Control (IBM HCD)
 - Stargate intégré
@@ -214,4 +233,3 @@ Le quickstart suppose un endpoint Data API **réellement déployé** :
 **✅ Configuration : Complète (conforme quickstart)**  
 **❌ Déploiement : NON (Stargate requis pour endpoint réel)**  
 **💡 Pour POC : Démonstration conceptuelle suffisante**
-

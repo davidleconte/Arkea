@@ -51,6 +51,7 @@ source .poc-profile
 ```
 
 **Ce script** :
+
 - ✅ Détecte automatiquement l'OS
 - ✅ Configure Java 11 automatiquement
 - ✅ Extrait HCD dans `binaire/hcd-1.2.3/`
@@ -58,6 +59,7 @@ source .poc-profile
 - ✅ Crée les répertoires de données
 
 **Voir** :
+
 - `docs/GUIDE_INSTALLATION_LINUX.md` pour les détails Linux
 - `docs/GUIDE_INSTALLATION_WINDOWS.md` pour Windows (WSL2)
 
@@ -107,6 +109,7 @@ java -version
 ```
 
 **Persistance** (ajouter dans `~/.zshrc` ou `~/.bash_profile`) :
+
 ```bash
 # HCD Java 11 Configuration
 export JAVA_HOME=/opt/homebrew/opt/openjdk@11/libexec/openjdk.jdk/Contents/Home
@@ -133,17 +136,20 @@ ls -la binaire/hcd-1.2.3/
 #### Étape 1 : Installation de Java 11
 
 **Ubuntu/Debian** :
+
 ```bash
 sudo apt-get update
 sudo apt-get install -y openjdk-11-jdk
 ```
 
 **CentOS/RHEL** :
+
 ```bash
 sudo yum install -y java-11-openjdk-devel
 ```
 
 **Fedora** :
+
 ```bash
 sudo dnf install -y java-11-openjdk-devel
 ```
@@ -163,6 +169,7 @@ java -version
 ```
 
 **Persistance** (ajouter dans `~/.bashrc`) :
+
 ```bash
 # HCD Java 11 Configuration
 export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
@@ -189,6 +196,7 @@ ls -la binaire/hcd-1.2.3/
 **Suivre le guide Linux** dans WSL2 : Voir `docs/GUIDE_INSTALLATION_WINDOWS.md`
 
 **Résumé** :
+
 1. Installer WSL2 et Ubuntu
 2. Suivre les étapes Linux ci-dessus
 3. Utiliser les chemins WSL2 (`/home/username/Arkea`)
@@ -280,11 +288,13 @@ CASSANDRA_LOG_DIR=$(pwd)/logs bin/hcd cassandra
 ### Vérifier que HCD est Démarré
 
 **Utiliser le script de vérification** :
+
 ```bash
 ./scripts/utils/80_verify_all.sh
 ```
 
 **Vérification manuelle** :
+
 ```bash
 # Vérifier les processus (fonction portable)
 source scripts/utils/portable_functions.sh
@@ -309,6 +319,7 @@ cqlsh localhost 9042
 ```
 
 **Dans cqlsh** :
+
 ```cql
 -- Vérifier la version
 SELECT release_version FROM system.local;
@@ -351,6 +362,7 @@ ALTER ROLE cassandra WITH SUPERUSER = false;
 ### Problème : HCD ne démarre pas
 
 **Vérifications** :
+
 ```bash
 # 1. Vérifier Java 11
 java -version

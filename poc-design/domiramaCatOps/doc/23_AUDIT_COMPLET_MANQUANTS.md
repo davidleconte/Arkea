@@ -334,4 +334,3 @@ CREATE TABLE edm.events_by_client (
 **Date** : 2025-01-XX  
 **Version** : 1.0  
 **Statut** : ✅ **Audit complet terminé - Manques identifiés et planifié**
-

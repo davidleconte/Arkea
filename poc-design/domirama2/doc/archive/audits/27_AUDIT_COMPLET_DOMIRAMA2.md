@@ -134,6 +134,7 @@ domirama2/
 ### 1. Organisation et Numérotation
 
 **✅ Excellent** : Scripts numérotés dans l'ordre d'exécution
+
 - `10_*` : Setup initial
 - `11_*` : Chargement données
 - `12-13_*` : Tests
@@ -152,6 +153,7 @@ domirama2/
 ### 2. Documentation Complète
 
 **✅ Excellent** : 32 fichiers de documentation couvrant :
+
 - README principal
 - README spécialisés par fonctionnalité
 - Analyses de gaps
@@ -167,6 +169,7 @@ domirama2/
 **✅ Excellent** : **98%** de conformité avec la proposition IBM
 
 **Points conformes** :
+
 - ✅ Schéma complet (colonnes catégorisation)
 - ✅ Logique multi-version
 - ✅ Format COBOL (BLOB)
@@ -186,6 +189,7 @@ domirama2/
 - ✅ Data API (conforme documentation officielle)
 
 **Points manquants** :
+
 - ⚠️ OperationDecoder (simulation seulement)
 - ⚠️ Data API endpoint réel (Stargate requis)
 
@@ -198,17 +202,20 @@ domirama2/
 **✅ Bon** : Code bien structuré et commenté
 
 **Python** :
+
 - ✅ Scripts modulaires
 - ✅ Gestion d'erreurs
 - ✅ Documentation inline
 - ✅ Exemples complets
 
 **Scala** :
+
 - ✅ Code Spark optimisé
 - ✅ Gestion des partitions
 - ✅ Commentaires explicatifs
 
 **Shell** :
+
 - ✅ Scripts robustes
 - ✅ Vérifications préalables
 - ✅ Messages informatifs
@@ -223,6 +230,7 @@ domirama2/
 **✅ Excellent** : Toutes les fonctionnalités sont démontrées
 
 **Démonstrations disponibles** :
+
 1. ✅ Setup et chargement
 2. ✅ Recherche full-text
 3. ✅ Recherche avancée
@@ -248,6 +256,7 @@ domirama2/
 ### 1. Fichiers Dupliqués / Obsolètes
 
 **⚠️ À Nettoyer** :
+
 - `11_load_domirama11_load_domirama11_load_domirama2_data_parquet.sh.old` (obsolète)
 - `demo_multi_version_complete.sh` (remplacé par v2)
 - `31_demo_bloomfilter_equivalent_v2.sh` (remplacé par v2)
@@ -257,7 +266,8 @@ domirama2/
 - `27_export_incremental_parquet_spark_shell.sh` (alternative, garder)
 - `28_demo_fenetre_glissante.sh` (alternative, garder)
 
-**Recommandation** : 
+**Recommandation** :
+
 - Supprimer les fichiers `.old` et obsolètes
 - Garder les variantes `_v2` comme versions principales
 - Documenter les alternatives (spark-shell vs spark-submit)
@@ -267,6 +277,7 @@ domirama2/
 ### 2. Scripts Data API Multiples
 
 **⚠️ À Consolider** :
+
 - `demo_data_api_crud_complete.py`
 - `demo_data_api_crud_proof.py`
 - `demo_data_api_operations.py`
@@ -275,6 +286,7 @@ domirama2/
 - `demo_data_api_validation.py`
 
 **Recommandation** :
+
 - Garder `demo_data_api_official.py` comme référence principale
 - Supprimer ou archiver les autres variantes
 - Documenter dans README_DATA_API.md
@@ -284,11 +296,13 @@ domirama2/
 ### 3. Organisation des Exemples
 
 **⚠️ À Améliorer** :
+
 - Exemples Python dispersés
 - Exemples Java isolés
 - Exemples CQL mélangés avec schémas
 
 **Recommandation** :
+
 ```
 domirama2/
 ├── examples/
@@ -307,12 +321,14 @@ domirama2/
 ### 4. Documentation Redondante
 
 **⚠️ À Consolider** :
+
 - `AUDIT_COMPLET_GAP_FONCTIONNEL.md`
 - `BILAN_ECARTS_FONCTIONNELS.md`
 - `GAPS_ANALYSIS.md`
 - (3 documents similaires)
 
 **Recommandation** :
+
 - Fusionner en un seul document `GAPS_ANALYSIS_COMPLETE.md`
 - Archiver les anciennes versions
 
@@ -321,11 +337,13 @@ domirama2/
 ### 5. Tests Automatisés
 
 **⚠️ Manquant** :
+
 - Pas de suite de tests automatisés
 - Pas de validation continue
 - Pas de tests de non-régression
 
 **Recommandation** :
+
 - Créer `tests/` directory
 - Ajouter tests unitaires Python
 - Ajouter tests d'intégration
@@ -485,6 +503,7 @@ domirama2/
 ### Priorité 2 : Organisation
 
 1. **Créer structure examples/** :
+
    ```
    examples/
    ├── python/
@@ -496,6 +515,7 @@ domirama2/
    ```
 
 2. **Séparer schémas** :
+
    ```
    schemas/
    ├── create_*.cql
@@ -538,6 +558,7 @@ domirama2/
 **🎯 Score Global : 8.5/10** ✅
 
 **Détail** :
+
 - Organisation : 9/10 ✅
 - Documentation : 10/10 ✅
 - Code : 8/10 ✅
@@ -549,10 +570,10 @@ domirama2/
 **✅ Audit Terminé : Répertoire domirama2 est globalement excellent avec quelques améliorations mineures à apporter**
 
 **Mise à jour** : 2024-11-27
+
 - ✅ **57 scripts** créés (au lieu de 43)
 - ✅ **18 versions didactiques** avec documentation automatique
 - ✅ **18 démonstrations** .md générées automatiquement
 - ✅ **12 templates** réutilisables créés
 - ✅ **Conformité IBM** : 95% → 98%
 - ✅ **Tous les gaps critiques comblés**
-

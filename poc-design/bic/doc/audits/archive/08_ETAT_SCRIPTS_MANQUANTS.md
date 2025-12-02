@@ -64,6 +64,7 @@
 **Objectif** : Ingestion temps réel depuis Kafka (topic `bic-event`)
 
 **Exigences** :
+
 - Consumer Kafka pour topic `bic-event`
 - Spark Streaming ou Kafka Connect
 - Écriture en temps réel dans HCD
@@ -86,6 +87,7 @@
 **Objectif** : Ingestion de fichiers JSON individuels
 
 **Exigences** :
+
 - Lecture de fichiers JSON
 - Écriture dans HCD
 - Gestion des erreurs
@@ -104,6 +106,7 @@
 **Objectif** : Tester le filtrage par type d'interaction (consultation, conseil, transaction, reclamation)
 
 **Exigences** :
+
 - Filtrage par type (consultation, conseil, transaction, reclamation)
 - Utilisation des index SAI
 - Performance optimale
@@ -122,6 +125,7 @@
 **Objectif** : Tester le TTL 2 ans (63072000 secondes)
 
 **Exigences** :
+
 - Vérification du TTL 2 ans
 - Test d'expiration automatique
 - Validation de la purge
@@ -140,6 +144,7 @@
 **Objectif** : Tests avancés de requêtes timeline
 
 **Exigences** :
+
 - Requêtes timeline complexes
 - Filtres combinés
 - Pagination avancée
@@ -155,6 +160,7 @@
 **Scripts Manquants** : 12 (48%)
 
 **Par Phase** :
+
 - **Phase 1 (Setup)** : 4/4 créés (100%) ✅
 - **Phase 2 (Génération)** : 3/3 créés (100%) ✅
 - **Phase 3 (Ingestion)** : 1/3 créés (33%) ⚠️
@@ -162,6 +168,7 @@
 - **Phase 5 (Recherche/Démo)** : 2/10 créés (20%) ⚠️
 
 **Par Priorité** :
+
 - **🔴 Critique** : 1/2 créés (50%) - Script 09 manquant
 - **🟡 Haute** : 4/6 créés (67%) - Scripts 10, 13 manquants
 - **🟡 Moyenne** : 4/6 créés (67%) - Script 17 manquant
@@ -220,4 +227,3 @@
 **Date** : 2025-12-01  
 **Version** : 1.0.0  
 **Statut** : Scripts manquants identifiés, plan d'action défini
-

@@ -10,10 +10,12 @@
 ### Version 1 : spark-submit (⭐ Recommandé)
 
 **Scripts** :
+
 - `27_export_incremental_parquet.sh` - Utilise `spark-submit`
 - `28_demo_fenetre_glissante_spark_submit.sh` - Utilise `spark-submit`
 
 **Avantages** :
+
 - ✅ **Meilleures performances** : Optimisations Spark natives
 - ✅ **Pas d'interprétation ligne par ligne** : Script compilé
 - ✅ **Gestion d'erreurs améliorée** : Exceptions claires
@@ -21,6 +23,7 @@
 - ✅ **Logs propres** : Pas de pollution scala> prompt
 
 **Usage** :
+
 ```bash
 # Export incrémental
 ./27_export_incremental_parquet.sh "2024-01-01" "2024-02-01" "/tmp/exports/domirama/incremental/2024-01"
@@ -32,20 +35,24 @@
 ### Version 2 : spark-shell (Alternative)
 
 **Scripts** :
+
 - `27_export_incremental_parquet_spark_shell.sh` - Utilise `spark-shell`
 - `28_demo_fenetre_glissante.sh` - Utilise `spark-shell`
 
 **Avantages** :
+
 - ✅ **Interactivité** : Possibilité de déboguer ligne par ligne
 - ✅ **Rapidité de développement** : Pas besoin de recompiler
 - ✅ **Utile pour tests** : Validation rapide
 
 **Inconvénients** :
+
 - ⚠️ **Performance** : Moins optimisé que spark-submit
 - ⚠️ **Logs** : Pollution avec scala> prompts
 - ⚠️ **Gestion d'erreurs** : Moins claire
 
 **Usage** :
+
 ```bash
 # Export incrémental
 ./27_export_incremental_parquet_spark_shell.sh "2024-01-01" "2024-02-01" "/tmp/exports/domirama/incremental/2024-01"
@@ -79,12 +86,14 @@
 **Fichier** : `examples/scala/export_incremental_parquet_standalone.scala`
 
 **Caractéristiques** :
+
 - ✅ Classe `ExportIncrementalParquet` avec méthode `main()`
 - ✅ Paramètres en ligne de commande
 - ✅ Compatible avec `spark-submit`
 - ✅ Gestion d'erreurs complète
 
 **Usage direct** :
+
 ```bash
 spark-submit \
   --class ExportIncrementalParquet \
@@ -113,6 +122,7 @@ spark-submit \
 ### Pour Production
 
 **Utiliser spark-submit** :
+
 - ✅ Meilleures performances
 - ✅ Logs propres
 - ✅ Gestion d'erreurs améliorée
@@ -121,6 +131,7 @@ spark-submit \
 ### Pour Développement/Débogage
 
 **Utiliser spark-shell** :
+
 - ✅ Interactivité
 - ✅ Débogage ligne par ligne
 - ✅ Tests rapides
@@ -181,4 +192,3 @@ spark-submit \
 ---
 
 **✅ Les scripts sont maintenant corrigés et fonctionnels !**
-

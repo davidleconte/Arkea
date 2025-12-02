@@ -188,7 +188,7 @@ if [ ! -f "$CONNECTOR_JAR" ]; then
     info "Téléchargement depuis Maven Central..."
     curl -L -o "$CONNECTOR_JAR" \
       "https://repo1.maven.org/maven2/com/datastax/spark/spark-cassandra-connector_2.12/3.5.0/$CONNECTOR_JAR"
-    
+
     if [ -f "$CONNECTOR_JAR" ]; then
         info "✅ spark-cassandra-connector téléchargé"
     else
@@ -219,7 +219,7 @@ if [ -n "$SPARK_HOME" ] && [ -d "$SPARK_HOME/conf" ]; then
             cp "$SPARK_HOME/conf/spark-defaults.conf.template" "$SPARK_CONF"
         fi
     fi
-    
+
     # Ajouter configuration Cassandra si pas déjà présent
     if [ -f "$SPARK_CONF" ] && ! grep -q "spark.cassandra.connection.host" "$SPARK_CONF"; then
         cat >> "$SPARK_CONF" << EOF

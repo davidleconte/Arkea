@@ -10,6 +10,7 @@
 **Objectif** : Améliorer l'organisation de la racine ARKEA pour une meilleure maintenabilité et portabilité.
 
 **Résultats** :
+
 - ✅ **9 scripts** déplacés de la racine vers `scripts/setup/` et `scripts/utils/`
 - ✅ **4 fichiers Scala** déplacés vers `scripts/scala/`
 - ✅ **1 schéma CQL** déplacé vers `schemas/kafka/`
@@ -26,11 +27,13 @@
 #### 1.1 Structure de Scripts Créée
 
 **Créé** :
+
 - `scripts/setup/` - 6 scripts d'installation/setup
 - `scripts/utils/` - 3 scripts utilitaires
 - `scripts/scala/` - 4 fichiers Scala
 
 **Déplacé** :
+
 - `01_install_hcd.sh` → `scripts/setup/`
 - `02_install_spark_kafka.sh` → `scripts/setup/`
 - `03_start_hcd.sh` → `scripts/setup/`
@@ -45,18 +48,22 @@
 #### 1.2 Schémas Organisés
 
 **Créé** :
+
 - `schemas/kafka/`
 
 **Déplacé** :
+
 - `create_kafka_schema.cql` → `schemas/kafka/`
 
 #### 1.3 Nettoyage
 
 **Supprimé** :
+
 - ✅ `ehB /` (répertoire vide)
 - ✅ `date_requête` (fichier vide)
 
 **Conservé** :
+
 - ⚠️ `hcd-1.2.3/` (documenté dans `.gitignore`, doublon partiel de `binaire/hcd-1.2.3/`)
 
 ---
@@ -66,6 +73,7 @@
 #### 2.1 Structure Créée
 
 **Créé** :
+
 - `logs/archive/2025-11/`
 - `logs/current/`
 - `logs/README.md`
@@ -73,9 +81,11 @@
 #### 2.2 Archivage Effectué
 
 **Archivé** :
+
 - ✅ **37 répertoires** `UNLOAD_202511*` → `logs/archive/2025-11/`
 
 **Résultat** :
+
 - Logs de novembre 2025 archivés
 - Structure prête pour organisation future
 
@@ -86,6 +96,7 @@
 #### 3.1 Fichiers Créés
 
 **Créé** :
+
 - ✅ `.gitignore` - Exclusions Git complètes
 - ✅ `docs/GUIDE_STRUCTURE.md` - Guide de structure détaillé
 - ✅ `logs/README.md` - Documentation organisation logs
@@ -94,6 +105,7 @@
 #### 3.2 Fichiers Mis à Jour
 
 **Mis à jour** :
+
 - ✅ `README.md` - Nouveaux chemins des scripts
 - ✅ `docs/ORDRE_EXECUTION_SCRIPTS.md` - Chemins mis à jour
 - ✅ `docs/ANALYSE_AMELIORATION_RACINE_ARKEA.md` - Analyse complète
@@ -107,6 +119,7 @@
 **Créé** : `scripts/utils/update_script_references.py`
 
 **Fonctionnalités** :
+
 - Détection automatique des références aux anciens chemins
 - Remplacement par les nouveaux chemins
 - Support de tous les types de fichiers (.sh, .md, .py, .txt)
@@ -114,11 +127,13 @@
 #### 4.2 Résultats
 
 **Statistiques** :
+
 - **2223 fichiers** traités
 - **124 fichiers** mis à jour
 - **Toutes les références** corrigées
 
 **Fichiers mis à jour** :
+
 - Scripts shell (poc-design/*/scripts/*.sh)
 - Documentation (docs/*.md, poc-design/*/doc/*.md)
 - Templates (poc-design/*/doc/templates/*.md)
@@ -131,12 +146,14 @@
 #### 5.1 Tests Effectués
 
 **Vérifications** :
+
 - ✅ Structure créée correctement
 - ✅ Permissions des scripts corrigées
 - ✅ Syntaxe des scripts validée
 - ✅ Références mises à jour vérifiées
 
 **Résultats** :
+
 - ✅ Tous les tests passés
 - ✅ Aucune erreur détectée
 
@@ -257,6 +274,7 @@ Arkea/
 **Toutes les améliorations ont été implémentées avec succès !**
 
 La racine ARKEA est maintenant :
+
 - ✅ **Organisée** : Structure claire et logique
 - ✅ **Portable** : Configuration centralisée et détection automatique
 - ✅ **Maintenable** : Documentation complète et conventions claires
@@ -269,4 +287,3 @@ La racine ARKEA est maintenant :
 **Date** : 2025-12-01  
 **Version** : 1.0  
 **Statut** : ✅ **TERMINÉ**
-

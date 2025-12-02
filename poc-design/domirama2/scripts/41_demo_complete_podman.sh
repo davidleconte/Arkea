@@ -7,7 +7,7 @@
 #   Ce script orchestre une démonstration complète de la Data API HCD en
 #   utilisant Podman (conforme aux contraintes, Docker non autorisé) pour
 #   déployer Stargate et valider toutes les fonctionnalités.
-#   
+#
 #   Étapes exécutées :
 #   1. Vérifier HCD démarré
 #   2. Vérifier Podman disponible (Docker non autorisé)
@@ -161,7 +161,7 @@ if ! podman info &> /dev/null; then
     podman machine start 2>&1 | grep -E "(Starting|started|already)" || true
     info "Attente que Podman soit prêt (10 secondes)..."
     sleep 10
-    
+
     # Réessayer plusieurs fois
     MAX_RETRIES=5
     RETRY=0
@@ -202,7 +202,7 @@ EXISTING_CONTAINER=$($CONTAINER_CMD ps -a --filter "name=$STARGATE_CONTAINER" --
 
 if [ -n "$EXISTING_CONTAINER" ]; then
     success "Conteneur Stargate trouvé : $EXISTING_CONTAINER"
-    
+
     # Vérifier si le conteneur est en cours d'exécution
     if $CONTAINER_CMD ps --filter "name=$STARGATE_CONTAINER" --format "{{.Names}}" 2>/dev/null | grep -q "$STARGATE_CONTAINER"; then
         success "Stargate est déjà en cours d'exécution"
@@ -219,11 +219,11 @@ if [ -n "$EXISTING_CONTAINER" ]; then
 else
     warn "Stargate n'est pas déployé"
     info "Déploiement en cours..."
-    
+
     # Télécharger l'image si nécessaire
     info "Téléchargement de l'image Stargate..."
     $CONTAINER_CMD pull "$STARGATE_IMAGE" 2>&1 | grep -E "(Pulling|Downloading|Downloaded|Already exists)" || true
-    
+
     # Déployer Stargate
     info "Démarrage du conteneur Stargate..."
     CONTAINER_OUTPUT=$($CONTAINER_CMD run -d \
@@ -237,7 +237,7 @@ else
         -e CLUSTER_SEED="$HCD_HOST:$HCD_PORT" \
         -e DSE=1 \
         "$STARGATE_IMAGE" 2>&1)
-    
+
     if [ $? -eq 0 ]; then
         success "Conteneur Stargate créé"
     else
@@ -251,10 +251,10 @@ else
             exit 1
         fi
     fi
-    
+
     success "Conteneur Stargate créé"
     STARGATE_RUNNING=true
-    
+
     # Attendre que Stargate démarre
     info "Attente du démarrage de Stargate (30 secondes)..."
     sleep 30
@@ -272,26 +272,26 @@ echo ""
 
 if [ "$STARGATE_RUNNING" = true ]; then
     info "Test de l'endpoint : $API_ENDPOINT"
-    
+
     MAX_RETRIES=10
     RETRY=0
     HTTP_STATUS="000"
-    
+
     while [ $RETRY -lt $MAX_RETRIES ]; do
         HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 "$API_ENDPOINT/v1/status" 2>&1 || echo "000")
-        
+
         if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "404" ]; then
             success "Endpoint accessible (HTTP Status: $HTTP_STATUS)"
             break
         fi
-        
+
         RETRY=$((RETRY + 1))
         if [ $RETRY -lt $MAX_RETRIES ]; then
             info "Tentative $RETRY/$MAX_RETRIES... (attente 5 secondes)"
             sleep 5
         fi
     done
-    
+
     if [ "$HTTP_STATUS" != "200" ] && [ "$HTTP_STATUS" != "404" ]; then
         warn "Endpoint non accessible après $MAX_RETRIES tentatives"
         warn "HTTP Status: $HTTP_STATUS"
@@ -434,7 +434,7 @@ if INSERT_OK:
                 "numero_op": test_numero_op,
             }
         )
-        
+
         if result:
             print("✅ ✅ GET RÉUSSI !")
             print(f"   Libellé : {result.get('libelle', 'N/A')}")
@@ -483,7 +483,7 @@ if GET_OK:
         print("✅ ✅ UPDATE RÉUSSI !")
         print(f"   Modifié : {result.get('modifiedCount', 'N/A')}")
         print()
-        
+
         # Vérifier la mise à jour
         updated = table.find_one(
             filter={
@@ -531,7 +531,7 @@ if UPDATE_OK:
         print("✅ ✅ DELETE RÉUSSI !")
         print(f"   Supprimé : {result.get('deletedCount', 'N/A')}")
         print()
-        
+
         # Vérifier la suppression
         deleted_check = table.find_one(
             filter={
@@ -710,4 +710,3 @@ fi
 
 success "✅ Démonstration terminée"
 echo ""
-

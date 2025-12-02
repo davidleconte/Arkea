@@ -7,7 +7,7 @@
 #   Ce script démontre l'interaction directe avec la Data API HCD via HTTP
 #   en utilisant curl, sans nécessiter de clients spécifiques (Python, Java, etc.).
 #   Il est conforme à la documentation officielle DataStax.
-#   
+#
 #   Fonctionnalités :
 #   - Génération du token d'authentification (format: Cassandra:BASE64-USERNAME:BASE64-PASSWORD)
 #   - Requêtes HTTP directes (POST, GET) vers l'endpoint Data API
@@ -352,4 +352,3 @@ fi
 
 success "✅ Démonstration terminée"
 echo ""
-

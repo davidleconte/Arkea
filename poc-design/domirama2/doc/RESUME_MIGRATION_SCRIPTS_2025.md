@@ -13,11 +13,13 @@
 **Action** : Remplacer tous les chemins hardcodés par la détection automatique
 
 **Implémentation** :
+
 1. ✅ Fonction `setup_paths()` créée dans `utils/didactique_functions.sh`
 2. ✅ Fichier de configuration `.poc-config.sh` créé
 3. ✅ 58 scripts migrés automatiquement
 
 **Fonction créée** :
+
 ```bash
 setup_paths() {
     # Détection automatique de SCRIPT_DIR, INSTALL_DIR, HCD_DIR, SPARK_HOME
@@ -27,6 +29,7 @@ setup_paths() {
 ```
 
 **Résultat** :
+
 - ✅ **60 scripts** utilisent maintenant la détection automatique
 - ✅ **0 script** avec chemin hardcodé restant (sauf `migrate_scripts.sh` qui est normal)
 - ✅ Compatibilité avec variables d'environnement (`ARKEA_HOME`, `HCD_DIR`, `SPARK_HOME`)
@@ -38,16 +41,19 @@ setup_paths() {
 **Action** : Utiliser des variables d'environnement pour HCD_HOST et HCD_PORT
 
 **Implémentation** :
+
 1. ✅ Variables `HCD_HOST` et `HCD_PORT` ajoutées dans `setup_paths()`
 2. ✅ Tous les `localhost 9042` remplacés par `"$HCD_HOST" "$HCD_PORT"`
 3. ✅ Tous les `localhost:9042` remplacés par `"$HCD_HOST:$HCD_PORT"`
 
 **Résultat** :
+
 - ✅ **60 scripts** utilisent maintenant `$HCD_HOST` et `$HCD_PORT`
 - ✅ **0 occurrence** de `localhost 9042` hardcodé restant (sauf `migrate_scripts.sh` qui est normal)
 - ✅ Configuration via variables d'environnement possible
 
 **Exemple d'utilisation** :
+
 ```bash
 # Utiliser un HCD distant
 HCD_HOST=192.168.1.100 HCD_PORT=9042 ./10_setup_domirama2_poc.sh
@@ -60,15 +66,18 @@ HCD_HOST=192.168.1.100 HCD_PORT=9042 ./10_setup_domirama2_poc.sh
 **Action** : Ajouter `set -u` et `set -o pipefail` à tous les scripts
 
 **Implémentation** :
+
 1. ✅ Tous les `set -e` remplacés par `set -euo pipefail`
 2. ✅ Scripts déjà avec `set -euo pipefail` laissés intacts
 
 **Résultat** :
+
 - ✅ **60 scripts** utilisent maintenant `set -euo pipefail`
 - ✅ Détection automatique des variables non définies
 - ✅ Détection des erreurs dans les pipes
 
 **Bénéfices** :
+
 - ✅ Erreurs détectées plus tôt
 - ✅ Scripts plus robustes
 - ✅ Meilleure traçabilité des erreurs
@@ -98,6 +107,7 @@ HCD_HOST=192.168.1.100 HCD_PORT=9042 ./10_setup_domirama2_poc.sh
 **Total** : 60 scripts modifiés
 
 **Catégories** :
+
 - ✅ Scripts d'initialisation (10-13) : 8 scripts
 - ✅ Scripts de recherche (14-20) : 14 scripts
 - ✅ Scripts fuzzy/vector (21-25) : 10 scripts
@@ -211,6 +221,7 @@ fi
 **Après** : Scripts fonctionnent sur n'importe quel environnement
 
 **Utilisation** :
+
 ```bash
 # Détection automatique
 ./10_setup_domirama2_poc.sh
@@ -227,6 +238,7 @@ ARKEA_HOME=/autre/chemin ./10_setup_domirama2_poc.sh
 **Après** : HCD peut être sur n'importe quel host/port
 
 **Utilisation** :
+
 ```bash
 # HCD local (défaut)
 ./10_setup_domirama2_poc.sh
@@ -243,6 +255,7 @@ HCD_HOST=192.168.1.100 HCD_PORT=9042 ./10_setup_domirama2_poc.sh
 **Après** : Toutes les erreurs sont détectées immédiatement
 
 **Exemple** :
+
 ```bash
 # Avant : Erreur silencieuse
 command1 | command2 | command3  # Si command2 échoue, script continue
@@ -329,6 +342,7 @@ done
 **Score** : **10/10** ✅
 
 **Les scripts sont maintenant** :
+
 - ✅ Portables (fonctionnent sur n'importe quel environnement)
 - ✅ Configurables (via variables d'environnement)
 - ✅ Robustes (gestion d'erreurs complète)
@@ -336,4 +350,3 @@ done
 ---
 
 **✅ Migration terminée le 2025-01-XX**
-

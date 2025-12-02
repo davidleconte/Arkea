@@ -70,11 +70,13 @@
 **Statut** : ✅ **EXÉCUTÉ ET VALIDÉ**
 
 **Exécution** :
+
 ```bash
 ./14_test_incremental_export.sh "2024-01-01" "2024-02-01" "/tmp/exports/domiramaCatOps/incremental/2024-01" "snappy"
 ```
 
 **Résultats Obtenus** :
+
 - ✅ 20,050 opérations exportées depuis HCD vers JSON
 - ✅ 20,050 opérations converties en Parquet
 - ✅ 182 partitions créées (date_partition)
@@ -83,6 +85,7 @@
 - ✅ Validation avancée réussie
 
 **Cohérence** :
+
 - ✅ Count exporté = count lu (20,050 = 20,050)
 - ✅ Schéma Parquet complet (29 colonnes)
 - ✅ Colonne libelle_embedding présente
@@ -97,23 +100,27 @@
 **Statut** : ⚠️ **IMPLÉMENTÉ MAIS NON EXÉCUTÉ**
 
 **Implémentation** :
+
 - ✅ Mode startrow_stoprow implémenté dans le script
 - ✅ Support des filtres code_si, contrat, date_op, numero_op
 - ✅ Documentation et exemples fournis
 
 **Exécution Requise** :
+
 ```bash
 ./14_test_incremental_export.sh "2024-01-01" "2024-02-01" "/tmp/export" "snappy" \
   "1" "100000000" "100000100" "1" "100"
 ```
 
 **Résultats Attendus** :
+
 - Export filtré par code_si = '1' AND contrat >= '100000000' AND contrat < '100000100'
 - Optionnellement : date_op + numero_op (clustering keys)
 
 **⚠️ NON EXÉCUTÉ** : Le test n'a pas été réellement exécuté pour valider le fonctionnement
 
 **Explication** :
+
 - Le code est implémenté et devrait fonctionner
 - Nécessite des données de test appropriées (code_si='1', contrats dans la plage)
 - **Recommandation** : Exécuter le test avec des paramètres appropriés
@@ -125,6 +132,7 @@
 **Statut** : ✅ **EXÉCUTÉ ET VALIDÉ**
 
 **Résultats** :
+
 - ✅ Format Parquet créé (1092 fichiers .snappy.parquet)
 - ✅ Compression Snappy appliquée
 - ✅ Partitionnement par date_partition
@@ -139,11 +147,13 @@
 **Statut** : ⚠️ **IMPLÉMENTÉ MAIS NON EXÉCUTÉ**
 
 **Implémentation** :
+
 - ✅ Script dédié `14_test_sliding_window_export.sh` créé
 - ✅ Calcul automatique des fenêtres mensuelles/hebdomadaires
 - ✅ Export séquentiel de plusieurs fenêtres
 
 **Exécution Requise** :
+
 ```bash
 # Fenêtres mensuelles
 ./14_test_sliding_window_export.sh "2024-01-01" "2024-06-30" "monthly" "/tmp/export" "snappy"
@@ -153,6 +163,7 @@
 ```
 
 **Résultats Attendus** :
+
 - Calcul automatique de 6 fenêtres mensuelles (janvier à juin 2024)
 - Export séquentiel de chaque fenêtre
 - Vérification de la cohérence entre fenêtres
@@ -160,6 +171,7 @@
 **⚠️ NON EXÉCUTÉ** : Le script n'a pas été réellement exécuté
 
 **Explication** :
+
 - Le script est fonctionnel et devrait fonctionner
 - Nécessite une période de données appropriée
 - **Recommandation** : Exécuter le test avec une période de données réelle
@@ -183,6 +195,7 @@
 **Détails** : Partie du mode startrow_stoprow avec paramètres numero_op_start et numero_op_end
 
 **Exécution Requise** :
+
 ```bash
 ./14_test_incremental_export.sh "2024-01-01" "2024-02-01" "/tmp/export" "snappy" \
   "1" "100000000" "100000100" "1" "100"
@@ -197,12 +210,14 @@
 **Statut** : ✅ **EXÉCUTÉ ET VALIDÉ**
 
 **Contrôles Effectués** :
+
 - ✅ Vérification schéma Parquet (Python pyarrow)
 - ✅ Vérification présence VECTOR (libelle_embedding)
 - ✅ Statistiques détaillées (min/max dates, comptes uniques, partitions)
 - ✅ Count exporté vs count lu (20,050 = 20,050)
 
 **Résultats** :
+
 - ✅ Toutes les colonnes critiques présentes
 - ✅ Colonne libelle_embedding (VECTOR) présente
 - ✅ 182 partitions créées
@@ -217,14 +232,17 @@
 **Statut** : ⚠️ **PARTIELLEMENT TESTÉ**
 
 **Implémentation** :
+
 - ✅ Gestion des valeurs NULL avec partition "unknown"
 - ⚠️ Gestion des dates invalides non explicitement testée
 
 **Résultats** :
+
 - ✅ Valeurs NULL gérées (partition "unknown" créée si nécessaire)
 - ⚠️ Dates invalides (format incorrect) : Non testées explicitement
 
 **Explication** :
+
 - La gestion des NULL est implémentée et devrait fonctionner
 - Les dates invalides seraient gérées par le `coalesce` dans Spark (retournerait NULL)
 - **Recommandation** : Tester explicitement avec des dates invalides
@@ -236,12 +254,15 @@
 **Statut** : ❌ **NON EXÉCUTÉ**
 
 **Test Effectué** :
+
 - ✅ Testé avec 20,050 lignes (réussi)
 
 **Test Requis** :
+
 - ❌ Test avec > 1M lignes non effectué
 
 **Explication** :
+
 - Le script devrait fonctionner avec un grand volume (DSBulk et Spark sont conçus pour cela)
 - Nécessite un jeu de données volumineux (> 1M lignes)
 - **Recommandation** : Générer ou utiliser un jeu de données volumineux pour valider la performance
@@ -253,6 +274,7 @@
 ### 3.1 Cohérence des Données Exportées
 
 **Vérifications Effectuées** :
+
 - ✅ Count exporté = count lu (20,050 = 20,050)
 - ✅ Schéma Parquet complet (29 colonnes)
 - ✅ Colonne libelle_embedding présente
@@ -266,6 +288,7 @@
 ### 3.2 Vérification de l'Exploitabilité des Données
 
 **Vérifications Effectuées** :
+
 - ✅ Format Parquet standard (lisible par Spark, Pandas, etc.)
 - ✅ Compression Snappy appliquée
 - ✅ Partitionnement par date (optimisé pour requêtes par date)
@@ -278,6 +301,7 @@
 ### 3.3 Vérification de la Complétude
 
 **Colonnes Exportées** :
+
 - ✅ code_si, contrat, date_op, numero_op
 - ✅ libelle, montant, devise, date_valeur
 - ✅ type_operation, sens_operation, operation_data
@@ -301,10 +325,11 @@
 | **TEST-06** | Identique TEST-02 | Même raison | Ajuster paramètres pour correspondre aux données existantes |
 
 **Explication Globale** :
+
 - Les fonctionnalités sont **implémentées** et **fonctionnelles** (code exécuté)
 - TEST-02 a été exécuté mais aucune donnée ne correspond aux critères de filtrage
 - TEST-04 n'a pas été exécuté (script créé mais non lancé)
-- **Raison** : 
+- **Raison** :
   - TEST-02 : Paramètres de filtrage ne correspondent pas aux données existantes
   - TEST-04 : Script créé mais non exécuté par manque de temps ou priorité
 
@@ -317,6 +342,7 @@
 | **TEST-09** (Grand volume) | Volume de test limité | Testé avec 20K+ lignes, pas > 1M | Générer jeu de données volumineux ou utiliser données réelles |
 
 **Explication** :
+
 - Le script devrait fonctionner avec un grand volume (DSBulk et Spark sont conçus pour cela)
 - Nécessite un jeu de données volumineux qui n'est pas disponible dans le POC
 - **Raison** : Limitation du POC (pas de données > 1M lignes)
@@ -328,27 +354,33 @@
 ### 5.1 Priorité 1 (Critique) : Exécuter les Tests Implémentés
 
 1. **Exécuter TEST-02 (STARTROW/STOPROW équivalent)**
+
    ```bash
    ./14_test_incremental_export.sh "2024-01-01" "2024-02-01" "/tmp/export_startrow" "snappy" \
      "1" "100000000" "100000100"
    ```
+
    - Vérifier que le filtrage fonctionne correctement
    - Valider les résultats (count, données filtrées)
    - Documenter les résultats dans le rapport
 
 2. **Exécuter TEST-04 (Fenêtre glissante)**
+
    ```bash
    ./14_test_sliding_window_export.sh "2024-01-01" "2024-03-31" "monthly" "/tmp/export_sliding" "snappy"
    ```
+
    - Vérifier le calcul automatique des fenêtres
    - Valider l'export de chaque fenêtre
    - Vérifier la cohérence entre fenêtres
 
 3. **Exécuter TEST-06 (Clustering keys)**
+
    ```bash
    ./14_test_incremental_export.sh "2024-01-01" "2024-02-01" "/tmp/export_clustering" "snappy" \
      "1" "100000000" "100000100" "1" "100"
    ```
+
    - Vérifier le filtrage par date_op + numero_op
    - Valider les résultats
 
@@ -443,4 +475,3 @@
 ---
 
 **Date de génération** : 2025-11-30
-

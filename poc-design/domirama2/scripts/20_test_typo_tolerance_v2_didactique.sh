@@ -8,7 +8,7 @@
 #   Ce script démontre la tolérance aux typos en exécutant des recherches
 #   partielles sur la colonne 'libelle_prefix', permettant de trouver des
 #   opérations même avec des erreurs de saisie ou des caractères manquants.
-#   
+#
 #   Cette version didactique affiche :
 #   - Le contexte et le problème des typos dans les recherches
 #   - Les équivalences HBase → HCD pour la recherche partielle
@@ -538,8 +538,8 @@ for test_file in [test1_file, test2_file, test3_file]:
 # Générer le rapport
 report = f"""# 🔍 Démonstration : Tests Tolérance aux Typos - POC Domirama2
 
-**Date** : {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}  
-**Script** : `20_test_typo_tolerance_v2_didactique.sh`  
+**Date** : {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+**Script** : `20_test_typo_tolerance_v2_didactique.sh`
 **Objectif** : Démontrer la tolérance aux typos en comparant libelle vs libelle_prefix
 
 ---
@@ -591,8 +591,8 @@ AND libelle_prefix : 'loy';  -- Préfixe : trouve 'LOYER'
 
 ### Améliorations HCD
 
-✅ **Index intégré** (vs Elasticsearch externe)  
-✅ **Pas de synchronisation** (vs HBase + Elasticsearch)  
+✅ **Index intégré** (vs Elasticsearch externe)
+✅ **Pas de synchronisation** (vs HBase + Elasticsearch)
 ✅ **Performance optimale** (index co-localisé avec données)
 
 ---
@@ -616,10 +616,10 @@ LIMIT 5;
 
 ### Explication
 
-✅ Recherche avec libelle_prefix (sans stemming)  
-✅ Trouve 'loyer' même si on cherche 'loyers' (sans réduction)  
-⚠️  Limitation : L'opérateur ':' cherche des tokens complets  
-⚠️  La recherche par préfixe ('loy') ne fonctionne pas directement  
+✅ Recherche avec libelle_prefix (sans stemming)
+✅ Trouve 'loyer' même si on cherche 'loyers' (sans réduction)
+⚠️  Limitation : L'opérateur ':' cherche des tokens complets
+⚠️  La recherche par préfixe ('loy') ne fonctionne pas directement
 ✅ Solution : Utiliser le terme complet ou implémenter côté app
 
 ### Résultats
@@ -634,7 +634,7 @@ for i, test in enumerate(tests, 1):
     query_time = test.get('query_time', 0)
     result_count = test.get('result_count', 0)
     success = test.get('success', False)
-    
+
     report += f"""
 ### TEST {test_num} : {title}
 
@@ -654,7 +654,7 @@ for i, test in enumerate(tests, 1):
         query_time_prefix = test.get('query_time_prefix', 0)
         result_count_libelle = test.get('result_count_libelle', 0)
         result_count_prefix = test.get('result_count_prefix', 0)
-        
+
         report += f"""
 **Comparaison** :
 
@@ -665,7 +665,7 @@ for i, test in enumerate(tests, 1):
     elif test_num == 3:
         result_count_libelle = test.get('result_count_libelle', 0)
         result_count_prefix = test.get('result_count_prefix', 0)
-        
+
         report += f"""
 **Comparaison** :
 
@@ -697,20 +697,20 @@ report += f"""
 
 ### Utiliser libelle pour :
 
-✅ Recherches précises avec variations grammaticales  
-✅ Recherches avec pluriel/singulier (loyers, loyer)  
+✅ Recherches précises avec variations grammaticales
+✅ Recherches avec pluriel/singulier (loyers, loyer)
 ✅ Recherches avec accents (impayé, impaye)
 
 ### Utiliser libelle_prefix pour :
 
-✅ Recherches tolérantes aux typos (préfixe)  
-✅ Autocomplétion  
+✅ Recherches tolérantes aux typos (préfixe)
+✅ Autocomplétion
 ✅ Recherches où l'utilisateur peut faire des erreurs
 
 ### Limitations de libelle_prefix
 
-⚠️  L'opérateur ':' cherche des tokens complets (pas vraiment partiel)  
-⚠️  Pour vraie recherche partielle : Utiliser libelle_tokens CONTAINS  
+⚠️  L'opérateur ':' cherche des tokens complets (pas vraiment partiel)
+⚠️  Pour vraie recherche partielle : Utiliser libelle_tokens CONTAINS
 ⚠️  La tolérance aux typos est limitée (préfixe correct nécessaire)
 
 ---
@@ -732,4 +732,3 @@ echo ""
 success "✅ Tests de tolérance aux typos terminés !"
 info "📝 Documentation générée : $REPORT_FILE"
 echo ""
-

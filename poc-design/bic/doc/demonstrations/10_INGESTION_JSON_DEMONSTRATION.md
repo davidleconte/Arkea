@@ -39,7 +39,6 @@ Un événement par ligne, format JSON :
 
 ## 🔧 Code Spark
 
-
 ### Code Spark - Lecture
 
 ```scala
@@ -51,6 +50,7 @@ val jsonDF = spark.read
 ```
 
 **Explication** :
+
 - Lecture JSON avec `read.json()`
 - Format JSONL (une ligne JSON par événement)
 - Mode PERMISSIVE pour gérer les erreurs
@@ -90,6 +90,7 @@ val interactions = jsonDF
 ```
 
 **Explication** :
+
 - Transformation vers format HCD
 - Colonnes JSON et dynamiques préservées
 - Métadonnées ajoutées
@@ -119,6 +120,7 @@ spark.stop()
 ```
 
 **Explication** :
+
 - Écriture directe via Spark Cassandra Connector
 - Mode append (ajout des données)
 - Vérification du total

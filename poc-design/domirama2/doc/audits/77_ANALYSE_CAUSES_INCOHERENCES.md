@@ -11,6 +11,7 @@
 ### Problème Identifié
 
 Les tests de recherche vectorielle avec typos retournent des résultats non pertinents malgré :
+
 - ✅ **Données présentes** : Tous les libellés attendus sont présents dans la partition
 - ✅ **Embeddings générés** : 100% de couverture (85/85 lignes)
 - ✅ **Performance excellente** : < 10ms par requête
@@ -20,6 +21,7 @@ Les tests de recherche vectorielle avec typos retournent des résultats non pert
 **Les embeddings ByteT5 capturent une similarité SÉMANTIQUE mais pas LEXICALE.**
 
 Les vecteurs d'embedding représentent le **sens** des textes, pas les **mots exacts**. Par conséquent :
+
 - "loyr" (typo) peut être sémantiquement proche de "CB PISCINE PARIS" (transaction bancaire)
 - Mais "loyr" n'est pas lexicalement proche de "LOYER" (même si sémantiquement proche)
 
@@ -30,6 +32,7 @@ Les vecteurs d'embedding représentent le **sens** des textes, pas les **mots ex
 ### TEST 1 : 'loyr' → Devrait trouver 'LOYER'
 
 #### Données Présentes ✅
+
 - **6 libellés pertinents** trouvés dans la partition
 - Exemples : "LOYER IMPAYE REGULARISATION", "LOYER PARIS MAISON"
 - **Tous ont des embeddings** ✅
@@ -56,11 +59,13 @@ Les vecteurs d'embedding représentent le **sens** des textes, pas les **mots ex
 #### Cause Identifiée
 
 **Problème de Similarité Sémantique vs Lexicale** :
+
 - Les libellés pertinents ("LOYER") ont une similarité de **0.2279**
 - Les résultats ANN (top 5) ont une similarité de **0.3052** (plus élevée)
 - **Aucun résultat pertinent dans le top 20**
 
 **Explication** :
+
 - "loyr" est sémantiquement proche de "CB PISCINE PARIS" (toutes deux sont des transactions bancaires)
 - Mais "loyr" n'est pas lexicalement proche de "LOYER" (même si sémantiquement proche)
 - ByteT5 capture le **sens** (transaction bancaire) mais pas les **mots exacts** (LOYER)
@@ -72,6 +77,7 @@ Les vecteurs d'embedding représentent le **sens** des textes, pas les **mots ex
 ### TEST 2 : 'impay' → Devrait trouver 'IMPAYE'
 
 #### Données Présentes ✅
+
 - **13 libellés pertinents** trouvés dans la partition
 - Exemples : "VIREMENT IMPAYE REGULARISATION", "LOYER IMPAYE REGULARISATION"
 - **Tous ont des embeddings** ✅
@@ -98,11 +104,13 @@ Les vecteurs d'embedding représentent le **sens** des textes, pas les **mots ex
 #### Cause Identifiée
 
 **Même problème que TEST 1** :
+
 - Les libellés pertinents ("IMPAYE") ont une similarité de **0.1811**
 - Les résultats ANN (top 5) ont une similarité de **0.2325** (plus élevée)
 - **Aucun résultat pertinent dans le top 20**
 
 **Explication** :
+
 - "impay" est sémantiquement proche de "CB PISCINE PARIS" (toutes deux sont des transactions bancaires)
 - Mais "impay" n'est pas lexicalement proche de "IMPAYE" (même si sémantiquement proche)
 
@@ -113,6 +121,7 @@ Les vecteurs d'embedding représentent le **sens** des textes, pas les **mots ex
 ### TEST 3 : 'viremnt' → Devrait trouver 'VIREMENT'
 
 #### Données Présentes ✅
+
 - **15 libellés pertinents** trouvés dans la partition
 - Exemples : "VIREMENT SEPA VERS ASSURANCE VIE", "VIREMENT PERMANENT VERS LIVRET A"
 - **Tous ont des embeddings** ✅
@@ -139,12 +148,14 @@ Les vecteurs d'embedding représentent le **sens** des textes, pas les **mots ex
 #### Cause Identifiée
 
 **Problème de LIMIT trop restrictif** :
+
 - Les libellés pertinents ("VIREMENT") ont une similarité de **0.2489**
 - Les résultats pertinents apparaissent à partir du **rang 6**
 - **Cause** : La similarité cosinus n'est pas assez élevée pour être dans le top 5
 - Les résultats non pertinents (CB COIFFEUR, etc.) ont une similarité plus élevée (0.2623)
 
 **Explication** :
+
 - "viremnt" est sémantiquement proche de "CB COIFFEUR PARIS" (transaction bancaire)
 - Mais "viremnt" est aussi sémantiquement proche de "VIREMENT" (même type d'opération)
 - La différence de similarité est faible (0.2623 vs 0.2489), donc les résultats pertinents sont juste après le top 5
@@ -166,11 +177,13 @@ Les vecteurs d'embedding représentent le **sens** des textes, pas les **mots ex
 ### Conclusion Globale
 
 **❌ Ce n'est PAS un problème de données manquantes** :
+
 - ✅ Tous les libellés attendus sont présents
 - ✅ Tous les embeddings sont générés (100%)
 - ✅ Les libellés pertinents ont des similarités correctes (0.18-0.25)
 
 **✅ C'est un problème de Similarité Sémantique vs Lexicale** :
+
 - Les embeddings ByteT5 capturent le **sens** (transaction bancaire) mais pas les **mots exacts** (LOYER, IMPAYE, VIREMENT)
 - Les résultats non pertinents (CB PISCINE PARIS) ont une similarité sémantique plus élevée que les résultats pertinents (LOYER)
 - La recherche vectorielle seule ne suffit pas pour des recherches lexicales avec typos
@@ -198,6 +211,7 @@ Les vecteurs d'embedding représentent le **sens** des textes, pas les **mots ex
 ## 🎯 Recommandation Principale
 
 **Utiliser la Recherche Hybride (Full-Text + Vector)** :
+
 - ✅ Combine la précision lexicale (Full-Text) avec la tolérance aux typos (Vector)
 - ✅ Résout le problème de similarité sémantique vs lexicale
 - ✅ Meilleure pertinence globale
@@ -206,7 +220,3 @@ Les vecteurs d'embedding représentent le **sens** des textes, pas les **mots ex
 ---
 
 **✅ Analyse terminée**
-
-
-
-

@@ -17,7 +17,7 @@ setup_paths() {
     # Détecter le répertoire du script appelant
     local caller_script="${BASH_SOURCE[1]:-${BASH_SOURCE[0]}}"
     SCRIPT_DIR="$(cd "$(dirname "$caller_script")" && pwd)"
-    
+
     # Détecter ARKEA_HOME (racine du projet Arkea)
     # Priorité 1: Variable d'environnement ARKEA_HOME
     # Priorité 2: Détection automatique (3 niveaux au-dessus de bic/scripts)
@@ -30,14 +30,14 @@ setup_paths() {
     if [ -f "$config_file" ]; then
         source "$config_file"
     fi
-    
+
     # Définir les chemins par défaut si non définis par .poc-config.sh ou env vars
     export INSTALL_DIR="${INSTALL_DIR:-$ARKEA_HOME}" # Pour compatibilité avec anciens scripts
     export HCD_DIR="${HCD_DIR:-${ARKEA_HOME}/binaire/hcd-1.2.3}"
     export SPARK_HOME="${SPARK_HOME:-${ARKEA_HOME}/binaire/spark-3.5.1}"
     export HCD_HOST="${HCD_HOST:-localhost}"
     export HCD_PORT="${HCD_PORT:-9042}"
-    
+
     # Exporter les variables pour qu'elles soient disponibles dans le script appelant
     export SCRIPT_DIR ARKEA_HOME INSTALL_DIR HCD_DIR SPARK_HOME HCD_HOST HCD_PORT
 }
@@ -141,7 +141,7 @@ check_kafka_running() {
 execute_cql() {
     local cql_command="$1"
     local keyspace="${2:-}"
-    
+
     if [ -n "$keyspace" ]; then
         cqlsh "$HCD_HOST" "$HCD_PORT" -e "USE $keyspace; $cql_command"
     else
@@ -170,7 +170,7 @@ execute_cql_safe() {
     local expected_errors="${3:-}"
     local output
     local exit_code=0
-    
+
     # Construire la commande cqlsh
     local cqlsh_cmd
     if [ -n "$keyspace" ]; then
@@ -178,10 +178,10 @@ execute_cql_safe() {
     else
         cqlsh_cmd="$cql_command"
     fi
-    
+
     # Exécuter la commande et capturer la sortie
     output=$(cqlsh "$HCD_HOST" "$HCD_PORT" -e "$cqlsh_cmd" 2>&1) || exit_code=$?
-    
+
     # Vérifier si c'est une erreur attendue
     if [ $exit_code -ne 0 ]; then
         if [ -n "$expected_errors" ]; then
@@ -190,13 +190,13 @@ execute_cql_safe() {
                 return 0
             fi
         fi
-        
+
         # Erreur critique
         error "Erreur CQL : $cql_command"
         error "Sortie : $output"
         return 1
     fi
-    
+
     # Succès
     echo "$output"
     return 0
@@ -211,12 +211,12 @@ check_spark_running() {
         error "Définissez SPARK_HOME ou configurez .poc-config.sh"
         return 1
     fi
-    
+
     if [ ! -f "$SPARK_HOME/bin/spark-submit" ]; then
         error "spark-submit n'est pas trouvé dans $SPARK_HOME/bin"
         return 1
     fi
-    
+
     return 0
 }
 
@@ -228,22 +228,22 @@ check_ingestion_health() {
     local table="$2"
     local expected_min_count="${3:-1}"
     local actual_count
-    
+
     info "Vérification de la santé de l'ingestion..."
-    
+
     # Compter les lignes dans la table
     actual_count=$(execute_cql_safe "SELECT COUNT(*) FROM $table;" "$keyspace" 2>/dev/null | grep -E "^\s+[0-9]+" | tr -d ' ' || echo "0")
-    
+
     if [ -z "$actual_count" ] || [ "$actual_count" = "0" ]; then
         warn "⚠️  Aucune donnée trouvée dans $keyspace.$table après ingestion"
         return 1
     fi
-    
+
     if [ "$actual_count" -lt "$expected_min_count" ]; then
         warn "⚠️  Nombre de lignes ($actual_count) inférieur au minimum attendu ($expected_min_count)"
         return 1
     fi
-    
+
     success "✅ Ingestion réussie : $actual_count lignes dans $keyspace.$table"
     return 0
 }
@@ -255,12 +255,11 @@ generate_demo_report() {
     local script_name="$1"
     local report_file="$2"
     local content="$3"
-    
+
     mkdir -p "$(dirname "$report_file")"
     cat > "$report_file" << EOF
 $content
 EOF
-    
+
     success "Rapport généré : $report_file"
 }
-

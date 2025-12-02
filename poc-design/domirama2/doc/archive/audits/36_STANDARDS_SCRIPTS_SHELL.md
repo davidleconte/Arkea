@@ -17,6 +17,7 @@
 ### 1. En-tête du Script
 
 **Format standard** :
+
 ```bash
 #!/bin/bash
 # ============================================
@@ -45,6 +46,7 @@
 ```
 
 **Exemple complet** :
+
 ```bash
 #!/bin/bash
 # ============================================
@@ -83,6 +85,7 @@
 ### 2. Gestion des Erreurs
 
 **Obligatoire** :
+
 ```bash
 set -e  # Arrêter en cas d'erreur
 set -u  # Erreur si variable non définie (optionnel mais recommandé)
@@ -90,6 +93,7 @@ set -o pipefail  # Erreur si une commande dans un pipe échoue (optionnel)
 ```
 
 **Gestion explicite** :
+
 ```bash
 # Vérifier les prérequis
 if ! command -v python3 &> /dev/null; then
@@ -104,6 +108,7 @@ fi
 ### 3. Variables et Configuration
 
 **Définir toutes les variables en haut** :
+
 ```bash
 # Configuration
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
@@ -113,6 +118,7 @@ SCHEMA_FILE="${SCRIPT_DIR}/schemas/01_create_domirama2_schema.cql"
 ```
 
 **Commenter les variables importantes** :
+
 ```bash
 # Chemin vers le fichier schéma CQL (doit exister)
 SCHEMA_FILE="${SCRIPT_DIR}/schemas/01_create_domirama2_schema.cql"
@@ -126,6 +132,7 @@ CQL_PORT=9042
 ### 4. Fonctions Utilitaires
 
 **Définir les fonctions de logging** :
+
 ```bash
 # Couleurs pour les messages
 RED='\033[0;31m'
@@ -146,6 +153,7 @@ error() { echo -e "${RED}❌ $1${NC}"; }
 ### 5. Vérifications Préalables
 
 **Toujours vérifier les prérequis** :
+
 ```bash
 # Vérifier que HCD est démarré
 if ! pgrep -f "cassandra" > /dev/null; then
@@ -167,6 +175,7 @@ fi
 ### 6. Messages Informatifs
 
 **Expliquer chaque étape** :
+
 ```bash
 info "🔍 Vérification que HCD est prêt..."
 # ... vérification ...
@@ -184,6 +193,7 @@ success "✅ Configuration terminée !"
 ### 7. Documentation des Paramètres
 
 **Si le script accepte des paramètres** :
+
 ```bash
 # ============================================
 # PARAMÈTRES :
@@ -230,6 +240,7 @@ Pour chaque script, vérifier :
 ### Pour un Développeur Externe
 
 Un développeur externe doit pouvoir :
+
 1. **Comprendre l'objectif** : Lire l'en-tête et savoir ce que fait le script
 2. **Vérifier les prérequis** : Savoir ce qui doit être installé/configuré avant
 3. **Exécuter le script** : Comprendre comment l'utiliser (paramètres, exemples)
@@ -251,7 +262,7 @@ Un développeur externe doit pouvoir :
 #   Ce script démontre la recherche hybride qui combine :
 #   1. Full-Text Search (SAI) : Filtre initial pour la précision
 #   2. Vector Search (ByteT5) : Tri par similarité pour tolérer les typos
-#   
+#  
 #   La recherche hybride offre une meilleure pertinence que chaque
 #   approche seule, en combinant précision et tolérance aux erreurs.
 #
@@ -340,8 +351,3 @@ fi
 ---
 
 **✅ Standards définis pour une documentation complète et compréhensible !**
-
-
-
-
-

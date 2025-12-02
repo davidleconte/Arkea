@@ -52,12 +52,14 @@ Le script exécute 3 requêtes CQL différentes :
 ### Template 43 : Script Didactique Général
 
 **Points communs** :
+
 - ✅ Structure didactique avec explications
 - ✅ Affichage de requêtes CQL
 - ✅ Génération de rapport markdown
 - ✅ Capture de résultats
 
 **Différences** :
+
 - ⚠️ Template 43 : Générique (peut être pour setup, test, etc.)
 - ✅ Script 29 : Spécifique aux requêtes CQL avec fenêtre glissante
 - ⚠️ Template 43 : Peut utiliser Spark ou Python
@@ -72,11 +74,13 @@ Le script exécute 3 requêtes CQL différentes :
 ### Template 63 : Script d'Orchestration
 
 **Points communs** :
+
 - ✅ Plusieurs démonstrations
 - ✅ Structure didactique
 - ✅ Génération de rapport
 
 **Différences** :
+
 - ❌ Template 63 : Orchestre plusieurs scripts
 - ✅ Script 29 : Exécute plusieurs requêtes dans un seul script
 - ❌ Template 63 : Appelle d'autres scripts
@@ -90,10 +94,12 @@ Le script exécute 3 requêtes CQL différentes :
 ### Template 65 : Délégation Python
 
 **Points communs** :
+
 - ✅ Structure didactique
 - ✅ Génération de rapport
 
 **Différences** :
+
 - ❌ Template 65 : Délègue à Python
 - ✅ Script 29 : Utilise `cqlsh` directement
 - ❌ Template 65 : Pour tests complexes
@@ -108,6 +114,7 @@ Le script exécute 3 requêtes CQL différentes :
 ### Template 68 : Script Démonstration Requêtes CQL
 
 **Justification** :
+
 1. **Spécificité** : Les scripts de démonstration de requêtes CQL avec `cqlsh` sont un pattern unique
 2. **Complexité** : Nécessite une structure spécifique pour gérer plusieurs requêtes
 3. **Didactique** : Doit afficher les requêtes, résultats attendus, résultats obtenus
@@ -127,7 +134,7 @@ Le script exécute 3 requêtes CQL différentes :
 # OBJECTIF :
 #   Ce script démontre [fonctionnalité] en exécutant [nombre] requêtes CQL
 #   directement via cqlsh.
-#   
+#  
 #   Cette version didactique affiche :
 #   - Les équivalences HBase → HCD détaillées
 #   - Les requêtes CQL complètes avant exécution
@@ -157,18 +164,22 @@ Le script exécute 3 requêtes CQL différentes :
 ### Structure Détaillée
 
 #### PARTIE 0: VÉRIFICATIONS
+
 - Vérification HCD démarré
 - Vérification `cqlsh` disponible
 - Vérification schéma et données
 
 #### PARTIE 1: CONTEXTE ET STRATÉGIE
+
 - Objectif de la démonstration
 - Équivalences HBase → HCD
 - Valeur ajoutée SAI (si applicable)
 - Stratégie de démonstration
 
 #### PARTIE 2: REQUÊTES CQL
+
 Pour chaque requête :
+
 1. **Titre et description** : Explication du concept
 2. **Équivalence HBase** : Comment HBase fait la même chose
 3. **Requête CQL** : Code CQL complet affiché
@@ -178,11 +189,13 @@ Pour chaque requête :
 7. **Analyse** : Comparaison attendu vs obtenu, performance
 
 #### PARTIE 3: COMPARAISON PERFORMANCE
+
 - Comparaison avec/sans SAI
 - Mesures de performance
 - Valeur ajoutée des index
 
 #### PARTIE 4: GÉNÉRATION RAPPORT
+
 - Capture de tous les résultats
 - Génération de rapport markdown structuré
 - Tableau récapitulatif des requêtes
@@ -210,6 +223,7 @@ Pour chaque requête :
 **Créer Template 68** : Script Démonstration Requêtes CQL
 
 **Justification** :
+
 1. Les scripts de démonstration de requêtes CQL avec `cqlsh` sont un pattern unique
 2. Nécessitent une structure spécifique pour gérer plusieurs requêtes
 3. Doivent mesurer et documenter les performances
@@ -228,7 +242,3 @@ Pour chaque requête :
 **Date de création** : 2025-11-27  
 **Auteur** : Analyse du script 29  
 **Version** : 1.0
-
-
-
-

@@ -24,12 +24,14 @@
 **Objectif** : Exécuter 20 tests de recherche full-text avancés
 
 **Fonctionnalités** :
+
 - ✅ Exécute des requêtes de recherche (DML)
 - ✅ Teste différents types de recherches (stemming, exact, phrase, partielle, multi-termes)
 - ✅ Utilise les index **déjà créés** (libelle, libelle_prefix, libelle_tokens, libelle_embedding)
 - ✅ Génère un rapport détaillé avec résultats
 
 **Prérequis** :
+
 - Schéma configuré (script 10)
 - Index avancés configurés (script 16)
 - Données chargées (script 11)
@@ -44,6 +46,7 @@
 **Objectif** : Orchestrer une démonstration complète du POC
 
 **Fonctionnalités** :
+
 - ✅ Orchestre plusieurs étapes (setup, chargement, tests)
 - ✅ Appelle le script 16 (`16_setup_advanced_indexes.sh`)
 - ✅ Appelle le script 11 (chargement données)
@@ -51,6 +54,7 @@
 - ✅ Génère un rapport complet
 
 **Prérequis** :
+
 - Scripts dépendants présents
 
 **Ce qu'il fait** : **ORCHESTRE** les scripts de setup ET teste les recherches
@@ -65,12 +69,14 @@
 **Objectif** : Configurer la tolérance aux typos
 
 **Fonctionnalités** :
+
 - ✅ Ajoute la colonne `libelle_prefix` (si elle n'existe pas)
 - ✅ Crée l'index `idx_libelle_prefix_ngram` (si il n'existe pas)
 - ✅ Vérifie l'existence avant d'agir (idempotent)
 - ✅ Messages informatifs
 
 **Prérequis** :
+
 - Schéma de base configuré (script 10)
 - Table existante
 
@@ -109,6 +115,7 @@ Script 18
 ### ❌ **Valeur Ajoutée Fonctionnelle : AUCUNE**
 
 Le script 19 est **fonctionnellement redondant** avec le script 16 (exécuté par le script 18) :
+
 - La colonne `libelle_prefix` est déjà créée par le schéma 02
 - L'index `idx_libelle_prefix_ngram` est déjà créé par le schéma 02
 - Le script 18 orchestre déjà cette création
@@ -203,11 +210,13 @@ Script 19 (v2 didactique) → Script 20 (tests)
 ### Option 1 : Conserver comme Script Standalone (Recommandé)
 
 **Justification** :
+
 - ✅ Utile pour ajouter la fonctionnalité à un schéma existant
 - ✅ Version didactique apporte de la valeur éducative
 - ✅ Script simple et ciblé
 
 **Actions** :
+
 1. ✅ Documenter clairement que le script 16 fait déjà ce travail
 2. ✅ Indiquer que le script 19 est un **script standalone**
 3. ✅ Recommander le script 18 pour un setup complet
@@ -215,10 +224,12 @@ Script 19 (v2 didactique) → Script 20 (tests)
 ### Option 2 : Marquer comme Obsolète (Si Setup Complet Toujours Utilisé)
 
 **Justification** :
+
 - ⚠️ Redondant avec script 16 (exécuté par script 18)
 - ⚠️ Peut créer de la confusion
 
 **Actions** :
+
 1. ✅ Ajouter un warning indiquant que le script est obsolète
 2. ✅ Rediriger vers le script 16 ou 18
 3. ✅ Archiver le script
@@ -226,10 +237,12 @@ Script 19 (v2 didactique) → Script 20 (tests)
 ### Option 3 : Conserver Uniquement la Version Didactique
 
 **Justification** :
+
 - ✅ La version didactique apporte de la valeur éducative
 - ✅ La version standard est redondante
 
 **Actions** :
+
 1. ✅ Supprimer `19_setup_typo_tolerance.sh` (version standard)
 2. ✅ Conserver `19_setup_typo_tolerance_v2_didactique.sh`
 3. ✅ Renommer en `19_setup_typo_tolerance_didactique.sh`
@@ -259,6 +272,7 @@ Script 19 (v2 didactique) → Script 20 (tests)
 ### Valeur Ajoutée Didactique
 
 **✅ OUI** - La version didactique (`19_setup_typo_tolerance_v2_didactique.sh`) apporte :
+
 - Explications détaillées du problème et de la solution
 - Documentation structurée
 - Focus spécifique sur la tolérance aux typos
@@ -266,6 +280,7 @@ Script 19 (v2 didactique) → Script 20 (tests)
 ### Recommandation Finale
 
 **Conserver le script 19 comme script standalone** avec :
+
 1. ✅ Documentation claire indiquant que le script 16 fait déjà ce travail
 2. ✅ Recommandation d'utiliser le script 18 pour un setup complet
 3. ✅ Utilité pour des cas d'usage spécifiques (ajout à un schéma existant)
@@ -278,12 +293,9 @@ Script 19 (v2 didactique) → Script 20 (tests)
 ## 📝 Note Importante
 
 Le script 19 **n'apporte rien de nouveau fonctionnellement** par rapport aux scripts 17 et 18 :
+
 - Le script 18 **crée déjà** `libelle_prefix` via le script 16
 - Le script 17 **utilise** `libelle_prefix` pour tester les recherches
 - Le script 19 **crée** `libelle_prefix` (redondant avec script 16)
 
 **La seule valeur ajoutée** est **didactique** : comprendre en détail comment fonctionne la configuration de la tolérance aux typos, avec explications et documentation structurée.
-
-
-
-

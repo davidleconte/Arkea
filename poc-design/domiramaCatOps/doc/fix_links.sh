@@ -25,14 +25,14 @@ update_links() {
     local file="$1"
     local old_name="$2"
     local new_path="$3"
-    
+
     if [ ! -f "$file" ]; then
         return
     fi
-    
+
     local current_dir=$(dirname "$file")
     local relative_path
-    
+
     # Calculer le chemin relatif
     if [[ "$current_dir" == "." ]]; then
         relative_path="$new_path"
@@ -42,7 +42,7 @@ update_links() {
         # Depuis une catégorie vers une autre
         relative_path="../$new_path"
     fi
-    
+
     # Mettre à jour les liens markdown
     if grep -q "$old_name" "$file" 2>/dev/null; then
         # Pattern 1: [texte](fichier.md)
@@ -63,7 +63,7 @@ for category in design guides implementation results corrections audits; do
             if [ -f "$file" ]; then
                 old_name=$(basename "$file")
                 new_path="$category/$old_name"
-                
+
                 # Mettre à jour dans tous les fichiers
                 for target_category in design guides implementation results corrections audits demonstrations templates; do
                     if [ -d "$target_category" ]; then
@@ -95,4 +95,3 @@ if [ -f "INDEX.md" ]; then
 fi
 
 success "Liens mis à jour : $UPDATED fichiers modifiés"
-

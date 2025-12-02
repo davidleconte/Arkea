@@ -8,7 +8,7 @@
 #   Ce script démontre la tolérance aux typos en exécutant des recherches
 #   partielles sur la colonne 'libelle_prefix', permettant de trouver des
 #   opérations même avec des erreurs de saisie ou des caractères manquants.
-#   
+#
 #   Les tests couvrent :
 #   - Recherches partielles (ex: "LOY" trouve "LOYER")
 #   - Recherches avec caractères manquants
@@ -162,4 +162,3 @@ success "✅ Tests de tolérance aux typos terminés !"
 info "📝 Utilisation recommandée :"
 echo "   - libelle : Pour recherches précises avec stemming"
 echo "   - libelle_prefix : Pour recherches tolérantes aux typos"
-

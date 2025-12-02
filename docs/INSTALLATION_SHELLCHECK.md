@@ -71,6 +71,7 @@ shellcheck --version
 ### Méthode 1 : Via WSL (Recommandée)
 
 Installer dans WSL (Ubuntu) :
+
 ```bash
 sudo apt-get update
 sudo apt-get install shellcheck
@@ -167,7 +168,7 @@ ShellCheck utilise des codes d'erreur (SC####) :
 | SC2155 | Declare and assign separately | `export VAR=$(cmd)` |
 | SC2164 | Use 'cd ... || exit' | `cd dir` → `cd dir || exit` |
 
-**Liste complète** : https://github.com/koalaman/shellcheck/wiki
+**Liste complète** : <https://github.com/koalaman/shellcheck/wiki>
 
 ---
 
@@ -176,11 +177,13 @@ ShellCheck utilise des codes d'erreur (SC####) :
 ### Exemple 1 : Double Quotes
 
 **Avant** :
+
 ```bash
 rm $file
 ```
 
 **Après** :
+
 ```bash
 rm "$file"
 ```
@@ -188,11 +191,13 @@ rm "$file"
 ### Exemple 2 : cd avec Gestion d'Erreur
 
 **Avant** :
+
 ```bash
 cd "$DIR"
 ```
 
 **Après** :
+
 ```bash
 cd "$DIR" || exit 1
 ```
@@ -200,12 +205,14 @@ cd "$DIR" || exit 1
 ### Exemple 3 : set -euo pipefail
 
 **Avant** :
+
 ```bash
 #!/bin/bash
 # Pas de gestion d'erreur
 ```
 
 **Après** :
+
 ```bash
 #!/bin/bash
 set -euo pipefail
@@ -219,6 +226,7 @@ set -euo pipefail
 ### Erreur : "shellcheck: command not found"
 
 **Solution** :
+
 ```bash
 # Vérifier l'installation
 which shellcheck
@@ -231,6 +239,7 @@ sudo apt-get install shellcheck  # Linux
 ### Erreur Pre-commit : "Failed to install shellcheck"
 
 **Solution** :
+
 1. Installer shellcheck manuellement (voir ci-dessus)
 2. Vérifier que shellcheck est dans le PATH
 3. Réessayer : `pre-commit run shellcheck --all-files`
@@ -238,12 +247,14 @@ sudo apt-get install shellcheck  # Linux
 ### Ignorer une Erreur Spécifique
 
 Dans le script :
+
 ```bash
 # shellcheck disable=SC2086
 rm $file  # Intentionnel
 ```
 
 Ou dans `.pre-commit-config.yaml` :
+
 ```yaml
 args: [-e, SC1091, -e, SC2086]  # Ignorer plusieurs codes
 ```
@@ -252,10 +263,10 @@ args: [-e, SC1091, -e, SC2086]  # Ignorer plusieurs codes
 
 ## 📚 Ressources
 
-- **Site officiel** : https://www.shellcheck.net/
-- **GitHub** : https://github.com/koalaman/shellcheck
-- **Wiki** : https://github.com/koalaman/shellcheck/wiki
-- **Codes d'erreur** : https://github.com/koalaman/shellcheck/wiki/Checks
+- **Site officiel** : <https://www.shellcheck.net/>
+- **GitHub** : <https://github.com/koalaman/shellcheck>
+- **Wiki** : <https://github.com/koalaman/shellcheck/wiki>
+- **Codes d'erreur** : <https://github.com/koalaman/shellcheck/wiki/Checks>
 
 ---
 
@@ -271,4 +282,3 @@ args: [-e, SC1091, -e, SC2086]  # Ignorer plusieurs codes
 **Date** : 2025-12-01  
 **Version** : 1.0  
 **Statut** : ✅ **Documentation complète**
-

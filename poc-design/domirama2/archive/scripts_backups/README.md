@@ -14,11 +14,13 @@ Ce répertoire contient les archives complètes du répertoire `scripts/` créé
 ## 📁 Archives Disponibles
 
 Les archives sont nommées avec le format :
+
 ```
 scripts_backup_YYYYMMDD_HHMMSS.tar.gz
 ```
 
 **Contenu** :
+
 - Tous les fichiers `.sh` du répertoire `scripts/`
 - Tous les fichiers `.py` du répertoire `scripts/`
 - Tous les fichiers `.cql` du répertoire `scripts/`
@@ -48,4 +50,3 @@ tar -xzf archive/scripts_backups/scripts_backup_YYYYMMDD_HHMMSS.tar.gz
 ---
 
 **Date de création** : 2025-01-XX
-

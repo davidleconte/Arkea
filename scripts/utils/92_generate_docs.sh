@@ -88,7 +88,7 @@ generate_index() {
     cat > "$index_file" <<EOF
 # 📚 Index Automatique de la Documentation - ARKEA
 
-**Date de génération** : $(date +%Y-%m-%d\ %H:%M:%S)  
+**Date de génération** : $(date +%Y-%m-%d\ %H:%M:%S)
 **Généré par** : \`92_generate_docs.sh\`
 
 ---
@@ -146,7 +146,7 @@ generate_scripts_list() {
     cat > "$scripts_file" <<EOF
 # 📜 Liste Automatique des Scripts - ARKEA
 
-**Date de génération** : $(date +%Y-%m-%d\ %H:%M:%S)  
+**Date de génération** : $(date +%Y-%m-%d\ %H:%M:%S)
 **Généré par** : \`92_generate_docs.sh\`
 
 ---
@@ -160,12 +160,12 @@ EOF
         local filename="$(basename "$script")"
         local rel_path="${script#$ARKEA_HOME/}"
         local description=""
-        
+
         # Extraire la description depuis les commentaires
         if head -20 "$script" | grep -q "Description :"; then
             description="$(head -20 "$script" | grep "Description :" | head -1 | sed 's/.*Description : //')"
         fi
-        
+
         echo "- **\`$filename\`** : $description" >> "$scripts_file"
         echo "  - Chemin : \`$rel_path\`" >> "$scripts_file"
         echo "" >> "$scripts_file"
@@ -185,13 +185,13 @@ EOF
             local poc_name="$(basename "$poc_dir")"
             echo "### $poc_name" >> "$scripts_file"
             echo "" >> "$scripts_file"
-            
+
             find "$poc_dir/scripts" -type f -name "*.sh" ! -path "*/archive/*" | sort | while IFS= read -r script; do
                 local filename="$(basename "$script")"
                 local rel_path="${script#$ARKEA_HOME/}"
                 echo "- \`$filename\` : \`$rel_path\`" >> "$scripts_file"
             done
-            
+
             echo "" >> "$scripts_file"
         fi
     done
@@ -219,7 +219,7 @@ generate_pocs_comparison() {
     cat > "$comparison_file" <<EOF
 # 📊 Tableau Comparatif Automatique des POCs - ARKEA
 
-**Date de génération** : $(date +%Y-%m-%d\ %H:%M:%S)  
+**Date de génération** : $(date +%Y-%m-%d\ %H:%M:%S)
 **Généré par** : \`92_generate_docs.sh\`
 
 ---
@@ -237,24 +237,24 @@ EOF
             local scripts_count=0
             local docs_count=0
             local schemas_count=0
-            
+
             if [ -d "$poc_dir/scripts" ]; then
                 scripts_count=$(find "$poc_dir/scripts" -type f -name "*.sh" ! -path "*/archive/*" 2>/dev/null | wc -l | tr -d ' ')
             fi
-            
+
             if [ -d "$poc_dir/doc" ]; then
                 docs_count=$(find "$poc_dir/doc" -type f -name "*.md" ! -path "*/archive/*" 2>/dev/null | wc -l | tr -d ' ')
             fi
-            
+
             if [ -d "$poc_dir/schemas" ]; then
                 schemas_count=$(find "$poc_dir/schemas" -type f -name "*.cql" 2>/dev/null | wc -l | tr -d ' ')
             fi
-            
+
             local status="✅"
             if [ ! -f "$poc_dir/README.md" ]; then
                 status="⚠️"
             fi
-            
+
             echo "| $poc_name | $scripts_count | $docs_count | $schemas_count | $status |" >> "$comparison_file"
         fi
     done
@@ -312,4 +312,3 @@ fi
 section "✅ Génération terminée"
 
 info "Documentation générée avec succès !"
-

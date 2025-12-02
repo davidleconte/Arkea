@@ -27,16 +27,19 @@ Ce document décrit l'implémentation de la recherche floue (fuzzy search) dans 
 ## Avantages de ByteT5 pour Fuzzy Search
 
 ### 1. Traitement au Niveau des Bytes
+
 - Fonctionne avec n'importe quel alphabet (Latin, Cyrillic, Chinois, etc.)
 - Pas de dépendance à un vocabulaire fixe
 - Idéal pour les environnements multilingues
 
 ### 2. Robustesse aux Typos
+
 - Les embeddings capturent la similarité sémantique
 - Résilient aux erreurs de frappe mineures
 - Gère les variations de formulation
 
 ### 3. Similarité Sémantique
+
 - Comprend le sens au-delà de la correspondance exacte
 - Trouve des résultats même avec des synonymes
 - Gère les variations grammaticales
@@ -64,7 +67,7 @@ def encode_text(text):
 
 ```cql
 -- Ajouter la colonne vectorielle
-ALTER TABLE operations_by_account 
+ALTER TABLE operations_by_account
 ADD libelle_embedding VECTOR<FLOAT, 1472>;
 
 -- Créer l'index vectoriel
@@ -101,36 +104,44 @@ LIMIT 5;
 ## Scripts Disponibles
 
 ### 1. `21_setup_fuzzy_search.sh`
+
 - Configure le schéma HCD pour la recherche vectorielle
 - Ajoute la colonne `libelle_embedding`
 - Crée l'index SAI vectoriel
 
 ### 2. `22_generate_embeddings.sh`
+
 - Génère les embeddings ByteT5 pour tous les libellés existants
 - Met à jour la colonne `libelle_embedding` dans HCD
 - Utilise Spark pour le traitement distribué
 
 ### 3. `23_test_fuzzy_search.sh`
+
 - Teste la recherche floue avec différentes requêtes contenant des typos
 - Démonstration de la tolérance aux erreurs
 - Affiche les résultats avec scores de similarité
 
 ### 4. `generate_embeddings_bytet5.py`
+
 - Script Python standalone pour générer des embeddings
 - Utile pour tester ou générer des embeddings ponctuels
 
 ## Exemples de Requêtes
 
 ### Typo: Caractère Manquant
+
 - Requête: `"loyr"` → Trouve: `"LOYER"`
 
 ### Typo: Inversion de Caractères
+
 - Requête: `"parsi"` → Trouve: `"PARIS"`
 
 ### Typo: Accent Manquant
+
 - Requête: `"impay"` → Trouve: `"IMPAYE"`
 
 ### Typo: Caractère Manquant
+
 - Requête: `"viremnt"` → Trouve: `"VIREMENT"`
 
 ## Comparaison avec Full-Text Search
@@ -145,18 +156,21 @@ LIMIT 5;
 
 ## Recommandations d'Utilisation
 
-### Utiliser Full-Text Search pour:
+### Utiliser Full-Text Search pour
+
 - Recherches exactes avec tokens complets
 - Filtrage rapide par mots-clés
 - Recherches avec stemming/accents
 
-### Utiliser Vector Search pour:
+### Utiliser Vector Search pour
+
 - Recherches avec typos
 - Recherches sémantiques (synonymes)
 - Recherches multilingues
 - Recherches avec variations de formulation
 
-### Utiliser Recherche Hybride pour:
+### Utiliser Recherche Hybride pour
+
 - Combiner précision (full-text) et tolérance (vector)
 - Filtrer d'abord par full-text, puis trier par similarité
 - Meilleur compromis performance/précision
@@ -201,4 +215,3 @@ La clé API est automatiquement utilisée depuis la variable d'environnement `HF
 - [ByteT5 Paper](https://arxiv.org/abs/2105.13626)
 - [HCD Vector Search Documentation](https://docs.datastax.com/en/hyper-converged-database/1.2/tutorials/vector-search-with-cql.html)
 - [Transformers Library](https://huggingface.co/docs/transformers)
-

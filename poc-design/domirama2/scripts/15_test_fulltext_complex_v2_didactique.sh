@@ -8,7 +8,7 @@
 #   Ce script exécute des tests de recherche full-text complexes sur la table
 #   'operations_by_account' en utilisant les index SAI avancés avec différents
 #   analyzers (lowercase, asciifolding, frenchLightStem, stop words).
-#   
+#
 #   Cette version didactique affiche :
 #   - Les analyzers SAI expliqués en détail
 #   - Les recherches multi-termes expliquées (AND implicite)

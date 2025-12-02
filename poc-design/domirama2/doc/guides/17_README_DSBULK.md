@@ -25,6 +25,7 @@
 ### Support Parquet
 
 **DSBulk ne supporte PAS directement Parquet** car :
+
 - Parquet est un format columnar binaire
 - DSBulk est optimisé pour formats textuels (CSV, JSON)
 - Parquet nécessite des bibliothèques spécifiques (Parquet-MR, etc.)
@@ -48,6 +49,7 @@ spark.read.parquet("/data/operations.parquet")
 ```
 
 **Avantages** :
+
 - ✅ Pas de conversion intermédiaire
 - ✅ Performance optimale
 - ✅ Format natif Parquet
@@ -56,6 +58,7 @@ spark.read.parquet("/data/operations.parquet")
 #### Solution 2 : Parquet → CSV → DSBulk
 
 **Workflow** :
+
 1. **Spark** : Convertir Parquet → CSV
 2. **DSBulk** : Importer CSV → HCD
 
@@ -79,10 +82,12 @@ dsbulk load \
 ```
 
 **Avantages** :
+
 - ✅ Utilise DSBulk pour import optimisé
 - ✅ Gestion erreurs automatique
 
 **Inconvénients** :
+
 - ⚠️ Conversion intermédiaire nécessaire
 - ⚠️ Performance réduite (conversion + import)
 
@@ -100,6 +105,7 @@ dsbulk load \
 | **ETL** | ❌ Limité | ✅ Complet | ✅ **Spark** |
 
 **Conclusion** :
+
 - ✅ **Pour Parquet** : Utiliser Spark directement (recommandé)
 - ✅ **Pour CSV/JSON** : DSBulk ou Spark (selon besoins)
 - ✅ **Pour ETL** : Spark (transformation, analytics)
@@ -156,6 +162,7 @@ dsbulk load \
 ### Cas 1 : Migration depuis CSV
 
 **DSBulk recommandé** :
+
 ```bash
 dsbulk load -h localhost -k domirama2_poc -t operations_by_account \
   -url /data/operations.csv -header true
@@ -164,6 +171,7 @@ dsbulk load -h localhost -k domirama2_poc -t operations_by_account \
 ### Cas 2 : Migration depuis Parquet
 
 **Spark recommandé** (déjà démontré dans POC) :
+
 ```scala
 spark.read.parquet("/data/operations.parquet")
   .write.format("org.apache.spark.sql.cassandra")
@@ -174,6 +182,7 @@ spark.read.parquet("/data/operations.parquet")
 ### Cas 3 : Export vers CSV
 
 **DSBulk recommandé** :
+
 ```bash
 dsbulk unload -h localhost -k domirama2_poc -t operations_by_account \
   -url /tmp/export -header true
@@ -182,6 +191,7 @@ dsbulk unload -h localhost -k domirama2_poc -t operations_by_account \
 ### Cas 4 : Export vers Parquet
 
 **Spark recommandé** :
+
 ```scala
 spark.read.format("org.apache.spark.sql.cassandra")
   .options(Map("keyspace" -> "domirama2_poc", "table" -> "operations_by_account"))
@@ -196,18 +206,21 @@ spark.read.format("org.apache.spark.sql.cassandra")
 ### Pour Parquet
 
 **✅ Utiliser Spark directement** :
+
 - Support natif Parquet
 - Performance optimale
 - Pas de conversion intermédiaire
 - Intégration Spark-Cassandra-Connector
 
 **Déjà démontré dans le POC** :
+
 - `examples/scala/export_incremental_parquet.scala` : Export Parquet
 - `11_load_domirama2_data_parquet.sh` : Import Parquet
 
 ### Pour CSV/JSON
 
 **✅ Utiliser DSBulk** :
+
 - Performance optimale pour bulk load
 - Gestion erreurs automatique
 - Monitoring intégré
@@ -216,6 +229,7 @@ spark.read.format("org.apache.spark.sql.cassandra")
 ### Pour ETL Complexe
 
 **✅ Utiliser Spark** :
+
 - Transformation de données
 - Analytics
 - Agrégations
@@ -228,10 +242,12 @@ spark.read.format("org.apache.spark.sql.cassandra")
 ### DSBulk
 
 **Formats supportés** :
+
 - ✅ CSV, JSON, CQL
 - ❌ Parquet (non supporté directement)
 
 **Cas d'usage** :
+
 - ✅ Bulk load depuis CSV/JSON
 - ✅ Export vers CSV/JSON
 - ✅ Migration de données
@@ -239,10 +255,12 @@ spark.read.format("org.apache.spark.sql.cassandra")
 ### Parquet
 
 **Recommandation** :
+
 - ✅ **Spark direct** (déjà démontré dans POC)
 - ⚠️ DSBulk nécessite conversion intermédiaire (non recommandé)
 
 **POC actuel** :
+
 - ✅ Spark utilisé pour Parquet (déjà démontré)
 - ✅ Performance optimale
 - ✅ Pas de conversion nécessaire
@@ -256,6 +274,7 @@ spark.read.format("org.apache.spark.sql.cassandra")
 **Fichier** : `35_demo_dsbulk_v2.sh`
 
 **Contenu** :
+
 - Explication DSBulk et formats supportés
 - Analyse Parquet vs DSBulk
 - Comparaison DSBulk vs Spark
@@ -266,6 +285,7 @@ spark.read.format("org.apache.spark.sql.cassandra")
 **Fichier** : `35_demo_dsbulk_v2.sh`
 
 **Améliorations** :
+
 - ✅ Installation DSBulk (si nécessaire)
 - ✅ Démonstrations pratiques avec CSV (import/export)
 - ✅ Workflow complet Parquet → CSV → DSBulk
@@ -274,6 +294,7 @@ spark.read.format("org.apache.spark.sql.cassandra")
 - ✅ Mesures de performance (simulation)
 
 **Usage** :
+
 ```bash
 ./35_demo_dsbulk_v2.sh
 ```
@@ -281,4 +302,3 @@ spark.read.format("org.apache.spark.sql.cassandra")
 ---
 
 **✅ DSBulk documenté, Spark recommandé pour Parquet (déjà démontré) !**
-

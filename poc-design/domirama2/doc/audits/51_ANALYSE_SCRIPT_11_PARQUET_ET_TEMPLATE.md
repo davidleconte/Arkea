@@ -48,11 +48,13 @@ Le script `11_load_domirama2_data_parquet.sh` est un **script d'ingestion/ETL** 
 ### Fonctionnalités Actuelles
 
 ✅ **Vérifications** :
+
 - HCD démarré
 - Keyspace existe
 - Fichier Parquet présent (vérification répertoire `[ ! -d ]`)
 
 ✅ **Exécution Spark** :
+
 - Création d'un script Scala temporaire
 - Exécution via `spark-shell`
 - **Lecture Parquet** : `.parquet()` (pas d'options header/inferSchema)
@@ -60,10 +62,12 @@ Le script `11_load_domirama2_data_parquet.sh` est un **script d'ingestion/ETL** 
 - Écriture dans HCD
 
 ✅ **Vérifications Post-Chargement** :
+
 - Nombre d'opérations chargées
 - Vérification que `cat_user` est null (stratégie batch)
 
 ✅ **Avantages Parquet mentionnés** :
+
 - Lecture 3-10x plus rapide
 - Schéma typé (pas de parsing)
 - Compression automatique
@@ -72,18 +76,22 @@ Le script `11_load_domirama2_data_parquet.sh` est un **script d'ingestion/ETL** 
 ### Limitations Actuelles
 
 ❌ **Pas d'affichage du code Spark** :
+
 - Le code Scala n'est pas affiché avant exécution
 - Pas d'explication des différences Parquet vs CSV
 
 ❌ **Vérifications basiques** :
+
 - Vérifications limitées (comptage, null check)
 - Pas d'affichage détaillé des résultats
 
 ❌ **Pas d'explications** :
+
 - Pas d'explications des avantages Parquet
 - Pas d'explications des différences dans les transformations
 
 ❌ **Pas de documentation générée** :
+
 - Pas de rapport markdown généré automatiquement
 
 ---
@@ -115,6 +123,7 @@ Le script `11_load_domirama2_data_parquet.sh` est un **script d'ingestion/ETL** 
 ### Différences dans le Code Spark
 
 **CSV** :
+
 ```scala
 val raw = spark.read
   .option("header", "true")
@@ -129,6 +138,7 @@ val ops = raw.select(
 ```
 
 **Parquet** :
+
 ```scala
 val raw = spark.read.parquet(inputPath)
 raw.printSchema()  // Affichage du schéma
@@ -169,11 +179,13 @@ val ops = raw.select(
 ### Option 1 : Utiliser le Template Existant avec Adaptations
 
 **Avantages** :
+
 - Réutilise le template existant
 - Cohérence avec le script CSV didactique
 - Adaptations mineures nécessaires
 
 **Adaptations nécessaires** :
+
 - Remplacer `.csv()` par `.parquet()`
 - Supprimer les options `header` et `inferSchema`
 - Ajouter `raw.printSchema()` pour afficher le schéma
@@ -186,10 +198,12 @@ val ops = raw.select(
 ### Option 2 : Créer un Template Spécifique pour Parquet
 
 **Avantages** :
+
 - Template dédié à Parquet
 - Sections spécifiques Parquet
 
 **Inconvénients** :
+
 - Duplication de code avec template CSV
 - Maintenance de deux templates similaires
 - Pas de valeur ajoutée significative
@@ -199,10 +213,12 @@ val ops = raw.select(
 ### Option 3 : Enrichir le Template Existant pour Support Multi-Format
 
 **Avantages** :
+
 - Un seul template pour CSV et Parquet
 - Sections conditionnelles selon le format
 
 **Inconvénients** :
+
 - Template plus complexe
 - Sections conditionnelles à gérer
 - Risque de confusion
@@ -268,6 +284,7 @@ val ops = raw.select(
 ### 1. Format de Lecture
 
 **CSV** :
+
 ```scala
 val raw = spark.read
   .option("header", "true")
@@ -276,6 +293,7 @@ val raw = spark.read
 ```
 
 **Parquet** :
+
 ```scala
 val raw = spark.read.parquet(inputPath)
 raw.printSchema()  // Affichage du schéma typé
@@ -284,12 +302,14 @@ raw.printSchema()  // Affichage du schéma typé
 ### 2. Transformations
 
 **CSV** : Beaucoup de `.cast()` nécessaires
+
 ```scala
 col("code_si").cast("string").as("code_si")
 to_timestamp(col("date_iso"), "yyyy-MM-dd'T'HH:mm:ss'Z'").as("date_op")
 ```
 
 **Parquet** : Moins de `.cast()` (types déjà présents)
+
 ```scala
 col("code_si").as("code_si")  // Déjà String
 col("date_op").as("date_op")  // Déjà Timestamp
@@ -303,6 +323,7 @@ col("date_op").as("date_op")  // Déjà Timestamp
 ### 4. Avantages à Documenter
 
 **Parquet** :
+
 - Lecture 3-10x plus rapide
 - Schéma typé (pas de parsing)
 - Compression automatique
@@ -311,4 +332,3 @@ col("date_op").as("date_op")  // Déjà Timestamp
 ---
 
 **✅ Conclusion : Le template d'ingestion existant est applicable avec des adaptations spécifiques pour Parquet !**
-

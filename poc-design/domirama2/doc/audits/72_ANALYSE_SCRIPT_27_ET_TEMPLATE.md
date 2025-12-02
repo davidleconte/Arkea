@@ -43,11 +43,13 @@ Le script `27_export_incremental_parquet.sh` est un **script d'export/ETL sortan
 ### Fonctionnalités Actuelles
 
 ✅ **Vérifications** :
+
 - HCD démarré
 - Spark Cassandra Connector JAR présent
 - Java 11 configuré
 
 ✅ **Exécution Spark** :
+
 - Création d'un script Scala temporaire
 - Exécution via `spark-shell` en mode non-interactif
 - Lecture depuis HCD avec filtrage par dates
@@ -55,6 +57,7 @@ Le script `27_export_incremental_parquet.sh` est un **script d'export/ETL sortan
 - Vérification de l'export
 
 ✅ **Paramètres** :
+
 - Date début (défaut: 2024-01-01)
 - Date fin (défaut: 2024-02-01)
 - Chemin de sortie (défaut: /tmp/exports/domirama/incremental/2024-01)
@@ -63,19 +66,23 @@ Le script `27_export_incremental_parquet.sh` est un **script d'export/ETL sortan
 ### Limitations Actuelles
 
 ❌ **Pas d'affichage du code Spark** :
+
 - Le code Scala n'est pas affiché avant exécution
 - Pas d'explication des transformations
 - Pas d'explication du filtrage par dates
 
 ❌ **Vérifications basiques** :
+
 - Pas de vérification détaillée des fichiers créés
 - Pas de statistiques détaillées (taille, nombre de fichiers, etc.)
 
 ❌ **Pas de documentation structurée** :
+
 - Pas de rapport markdown généré
 - Pas de documentation pour livrable
 
 ❌ **Pas d'explication didactique** :
+
 - Pas d'explication de l'équivalence HBase → HCD
 - Pas d'explication du partitionnement
 - Pas d'explication de la compression
@@ -107,12 +114,14 @@ Le script `27_export_incremental_parquet.sh` est un **script d'export/ETL sortan
 ### Option 2 : Créer un Template Spécifique pour Export/ETL Sortant
 
 **Avantages** :
+
 - Template adapté spécifiquement aux scripts d'export
 - Structure claire et dédiée
 - Sections pertinentes pour les exports
 - Facile à utiliser et maintenir
 
 **Inconvénients** :
+
 - Un template supplémentaire à maintenir
 - Nécessite de choisir le bon template
 
@@ -121,10 +130,12 @@ Le script `27_export_incremental_parquet.sh` est un **script d'export/ETL sortan
 ### Option 3 : Enrichir le Template d'Ingestion pour Gérer les Deux Directions
 
 **Avantages** :
+
 - Un seul template
 - Sections optionnelles selon la direction
 
 **Inconvénients** :
+
 - Template très complexe
 - Difficile à comprendre et utiliser
 - Risque d'erreurs
@@ -219,7 +230,3 @@ Le template spécifique pour export (`66_TEMPLATE_SCRIPT_EXPORT_DIDACTIQUE.md`) 
 ---
 
 **✅ Analyse terminée !**
-
-
-
-

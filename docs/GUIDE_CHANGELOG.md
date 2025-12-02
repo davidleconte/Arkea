@@ -154,6 +154,7 @@ Ajouter les changements dans `[Unreleased]` :
    - **PATCH** (1.0.1) : Corrections de bugs
 
 2. **Créer la section de version** :
+
 ```markdown
 ## [1.1.0] - 2025-12-15
 
@@ -168,6 +169,7 @@ Ajouter les changements dans `[Unreleased]` :
 ```
 
 3. **Réinitialiser [Unreleased]** :
+
 ```markdown
 ## [Unreleased]
 
@@ -250,4 +252,3 @@ Ajouter les changements dans `[Unreleased]` :
 **Date** : 2025-12-01  
 **Version** : 1.0  
 **Statut** : ✅ **Guide complet**
-

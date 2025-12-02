@@ -16,8 +16,3 @@ CREATE TABLE IF NOT EXISTS kafka_events (
     value text,
     processed_at timestamp
 );
-
-
-
-
-

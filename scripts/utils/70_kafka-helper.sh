@@ -28,4 +28,3 @@ if [ $# -eq 0 ]; then
 fi
 
 "$KAFKA_HOME/libexec/bin/$@"
-

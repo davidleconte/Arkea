@@ -9,13 +9,16 @@
 ## 📊 Résumé Exécutif
 
 ### État Global
+
 - ✅ **TEST 2** ('parsi') : **COHÉRENT** - Trouve "LOYER PARIS MAISON" (résultat pertinent)
 - ⚠️  **TEST 1** ('loyr') : **INCOHÉRENT** - Ne trouve pas "LOYER" dans les 5 premiers résultats
 - ⚠️  **TEST 3** ('impay') : **INCOHÉRENT** - Ne trouve pas "IMPAYE" dans les 5 premiers résultats
 - ⚠️  **TEST 4** ('viremnt') : **INCOHÉRENT** - Ne trouve pas "VIREMENT" dans les 5 premiers résultats
 
 ### Problème Identifié
+
 Les tests 1, 3 et 4 retournent principalement "PRIME ANNUELLE 2024" qui n'a aucun lien sémantique avec les recherches effectuées, suggérant :
+
 1. **Absence de données** : Les libellés attendus (LOYER, IMPAYE, VIREMENT) ne sont peut-être pas présents dans la partition testée
 2. **Embeddings manquants** : Les embeddings ne sont peut-être pas générés pour tous les libellés
 3. **Limitation de la recherche vectorielle** : La similarité cosinus peut ne pas être suffisante pour ces typos spécifiques
@@ -29,6 +32,7 @@ Les tests 1, 3 et 4 retournent principalement "PRIME ANNUELLE 2024" qui n'a aucu
 **Résultat attendu** : Devrait trouver 'LOYER', 'LOYER IMPAYE', etc.
 
 **Résultats obtenus** :
+
 1. PRIME ANNUELLE 2024 (REVENUS)
 2. PRIME ANNUELLE 2024 (REVENUS)
 3. PRIME ANNUELLE 2024 (REVENUS)
@@ -36,9 +40,10 @@ Les tests 1, 3 et 4 retournent principalement "PRIME ANNUELLE 2024" qui n'a aucu
 5. CHARGES COPROPRIETE TRIMESTRE 4 (HABITATION)
 
 **Analyse** :
+
 - ❌ **Aucun résultat pertinent** : Aucun libellé contenant "LOYER" n'apparaît
 - ⚠️  **Résultats non pertinents** : "PRIME ANNUELLE 2024" n'a aucun lien avec "loyr" ou "loyer"
-- 🔍 **Hypothèse** : 
+- 🔍 **Hypothèse** :
   - Les libellés "LOYER" ne sont peut-être pas présents dans la partition testée
   - Ou les embeddings ne sont pas générés pour ces libellés
   - Ou la similarité vectorielle n'est pas suffisante pour cette typo
@@ -52,6 +57,7 @@ Les tests 1, 3 et 4 retournent principalement "PRIME ANNUELLE 2024" qui n'a aucu
 **Résultat attendu** : Devrait trouver 'PARIS', opérations liées à Paris
 
 **Résultats obtenus** :
+
 1. PRIME ANNUELLE 2024 (REVENUS)
 2. PRIME ANNUELLE 2024 (REVENUS)
 3. PRIME ANNUELLE 2024 (REVENUS)
@@ -59,6 +65,7 @@ Les tests 1, 3 et 4 retournent principalement "PRIME ANNUELLE 2024" qui n'a aucu
 5. CHARGES COPROPRIETE TRIMESTRE 4 (HABITATION)
 
 **Analyse** :
+
 - ✅ **Résultat pertinent trouvé** : "LOYER PARIS MAISON" contient "PARIS"
 - ✅ **Cohérence** : La recherche vectorielle a correctement identifié la similarité entre "parsi" et "PARIS"
 - ⚠️  **Position** : Le résultat pertinent est en 4ème position, après 3 résultats non pertinents
@@ -73,6 +80,7 @@ Les tests 1, 3 et 4 retournent principalement "PRIME ANNUELLE 2024" qui n'a aucu
 **Résultat attendu** : Devrait trouver 'IMPAYE', 'IMPAYE REGULARISATION', etc.
 
 **Résultats obtenus** :
+
 1. PRIME ANNUELLE 2024 (REVENUS)
 2. PRIME ANNUELLE 2024 (REVENUS)
 3. PRIME ANNUELLE 2024 (REVENUS)
@@ -80,9 +88,10 @@ Les tests 1, 3 et 4 retournent principalement "PRIME ANNUELLE 2024" qui n'a aucu
 5. CB PISCINE PARIS ABONNEMENT (LOISIRS)
 
 **Analyse** :
+
 - ❌ **Aucun résultat pertinent** : Aucun libellé contenant "IMPAYE" n'apparaît
 - ⚠️  **Résultats non pertinents** : "PRIME ANNUELLE 2024" n'a aucun lien avec "impay" ou "impayé"
-- 🔍 **Hypothèse** : 
+- 🔍 **Hypothèse** :
   - Les libellés "IMPAYE" ne sont peut-être pas présents dans la partition testée
   - Ou les embeddings ne sont pas générés pour ces libellés
   - Ou la similarité vectorielle n'est pas suffisante pour cette typo
@@ -96,6 +105,7 @@ Les tests 1, 3 et 4 retournent principalement "PRIME ANNUELLE 2024" qui n'a aucu
 **Résultat attendu** : Devrait trouver 'VIREMENT', 'VIREMENT SEPA', etc.
 
 **Résultats obtenus** :
+
 1. PRIME ANNUELLE 2024 (REVENUS)
 2. PRIME ANNUELLE 2024 (REVENUS)
 3. PRIME ANNUELLE 2024 (REVENUS)
@@ -103,9 +113,10 @@ Les tests 1, 3 et 4 retournent principalement "PRIME ANNUELLE 2024" qui n'a aucu
 5. CB UBER EATS PARIS LIVRAISON (RESTAURANT)
 
 **Analyse** :
+
 - ❌ **Aucun résultat pertinent** : Aucun libellé contenant "VIREMENT" n'apparaît
 - ⚠️  **Résultats non pertinents** : "PRIME ANNUELLE 2024" n'a aucun lien avec "viremnt" ou "virement"
-- 🔍 **Hypothèse** : 
+- 🔍 **Hypothèse** :
   - Les libellés "VIREMENT" ne sont peut-être pas présents dans la partition testée
   - Ou les embeddings ne sont pas générés pour ces libellés
   - Ou la similarité vectorielle n'est pas suffisante pour cette typo
@@ -123,6 +134,7 @@ Les tests 1, 3 et 4 retournent principalement "PRIME ANNUELLE 2024" qui n'a aucu
 #### 1. Présence des Données ✅
 
 **Les libellés attendus SONT présents dans la partition** :
+
 - ✅ **LOYER** : 6 libellés trouvés (ex: "LOYER IMPAYE REGULARISATION", "LOYER PARIS MAISON")
 - ✅ **IMPAYE** : 13 libellés trouvés (ex: "VIREMENT IMPAYE REGULARISATION", "LOYER IMPAYE REGULARISATION")
 - ✅ **VIREMENT** : 15 libellés trouvés (ex: "VIREMENT IMPAYE REGULARISATION", "VIREMENT SEPA VERS PEL")
@@ -133,11 +145,13 @@ Les tests 1, 3 et 4 retournent principalement "PRIME ANNUELLE 2024" qui n'a aucu
 #### 2. Embeddings Partiellement Générés ⚠️
 
 **Résultats de la vérification** :
+
 - **Total de lignes** : 85
 - **Avec embeddings** : 66 (77.6%)
 - **Sans embeddings** : 19 (22.4%)
 
 **Détail par type de libellé** :
+
 - ✅ **LOYER** : 6/6 avec embeddings (100%)
 - ✅ **IMPAYE** : 13/13 avec embeddings (100%)
 - ⚠️  **VIREMENT** : 11/15 avec embeddings (73.3%) - **4 libellés sans embeddings**
@@ -150,11 +164,13 @@ Les tests 1, 3 et 4 retournent principalement "PRIME ANNUELLE 2024" qui n'a aucu
 **Hypothèse** : La similarité cosinus entre les embeddings de la requête typée et les libellés réels n'est pas suffisante pour ces typos spécifiques.
 
 **Analyse** :
+
 - Les libellés LOYER, IMPAYE, VIREMENT **sont présents avec embeddings**
 - Mais la recherche vectorielle ne les trouve pas dans les 5 premiers résultats
 - Cela suggère que la **similarité cosinus n'est pas suffisante** pour ces typos
 
 **Explication** :
+
 - ByteT5 peut ne pas capturer suffisamment la similarité pour des typos complexes
 - Les embeddings peuvent être trop différents même pour des mots proches
 - La recherche ANN peut ne pas être optimale pour ces cas
@@ -167,6 +183,7 @@ Les tests 1, 3 et 4 retournent principalement "PRIME ANNUELLE 2024" qui n'a aucu
 **Hypothèse** : Les embeddings générés ne sont pas de qualité suffisante pour capturer la similarité sémantique.
 
 **Analyse** :
+
 - Les embeddings sont générés pour 77.6% des libellés seulement
 - Certains libellés pertinents (PARIS, VIREMENT) n'ont pas d'embeddings
 - Même pour les libellés avec embeddings, la similarité n'est pas suffisante
@@ -188,17 +205,20 @@ Les tests 1, 3 et 4 retournent principalement "PRIME ANNUELLE 2024" qui n'a aucu
 **Action** : Relancer le script `22_generate_embeddings.sh` pour générer les embeddings manquants.
 
 **Problème identifié** :
+
 - 19 libellés (22.4%) n'ont pas d'embeddings
 - Notamment 24 libellés PARIS sur 29 n'ont pas d'embeddings
 - 4 libellés VIREMENT sur 15 n'ont pas d'embeddings
 
 **Action immédiate** :
+
 ```bash
 cd /Users/david.leconte/Documents/Arkea/poc-design/domirama2
 ./22_generate_embeddings.sh
 ```
 
 **Vérification** :
+
 - Vérifier que tous les libellés ont maintenant des embeddings
 - Objectif : 100% de couverture des embeddings
 
@@ -207,21 +227,25 @@ cd /Users/david.leconte/Documents/Arkea/poc-design/domirama2
 **Action** : La recherche vectorielle seule n'est pas suffisante pour ces typos. Plusieurs options :
 
 **Option A : Utiliser la Recherche Hybride (RECOMMANDÉ)**
+
 - Full-Text pour filtrer les résultats pertinents
 - Vector pour trier par similarité
 - Meilleure pertinence globale
 - Script disponible : `25_test_hybrid_search_v2_didactique.sh`
 
 **Option B : Augmenter le LIMIT**
+
 - Augmenter le `LIMIT` de 5 à 10 ou 20
 - Vérifier si les résultats pertinents apparaissent plus loin
 - Exemple :
+
 ```cql
 ORDER BY libelle_embedding ANN OF [...]
 LIMIT 20
 ```
 
 **Option C : Améliorer les Embeddings**
+
 - Utiliser un modèle plus performant (ByteT5-base au lieu de ByteT5-small)
 - Fine-tuner le modèle sur des données de typos
 - Augmenter la dimension des embeddings
@@ -229,6 +253,7 @@ LIMIT 20
 ### 4. ⚠️  Documenter les Limites de la Recherche Vectorielle - À FAIRE
 
 **Action** : Mettre à jour le rapport markdown du script 24 pour documenter :
+
 - Les résultats obtenus vs attendus
 - Les causes identifiées (embeddings manquants, similarité insuffisante)
 - Les recommandations (recherche hybride, augmentation LIMIT)
@@ -237,6 +262,7 @@ LIMIT 20
 ### 5. ✅ Modifier les Tests pour Refléter la Réalité - À FAIRE
 
 **Action** : Modifier les tests pour :
+
 - Utiliser des libellés réellement présents (déjà fait ✅)
 - Documenter que la recherche vectorielle seule peut ne pas être suffisante
 - Recommander la recherche hybride pour de meilleurs résultats
@@ -280,4 +306,3 @@ LIMIT 20
 ---
 
 **✅ Analyse terminée**
-

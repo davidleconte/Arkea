@@ -8,7 +8,7 @@
 # OBJECTIF :
 #   Ce script démontre la fenêtre glissante pour les exports incrémentaux,
 #   équivalent au TIMERANGE HBase avec décalage progressif.
-#   
+#
 #   Cette version didactique affiche :
 #   - Le code Spark complet pour chaque fenêtre avec explications
 #   - Les équivalences HBase → HCD détaillées
@@ -206,11 +206,11 @@ export_window() {
     local start_date=$2
     local end_date=$3
     local output_path=$4
-    
+
     info "📅 Fenêtre $window_id : $start_date → $end_date"
     code "   Output : $output_path"
     echo ""
-    
+
     # Afficher la stratégie DSBulk + Spark
     info "📝 Stratégie : DSBulk → JSON → Spark → Parquet"
     echo ""
@@ -236,23 +236,23 @@ export_window() {
     echo "   - Export Parquet avec partitionnement par date_op"
     echo "   - Mode overwrite pour idempotence (rejeux possibles)"
     echo ""
-    
+
     # Créer un répertoire temporaire pour JSON
     TEMP_JSON_DIR=$(mktemp -d "/tmp/dsbulk_window_${window_id}_$(date +%s)_XXXXXX")
-    
+
     # Créer un fichier temporaire pour la requête CQL
     TEMP_CQL_QUERY=$(mktemp "/tmp/dsbulk_query_${window_id}_$(date +%s)_XXXXXX.cql")
     cat > "$TEMP_CQL_QUERY" <<EOFCQL
 SELECT code_si, contrat, date_op, numero_op, op_id, libelle, montant, devise, date_valeur, type_operation, sens_operation, operation_data, cobol_data_base64, copy_type, meta_flags, cat_auto, cat_confidence, cat_user, cat_date_user, cat_validee, libelle_tokens, libelle_prefix, metadata
-FROM domirama2_poc.operations_by_account 
-WHERE date_op >= '$start_date' AND date_op < '$end_date' 
+FROM domirama2_poc.operations_by_account
+WHERE date_op >= '$start_date' AND date_op < '$end_date'
 ALLOW FILTERING
 EOFCQL
-    
+
     # ÉTAPE 1 : Export DSBulk vers JSON
     info "🚀 ÉTAPE 1 : Export DSBulk vers JSON..."
     echo ""
-    
+
     "$DSBULK" unload \
       --connector.name json \
       --query.file "$TEMP_CQL_QUERY" \
@@ -263,9 +263,9 @@ EOFCQL
       --dsbulk.connector.cassandra.host localhost \
       --dsbulk.connector.cassandra.port 9042 \
       2>&1 | tee -a "$TEMP_OUTPUT" | grep -v "^$" | tail -10
-    
+
     DSBULK_EXIT_CODE=${PIPESTATUS[0]}
-    
+
     if [ $DSBULK_EXIT_CODE -ne 0 ]; then
         warn "Erreur lors de l'export DSBulk pour la fenêtre $window_id (code: $DSBULK_EXIT_CODE)"
         rm -rf "$TEMP_JSON_DIR"
@@ -273,7 +273,7 @@ EOFCQL
         WINDOW_RESULTS+=("$window_id|$start_date|$end_date|$output_path|0|0")
         return
     fi
-    
+
     # Extraire le nombre d'opérations depuis la sortie DSBulk (PRIORITÉ)
     # DSBulk affiche: "10,029 | 0 | 2,780 | ..." dans une ligne avec des codes couleur ANSI
     # On cherche la ligne qui suit "total | failed | rows/s" et on prend le PREMIER nombre (avant le premier |)
@@ -287,23 +287,23 @@ EOFCQL
         # Fallback 2: chercher n'importe quelle ligne avec "|" et prendre le premier nombre
         JSON_LINES=$(grep -E "[0-9,]+[[:space:]]*\|" "$TEMP_OUTPUT" | grep -v "total.*failed" | tail -1 | sed 's/\x1b\[[0-9;]*m//g' | awk -F'|' '{print $1}' | tr -d ', ' | xargs || echo "0")
     fi
-    
+
     # Trouver le répertoire réel où DSBulk a exporté (peut être un sous-répertoire)
     ACTUAL_JSON_DIR=$(find "$TEMP_JSON_DIR" -name "*.json.gz" -type f 2>/dev/null | head -1 | xargs dirname 2>/dev/null || echo "$TEMP_JSON_DIR")
     if [ -z "$ACTUAL_JSON_DIR" ] || [ "$ACTUAL_JSON_DIR" = "." ]; then
         ACTUAL_JSON_DIR="$TEMP_JSON_DIR"
     fi
-    
+
     # Vérifier si des fichiers JSON existent
     JSON_FILE_COUNT=$(find "$TEMP_JSON_DIR" -name "*.json.gz" -type f 2>/dev/null | wc -l | tr -d ' ')
-    
+
     # Si JSON_LINES est toujours 0 mais qu'il y a des fichiers, compter les lignes
     if [ "$JSON_LINES" = "0" ] || [ -z "$JSON_LINES" ]; then
         if [ "$JSON_FILE_COUNT" -gt 0 ]; then
             JSON_LINES=$(find "$TEMP_JSON_DIR" -name "*.json.gz" -exec zcat {} \; 2>/dev/null | wc -l | tr -d ' ' || echo "0")
         fi
     fi
-    
+
     # Si toujours 0 et aucun fichier, alors vraiment aucune donnée
     if [ "$JSON_LINES" = "0" ] && [ "$JSON_FILE_COUNT" -eq 0 ]; then
         warn "Aucune donnée exportée par DSBulk pour la fenêtre $window_id"
@@ -312,7 +312,7 @@ EOFCQL
         WINDOW_RESULTS+=("$window_id|$start_date|$end_date|$output_path|0|0")
         return
     fi
-    
+
     # Si JSON_LINES > 0 mais pas de fichiers, DSBulk a peut-être exporté vers stdout
     # Dans ce cas, on continue quand même car Spark pourra lire depuis le répertoire
     if [ "$JSON_LINES" != "0" ] && [ "$JSON_FILE_COUNT" -eq 0 ]; then
@@ -321,16 +321,16 @@ EOFCQL
         # DSBulk peut aussi exporter dans un sous-répertoire basé sur la date/heure
         ACTUAL_JSON_DIR=$(find "$TEMP_JSON_DIR" -type d -mindepth 1 -maxdepth 2 2>/dev/null | head -1 || echo "$TEMP_JSON_DIR")
     fi
-    
+
     success "✅ Export DSBulk terminé : $JSON_LINES opérations exportées vers JSON"
     info "   📁 Répertoire : $ACTUAL_JSON_DIR"
     info "   📄 Fichiers : $JSON_FILE_COUNT fichiers JSON.gz"
     echo ""
-    
+
     # ÉTAPE 2 : Conversion JSON → Parquet avec Spark
     info "🚀 ÉTAPE 2 : Conversion JSON → Parquet avec Spark..."
     echo ""
-    
+
     # Créer le script Scala temporaire
     TEMP_SCRIPT=$(mktemp "/tmp/window_${window_id}_$(date +%s)_XXXXXX.scala")
     cat > "$TEMP_SCRIPT" <<EOFSCRIPT
@@ -396,7 +396,7 @@ try {
   val dfRead = spark.read.parquet(outputPath)
   val countRead = dfRead.count()
   println(s"✅ Vérification OK : \$countRead opérations lues depuis Parquet")
-  
+
   if (count != countRead) {
     println(s"⚠️  ATTENTION : Incohérence (\$count exportées vs \$countRead lues)")
   }
@@ -418,34 +418,34 @@ EOFSCRIPT
       --executor-memory 2g \
       -i "$TEMP_SCRIPT" \
       2>&1 | tee -a "$TEMP_OUTPUT" > /dev/null
-    
+
     # Afficher les lignes importantes pour l'utilisateur
     grep -v "^scala>" "$TEMP_OUTPUT" | grep -v "^     |" | grep -v "^Welcome to" | grep -v "WARN NativeCodeLoader" | grep -E "(✅|⚠️|📥|📊|💾|🔍|opérations|Export|Terminé|count|Statistiques|Vérification|Fenêtre)" | tail -25
-    
+
     # Extraire les résultats depuis la sortie Spark
     # Spark peut afficher: "✅ 10029 opérations lues depuis JSON" ou "✅10029 opérations lues depuis JSON"
     # On cherche d'abord avec le pattern le plus spécifique, puis on élargit
     local count=$(grep -i "opérations lues depuis json" "$TEMP_OUTPUT" | tail -1 | grep -oE "[0-9]+" | head -1 || echo "0")
-    
+
     # Si count est toujours 0, essayer avec un pattern différent
     if [ "$count" = "0" ] || [ -z "$count" ]; then
         # Chercher "Total opérations : 10029" dans les statistiques
         count=$(grep -i "Total opérations" "$TEMP_OUTPUT" | tail -1 | grep -oE "[0-9]+" | head -1 || echo "0")
     fi
-    
+
     # Pour count_read, chercher "Vérification OK"
     local count_read=$(grep -i "vérification ok.*opérations lues" "$TEMP_OUTPUT" | tail -1 | grep -oE "[0-9]+" | head -1 || echo "0")
-    
+
     # Si count_read est toujours 0, utiliser count comme fallback
     if [ "$count_read" = "0" ] || [ -z "$count_read" ]; then
         count_read="$count"
     fi
-    
+
     # Nettoyer
     rm -f "$TEMP_SCRIPT"
     rm -f "$TEMP_CQL_QUERY"
     rm -rf "$TEMP_JSON_DIR"
-    
+
     # S'assurer que count et count_read sont numériques
     if [ -z "$count" ] || ! [[ "$count" =~ ^[0-9]+$ ]]; then
         count="0"
@@ -453,7 +453,7 @@ EOFSCRIPT
     if [ -z "$count_read" ] || ! [[ "$count_read" =~ ^[0-9]+$ ]]; then
         count_read="0"
     fi
-    
+
     # S'assurer que count et count_read sont numériques
     if [ -z "$count" ] || ! [[ "$count" =~ ^[0-9]+$ ]]; then
         count="0"
@@ -461,10 +461,10 @@ EOFSCRIPT
     if [ -z "$count_read" ] || ! [[ "$count_read" =~ ^[0-9]+$ ]]; then
         count_read="0"
     fi
-    
+
     # Stocker les résultats
     WINDOW_RESULTS+=("$window_id|$start_date|$end_date|$output_path|$count|$count_read")
-    
+
     echo ""
     if [ -n "$count" ] && [ "$count" -gt 0 ] 2>/dev/null; then
         success "✅ Fenêtre $window_id exportée : $count opérations"
@@ -494,7 +494,7 @@ current_month=$START_MONTH
 for i in $(seq 1 $NUM_MONTHS); do
     window_id="${current_year}-$(printf "%02d" $current_month)"
     start_date="${current_year}-$(printf "%02d" $current_month)-01"
-    
+
     # Calculer la date de fin (mois suivant)
     next_month=$((current_month + 1))
     next_year=$current_year
@@ -504,9 +504,9 @@ for i in $(seq 1 $NUM_MONTHS); do
     fi
     end_date="${next_year}-$(printf "%02d" $next_month)-01"
     output_path="${OUTPUT_BASE}/${window_id}"
-    
+
     WINDOWS+=("$window_id|$start_date|$end_date|$output_path")
-    
+
     # Passer au mois suivant
     current_month=$next_month
     current_year=$next_year
@@ -695,7 +695,7 @@ for result in window_results:
             count_int = int(count) if count.isdigit() else 0
             count_read_int = int(count_read) if count_read.isdigit() else 0
             coherence = "✅ Cohérent" if count_int == count_read_int and count_int > 0 else ("⚠️  Incohérent" if count_int != count_read_int else "N/A")
-            
+
             report_content += f"""
 ### Fenêtre {window_id}
 
@@ -756,4 +756,3 @@ code "  ✅ Partitionnement par date_op (performance)"
 code "  ✅ Format Parquet (cohérent avec ingestion)"
 code "  ✅ Documentation structurée générée"
 echo ""
-

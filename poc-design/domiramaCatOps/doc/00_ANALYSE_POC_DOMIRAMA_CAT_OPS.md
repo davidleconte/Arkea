@@ -2,9 +2,10 @@
 
 **Date** : 2024-11-27  
 **Projet** : Catégorisation des Opérations (DomiramaCatOps)  
-**Tables HBase Sources** : 
-  - `B997X04:domirama` (Column Family `category`)
-  - `B997X04:domirama-meta-categories`
+**Tables HBase Sources** :
+
+- `B997X04:domirama` (Column Family `category`)
+- `B997X04:domirama-meta-categories`
 **Objectif** : Déterminer le POC à faire pour démontrer que la migration de HBase vers DataStax HCD est possible  
 **Méthodologie** : Même approche que Domirama2  
 **Format** : Rapport McKinsey MECE (Mutuellement Exclusif, Collectivement Exhaustif)  
@@ -65,6 +66,7 @@
 **Objectif** : Extension du projet Domirama pour enrichir les opérations d'un système de catégorisation automatique et personnalisable par les clients.
 
 **Architecture HBase** :
+
 - Ajout d'une Column Family à la table `domirama` existante
 - Partage du même design de clé que Domirama
 - **Deux tables HBase distinctes** :
@@ -72,12 +74,14 @@
   - `B997X04:domirama-meta-categories` : Métadonnées et configurations (7 "KeySpaces" logiques)
 
 **Architecture HCD Cible** :
+
 - **Nouveau keyspace dédié** : `domiramacatops_poc` (pas d'extension de `domirama2_poc`)
 - **8 tables HCD** :
   - 1 table pour `operations_by_account` (depuis `domirama.category`)
   - 7 tables pour les métadonnées (explosion de `domirama-meta-categories`)
 
 **Repos Git** :
+
 - `https://gitlark.s.arkea.com/edd_technique_outil_plateforme/7x09/categorizationjar`
 - `https://gitlark.s.arkea.com/edd_technique_outul_plateforme/7x09/domirama-category`
 - `https://gitlark.s.arkea.com/edd_technique_outul_plateforme/7x09/categorizationapi`
@@ -111,12 +115,14 @@ Column Family: 'category'
 ### 1.3 Key Design
 
 **Structure de la RowKey** :
+
 - **Même structure que Domirama** :
   - `code SI` (entité organisationnelle)
   - `numéro de contrat` (identification du compte)
   - `binaire combinant numéro d'opération + date` pour ordre antichronologique
 
 **Objectif** :
+
 - Une ligne par opération
 - Toutes les opérations d'un même compte sont contiguës
 - Tri antichronologique (plus récent en premier)
@@ -126,17 +132,20 @@ Column Family: 'category'
 ### 1.4 Format de Stockage
 
 **Données Thrift encodées en Binaire** :
+
 - Données Thrift encodées en Binaire dans une colonne
 - Colonnes dynamiques calquées sur certaines propriétés du POJO Thrift
 - Permet d'ajouter des filtres sur les valeurs de ces colonnes dans les Scan
 - Optimisation avec le BLOOMFILTER
 
 **Structure** :
+
 - **Colonne principale** : Données Thrift complètes (format binaire)
 - **Colonnes dynamiques** : Propriétés extraites du POJO Thrift pour filtrage
   - Exemples : `cat_auto`, `cat_user`, `cat_date_user`, `cat_validee`, etc.
 
 **Avantages** :
+
 - Stockage compact (Thrift binaire)
 - Filtrage efficace (colonnes dynamiques + BLOOMFILTER)
 - Flexibilité (colonnes dynamiques sans modification de schéma)
@@ -148,16 +157,19 @@ Column Family: 'category'
 #### 1.5.1 Écriture Batch (MapReduce bulkLoad)
 
 **Processus** :
+
 1. Préparation des données issues du moteur de catégorisation
 2. Écriture HBase dans un programme MapReduce en bulkLoad
 3. Passage des opérations directement par API HBase dans la phase reduce
 
 **Caractéristiques** :
+
 - **Format source** : SequenceFile (probablement)
 - **Volume** : Traitement batch de toutes les opérations
 - **Performance** : BulkLoad pour éviter surcharge API temps réel
 
 **Données écrites** :
+
 - Catégorie automatique (`cat_auto`)
 - Score de confiance (`cat_confidence`)
 - Timestamp constant (pour ne pas écraser les corrections client)
@@ -165,15 +177,18 @@ Column Family: 'category'
 #### 1.5.2 Écriture Temps Réel (API Client)
 
 **Processus** :
+
 - Écriture par l'API pour permettre au client de corriger les résultats du moteur de catégorisation
 - PUT avec `current_Timestamp` (timestamp réel de l'action client)
 
 **Données écrites** :
+
 - Catégorie modifiée par client (`cat_user`)
 - Date de modification (`cat_date_user`)
 - Validation (`cat_validee`)
 
 **Stratégie Multi-Version** :
+
 - Le batch écrit toujours sur le même timestamp
 - Le client écrit sur le timestamp réel de son action
 - **Résultat** : Pas d'écrasement en cas de rejeu du batch
@@ -186,15 +201,18 @@ Column Family: 'category'
 #### 1.6.1 Lecture Temps Réel (API)
 
 **Processus** :
+
 - Lecture Temps réel par l'API à l'aide de SCAN + value filter
 - Recherche des opérations d'un compte avec filtres sur catégories
 
 **Patterns** :
+
 - SCAN sur la partition (code_si + contrat)
 - Filtres sur colonnes dynamiques (cat_auto, cat_user, etc.)
 - Value filters pour filtrer côté serveur
 
 **Cas d'usage** :
+
 - Affichage des opérations catégorisées pour un client
 - Recherche par catégorie
 - Filtrage par période
@@ -202,16 +220,19 @@ Column Family: 'category'
 #### 1.6.2 Lecture Batch (Unload Incrémental)
 
 **Processus** :
+
 - Lecture batch pour des unload incrémentaux sur HDFS au format ORC
 - FullScan + STARTROW + STOPROW + TIMERANGE pour une fenêtre glissante
 - Ciblage plus précis des données à redescendre
 
 **Patterns** :
+
 - **FullScan** : Parcours complet de la table
 - **STARTROW/STOPROW** : Délimitation par RowKey
 - **TIMERANGE** : Fenêtre glissante temporelle
 
 **Cas d'usage** :
+
 - Export incrémental vers HDFS
 - Alimentation de systèmes d'analyse
 - Backup/Archive
@@ -223,29 +244,35 @@ Column Family: 'category'
 #### 1.7.1 TTL (Time To Live)
 
 **Configuration** :
+
 - TTL : `315619200` secondes (3653 jours ≈ 10 ans)
 
 **Usage** :
+
 - Purge automatique des données anciennes
 - Pas d'intervention manuelle nécessaire
 
 #### 1.7.2 Temporalité des Cellules (Versions)
 
 **Stratégie** :
+
 - Le batch écrit toujours sur le même timestamp
 - Le client écrit sur le timestamp réel de son action
 - **Résultat** : Pas d'écrasement en cas de rejeu du batch
 
 **Implémentation** :
+
 - Utilisation des versions HBase pour distinguer batch vs client
 - L'application lit la version la plus récente pour chaque source
 
 #### 1.7.3 BLOOMFILTER
 
 **Configuration** :
+
 - `BLOOMFILTER => 'ROWCOL'`
 
 **Usage** :
+
 - Optimisation des lectures
 - Filtrage sur RowKey + Column Qualifier
 - Réduction des I/O inutiles
@@ -253,9 +280,11 @@ Column Family: 'category'
 #### 1.7.4 REPLICATION_SCOPE
 
 **Configuration** :
+
 - `REPLICATION_SCOPE => '1'`
 
 **Usage** :
+
 - Réplication vers autres clusters
 - Haute disponibilité
 - Disaster recovery
@@ -263,6 +292,7 @@ Column Family: 'category'
 #### 1.7.5 Colonnes Dynamiques
 
 **Usage** :
+
 - Colonnes calquées sur propriétés du POJO Thrift
 - Permet filtres sur valeurs dans les Scan
 - Pas de modification de schéma nécessaire
@@ -276,11 +306,13 @@ Column Family: 'category'
 #### 2.1.1 Keyspace et Table
 
 **À démontrer** :
+
 - ✅ Création du keyspace `domiramacatops_poc`
 - ✅ Création de la table `operations_by_account` (ou réutilisation de `domirama2_poc.operations_by_account`)
 - ✅ Ajout des colonnes de catégorisation à la table existante
 
 **Implique** :
+
 - Schéma CQL avec colonnes de catégorisation
 - Stratégie de réplication (SimpleStrategy pour POC, NetworkTopologyStrategy pour production)
 - Documentation du schéma
@@ -288,11 +320,13 @@ Column Family: 'category'
 #### 2.1.2 Key Design
 
 **À démontrer** :
+
 - ✅ Partition Key : `(code_si, contrat)` (identique à Domirama2)
 - ✅ Clustering Keys : `(date_op DESC, numero_op ASC)` (ordre antichronologique)
 - ✅ Conformité avec la structure HBase existante
 
 **Implique** :
+
 - Validation que la structure de clé permet les mêmes patterns d'accès
 - Démonstration de l'ordre antichronologique
 - Tests de performance sur les accès par partition
@@ -300,12 +334,14 @@ Column Family: 'category'
 #### 2.1.3 Colonnes de Catégorisation
 
 **À démontrer** :
+
 - ✅ Colonnes pour catégorie automatique (`cat_auto`, `cat_confidence`)
 - ✅ Colonnes pour catégorie utilisateur (`cat_user`, `cat_date_user`, `cat_validee`)
 - ✅ Colonne pour données Thrift binaires (`operation_data BLOB`)
 - ✅ Colonnes dynamiques (`meta_flags MAP<TEXT, TEXT>`)
 
 **Implique** :
+
 - Schéma CQL complet avec toutes les colonnes
 - Documentation de chaque colonne
 - Exemples de données
@@ -317,11 +353,13 @@ Column Family: 'category'
 #### 2.2.1 Données Thrift Binaires
 
 **À démontrer** :
+
 - ✅ Stockage des données Thrift encodées en binaire dans une colonne BLOB
 - ✅ Préservation de l'intégrité des données lors de la migration
 - ✅ Capacité de décodage des données Thrift depuis le BLOB
 
 **Implique** :
+
 - Colonne `operation_data BLOB` dans le schéma
 - Scripts de migration HBase → HCD (conversion Thrift binaire)
 - Tests de validation (encodage/décodage)
@@ -329,11 +367,13 @@ Column Family: 'category'
 #### 2.2.2 Colonnes Dynamiques
 
 **À démontrer** :
+
 - ✅ Utilisation de `MAP<TEXT, TEXT>` pour colonnes dynamiques
 - ✅ Filtrage sur les valeurs des colonnes dynamiques
 - ✅ Indexation SAI sur les colonnes dynamiques si nécessaire
 
 **Implique** :
+
 - Schéma avec `meta_flags MAP<TEXT, TEXT>`
 - Index SAI sur les clés du MAP si besoin
 - Démonstration de filtrage avec `CONTAINS`
@@ -345,12 +385,14 @@ Column Family: 'category'
 #### 2.3.1 Écriture Batch (MapReduce bulkLoad → Spark)
 
 **À démontrer** :
+
 - ✅ Migration de MapReduce bulkLoad vers Spark
 - ✅ Chargement batch de données depuis Parquet/SequenceFile
 - ✅ Écriture en masse dans HCD via Spark Cassandra Connector
 - ✅ Préservation du timestamp constant pour le batch
 
 **Implique** :
+
 - Script Spark pour ingestion batch
 - Conversion SequenceFile → Parquet (si nécessaire)
 - Utilisation de `spark-cassandra-connector`
@@ -359,12 +401,14 @@ Column Family: 'category'
 #### 2.3.2 Écriture Temps Réel (API PUT → Data API / CQL)
 
 **À démontrer** :
+
 - ✅ Écriture via Data API (REST/GraphQL) pour corrections client
 - ✅ Écriture via CQL direct (driver Java/Python)
 - ✅ Utilisation de timestamp réel pour les corrections client
 - ✅ Stratégie multi-version (pas d'écrasement batch → client)
 
 **Implique** :
+
 - Configuration Data API (Stargate)
 - Scripts de démonstration (PUT via Data API)
 - Scripts de démonstration (UPDATE via CQL)
@@ -377,12 +421,14 @@ Column Family: 'category'
 #### 2.4.1 Lecture Temps Réel (SCAN + value filter → SELECT + SAI)
 
 **À démontrer** :
+
 - ✅ Remplacement de SCAN + value filter par SELECT + WHERE + SAI
 - ✅ Recherche par catégorie (cat_auto, cat_user)
 - ✅ Filtrage sur colonnes dynamiques
 - ✅ Performance équivalente ou meilleure
 
 **Implique** :
+
 - Index SAI sur colonnes de catégorisation
 - Requêtes CQL avec WHERE
 - Tests de performance (latence, débit)
@@ -391,12 +437,14 @@ Column Family: 'category'
 #### 2.4.2 Lecture Batch (FullScan + STARTROW/STOPROW + TIMERANGE)
 
 **À démontrer** :
+
 - ✅ Export incrémental avec fenêtre glissante (TIMERANGE)
 - ✅ Export avec délimitation par clé (STARTROW/STOPROW équivalent)
 - ✅ Export au format Parquet (remplacement ORC)
 - ✅ Performance et scalabilité
 
 **Implique** :
+
 - Scripts Spark pour export incrémental
 - Utilisation de WHERE sur clustering keys (date_op, numero_op)
 - Export Parquet avec partitionnement
@@ -409,11 +457,13 @@ Column Family: 'category'
 #### 2.5.1 TTL (Time To Live)
 
 **À démontrer** :
+
 - ✅ Configuration TTL au niveau table (`default_time_to_live`)
 - ✅ Purge automatique après 10 ans (315619200 secondes)
 - ✅ Validation que les données expirent correctement
 
 **Implique** :
+
 - Schéma CQL avec `default_time_to_live = 315619200`
 - Tests de validation (insertion puis vérification expiration)
 - Documentation du comportement
@@ -421,12 +471,14 @@ Column Family: 'category'
 #### 2.5.2 Temporalité des Cellules (Multi-Version)
 
 **À démontrer** :
+
 - ✅ Stratégie multi-version pour distinguer batch vs client
 - ✅ Colonnes séparées (`cat_auto` vs `cat_user`)
 - ✅ Logique applicative de priorisation (cat_user > cat_auto)
 - ✅ Non-écrasement en cas de rejeu batch
 
 **Implique** :
+
 - Schéma avec colonnes séparées
 - Scripts de démonstration (batch puis client)
 - Tests de non-écrasement
@@ -435,11 +487,13 @@ Column Family: 'category'
 #### 2.5.3 BLOOMFILTER Équivalent
 
 **À démontrer** :
+
 - ✅ Équivalent BLOOMFILTER avec index SAI
 - ✅ Performance équivalente ou meilleure
 - ✅ Réduction des I/O inutiles
 
 **Implique** :
+
 - Index SAI sur colonnes clés
 - Tests de performance
 - Comparaison avec HBase (si possible)
@@ -448,11 +502,13 @@ Column Family: 'category'
 #### 2.5.4 REPLICATION_SCOPE Équivalent
 
 **À démontrer** :
+
 - ✅ Réplication multi-cluster avec NetworkTopologyStrategy
 - ✅ Configuration de réplication par datacenter
 - ✅ Tests de réplication
 
 **Implique** :
+
 - Configuration NetworkTopologyStrategy
 - Tests de réplication (si environnement multi-cluster disponible)
 - Documentation de la configuration
@@ -464,12 +520,14 @@ Column Family: 'category'
 #### 2.6.1 Recherche par Catégorie
 
 **À démontrer** :
+
 - ✅ Recherche par catégorie automatique (`cat_auto`)
 - ✅ Recherche par catégorie utilisateur (`cat_user`)
 - ✅ Recherche combinée (cat_auto OU cat_user)
 - ✅ Performance avec index SAI
 
 **Implique** :
+
 - Index SAI sur `cat_auto` et `cat_user`
 - Requêtes CQL avec WHERE
 - Tests de performance
@@ -477,12 +535,14 @@ Column Family: 'category'
 #### 2.6.2 Recherche Full-Text (si applicable)
 
 **À démontrer** :
+
 - ✅ Recherche full-text sur libellé d'opération (si colonne `libelle` présente)
 - ✅ Utilisation d'analyzers Lucene (frenchLightStem, asciifolding)
 - ✅ Recherche multi-terme
 - ✅ Performance avec index SAI full-text
 
 **Implique** :
+
 - Index SAI full-text sur `libelle` (si présent)
 - Configuration d'analyzers
 - Tests de recherche
@@ -494,12 +554,14 @@ Column Family: 'category'
 #### 2.7.1 Migration des Données
 
 **À démontrer** :
+
 - ✅ Extraction des données depuis HBase
 - ✅ Conversion Thrift binaire → BLOB
 - ✅ Migration vers HCD (Spark ou DSBulk)
 - ✅ Validation de l'intégrité des données
 
 **Implique** :
+
 - Scripts d'extraction HBase
 - Scripts de conversion
 - Scripts de chargement HCD
@@ -508,11 +570,13 @@ Column Family: 'category'
 #### 2.7.2 Intégration avec Applications Existantes
 
 **À démontrer** :
+
 - ✅ Compatibilité avec l'API existante (categorizationapi)
 - ✅ Migration progressive (dual-write possible)
 - ✅ Tests de régression
 
 **Implique** :
+
 - Analyse de l'API existante
 - Adapter l'API pour HCD (Data API ou driver)
 - Tests de compatibilité
@@ -526,6 +590,7 @@ Column Family: 'category'
 **Dossier** : `poc-design/domiramaCatOps/`
 
 **Organisation** :
+
 ```
 domiramaCatOps/
 ├── doc/
@@ -540,6 +605,7 @@ domiramaCatOps/
 ```
 
 **Méthodologie** :
+
 - Même approche que Domirama2
 - Scripts numérotés par ordre d'exécution
 - Versions didactiques avec génération automatique de rapports .md
@@ -718,11 +784,13 @@ domiramaCatOps/
 #### 4.1.1 Schéma de Données
 
 **Défi** :
+
 - Création d'un nouveau keyspace dédié
 - Explosion de `domirama-meta-categories` en 7 tables
 - Relations entre les 8 tables HCD
 
 **Décision POC** :
+
 - **Nouveau keyspace** : `domiramacatops_poc` (dédié, pas d'extension de `domirama2_poc`)
 - **8 tables HCD** :
   - 1 table `operations_by_account` (depuis `domirama.category`)
@@ -732,11 +800,13 @@ domiramaCatOps/
 #### 4.1.2 Migration Thrift Binaire
 
 **Défi** :
+
 - Conversion des données Thrift binaires depuis HBase
 - Préservation de l'intégrité
 - Format source : Parquet uniquement (pas de SequenceFile)
 
 **Solution** :
+
 - Extraction directe du BLOB depuis HBase
 - Conversion en Parquet (colonne Binary pour BLOB)
 - Chargement depuis Parquet dans HCD
@@ -746,10 +816,12 @@ domiramaCatOps/
 #### 4.1.3 Stratégie Multi-Version
 
 **Défi** :
+
 - HBase utilise les versions de cellules
 - HCD n'a pas de versions automatiques
 
 **Solution** :
+
 - Colonnes séparées (`cat_auto` vs `cat_user`)
 - Logique applicative de priorisation
 - Timestamps explicites (`cat_date_user`)
@@ -761,10 +833,12 @@ domiramaCatOps/
 #### 4.2.1 Compatibilité API
 
 **Défi** :
+
 - L'API existante (`categorizationapi`) utilise l'API HBase
 - Migration vers Data API ou driver CQL
 
 **Solution** :
+
 - Adapter l'API pour utiliser Data API (REST/GraphQL)
 - Ou utiliser driver Java/Python CQL
 - Tests de régression
@@ -772,10 +846,12 @@ domiramaCatOps/
 #### 4.2.2 Performance
 
 **Défi** :
+
 - Garantir des performances équivalentes ou meilleures
 - Notamment pour les SCAN + value filter
 
 **Solution** :
+
 - Index SAI optimisés
 - Tests de performance
 - Benchmarking
@@ -787,10 +863,12 @@ domiramaCatOps/
 #### 4.3.1 Migration Progressive
 
 **Défi** :
+
 - Migration sans interruption de service
 - Dual-write possible ?
 
 **Solution** :
+
 - Phase 1 : Dual-write (HBase + HCD)
 - Phase 2 : Lecture HCD uniquement
 - Phase 3 : Arrêt écriture HBase
@@ -798,10 +876,12 @@ domiramaCatOps/
 #### 4.3.2 Formation Équipes
 
 **Défi** :
+
 - Formation des équipes sur HCD/CQL
 - Migration des compétences HBase → HCD
 
 **Solution** :
+
 - Documentation complète
 - Scripts didactiques
 - Sessions de formation
@@ -850,6 +930,7 @@ domiramaCatOps/
 Ce document définit le périmètre complet du POC pour la migration de la table `B997X04:domirama` (Column Family `category`) de HBase vers DataStax HCD.
 
 **Prochaines étapes** :
+
 1. Création de la structure du dossier `domiramaCatOps`
 2. Création des schémas CQL
 3. Création des scripts de démonstration
@@ -863,4 +944,3 @@ Ce document définit le périmètre complet du POC pour la migration de la table
 **Date de création** : 2024-11-27  
 **Auteur** : Analyse basée sur inputs-clients et inputs-ibm  
 **Version** : 1.0
-

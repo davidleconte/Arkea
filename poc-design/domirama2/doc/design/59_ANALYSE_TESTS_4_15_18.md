@@ -9,10 +9,11 @@ Les tests 4, 15 et 18 ne renvoient aucune ligne. Après analyse, **la cause prin
 L'index SAI `idx_libelle_fulltext_advanced` **n'existe pas** dans la base de données, ce qui empêche toutes les recherches full-text sur `libelle`.
 
 **Preuve** :
+
 ```sql
 -- Liste des index existants
-SELECT * FROM system_schema.indexes 
-WHERE keyspace_name = 'domirama2_poc' 
+SELECT * FROM system_schema.indexes
+WHERE keyspace_name = 'domirama2_poc'
   AND table_name = 'operations_by_account';
 
 -- Résultat : PAS d'index sur libelle
@@ -26,9 +27,10 @@ WHERE keyspace_name = 'domirama2_poc'
 ```
 
 **Erreur obtenue** :
+
 ```
-InvalidRequest: Error from server: code=2200 [Invalid query] 
-message=": restriction is only supported on properly indexed columns. 
+InvalidRequest: Error from server: code=2200 [Invalid query]
+message=": restriction is only supported on properly indexed columns.
 libelle : 'carref' is not valid."
 ```
 
@@ -39,6 +41,7 @@ libelle : 'carref' is not valid."
 ### 🔴 TEST 4 : Recherche partielle N-Gram
 
 **Requête** :
+
 ```cql
 SELECT code_si, contrat, libelle, montant
 FROM operations_by_account
@@ -61,6 +64,7 @@ LIMIT 5;
 **Solutions** :
 
 1. ✅ **Créer l'index full-text** (obligatoire) :
+
    ```cql
    CREATE CUSTOM INDEX idx_libelle_fulltext_advanced
    ON operations_by_account(libelle)
@@ -78,10 +82,11 @@ LIMIT 5;
    ```
 
 2. ⚠️ **Pour la recherche partielle** : Utiliser `libelle_prefix` :
+
    ```cql
    -- Alternative : utiliser libelle_prefix pour recherche partielle
    SELECT * FROM operations_by_account
-   WHERE code_si = '1' 
+   WHERE code_si = '1'
      AND contrat = '5913101072'
      AND libelle_prefix : 'carref'  -- Recherche partielle
    LIMIT 5;
@@ -92,6 +97,7 @@ LIMIT 5;
 ### 🔴 TEST 15 : Recherche avec noms propres (EDF ORANGE)
 
 **Requête** :
+
 ```cql
 SELECT code_si, contrat, libelle, montant
 FROM operations_by_account
@@ -120,6 +126,7 @@ LIMIT 5;
 1. ✅ **Créer l'index full-text** (obligatoire)
 
 2. ⚠️ **Ajouter des données avec EDF ET ORANGE** (si besoin) :
+
    ```cql
    INSERT INTO operations_by_account (
        code_si, contrat, date_op, numero_op, op_id,
@@ -127,13 +134,14 @@ LIMIT 5;
        cat_auto, cat_confidence
    ) VALUES (
        '1', '5913101072', '2024-11-25 00:00:00', 1015, 'op_test_15_003',
-       'PRELEVEMENT EDF ET ORANGE FACTURES COMBINEES', -131.40, 'EUR', 
+       'PRELEVEMENT EDF ET ORANGE FACTURES COMBINEES', -131.40, 'EUR',
        '2024-11-25 00:00:00', 'PRELEVEMENT', 'DEBIT',
        'DIVERS', 0.95
    );
    ```
 
 3. 💡 **Alternative** : Modifier le test pour chercher EDF **OU** ORANGE :
+
    ```cql
    -- Chercher EDF OU ORANGE (pas ET)
    SELECT * FROM operations_by_account
@@ -148,6 +156,7 @@ LIMIT 5;
 ### 🔴 TEST 18 : Recherche avec localisation précise (paris 15eme 16eme)
 
 **Requête** :
+
 ```cql
 SELECT code_si, contrat, libelle, montant
 FROM operations_by_account
@@ -177,6 +186,7 @@ LIMIT 5;
 1. ✅ **Créer l'index full-text** (obligatoire)
 
 2. ⚠️ **Ajouter des données avec les trois termes** (si besoin) :
+
    ```cql
    INSERT INTO operations_by_account (
        code_si, contrat, date_op, numero_op, op_id,
@@ -191,6 +201,7 @@ LIMIT 5;
    ```
 
 3. 💡 **Alternative** : Modifier le test pour chercher paris ET (15eme OU 16eme) :
+
    ```cql
    -- Chercher paris ET (15eme OU 16eme)
    SELECT * FROM operations_by_account
@@ -230,8 +241,8 @@ WITH OPTIONS = {
 ### Étape 2 : Vérifier que l'index est créé
 
 ```cql
-SELECT * FROM system_schema.indexes 
-WHERE keyspace_name = 'domirama2_poc' 
+SELECT * FROM system_schema.indexes
+WHERE keyspace_name = 'domirama2_poc'
   AND table_name = 'operations_by_account'
   AND index_name = 'idx_libelle_fulltext_advanced';
 ```
@@ -277,10 +288,7 @@ LIMIT 5;
 **Action immédiate** : Créer l'index `idx_libelle_fulltext_advanced`
 
 **Causes secondaires** :
+
 - Test 4 : Recherche partielle non supportée (utiliser `libelle_prefix`)
 - Test 15 : Aucun libellé ne contient EDF ET ORANGE simultanément
 - Test 18 : Aucun libellé ne contient paris ET 15eme ET 16eme simultanément
-
-
-
-

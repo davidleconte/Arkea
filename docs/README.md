@@ -119,6 +119,7 @@
 ## 🎯 Par où commencer ?
 
 ### Pour comprendre le contexte
+
 1. Lire **ANALYSE_ETAT_ART_HBASE.md** pour comprendre l'existant
 2. Lire **REFERENCE_HCD_DOCUMENTATION.md** pour comprendre HCD 1.2
 3. Lire **ANALYSE_PROPOSITION_IBM_MECE.md** pour comprendre la proposition IBM
@@ -127,6 +128,7 @@
 ### Pour installer
 
 **Choisir selon votre OS** :
+
 1. **GUIDE_INSTALLATION_HCD.md** - Installer HCD (cross-platform)
 2. **GUIDE_INSTALLATION_LINUX.md** - Guide Linux complet (si Linux)
 3. **GUIDE_INSTALLATION_WINDOWS.md** - Guide Windows WSL2 (si Windows)
@@ -134,13 +136,14 @@
 5. **DEPLOYMENT.md** - Guide de déploiement complet
 
 ### Pour utiliser
+
 1. Consulter **KAFKA_HCD_STREAMING_READY.md** pour le streaming
 2. Consulter **SCRIPTS_A_JOUR.md** pour tous les scripts disponibles
 
 ### Pour vérifier
+
 1. Consulter **RESULTATS_TEST_KAFKA_HCD.md** pour les résultats des tests
 
 ---
 
 **Note** : Les fichiers sont triés par date de modification (du plus récent au plus ancien).
-

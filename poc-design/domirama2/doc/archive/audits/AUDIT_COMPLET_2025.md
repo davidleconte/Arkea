@@ -68,6 +68,7 @@ domirama2/
 **✅ Excellent** : 80+ fichiers de documentation couvrant tous les aspects
 
 **Organisation** :
+
 - **00_ORGANISATION_DOC.md** : Guide de lecture
 - **01_README.md** : Vue d'ensemble complète
 - **02-05** : Analyses et bilans
@@ -81,6 +82,7 @@ domirama2/
 - **templates/** : 12 templates réutilisables
 
 **Qualité** :
+
 - ✅ Documentation très détaillée
 - ✅ Exemples de code inclus
 - ✅ Guides pas-à-pas
@@ -95,6 +97,7 @@ domirama2/
 **✅ Excellent** : 98% de conformité avec la proposition IBM
 
 **Points conformes** :
+
 - ✅ Schéma complet (colonnes catégorisation 5/5)
 - ✅ Logique multi-version (batch vs client)
 - ✅ Format COBOL (BLOB conforme IBM)
@@ -114,6 +117,7 @@ domirama2/
 - ✅ Data API (conforme documentation officielle)
 
 **Points manquants (2%)** :
+
 - ⚠️ OperationDecoder (simulation seulement, acceptable pour POC)
 - ⚠️ Data API endpoint réel (Stargate requis, déploiement documenté)
 
@@ -126,6 +130,7 @@ domirama2/
 **✅ Très Bon** : Code bien structuré et commenté
 
 **Scripts Shell** :
+
 - ✅ Gestion d'erreurs robuste (`set -e`)
 - ✅ Vérifications préalables
 - ✅ Messages informatifs avec couleurs
@@ -133,6 +138,7 @@ domirama2/
 - ✅ Chemins relatifs utilisés (`$SCRIPT_DIR`)
 
 **Scripts Python** :
+
 - ✅ Scripts modulaires
 - ✅ Gestion d'erreurs appropriée
 - ✅ Documentation docstrings
@@ -140,6 +146,7 @@ domirama2/
 - ✅ Utilisation de variables d'environnement pour configuration
 
 **Scripts Scala** :
+
 - ✅ Code Spark optimisé
 - ✅ Gestion des partitions
 - ✅ Commentaires explicatifs
@@ -154,6 +161,7 @@ domirama2/
 **✅ Excellent** : 18 scripts avec versions `_v2_didactique.sh`
 
 **Avantages** :
+
 - Génération automatique de documentation structurée
 - Capture des résultats dans `doc/demonstrations/`
 - Format standardisé et réutilisable
@@ -169,18 +177,22 @@ domirama2/
 
 **⚠️ À Nettoyer** :
 
-#### Fichiers mentionnés dans les audits précédents mais non trouvés :
+#### Fichiers mentionnés dans les audits précédents mais non trouvés
+
 - `11_load_domirama11_load_domirama11_load_domirama2_data_parquet.sh.old` (mentionné mais non présent)
 
-#### Fichiers dupliqués (variantes) :
+#### Fichiers dupliqués (variantes)
+
 - Scripts avec versions `_v2_didactique.sh` ET versions normales (normal, garder les deux)
 - Scripts avec variantes `_b19sh.sh` (normal, garder si utile)
 
-#### Fichiers dans archive/ :
+#### Fichiers dans archive/
+
 - ✅ Bien organisés dans `archive/`
 - ✅ Ne posent pas de problème
 
 **Recommandation** :
+
 - ✅ Vérifier l'existence réelle des fichiers `.old` mentionnés
 - ✅ Documenter les différences entre variantes (spark-shell vs spark-submit, v2 vs normal)
 - ✅ Maintenir l'archive/ pour historique
@@ -191,23 +203,29 @@ domirama2/
 
 **⚠️ À Améliorer** :
 
-#### Chemins hardcodés :
+#### Chemins hardcodés
+
 ```bash
 INSTALL_DIR="/Users/david.leconte/Documents/Arkea"
 ```
+
 Trouvé dans plusieurs scripts (ex: `10_setup_domirama2_poc.sh`)
 
 **Recommandation** :
+
 - Utiliser des variables d'environnement ou détection automatique
 - Exemple : `INSTALL_DIR="${ARKEA_HOME:-$(dirname "$(dirname "$SCRIPT_DIR")")}"`
 
-#### localhost hardcodé :
+#### localhost hardcodé
+
 ```bash
 localhost 9042
 ```
+
 Trouvé dans plusieurs scripts
 
 **Recommandation** :
+
 - Utiliser des variables : `HCD_HOST="${HCD_HOST:-localhost}"` et `HCD_PORT="${HCD_PORT:-9042}"`
 
 ---
@@ -217,10 +235,12 @@ Trouvé dans plusieurs scripts
 **✅ Bon** : La plupart des scripts utilisent `set -e`
 
 **⚠️ À Améliorer** :
+
 - Certains scripts pourraient bénéficier de `set -u` (erreur si variable non définie)
 - Certains scripts pourraient bénéficier de `set -o pipefail` (erreur si commande dans pipe échoue)
 
 **Recommandation** :
+
 ```bash
 set -euo pipefail  # Meilleure pratique
 ```
@@ -232,6 +252,7 @@ set -euo pipefail  # Meilleure pratique
 **⚠️ Manquant** : Pas de suite de tests automatisés
 
 **Recommandation** :
+
 - Créer un répertoire `tests/`
 - Ajouter des tests unitaires Python (pytest)
 - Ajouter des tests d'intégration
@@ -244,22 +265,26 @@ set -euo pipefail  # Meilleure pratique
 
 **⚠️ À Consolider** :
 
-#### Documents similaires :
+#### Documents similaires
+
 - `03_GAPS_ANALYSIS.md`
 - `04_BILAN_ECARTS_FONCTIONNELS.md`
 - `05_AUDIT_COMPLET_GAP_FONCTIONNEL.md`
 
 **Recommandation** :
+
 - Fusionner en un seul document `GAPS_ANALYSIS_COMPLETE.md` si redondance importante
 - Sinon, clarifier les différences entre ces documents
 
-#### Audits multiples :
+#### Audits multiples
+
 - `27_AUDIT_COMPLET_DOMIRAMA2.md`
 - `29_AUDIT_FINAL_DOMIRAMA2.md`
 - `40_AUDIT_DOCUMENTATION_MD.md`
 - `41_AUDIT_MD_COMPLET.md`
 
 **Recommandation** :
+
 - Conserver les audits historiques (utiles pour suivi)
 - Créer un index des audits avec dates et objectifs
 
@@ -269,16 +294,19 @@ set -euo pipefail  # Meilleure pratique
 
 **⚠️ À Vérifier** :
 
-#### Credentials en dur :
+#### Credentials en dur
+
 - Certains scripts utilisent des credentials par défaut (`cassandra/cassandra`)
 - Acceptable pour POC local, mais à documenter
 
 **Recommandation** :
+
 - ✅ Utiliser des variables d'environnement (déjà fait dans certains scripts)
 - ✅ Documenter les credentials par défaut
 - ⚠️ Ne jamais commiter de credentials réels
 
-#### Fichiers temporaires :
+#### Fichiers temporaires
+
 - Utilisation de `mktemp` (✅ bon)
 - Certains scripts créent des fichiers dans `/tmp` (normal)
 
@@ -290,11 +318,13 @@ set -euo pipefail  # Meilleure pratique
 
 **⚠️ À Nettoyer** :
 
-#### Code de debug présent :
+#### Code de debug présent
+
 - `30_demo_requetes_startrow_stoprow_v2_didactique.sh` : Plusieurs `print(f"DEBUG: ...")`
 - `28_demo_fenetre_glissante_v2_didactique.sh` : Commentaires `# Debug`
 
 **Recommandation** :
+
 - Retirer ou commenter le code de debug en production
 - Utiliser un système de logging avec niveaux (DEBUG, INFO, WARN, ERROR)
 - Ou utiliser des flags conditionnels : `if [ "${DEBUG:-}" = "1" ]; then ... fi`
@@ -305,11 +335,13 @@ set -euo pipefail  # Meilleure pratique
 
 **⚠️ À Vérifier** :
 
-#### Incohérences mineures :
+#### Incohérences mineures
+
 - `06_create_libelle_tokens_collection.cql` (numéroté 06 mais différent de `06_domirama2_search_fulltext_complex.cql`)
 - Certains fichiers dans `schemas/` n'ont pas le préfixe `domirama2_`
 
 **Recommandation** :
+
 - Standardiser les noms de fichiers CQL
 - Documenter la numérotation si plusieurs fichiers partagent le même numéro
 
@@ -333,11 +365,13 @@ set -euo pipefail  # Meilleure pratique
 | Utilitaires | 1 | ✅ | 14 |
 
 **Points forts** :
+
 - ✅ Numérotation cohérente
 - ✅ Documentation inline complète
 - ✅ Gestion d'erreurs
 
 **Points à améliorer** :
+
 - ⚠️ Chemins hardcodés
 - ⚠️ Variables d'environnement à standardiser
 
@@ -354,11 +388,13 @@ set -euo pipefail  # Meilleure pratique
 | Data API | 6+ | ✅ | Conforme documentation |
 
 **Points forts** :
+
 - ✅ Organisation par fonctionnalité
 - ✅ Documentation docstrings
 - ✅ Gestion d'erreurs
 
 **Points à améliorer** :
+
 - ⚠️ Certains scripts Data API pourraient être consolidés
 - ⚠️ Tests unitaires manquants
 
@@ -374,6 +410,7 @@ set -euo pipefail  # Meilleure pratique
 | `update_libelle_prefix.scala` | ✅ | Mise à jour |
 
 **Points forts** :
+
 - ✅ Code Spark optimisé
 - ✅ Support Parquet
 - ✅ Commentaires explicatifs
@@ -397,11 +434,13 @@ set -euo pipefail  # Meilleure pratique
 | `08_domirama2_api_correction_client.cql` | ✅ | 13_test | API client |
 
 **Points forts** :
+
 - ✅ Documentation inline complète
 - ✅ Commentaires explicatifs
 - ✅ Numérotation cohérente
 
 **Points à améliorer** :
+
 - ⚠️ Deux fichiers numérotés 06 (à documenter ou renommer)
 
 ---
@@ -416,12 +455,14 @@ set -euo pipefail  # Meilleure pratique
 | Autres | 15+ | ✅ | Analyses, guides |
 
 **Points forts** :
+
 - ✅ Documentation exceptionnellement complète
 - ✅ Organisation claire
 - ✅ Numérotation cohérente
 - ✅ Guides pas-à-pas
 
 **Points à améliorer** :
+
 - ⚠️ Certains documents redondants (à consolider si nécessaire)
 - ⚠️ Index des audits à créer
 
@@ -540,6 +581,7 @@ set -euo pipefail  # Meilleure pratique
 ### Score Global : **9.2/10** ✅
 
 **Détail** :
+
 - Organisation : 9.75/10 ✅
 - Documentation : 10/10 ✅
 - Code : 8.75/10 ✅
@@ -570,6 +612,7 @@ set -euo pipefail  # Meilleure pratique
 **✅ Le répertoire domirama2 est globalement excellent avec quelques améliorations mineures à apporter.**
 
 **Priorités** :
+
 1. Standardiser les chemins (variables d'environnement)
 2. Nettoyer le code de debug
 3. Créer des tests automatisés
@@ -581,7 +624,7 @@ set -euo pipefail  # Meilleure pratique
 **✅ Audit Terminé : Répertoire domirama2 est prêt pour la production avec quelques améliorations mineures !**
 
 **Mise à jour** : 2025-01-XX
+
 - ✅ **Audit indépendant complet**
 - ✅ **Tous les aspects analysés**
 - ✅ **Recommandations prioritaires identifiées**
-

@@ -33,28 +33,33 @@
 - ✅ **Java 17** (pour Kafka 4.1.1, optionnel)
 
 **Installation Ubuntu/Debian** :
+
 ```bash
 sudo apt-get update
 sudo apt-get install -y openjdk-11-jdk openjdk-17-jdk
 ```
 
 **Installation CentOS/RHEL** :
+
 ```bash
 sudo yum install -y java-11-openjdk-devel java-17-openjdk-devel
 ```
 
 **Installation Fedora** :
+
 ```bash
 sudo dnf install -y java-11-openjdk-devel java-17-openjdk-devel
 ```
 
 **Vérification** :
+
 ```bash
 java -version
 # Doit afficher Java 11 ou 17
 ```
 
 **Configuration JAVA_HOME** :
+
 ```bash
 # Ubuntu/Debian
 export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
@@ -78,21 +83,25 @@ source ~/.bashrc
 - ✅ **Python 3.8-3.11** (pour cqlsh et scripts)
 
 **Installation Ubuntu/Debian** :
+
 ```bash
 sudo apt-get install -y python3.11 python3-pip
 ```
 
 **Installation CentOS/RHEL** :
+
 ```bash
 sudo yum install -y python3.11 python3-pip
 ```
 
 **Installation Fedora** :
+
 ```bash
 sudo dnf install -y python3.11 python3-pip
 ```
 
 **Vérification** :
+
 ```bash
 python3 --version
 # Doit afficher Python 3.8-3.11
@@ -103,16 +112,19 @@ python3 --version
 #### Outils Système
 
 **Installation Ubuntu/Debian** :
+
 ```bash
 sudo apt-get install -y curl wget tar gzip
 ```
 
 **Installation CentOS/RHEL** :
+
 ```bash
 sudo yum install -y curl wget tar gzip
 ```
 
 **Installation Fedora** :
+
 ```bash
 sudo dnf install -y curl wget tar gzip
 ```
@@ -141,6 +153,7 @@ check_poc_env
 ```
 
 **Variables d'Environnement Optionnelles** :
+
 ```bash
 # Définir avant de sourcer .poc-profile
 export ARKEA_HOME="/chemin/vers/Arkea"
@@ -162,12 +175,14 @@ source .poc-profile
 ```
 
 **Ce script** :
+
 - Extrait HCD 1.2.3 dans `binaire/hcd-1.2.3/`
 - Configure les permissions
 - Vérifie l'installation
 - Détecte automatiquement Java 11
 
 **Vérification** :
+
 ```bash
 ls -la binaire/hcd-1.2.3/bin/hcd
 # Doit afficher le binaire HCD
@@ -182,6 +197,7 @@ ls -la binaire/hcd-1.2.3/bin/hcd
 ```
 
 **Ce script** :
+
 - Extrait Spark 3.5.1 dans `binaire/spark-3.5.1/`
 - Télécharge `spark-cassandra-connector`
 - Configure les chemins
@@ -199,6 +215,7 @@ ls -la binaire/hcd-1.2.3/bin/hcd
 ```
 
 **Ce script** :
+
 - Télécharge Kafka 4.1.1 depuis Apache
 - Extrait dans `binaire/kafka/`
 - Configure les chemins
@@ -229,6 +246,7 @@ export PATH="$KAFKA_HOME/bin:$PATH"
 **Fichier** : `binaire/hcd-1.2.3/resources/cassandra/conf/cassandra.yaml`
 
 **Paramètres importants** :
+
 ```yaml
 cluster_name: 'ARKEA POC'
 listen_address: localhost
@@ -245,6 +263,7 @@ seeds: "127.0.0.1"
 **Fichier** : `binaire/kafka/config/server.properties`
 
 **Paramètres importants** :
+
 ```properties
 broker.id=0
 listeners=PLAINTEXT://localhost:9092
@@ -252,6 +271,7 @@ log.dirs=/tmp/kafka-logs
 ```
 
 **Créer répertoire de logs** :
+
 ```bash
 mkdir -p /tmp/kafka-logs
 # Ou utiliser un répertoire personnalisé
@@ -274,6 +294,7 @@ mkdir -p $ARKEA_HOME/kafka-logs
 ```
 
 **Vérification** :
+
 ```bash
 # Vérifier que HCD est démarré
 cqlsh $HCD_HOST $HCD_PORT -e "DESCRIBE KEYSPACES;"
@@ -292,6 +313,7 @@ cqlsh $HCD_HOST $HCD_PORT -e "DESCRIBE KEYSPACES;"
 ```
 
 **Vérification** :
+
 ```bash
 # Lister les topics
 kafka-topics.sh --list --bootstrap-server localhost:9092
@@ -306,6 +328,7 @@ kafka-topics.sh --list --bootstrap-server localhost:9092
 ```
 
 **Ce script** :
+
 - Crée le keyspace `poc_hbase_migration`
 - Crée la table `kafka_events`
 - Configure les topics Kafka
@@ -319,6 +342,7 @@ kafka-topics.sh --list --bootstrap-server localhost:9092
 ```
 
 **Ce script** :
+
 - Envoie des messages de test à Kafka
 - Vérifie la réception dans HCD
 - Affiche les résultats
@@ -334,6 +358,7 @@ kafka-topics.sh --list --bootstrap-server localhost:9092
 ```
 
 **Vérifie** :
+
 - ✅ Installation de tous les composants
 - ✅ Services démarrés (HCD, Kafka)
 - ✅ Connexions fonctionnelles
@@ -385,10 +410,12 @@ kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test-topic -
 #### HCD ne démarre pas
 
 **Symptômes** :
+
 - Erreur "Address already in use"
 - Erreur "Cannot bind to address"
 
 **Solutions** :
+
 ```bash
 # Vérifier les ports
 ss -tuln | grep 9042
@@ -408,10 +435,12 @@ pkill -f hcd
 #### Kafka ne démarre pas
 
 **Symptômes** :
+
 - Erreur "Address already in use"
 - Erreur Zookeeper
 
 **Solutions** :
+
 ```bash
 # Vérifier Zookeeper (Kafka 2.8+ n'utilise plus Zookeeper)
 # Vérifier Kafka
@@ -426,10 +455,12 @@ ss -tuln | grep 9092
 #### Erreurs de Connexion
 
 **Symptômes** :
+
 - "Connection refused"
 - "Timeout"
 
 **Solutions** :
+
 ```bash
 # Vérifier que les services sont démarrés
 ./scripts/utils/80_verify_all.sh
@@ -449,10 +480,12 @@ tail -f binaire/kafka/logs/kafka.log
 #### Problèmes de Mémoire
 
 **Symptômes** :
+
 - OutOfMemoryError
 - Services qui crashent
 
 **Solutions** :
+
 ```bash
 # Augmenter la mémoire Java pour HCD
 export JAVA_OPTS="-Xms2G -Xmx4G"
@@ -467,10 +500,12 @@ export SPARK_EXECUTOR_MEMORY="2g"
 #### Problèmes de Permissions
 
 **Symptômes** :
+
 - "Permission denied"
 - Erreurs d'écriture
 
 **Solutions** :
+
 ```bash
 # Vérifier les permissions
 ls -la binaire/hcd-1.2.3/bin/hcd
@@ -488,17 +523,20 @@ chmod +x binaire/kafka/bin/kafka-server-start.sh
 ### Logs
 
 **HCD** :
+
 ```bash
 tail -f binaire/hcd-1.2.3/logs/cassandra/system.log
 tail -f binaire/hcd-1.2.3/logs/cassandra/debug.log
 ```
 
 **Kafka** :
+
 ```bash
 tail -f binaire/kafka/logs/kafka.log
 ```
 
 **Spark** :
+
 ```bash
 # Logs dans $SPARK_HOME/logs/
 ```
@@ -508,6 +546,7 @@ tail -f binaire/kafka/logs/kafka.log
 ### Métriques
 
 **HCD** :
+
 ```bash
 # Nodetool
 nodetool status
@@ -516,6 +555,7 @@ nodetool tpstats
 ```
 
 **Kafka** :
+
 ```bash
 # Métriques via JMX (port 9999 par défaut)
 ```
@@ -563,4 +603,3 @@ nodetool tpstats
 **Date** : 2025-12-01  
 **Version** : 1.0  
 **Statut** : ✅ **Documentation complète**
-

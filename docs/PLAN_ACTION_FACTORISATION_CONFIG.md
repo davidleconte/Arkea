@@ -22,12 +22,14 @@
 ### Résultats
 
 **Avant** :
+
 - 93 occurrences de chemins hardcodés dans scripts
 - 203 occurrences de `/Users/david.leconte` dans 137 fichiers
 - Support limité à macOS uniquement
 - Chemins Mac hardcodés partout
 
 **Après** :
+
 - ✅ 0 chemins hardcodés dans `scripts/setup/`
 - ✅ Détection automatique de l'OS (macOS, Linux, Windows WSL2)
 - ✅ Fonctions portables (`get_realpath`, `check_port`, `kill_process`)
@@ -36,6 +38,7 @@
 - ✅ Tests CI multi-OS préparés
 
 **Voir** :
+
 - `docs/AUDIT_PORTABILITE_CROSS_PLATFORM_2025.md` - Audit complet de portabilité
 - `scripts/utils/portable_functions.sh` - Fonctions portables
 - `docs/GUIDE_INSTALLATION_LINUX.md` - Guide Linux
@@ -239,7 +242,7 @@ if [ -z "${JAVA_HOME:-}" ]; then
             export JAVA11_HOME="$JAVA_HOME"
         fi
     fi
-    
+
     # Fallback Homebrew (macOS)
     if [ -z "$JAVA_HOME" ] && [[ "$OSTYPE" == "darwin"* ]]; then
         if [ -d "/opt/homebrew/opt/openjdk@11/libexec/openjdk.jdk/Contents/Home" ]; then
@@ -251,7 +254,7 @@ if [ -z "${JAVA_HOME:-}" ]; then
         fi
         export JAVA11_HOME="$JAVA_HOME"
     fi
-    
+
     # Fallback système
     if [ -z "$JAVA_HOME" ] && command -v java &> /dev/null; then
         export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java) 2>/dev/null || which java)))
@@ -337,13 +340,13 @@ setup_paths() {
     # Détecter le répertoire du script appelant
     local caller_script="${BASH_SOURCE[1]:-${BASH_SOURCE[0]}}"
     SCRIPT_DIR="$(cd "$(dirname "$caller_script")" && pwd)"
-    
+
     # Charger la configuration centralisée (priorité 1)
     local config_file="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}/.poc-config.sh"
     if [ -f "$config_file" ]; then
         source "$config_file"
     fi
-    
+
     # Détecter INSTALL_DIR (racine du projet Arkea)
     # Priorité 1: Variable d'environnement ARKEA_HOME (définie par .poc-config.sh)
     # Priorité 2: Détection automatique (2 niveaux au-dessus de domirama2/domiramaCatOps)
@@ -353,17 +356,17 @@ setup_paths() {
     else
         INSTALL_DIR="$ARKEA_HOME"
     fi
-    
+
     # Configuration HCD (déjà chargée par .poc-config.sh, mais fallback si nécessaire)
     HCD_DIR="${HCD_DIR:-${HCD_HOME:-${INSTALL_DIR}/binaire/hcd-1.2.3}}"
-    
+
     # Configuration Spark (déjà chargée par .poc-config.sh, mais fallback si nécessaire)
     SPARK_HOME="${SPARK_HOME:-${INSTALL_DIR}/binaire/spark-3.5.1}"
-    
+
     # Configuration HCD Host/Port (déjà chargée par .poc-config.sh, mais fallback si nécessaire)
     HCD_HOST="${HCD_HOST:-localhost}"
     HCD_PORT="${HCD_PORT:-9042}"
-    
+
     # Exporter les variables pour qu'elles soient disponibles dans le script appelant
     export SCRIPT_DIR INSTALL_DIR HCD_DIR SPARK_HOME HCD_HOST HCD_PORT
 }
@@ -404,26 +407,26 @@ DIRS=(
 replace_hardcoded_paths() {
     local file="$1"
     local temp_file="${file}.tmp"
-    
+
     # Lire le fichier
     local content
     content=$(cat "$file")
-    
+
     # Vérifier si le fichier contient le pattern
     if ! echo "$content" | grep -q "$HARDCODED_PATTERN\|$HARDCODED_PATTERN_ALT"; then
         return 0  # Pas de remplacement nécessaire
     fi
-    
+
     # Remplacer INSTALL_DIR hardcodé par setup_paths()
     # Pattern: INSTALL_DIR="/Users/david.leconte/Documents/Arkea"
     # Remplacer par: setup_paths() (via fonction)
-    
+
     # Créer le nouveau contenu
     local new_content
     new_content=$(echo "$content" | sed -E "
         # Supprimer les lignes INSTALL_DIR hardcodées
         /INSTALL_DIR=.*\"\/Users\/david\.leconte/d
-        
+
         # Si setup_paths n'existe pas, l'ajouter après set -euo pipefail
         /^set -euo pipefail/a\\
 # Configuration - Utiliser setup_paths si disponible\\
@@ -440,11 +443,11 @@ else\\
     HCD_PORT=\"\${HCD_PORT:-9042}\"\\
 fi
     ")
-    
+
     # Écrire le nouveau contenu
     echo "$new_content" > "$temp_file"
     mv "$temp_file" "$file"
-    
+
     echo "✅ Migré: $file"
 }
 
@@ -453,7 +456,7 @@ for dir in "${DIRS[@]}"; do
     if [ ! -d "$dir" ]; then
         continue
     fi
-    
+
     echo "📁 Traitement de: $dir"
     find "$dir" -type f -name "*.sh" | while read -r file; do
         replace_hardcoded_paths "$file"
@@ -537,7 +540,8 @@ echo "✅ Migration terminée"
 12. ✅ **Tests CI Multi-OS** - **COMPLÉTÉ**
     - ✅ `.github/workflows/test-multi-os.yml` créé
     - ✅ Tests Linux, macOS, Windows (WSL2) préparés
-   - Exemples d'utilisation
+
+- Exemples d'utilisation
 
 ### Phase 4 : Nettoyage (30 minutes)
 
@@ -557,33 +561,39 @@ echo "✅ Migration terminée"
 ### Option 1 : Configuration Centralisée (Recommandée)
 
 **Avantages** :
+
 - ✅ Un seul fichier de configuration
 - ✅ Détection automatique multi-OS
 - ✅ Variables d'environnement prioritaires
 - ✅ Portable entre machines
 
 **Inconvénients** :
+
 - ⚠️ Nécessite migration de tous les scripts
 - ⚠️ Tests nécessaires sur différentes machines
 
 ### Option 2 : Variables d'Environnement Uniquement
 
 **Avantages** :
+
 - ✅ Très portable
 - ✅ Pas de fichier de config à maintenir
 
 **Inconvénients** :
+
 - ❌ Nécessite configuration manuelle sur chaque machine
 - ❌ Pas de valeurs par défaut
 
 ### Option 3 : Hybrid (Recommandée)
 
 **Architecture** :
+
 1. Variables d'environnement (priorité maximale)
 2. `.poc-config.sh` (valeurs par défaut portables)
 3. Détection automatique (fallback)
 
 **Avantages** :
+
 - ✅ Flexibilité maximale
 - ✅ Portable par défaut
 - ✅ Surchargeable par variables d'environnement
@@ -603,4 +613,3 @@ echo "✅ Migration terminée"
 **Date** : 2025-12-01  
 **Version** : 1.0  
 **Statut** : ✅ **Plan d'action complet**
-

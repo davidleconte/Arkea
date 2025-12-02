@@ -9,6 +9,7 @@
 ## 📋 Vue d'Ensemble
 
 Pour le POC, nous devons installer :
+
 1. **Apache Spark** : Traitement distribué des données
 2. **spark-cassandra-connector** : Connexion Spark ↔ Cassandra/HCD
 3. **Apache Kafka** : Streaming de données (pour simuler l'intégration BIC/EDM)
@@ -122,6 +123,7 @@ cp spark-defaults.conf.template spark-defaults.conf
 ```
 
 Ajouter dans `spark-defaults.conf` :
+
 ```properties
 # Spark Cassandra Connector
 spark.jars.packages com.datastax.spark:spark-cassandra-connector_2.12:3.5.0
@@ -133,6 +135,7 @@ spark.cassandra.connection.port 9042
 ### Alternative : Via --packages (Recommandé)
 
 Lors de l'exécution de Spark :
+
 ```bash
 spark-shell --packages com.datastax.spark:spark-cassandra-connector_2.12:3.5.0 \
   --conf spark.cassandra.connection.host=localhost \
@@ -173,6 +176,7 @@ source .poc-profile
 ```
 
 **Ce script** :
+
 - Télécharge Kafka 4.1.1 depuis Apache
 - Extrait dans `binaire/kafka/`
 - Configure automatiquement `KAFKA_HOME`
@@ -202,6 +206,7 @@ mv binaire/kafka_2.13-4.1.1 binaire/kafka
 ```
 
 **Voir** :
+
 - `docs/GUIDE_INSTALLATION_LINUX.md` pour les détails Linux
 - `docs/GUIDE_INSTALLATION_WINDOWS.md` pour Windows (WSL2)
 
@@ -222,6 +227,7 @@ podman run -d --name kafka \
 **Fichier** : `$KAFKA_HOME/config/server.properties`
 
 Modifications recommandées pour développement local :
+
 ```properties
 # Adresse d'écoute
 listeners=PLAINTEXT://localhost:9092
@@ -326,6 +332,7 @@ kafkaDF
 **Le script `scripts/setup/02_install_spark_kafka.sh` est déjà disponible !**
 
 Il détecte automatiquement :
+
 - Le répertoire du projet (`ARKEA_HOME`)
 - L'OS (macOS/Linux)
 - Les chemins appropriés selon l'OS
@@ -419,17 +426,20 @@ echo "  3. Tester la connexion Spark → HCD"
 ## ✅ Checklist d'Installation
 
 ### Spark
+
 - [ ] Spark installé (Homebrew ou manuel)
 - [ ] `SPARK_HOME` configuré
 - [ ] `spark-submit --version` fonctionne
 - [ ] `spark-shell` démarre
 
 ### spark-cassandra-connector
+
 - [ ] JAR téléchargé ou package configuré
 - [ ] Configuration Spark mise à jour
 - [ ] Test de connexion Spark → HCD réussi
 
 ### Kafka
+
 - [ ] Kafka installé (Homebrew ou manuel)
 - [ ] Zookeeper démarré
 - [ ] Kafka démarré
@@ -437,6 +447,7 @@ echo "  3. Tester la connexion Spark → HCD"
 - [ ] Producer/Consumer testés
 
 ### Intégration
+
 - [ ] Spark peut lire depuis Kafka
 - [ ] Spark peut écrire vers HCD
 - [ ] Pipeline Spark → Kafka → HCD fonctionnel
@@ -455,6 +466,7 @@ spark-shell --packages com.datastax.spark:spark-cassandra-connector_2.12:3.5.0 \
 ```
 
 Dans spark-shell :
+
 ```scala
 import com.datastax.spark.connector._
 import org.apache.spark.sql.cassandra._
@@ -494,10 +506,10 @@ kafkaDF
 
 ## 📚 Documentation et Références
 
-- **Spark** : https://spark.apache.org/docs/latest/
-- **spark-cassandra-connector** : https://github.com/datastax/spark-cassandra-connector
-- **Kafka** : https://kafka.apache.org/documentation/
-- **Spark + Kafka** : https://spark.apache.org/docs/latest/structured-streaming-kafka-integration.html
+- **Spark** : <https://spark.apache.org/docs/latest/>
+- **spark-cassandra-connector** : <https://github.com/datastax/spark-cassandra-connector>
+- **Kafka** : <https://kafka.apache.org/documentation/>
+- **Spark + Kafka** : <https://spark.apache.org/docs/latest/structured-streaming-kafka-integration.html>
 
 ---
 
@@ -511,4 +523,3 @@ kafkaDF
 ---
 
 **Prêt à installer ?** 🚀
-

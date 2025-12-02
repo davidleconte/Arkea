@@ -31,15 +31,18 @@ Ce document explique la logique multi-version implémentée dans Domirama2 pour 
 #### Batch (MapReduce/Spark)
 
 **Le batch écrit UNIQUEMENT** :
+
 - ✅ `cat_auto` : Catégorie automatique
 - ✅ `cat_confidence` : Score du moteur
 
 **Le batch NE TOUCHE JAMAIS** :
+
 - ❌ `cat_user` : Jamais modifié par le batch
 - ❌ `cat_date_user` : Jamais modifié par le batch
 - ❌ `cat_validee` : Jamais modifié par le batch
 
 **Exemple Scala** :
+
 ```scala
 Operation(
   cat_auto       = catAuto,        // ✅ Batch écrit ici
@@ -53,15 +56,18 @@ Operation(
 #### Client (API)
 
 **Le client écrit dans** :
+
 - ✅ `cat_user` : Nouvelle catégorie choisie
 - ✅ `cat_date_user` : Date de correction (timestamp réel)
 - ✅ `cat_validee` : Acceptation/rejet
 
 **Le client NE TOUCHE JAMAIS** :
+
 - ❌ `cat_auto` : Conservé pour référence
 - ❌ `cat_confidence` : Conservé pour référence
 
 **Exemple CQL** :
+
 ```cql
 UPDATE operations_by_account
 SET cat_user = 'RESTAURANT',
@@ -74,6 +80,7 @@ WHERE code_si = '01' AND contrat = '1234567890'
 ### Logique de Priorité (Application)
 
 **L'application priorise** :
+
 ```sql
 IF cat_user IS NOT NULL AND cat_date_user IS NOT NULL:
     RETURN cat_user  -- Priorité au client
@@ -82,8 +89,9 @@ ELSE:
 ```
 
 **Exemple CQL** :
+
 ```cql
-SELECT 
+SELECT
     cat_auto,
     cat_user,
     COALESCE(cat_user, cat_auto) as categorie_finale
@@ -116,6 +124,7 @@ def get_category_at_date(query_date):
 3. **2024-01-20 08:00** : Batch ré-écrit `cat_auto = 'SUPERMARCHE'` (cat_user conservé)
 
 **Time Travel** :
+
 - **2024-01-15 12:00** : `ALIMENTATION` (batch, correction pas encore faite)
 - **2024-01-16 15:00** : `RESTAURANT` (client, correction faite)
 - **2024-01-20 09:00** : `RESTAURANT` (client, toujours valide)
@@ -129,12 +138,14 @@ def get_category_at_date(query_date):
 **Scénario critique** : Le batch ré-écrit `cat_auto` après une correction client.
 
 **Résultat** :
+
 - ✅ `cat_user` est **conservé** (non écrasé)
 - ✅ `cat_date_user` est **conservé**
 - ✅ `cat_validee` est **conservé**
 - ✅ Seul `cat_auto` est mis à jour par le batch
 
 **Démonstration** :
+
 ```python
 # Après ré-écriture batch
 cat_auto: 'SUPERMARCHE' (nouveau batch)
@@ -147,6 +158,7 @@ cat_date_user: '2024-01-16 14:30' (✅ CONSERVÉ)
 **Logique** : Si `cat_user` existe, il a toujours la priorité sur `cat_auto`.
 
 **Application** :
+
 ```sql
 SELECT COALESCE(cat_user, cat_auto) as categorie_finale
 FROM operations_by_account
@@ -156,6 +168,7 @@ WHERE ...
 ### 3. Traçabilité
 
 **`cat_date_user`** permet de :
+
 - ✅ Savoir quand la correction client a été faite
 - ✅ Faire du time travel (quelle catégorie était valide à une date)
 - ✅ Auditer les modifications client
@@ -179,6 +192,7 @@ WHERE ...
 ### Solution pour Historique Complet
 
 **Table séparée** : `domirama-meta-categories` (comme proposé par IBM)
+
 - Stocker l'historique des corrections client
 - Stocker l'historique des catégories batch
 - Permettre le time travel complet
@@ -192,6 +206,7 @@ WHERE ...
 **Fichier** : `test_multi_version_time_travel.py`
 
 **Exécution** :
+
 ```bash
 python3 test_multi_version_time_travel.py
 # ou
@@ -248,6 +263,7 @@ python3 test_multi_version_time_travel.py
 ### Validation Applicative
 
 **Le batch doit valider** qu'il ne touche jamais `cat_user` :
+
 ```scala
 // Validation dans le code batch
 require(operation.cat_user == null, "Batch ne doit jamais toucher cat_user")
@@ -256,6 +272,7 @@ require(operation.cat_user == null, "Batch ne doit jamais toucher cat_user")
 ### Historique Complet
 
 **Pour l'historique complet**, utiliser une table séparée :
+
 - `domirama-meta-categories` (comme proposé par IBM)
 - Stocker chaque correction avec timestamp
 - Permettre le time travel complet
@@ -263,6 +280,7 @@ require(operation.cat_user == null, "Batch ne doit jamais toucher cat_user")
 ### Monitoring
 
 **Surveiller** :
+
 - Nombre de corrections client par jour
 - Taux de validation (`cat_validee = true`)
 - Évolution de `cat_confidence` (qualité du moteur)
@@ -284,4 +302,3 @@ La stratégie multi-version de Domirama2 :
 
 **Script de test** : `test_multi_version_time_travel.py`  
 **Script shell** : `26_test_multi_version_time_travel.sh`
-

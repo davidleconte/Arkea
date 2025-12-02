@@ -23,6 +23,7 @@
 Le script `11_load_domirama2_data.sh` est **identique** à `11_load_domirama2_data_fixed.sh`.
 
 **Caractéristiques** :
+
 - ✅ Script d'ingestion/ETL (CSV → HCD via Spark)
 - ✅ Format source : CSV
 - ✅ Stratégie multi-version implémentée
@@ -31,6 +32,7 @@ Le script `11_load_domirama2_data.sh` est **identique** à `11_load_domirama2_da
 - ✅ Vérifications post-chargement (comptage, stratégie batch)
 
 **Limitations** :
+
 - ❌ Pas d'affichage du code Spark avant exécution
 - ❌ Pas d'explications détaillées
 - ❌ Vérifications basiques (pas d'échantillon de données)
@@ -40,11 +42,13 @@ Le script `11_load_domirama2_data.sh` est **identique** à `11_load_domirama2_da
 ### Problème Identifié
 
 **SPARK_HOME incorrect** :
+
 ```bash
 SPARK_HOME="${INSTALL_DIR}/binaire/spark-3.5.1-bin-hadoop3"
 ```
 
 **Correction nécessaire** :
+
 ```bash
 SPARK_HOME="${INSTALL_DIR}/binaire/spark-3.5.1"
 ```
@@ -134,11 +138,13 @@ poc-design/domirama2/
 **Action** : Supprimer `11_load_domirama2_data.sh`
 
 **Justification** :
+
 - ✅ Identique à `_fixed.sh` mais avec SPARK_HOME incorrect
 - ✅ Risque de confusion pour les utilisateurs
 - ✅ Les versions didactiques sont supérieures
 
 **Avantages** :
+
 - ✅ Évite la confusion
 - ✅ Nettoie le répertoire
 - ✅ Force l'utilisation des versions recommandées
@@ -148,10 +154,12 @@ poc-design/domirama2/
 **Action** : Corriger `SPARK_HOME` dans `11_load_domirama2_data.sh`
 
 **Justification** :
+
 - ⚠️ Permet de conserver le script original
 - ⚠️ Mais toujours inférieur aux versions didactiques
 
 **Inconvénients** :
+
 - ❌ Duplication avec `_fixed.sh`
 - ❌ Pas de valeur ajoutée
 - ❌ Risque de confusion
@@ -161,10 +169,12 @@ poc-design/domirama2/
 **Action** : Créer `11_load_domirama2_data_v2_didactique.sh`
 
 **Justification** :
+
 - ⚠️ Cohérence avec les autres versions didactiques
 - ⚠️ Mais le script original est obsolète
 
 **Inconvénients** :
+
 - ❌ Duplication inutile (déjà 2 versions didactiques)
 - ❌ Le script original a un SPARK_HOME incorrect
 - ❌ Pas de valeur ajoutée
@@ -224,4 +234,3 @@ poc-design/domirama2/
 ---
 
 **✅ Conclusion : Le script `11_load_domirama2_data.sh` est obsolète et doit être supprimé. Les versions didactiques existantes sont recommandées.**
-

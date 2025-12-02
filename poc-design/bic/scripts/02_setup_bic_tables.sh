@@ -84,4 +84,3 @@ $CQLSH -e "USE $KEYSPACE; DESCRIBE TABLES;"
 
 echo ""
 echo -e "${GREEN}✅ Setup terminé avec succès${NC}"
-

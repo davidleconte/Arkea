@@ -7,7 +7,7 @@
 # OBJECTIF :
 #   Ce script convertit un fichier CSV d'opérations en format Parquet,
 #   qui est optimisé pour les traitements analytiques avec Spark.
-#   
+#
 #   Avantages du format Parquet :
 #   - Performance 3-10x plus rapide que CSV pour les lectures
 #   - Schéma typé (moins d'erreurs de conversion)
@@ -184,4 +184,3 @@ fi
 echo ""
 success "✅ Génération Parquet terminée !"
 info "📝 Prochaine étape: Exécuter ./11_load_domirama2_data.sh (modifié pour Parquet)"
-

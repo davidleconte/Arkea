@@ -109,12 +109,14 @@ for i, row in enumerate(results, 1):
 ### Pour le Domaine Bancaire
 
 **Libellés typiques** :
+
 - LOYER, LOYER IMPAYE
 - VIREMENT, VIREMENT SALAIRE
 - TAXE FONCIERE, ASSURANCE HABITATION
 - FRAIS BANCAIRES, AGIOS
 
 **Avantages** :
+
 - ✅ **Meilleure compréhension terminologie bancaire**
 - ✅ **Optimisé pour documents structurés** (factures/paiements)
 - ✅ **Support français natif** (bilingue FR/EN)
@@ -171,6 +173,7 @@ Le modèle `NoureddineSa/Invoices_bilingual-embedding-large` nécessite `trust_r
 ### Stockage
 
 **Pour 1M opérations** :
+
 - ByteT5-small : ~5.9 GB
 - e5-large : ~4.1 GB
 - Modèle facturation : ~4.1 GB
@@ -183,6 +186,7 @@ Le modèle `NoureddineSa/Invoices_bilingual-embedding-large` nécessite `trust_r
 ✅ **Implémentation complète et prête**
 
 **Ce qui est fait** :
+
 - ✅ Modèle vérifié et disponible
 - ✅ Schéma créé (colonne + index)
 - ✅ Scripts Python créés
@@ -190,6 +194,7 @@ Le modèle `NoureddineSa/Invoices_bilingual-embedding-large` nécessite `trust_r
 - ✅ Documentation complète
 
 **Ce qui reste à faire** :
+
 - ⚠️ Générer les embeddings facturation
 - ⚠️ Comparer les 3 modèles
 - ⚠️ Analyser les résultats
@@ -201,4 +206,3 @@ Le modèle `NoureddineSa/Invoices_bilingual-embedding-large` nécessite `trust_r
 **Date de génération** : 2025-11-30  
 **Version** : 1.0  
 **Statut** : ✅ **IMPLÉMENTÉ**
-

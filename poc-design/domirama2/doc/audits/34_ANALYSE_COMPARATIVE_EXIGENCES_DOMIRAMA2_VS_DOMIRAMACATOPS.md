@@ -25,6 +25,7 @@
 #### Description
 
 **Exigence** :
+
 - Stratégie multi-version explicite (batch vs client)
 - Time travel (récupération données à une date donnée)
 - Aucune correction client perdue
@@ -33,12 +34,14 @@
 #### Pourquoi Spécifique à `domirama2` ?
 
 **Dans `domirama2`** :
+
 - ✅ **Exigence E-24 dédiée** : Documentée comme exigence à part entière
 - ✅ **Script dédié** : `scripts/26_test_multi_version_time_travel.sh`
 - ✅ **Démonstration explicite** : Tests de time travel, récupération historique
 - ✅ **Documentation détaillée** : Stratégie multi-version expliquée en détail
 
 **Dans `domiramaCatOps`** :
+
 - ⚠️ **Intégré dans E-02/E-03** : Multi-version mentionné dans les exigences batch/temps réel
 - ⚠️ **Pas d'exigence dédiée** : Pas d'exigence E-24 équivalente
 - ⚠️ **Pas de script dédié** : Pas de script `26_test_multi_version_time_travel.sh`
@@ -47,11 +50,13 @@
 #### Impact
 
 **Valeur Ajoutée `domirama2`** :
+
 - ✅ **Démonstration pédagogique** : Time travel explicite facilite la compréhension
 - ✅ **Validation robuste** : Tests dédiés garantissent la non-perte de corrections
 - ✅ **Documentation claire** : Stratégie multi-version documentée séparément
 
 **Recommandation** :
+
 - `domiramaCatOps` pourrait bénéficier d'une exigence E-24 dédiée pour aligner la documentation
 
 ---
@@ -63,6 +68,7 @@
 #### Description
 
 **Exigences** :
+
 - **E-08** : Acceptation et Opposition Client
 - **E-09** : Historique des Oppositions (VERSIONS => '50')
 - **E-10** : Feedbacks par Libellé (Compteurs Atomiques)
@@ -74,11 +80,13 @@
 #### Pourquoi Spécifiques à `domiramaCatOps` ?
 
 **Dans `domiramaCatOps`** :
+
 - ✅ **7 tables dédiées** : `acceptation_client`, `opposition_categorisation`, `historique_opposition`, `feedback_par_libelle`, `feedback_par_ics`, `regles_personnalisees`, `decisions_salaires`
 - ✅ **Scripts dédiés** : `scripts/03_setup_meta_categories_tables.sh`, `scripts/09_test_acceptation_opposition.sh`, etc.
 - ✅ **Documentation complète** : Chaque exigence documentée avec schémas CQL et tests
 
 **Dans `domirama2`** :
+
 - ❌ **Pas de table meta-categories** : Focus exclusif sur table `domirama`
 - ❌ **Pas d'exigences équivalentes** : Pas d'exigences E-08 à E-14
 - ❌ **Périmètre différent** : `domirama2` ne couvre que la table `domirama`
@@ -86,12 +94,14 @@
 #### Impact
 
 **Valeur Ajoutée `domiramaCatOps`** :
+
 - ✅ **Couverture complète** : Toutes les fonctionnalités de catégorisation couvertes
 - ✅ **Démonstration métier** : Acceptation, opposition, règles personnalisées démontrées
 - ✅ **Feedbacks et statistiques** : Compteurs atomiques, distribution des catégories
 - ✅ **Historique illimité** : Amélioration vs HBase (VERSIONS='50' → historique illimité)
 
 **Recommandation** :
+
 - `domirama2` pourrait être étendu pour couvrir `domirama-meta-categories` si nécessaire
 
 ---
@@ -101,6 +111,7 @@
 #### Description
 
 **Exigence** :
+
 - Ingestion temps réel via Kafka
 - Spark Structured Streaming
 - Checkpointing pour reprise
@@ -109,11 +120,13 @@
 #### Pourquoi Spécifique à `domiramaCatOps` ?
 
 **Dans `domiramaCatOps`** :
+
 - ✅ **Exigence E-20 dédiée** : Documentée comme exigence à part entière
 - ✅ **Script dédié** : `scripts/27_demo_kafka_streaming.sh`
 - ✅ **Démonstration complète** : Kafka + Spark Streaming + Checkpointing
 
 **Dans `domirama2`** :
+
 - ⚠️ **Pas d'exigence équivalente** : Pas d'exigence E-20
 - ⚠️ **Pas de script Kafka** : Pas de script `27_demo_kafka_streaming.sh`
 - ⚠️ **Ingestion temps réel différente** : E-03 couvre corrections client via API, pas Kafka
@@ -121,11 +134,13 @@
 #### Impact
 
 **Valeur Ajoutée `domiramaCatOps`** :
+
 - ✅ **Architecture moderne** : Kafka + Spark Streaming pour ingestion temps réel
 - ✅ **Scalabilité** : Support de flux de données haute volumétrie
 - ✅ **Résilience** : Checkpointing pour reprise après échec
 
 **Recommandation** :
+
 - `domirama2` pourrait bénéficier d'une démonstration Kafka si nécessaire pour des cas d'usage temps réel haute volumétrie
 
 ---
@@ -135,6 +150,7 @@
 #### Description
 
 **Exigence** :
+
 - Équivalent HBase `VERSIONS => '50'` (limite 50 versions)
 - Table `historique_opposition` (historique illimité)
 - Traçabilité complète des changements
@@ -142,11 +158,13 @@
 #### Pourquoi Spécifique à `domiramaCatOps` ?
 
 **Dans `domiramaCatOps`** :
+
 - ✅ **Exigence E-25 dédiée** : Documentée comme pattern HBase équivalent
 - ✅ **Table dédiée** : `historique_opposition` avec clustering key sur timestamp
 - ✅ **Amélioration vs HBase** : Historique illimité (vs 50 versions max)
 
 **Dans `domirama2`** :
+
 - ❌ **Pas d'exigence équivalente** : Pas d'exigence E-25
 - ❌ **Pas de table historique** : Pas de besoin (pas de table meta-categories)
 - ❌ **Périmètre différent** : `domirama2` ne couvre pas les oppositions
@@ -154,6 +172,7 @@
 #### Impact
 
 **Valeur Ajoutée `domiramaCatOps`** :
+
 - ✅ **Amélioration fonctionnelle** : Historique illimité vs 50 versions HBase
 - ✅ **Traçabilité complète** : Chaque changement horodaté
 - ✅ **Requêtes efficaces** : Accès direct par date (clustering key)
@@ -165,6 +184,7 @@
 #### Description
 
 **Exigence** :
+
 - Équivalent HBase `INCREMENT` atomique
 - Type `COUNTER` natif HCD
 - Atomicité garantie pour compteurs
@@ -172,11 +192,13 @@
 #### Pourquoi Spécifique à `domiramaCatOps` ?
 
 **Dans `domiramaCatOps`** :
+
 - ✅ **Exigence E-26 dédiée** : Documentée comme pattern HBase équivalent
 - ✅ **Tables COUNTER** : `feedback_par_libelle`, `feedback_par_ics` avec type `COUNTER`
 - ✅ **Démonstration** : Tests d'atomicité, incréments concurrents
 
 **Dans `domirama2`** :
+
 - ❌ **Pas d'exigence équivalente** : Pas d'exigence E-26
 - ❌ **Pas de tables COUNTER** : Pas de besoin (pas de feedbacks)
 - ❌ **Périmètre différent** : `domirama2` ne couvre pas les feedbacks
@@ -184,6 +206,7 @@
 #### Impact
 
 **Valeur Ajoutée `domiramaCatOps`** :
+
 - ✅ **Atomicité native** : Type `COUNTER` garantit l'atomicité
 - ✅ **Performance** : Pas de locks explicites nécessaires
 - ✅ **Simplicité** : Syntaxe CQL simple pour incréments
@@ -195,6 +218,7 @@
 #### Description
 
 **Exigence** :
+
 - Support multi-modèles embeddings (innovation)
 - ByteT5, e5-large, invoice
 - Comparaison et sélection intelligente
@@ -202,12 +226,14 @@
 #### Pourquoi Spécifique à `domiramaCatOps` ?
 
 **Dans `domiramaCatOps`** :
+
 - ✅ **Exigence E-35 dédiée** : Documentée comme innovation
 - ✅ **3 colonnes embeddings** : `libelle_embedding` (ByteT5), `libelle_embedding_e5` (e5-large), `libelle_embedding_invoice` (invoice)
 - ✅ **Scripts dédiés** : `scripts/17_add_e5_embedding_column.sh`, `scripts/18_add_invoice_embedding_column.sh`, `scripts/19_test_embeddings_comparison.sh`
 - ✅ **Comparaison** : Tests de comparaison entre modèles
 
 **Dans `domirama2`** :
+
 - ⚠️ **1 modèle uniquement** : ByteT5 seulement (E-08)
 - ⚠️ **Pas d'exigence E-35** : Pas de multi-modèles
 - ⚠️ **Pas de comparaison** : Pas de script de comparaison entre modèles
@@ -215,11 +241,13 @@
 #### Impact
 
 **Valeur Ajoutée `domiramaCatOps`** :
+
 - ✅ **Flexibilité** : Choix du meilleur modèle selon cas d'usage
 - ✅ **Optimisation** : ByteT5 pour typos, e5-large pour sémantique, invoice pour facturation
 - ✅ **Innovation** : Dépassement des attentes (120% conformité)
 
 **Recommandation** :
+
 - `domirama2` pourrait bénéficier d'une extension multi-modèles si nécessaire
 
 ---
@@ -316,6 +344,7 @@
 ### 5.1 Pour `domirama2`
 
 **Recommandations** :
+
 1. ✅ **Conserver E-24** : Multi-Version et Time Travel explicite est une force pédagogique
 2. ⚠️ **Optionnel** : Ajouter support `domirama-meta-categories` si besoin métier
 3. ⚠️ **Optionnel** : Ajouter démonstration Kafka si besoin temps réel haute volumétrie
@@ -328,6 +357,7 @@
 ### 5.2 Pour `domiramaCatOps`
 
 **Recommandations** :
+
 1. ✅ **Conserver toutes les exigences** : Couverture complète est une force
 2. ⚠️ **Optionnel** : Ajouter E-24 dédiée pour aligner avec `domirama2` (pédagogie)
 3. ✅ **Maintenir innovation** : Multi-Modèles Embeddings est une différenciation
@@ -352,6 +382,7 @@
 ### Recommandation Globale
 
 **Les deux POC sont complémentaires** :
+
 - **`domirama2`** : Excellent pour démonstration table `domirama` avec focus pédagogique
 - **`domiramaCatOps`** : Excellent pour démonstration complète avec toutes les fonctionnalités métier
 
@@ -362,4 +393,3 @@
 **Date** : 2025-12-01  
 **Version** : 1.0  
 **Statut** : ✅ **Analyse complète**
-

@@ -32,6 +32,7 @@
 ### 1. Structure de Répertoires
 
 ✅ **Tous les répertoires créés** :
+
 - `scripts/` - Scripts d'exécution
 - `schemas/` - Schémas CQL
 - `utils/` - Fonctions utilitaires
@@ -49,6 +50,7 @@
 | **04** | `04_verify_setup.sh` | ✅ Créé | ✅ Exécutable, utilise setup_paths |
 
 **Caractéristiques** :
+
 - ✅ Tous utilisent `set -euo pipefail`
 - ✅ Tous utilisent `setup_paths()` depuis `utils/didactique_functions.sh`
 - ✅ Tous vérifient les prérequis (HCD démarré, keyspace/tables existants)
@@ -63,6 +65,7 @@
 | **Indexes** | `03_create_bic_indexes.cql` | ✅ Créé | ✅ Index `resultat` présent |
 
 **Vérifications** :
+
 - ✅ Syntaxe CQL valide
 - ✅ Colonne `resultat` présente dans le schéma
 - ✅ Index SAI sur `resultat` présent
@@ -76,6 +79,7 @@
 | **Fonctions Validation** | `utils/validation_functions.sh` | ✅ Créé | ✅ Toutes les fonctions présentes |
 
 **Fonctions Disponibles** :
+
 - ✅ `setup_paths()` - Configuration des chemins
 - ✅ `validate_pertinence()`, `validate_coherence()`, etc. - Validations 5 dimensions
 - ✅ `compare_expected_vs_actual()` - Comparaisons
@@ -90,6 +94,7 @@
 | **07** | `07_generate_test_data.sh` | ✅ Créé | ✅ Exécutable, génère données ciblées |
 
 **Caractéristiques** :
+
 - ✅ Tous utilisent `set -euo pipefail`
 - ✅ Tous utilisent `setup_paths()`
 - ✅ Tous génèrent des données avec distribution réaliste
@@ -148,6 +153,7 @@ Ces scripts ne sont pas nécessaires pour l'exécution du script 01 :
 ### Vérifications Script 01
 
 ✅ **Structure du Script** :
+
 - ✅ Utilise `set -euo pipefail`
 - ✅ Source `utils/didactique_functions.sh`
 - ✅ Appelle `setup_paths()`
@@ -156,6 +162,7 @@ Ces scripts ne sont pas nécessaires pour l'exécution du script 01 :
 - ✅ Gestion d'erreurs complète
 
 ✅ **Dépendances** :
+
 - ✅ `schemas/01_create_bic_keyspace.cql` existe
 - ✅ `utils/didactique_functions.sh` existe avec `setup_paths()`
 - ✅ Configuration `.poc-config.sh` existe à la racine ARKEA
@@ -171,6 +178,7 @@ Ces scripts ne sont pas nécessaires pour l'exécution du script 01 :
 **Action** : Si HCD n'est pas démarré, le script affichera un message d'erreur et indiquera comment démarrer HCD.
 
 **Commande pour démarrer HCD** :
+
 ```bash
 cd /Users/david.leconte/Documents/Arkea
 ./scripts/setup/03_start_hcd.sh background
@@ -267,7 +275,8 @@ Une fois le script 01 exécuté avec succès :
 
 **Éléments Manquants** : Scripts 09, 10, 13, 15, 17 (non bloquants pour script 01)
 
-**Action Requise** : 
+**Action Requise** :
+
 1. Vérifier que HCD est démarré (ou le démarrer)
 2. Exécuter le script 01 : `./scripts/01_setup_bic_keyspace.sh`
 
@@ -276,4 +285,3 @@ Une fois le script 01 exécuté avec succès :
 **Date** : 2025-12-01  
 **Version** : 1.0.0  
 **Statut** : ✅ Audit complet effectué, prêt pour exécution
-

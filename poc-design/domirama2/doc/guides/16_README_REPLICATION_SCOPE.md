@@ -21,10 +21,12 @@ columnFamily.setScope(1);  // REPLICATION_SCOPE => '1' = Réplication activée
 ### Fonctionnement
 
 **REPLICATION_SCOPE** :
+
 - **0** : Pas de réplication (données locales uniquement)
 - **1** : Réplication activée vers d'autres clusters HBase
 
 **Architecture HBase** :
+
 ```
 Cluster HBase Source
   └─> REPLICATION_SCOPE => '1'
@@ -34,6 +36,7 @@ Cluster HBase Source
 ### Cas d'Usage
 
 **REPLICATION_SCOPE => '1'** est utilisé pour :
+
 - ✅ **Disaster Recovery** : Backup vers un cluster distant
 - ✅ **Géolocalisation** : Réplication vers clusters régionaux
 - ✅ **Analytics** : Réplication vers cluster d'analyse (séparé)
@@ -62,6 +65,7 @@ WITH REPLICATION = {
 #### 1. SimpleStrategy (Single Datacenter)
 
 **Pour POC/Développement** :
+
 ```cql
 CREATE KEYSPACE domirama2_poc
 WITH REPLICATION = {
@@ -71,12 +75,14 @@ WITH REPLICATION = {
 ```
 
 **Équivalent REPLICATION_SCOPE** :
+
 - ✅ **SimpleStrategy** = Réplication locale uniquement
 - ✅ **replication_factor: 1** = Pas de réplication (équivalent REPLICATION_SCOPE => '0')
 
 #### 2. NetworkTopologyStrategy (Multi-Datacenter)
 
 **Pour Production Multi-Cluster** :
+
 ```cql
 CREATE KEYSPACE domirama2_poc
 WITH REPLICATION = {
@@ -87,6 +93,7 @@ WITH REPLICATION = {
 ```
 
 **Équivalent REPLICATION_SCOPE** :
+
 - ✅ **NetworkTopologyStrategy** = Réplication multi-cluster activée
 - ✅ **datacenter2** = Cluster distant (équivalent REPLICATION_SCOPE => '1')
 
@@ -111,12 +118,14 @@ WITH REPLICATION = {
 ### 1. Pas de Réplication (REPLICATION_SCOPE => '0')
 
 **HBase** :
+
 ```java
 HColumnDescriptor columnFamily = new HColumnDescriptor("data");
 columnFamily.setScope(0);  // Pas de réplication
 ```
 
 **HCD/Cassandra** :
+
 ```cql
 CREATE KEYSPACE domirama2_poc
 WITH REPLICATION = {
@@ -126,17 +135,20 @@ WITH REPLICATION = {
 ```
 
 **Équivalence** :
+
 - ✅ **REPLICATION_SCOPE => '0'** = **SimpleStrategy avec replication_factor: 1**
 
 ### 2. Réplication Activée (REPLICATION_SCOPE => '1')
 
 **HBase** :
+
 ```java
 HColumnDescriptor columnFamily = new HColumnDescriptor("data");
 columnFamily.setScope(1);  // Réplication activée
 ```
 
 **HCD/Cassandra** :
+
 ```cql
 CREATE KEYSPACE domirama2_poc
 WITH REPLICATION = {
@@ -147,6 +159,7 @@ WITH REPLICATION = {
 ```
 
 **Équivalence** :
+
 - ✅ **REPLICATION_SCOPE => '1'** = **NetworkTopologyStrategy avec plusieurs datacenters**
 
 ---
@@ -176,6 +189,7 @@ Keyspace: domirama2_poc
 ```
 
 **Avantages HCD** :
+
 - ✅ **Réplication native** : Pas de configuration supplémentaire
 - ✅ **Consistance configurable** : QUORUM, ALL, etc.
 - ✅ **Géolocalisation** : Réplication automatique par datacenter
@@ -187,6 +201,7 @@ Keyspace: domirama2_poc
 ### Étape 1 : Configuration des Datacenters
 
 **Dans cassandra.yaml de chaque node** :
+
 ```yaml
 # Node dans Datacenter1 (Paris)
 cluster_name: 'Arkea_HCD_Cluster'
@@ -212,6 +227,7 @@ WITH REPLICATION = {
 ```
 
 **Équivalent REPLICATION_SCOPE => '1'** :
+
 - ✅ **NetworkTopologyStrategy** = Réplication activée
 - ✅ **datacenter 'lyon'** = Cluster distant (équivalent destination HBase)
 
@@ -234,6 +250,7 @@ SELECT * FROM system_schema.keyspaces WHERE keyspace_name = 'domirama2_prod';
 **Besoin** : Backup vers un cluster distant
 
 **Configuration HCD** :
+
 ```cql
 CREATE KEYSPACE domirama2_prod
 WITH REPLICATION = {
@@ -244,6 +261,7 @@ WITH REPLICATION = {
 ```
 
 **Équivalent HBase** :
+
 - REPLICATION_SCOPE => '1' sur Column Family 'data'
 
 ### Cas 2 : Géolocalisation
@@ -251,6 +269,7 @@ WITH REPLICATION = {
 **Besoin** : Réplication vers clusters régionaux
 
 **Configuration HCD** :
+
 ```cql
 CREATE KEYSPACE domirama2_prod
 WITH REPLICATION = {
@@ -262,6 +281,7 @@ WITH REPLICATION = {
 ```
 
 **Équivalent HBase** :
+
 - REPLICATION_SCOPE => '1' avec configuration multi-cluster
 
 ### Cas 3 : Analytics Séparé
@@ -269,6 +289,7 @@ WITH REPLICATION = {
 **Besoin** : Réplication vers cluster d'analyse (lecture seule)
 
 **Configuration HCD** :
+
 ```cql
 CREATE KEYSPACE domirama2_prod
 WITH REPLICATION = {
@@ -279,6 +300,7 @@ WITH REPLICATION = {
 ```
 
 **Équivalent HBase** :
+
 - REPLICATION_SCOPE => '1' vers cluster analytics
 
 ---
@@ -288,6 +310,7 @@ WITH REPLICATION = {
 ### Configuration Actuelle
 
 **POC Domirama2** :
+
 ```cql
 CREATE KEYSPACE domirama2_poc
 WITH REPLICATION = {
@@ -297,17 +320,20 @@ WITH REPLICATION = {
 ```
 
 **Équivalent REPLICATION_SCOPE** :
+
 - ✅ **SimpleStrategy** = Pas de réplication multi-cluster
 - ✅ **replication_factor: 1** = Équivalent REPLICATION_SCOPE => '0'
 
 ### Pourquoi Pas de Réplication dans le POC ?
 
 **Raisons** :
+
 - ✅ **POC local** : Single-node sur MacBook Pro
 - ✅ **Démonstration** : Focus sur fonctionnalités métier
 - ✅ **Complexité** : Multi-cluster nécessite plusieurs nodes
 
 **Note** : La réplication multi-cluster peut être démontrée si nécessaire avec :
+
 - Configuration multi-datacenter simulée
 - Documentation de la configuration production
 
@@ -318,6 +344,7 @@ WITH REPLICATION = {
 ### Étape 1 : Analyser Configuration HBase
 
 **HBase** :
+
 ```java
 // Analyser les Column Families avec REPLICATION_SCOPE => '1'
 HTableDescriptor tableDesc = admin.getTableDescriptor(tableName);
@@ -332,6 +359,7 @@ for (HColumnDescriptor cf : tableDesc.getColumnFamilies()) {
 ### Étape 2 : Créer Keyspace avec Réplication
 
 **HCD** :
+
 ```cql
 -- Créer le keyspace avec réplication multi-cluster
 CREATE KEYSPACE domirama2_prod
@@ -345,6 +373,7 @@ WITH REPLICATION = {
 ### Étape 3 : Migration des Données
 
 **Stratégie** :
+
 1. ✅ **Double-write** : Écrire dans HBase et HCD simultanément
 2. ✅ **Validation** : Vérifier la cohérence des données
 3. ✅ **Basculer** : Passer la lecture vers HCD
@@ -357,38 +386,46 @@ WITH REPLICATION = {
 ### 1. Configuration Centralisée
 
 **HBase** :
+
 - ⚠️ Configuration par Column Family
 - ⚠️ Nécessite configuration sur chaque table
 
 **HCD** :
+
 - ✅ **Configuration au niveau keyspace** : Une seule configuration
 - ✅ **Plus simple** : Pas de configuration par table
 
 ### 2. Réplication Native
 
 **HBase** :
+
 - ⚠️ Réplication asynchrone configurée séparément
 - ⚠️ Nécessite configuration supplémentaire
 
 **HCD** :
+
 - ✅ **Réplication native** : Intégrée dans Cassandra
 - ✅ **Pas de configuration supplémentaire** : Fonctionne automatiquement
 
 ### 3. Consistance Configurable
 
 **HBase** :
+
 - ⚠️ Consistance limitée par la réplication asynchrone
 
 **HCD** :
+
 - ✅ **Consistance configurable** : QUORUM, ALL, ONE, etc.
 - ✅ **Lecture locale** : LOCAL_QUORUM pour performance
 
 ### 4. Multi-Datacenter
 
 **HBase** :
+
 - ⚠️ Configuration complexe pour multi-cluster
 
 **HCD** :
+
 - ✅ **NetworkTopologyStrategy** : Support natif multi-datacenter
 - ✅ **Géolocalisation** : Réplication automatique par région
 
@@ -411,10 +448,12 @@ WITH REPLICATION = {
 ### POC Actuel
 
 **Configuration** :
+
 - ✅ **SimpleStrategy** : Single-node (POC)
 - ✅ **Équivalent REPLICATION_SCOPE => '0'** : Pas de réplication
 
 **Pour Production** :
+
 - ✅ **NetworkTopologyStrategy** : Multi-cluster si nécessaire
 - ✅ **Équivalent REPLICATION_SCOPE => '1'** : Réplication activée
 
@@ -425,6 +464,7 @@ WITH REPLICATION = {
 ### Pour le POC
 
 **Configuration actuelle** :
+
 ```cql
 CREATE KEYSPACE domirama2_poc
 WITH REPLICATION = {
@@ -434,6 +474,7 @@ WITH REPLICATION = {
 ```
 
 **Justification** :
+
 - ✅ POC local (single-node)
 - ✅ Focus sur fonctionnalités métier
 - ✅ Équivalent REPLICATION_SCOPE => '0' (pas de réplication)
@@ -441,6 +482,7 @@ WITH REPLICATION = {
 ### Pour Production
 
 **Configuration recommandée** :
+
 ```cql
 CREATE KEYSPACE domirama2_prod
 WITH REPLICATION = {
@@ -451,6 +493,7 @@ WITH REPLICATION = {
 ```
 
 **Justification** :
+
 - ✅ Équivalent REPLICATION_SCOPE => '1' (réplication activée)
 - ✅ Disaster recovery : Cluster secondaire
 - ✅ Haute disponibilité : 3 réplicas dans cluster principal
@@ -464,6 +507,7 @@ WITH REPLICATION = {
 **Fichier** : `34_demo_replication_scope_v2.sh`
 
 **Contenu** :
+
 - Explication REPLICATION_SCOPE HBase vs Réplication HCD
 - Vérification configuration POC
 - Comparaison HBase vs HCD
@@ -474,6 +518,7 @@ WITH REPLICATION = {
 **Fichier** : `34_demo_replication_scope_v2.sh`
 
 **Améliorations** :
+
 - ✅ Consistency levels expliqués (QUORUM, LOCAL_QUORUM, etc.)
 - ✅ Driver Java : Configuration et exemples
 - ✅ Load Balancing Policy : DatacenterAwareRoundRobinPolicy
@@ -482,6 +527,7 @@ WITH REPLICATION = {
 - ✅ Comparaison avec HBase : Avantages consistance
 
 **Usage** :
+
 ```bash
 ./34_demo_replication_scope_v2.sh
 ```
@@ -491,12 +537,14 @@ WITH REPLICATION = {
 **Fichier** : `ExempleJavaReplication.java`
 
 **Contenu** :
+
 - Configuration du driver avec consistency level
 - Exemples avec QUORUM, LOCAL_QUORUM, ONE
 - Load Balancing Policy
 - Retry Policy
 
 **Compilation** :
+
 ```bash
 javac -cp "cassandra-driver-core-4.x.x.jar" ExempleJavaReplication.java
 ```
@@ -542,6 +590,7 @@ SimpleStatement select = SimpleStatement.builder("SELECT * FROM ...")
 #### Load Balancing Policy
 
 **DatacenterAwareRoundRobinPolicy** (recommandé pour multi-datacenter) :
+
 - Envoie les requêtes vers le datacenter local en priorité
 - Compatible avec LOCAL_QUORUM pour performance
 - Fallback automatique si datacenter local indisponible
@@ -549,6 +598,7 @@ SimpleStatement select = SimpleStatement.builder("SELECT * FROM ...")
 #### Retry Policy
 
 **DefaultRetryPolicy** (recommandé) :
+
 - Gestion automatique des erreurs de consistance
 - Retry intelligent si consistency level non atteint
 - Fallback automatique vers autre datacenter si nécessaire
@@ -562,54 +612,65 @@ SimpleStatement select = SimpleStatement.builder("SELECT * FROM ...")
 **Résultats** (10 parties démontrées) :
 
 #### PARTIE 1 : REPLICATION_SCOPE HBase vs Réplication HCD
+
 - ✅ **HBase** : Réplication asynchrone (pas de contrôle consistance)
 - ✅ **HCD** : Réplication avec consistency levels configurables
 - ✅ **Différence clé** : Contrôle de la consistance avec HCD
 
 #### PARTIE 2 : Consistency Levels HCD/Cassandra
+
 - ✅ **Niveaux documentés** : ONE, TWO, THREE, QUORUM, LOCAL_QUORUM, EACH_QUORUM, ALL, ANY
 - ✅ **Exemples calculés** : QUORUM = (RF/2 + 1) réplicas
 - ✅ **Avantage vs HBase** : Contrôle de la consistance
 
 #### PARTIE 3 : Driver Java - Configuration de Base
+
 - ✅ **Configuration avec DriverConfigLoader** : Documentée
 - ✅ **Consistency level par défaut** : QUORUM (recommandé)
 
 #### PARTIE 4 : Driver Java - Consistency Level par Requête
+
 - ✅ **setConsistencyLevel() par requête** : Fonctionne
 - ✅ **Exemples** : QUORUM, LOCAL_QUORUM documentés
 - ✅ **Avantage** : Performance vs Consistance (trade-off configurable)
 
 #### PARTIE 5 : Driver Java - Load Balancing Policy
+
 - ✅ **DatacenterAwareRoundRobinPolicy** : Documentée
 - ✅ **Compatible avec LOCAL_QUORUM** : Pour performance
 - ✅ **Fallback automatique** : Si datacenter local indisponible
 
 #### PARTIE 6 : Driver Java - Retry Policy
+
 - ✅ **DefaultRetryPolicy** : Gestion automatique des erreurs
 - ✅ **Compatible avec QUORUM/LOCAL_QUORUM** : Retry intelligent
 
 #### PARTIE 7 : Cas d'Usage - Multi-Datacenter
+
 - ✅ **NetworkTopologyStrategy** : Configuration documentée
 - ✅ **LOCAL_QUORUM** : Performance locale
 - ✅ **Équivalent REPLICATION_SCOPE => '1'** : Réplication activée
 
 #### PARTIE 8 : Comparaison HBase vs HCD
+
 - ✅ **HBase** : Réplication asynchrone, pas de contrôle consistance
 - ✅ **HCD** : Réplication synchrone, consistance configurable
 - ✅ **Avantage HCD** : Contrôle de la consistance
 
 #### PARTIE 9 : Exemple Complet Java
+
 - ✅ **Exemple Java créé** : `/tmp/ExempleJavaReplication.java`
 - ✅ **Configuration globale et par requête** : Documentée
 - ✅ **Load Balancing et Retry Policy** : Inclus
 
 #### PARTIE 10 : Résumé et Conclusion
+
 - ✅ **Équivalences REPLICATION_SCOPE** : Documentées
 - ✅ **Consistency Levels et Drivers** : Expliqués
 - ✅ **Avantages vs HBase** : Consistance configurable
 
 **Conclusion** :
+
 - ✅ Toutes les équivalences documentées
 - ✅ Exemples Java fonctionnels fournis
 - ✅ Avantages significatifs vs REPLICATION_SCOPE HBase
@@ -617,4 +678,3 @@ SimpleStatement select = SimpleStatement.builder("SELECT * FROM ...")
 ---
 
 **✅ L'équivalent REPLICATION_SCOPE est documenté, avec des avantages significatifs !**
-

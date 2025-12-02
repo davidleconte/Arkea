@@ -207,7 +207,7 @@ test_function() {
     local test_name="$1"
     local expected="$2"
     local actual="$3"
-    
+
     if [ "$expected" = "$actual" ]; then
         echo "✅ $test_name"
         PASSED=$((PASSED + 1))
@@ -368,7 +368,7 @@ Avant de soumettre une contribution :
 ---
 
 **Pour plus d'informations, voir** :
+
 - `CONTRIBUTING.md` - Guide général
 - `docs/GUIDE_CHOIX_POC.md` - Guide de choix
 - `poc-design/*/README.md` - Documentation des POCs
-

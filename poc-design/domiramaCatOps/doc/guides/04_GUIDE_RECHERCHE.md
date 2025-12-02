@@ -40,6 +40,7 @@ DomiramaCatOps supporte 5 types de recherche :
 **Objectif** : Rechercher les opérations par catégorie
 
 **Exécution** :
+
 ```bash
 cd scripts
 ./08_test_category_search.sh
@@ -56,6 +57,7 @@ LIMIT 10;
 ```
 
 **Explication** :
+
 - **WHERE** : Filtre sur la partition (code_si, contrat)
 - **cat_auto** : Utilise l'index SAI `idx_cat_auto`
 - **Performance** : O(log n) avec index vs O(n) sans index
@@ -71,6 +73,7 @@ LIMIT 10;
 ```
 
 **Explication** :
+
 - **cat_user** : Utilise l'index SAI `idx_cat_user`
 - **Stratégie multi-version** : Priorise `cat_user` si non null
 
@@ -95,6 +98,7 @@ LIMIT 10;
 ```
 
 **Explication** :
+
 - **libelle : 'loyer'** : Utilise l'index SAI Full-Text `idx_libelle_fulltext`
 - **Analyzer français** : lowercase, frenchLightStem, asciiFolding
 - **Performance** : Recherche rapide même sur grandes collections
@@ -114,6 +118,7 @@ LIMIT 10;
 **Objectif** : Recherche floue avec embeddings ByteT5
 
 **Exécution** :
+
 ```bash
 ./16_test_fuzzy_search.sh
 ```
@@ -129,6 +134,7 @@ LIMIT 5;
 ```
 
 **Explication** :
+
 - **ORDER BY ... ANN OF** : Tri par similarité vectorielle (Approximate Nearest Neighbor)
 - **libelle_embedding** : Embeddings ByteT5 1472 dimensions
 - **Tolérance aux typos** : 'LOYR' trouve 'LOYER'
@@ -152,6 +158,7 @@ LIMIT 5;
 **Objectif** : Combinaison Full-Text + Vector Search
 
 **Exécution** :
+
 ```bash
 ./18_test_hybrid_search.sh
 ```
@@ -168,6 +175,7 @@ LIMIT 10;
 ```
 
 **Explication** :
+
 - **WHERE libelle : 'terme'** : Full-Text Search filtre les résultats pertinents
 - **ORDER BY ... ANN OF** : Vector Search trie selon similarité
 - **Résultat** : Précision (Full-Text) + Tolérance aux typos (Vector)
@@ -197,6 +205,7 @@ LIMIT 10;
 ```
 
 **Explication** :
+
 - **libelle_tokens** : SET<TEXT> avec N-grams 3-8 caractères
 - **CONTAINS** : Recherche partielle dans le SET
 - **Performance** : Index SAI sur SET
@@ -225,6 +234,7 @@ LIMIT 10;
 ```
 
 **Explication** :
+
 - **Full-Text** : `libelle : 'loyer'`
 - **Filtre catégorie** : `cat_auto = 'LOYER'`
 - **Range query** : `montant > 1000`
@@ -244,6 +254,7 @@ LIMIT 10;
 ```
 
 **Explication** :
+
 - **COALESCE** : Priorise `cat_user` si non null, sinon `cat_auto`
 - **Stratégie multi-version** : Aucune correction client perdue
 
@@ -276,4 +287,3 @@ LIMIT 10;
 
 **Date de création** : 2025-12-01  
 **Dernière mise à jour** : 2025-12-01
-

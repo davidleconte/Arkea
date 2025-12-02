@@ -33,6 +33,7 @@ domiramaCatOps/
 ```
 
 **Avantages** :
+
 - ✅ **Organisation claire** : Documents classés par catégorie
 - ✅ **Navigation facilitée** : INDEX.md pour navigation rapide
 - ✅ **Scalabilité** : Facile d'ajouter de nouveaux fichiers
@@ -59,6 +60,7 @@ domirama2/
 ```
 
 **Problèmes identifiés** :
+
 - ⚠️ **61 scripts à la racine** : Difficile de naviguer
 - ⚠️ **88 fichiers .md à la racine de doc/** : Non organisés
 - ⚠️ **Pas d'INDEX.md** : Navigation difficile
@@ -189,26 +191,32 @@ domirama2/
 ## 📝 Plan d'Action
 
 ### Étape 1 : Création des répertoires
+
 - [ ] Créer les répertoires de catégories dans `doc/`
 - [ ] Créer le répertoire `scripts/`
 
 ### Étape 2 : Catégorisation de la documentation
+
 - [ ] Analyser chaque fichier .md et le classer dans la bonne catégorie
 - [ ] Déplacer les fichiers vers leurs répertoires respectifs
 
 ### Étape 3 : Déplacement des scripts
+
 - [ ] Déplacer tous les scripts .sh vers `scripts/`
 - [ ] Mettre à jour les références dans la documentation
 
 ### Étape 4 : Création de l'INDEX.md
+
 - [ ] Créer `doc/INDEX.md` avec navigation par catégorie
 - [ ] Mettre à jour `00_ORGANISATION_DOC.md`
 
 ### Étape 5 : Mise à jour des liens
+
 - [ ] Mettre à jour tous les liens dans les fichiers .md
 - [ ] Vérifier que tous les liens fonctionnent
 
 ### Étape 6 : Validation
+
 - [ ] Vérifier que la structure est cohérente
 - [ ] Tester la navigation
 - [ ] Documenter la réorganisation
@@ -226,4 +234,3 @@ domirama2/
 
 **Date de création** : 2025-01-XX  
 **Version** : 1.0
-

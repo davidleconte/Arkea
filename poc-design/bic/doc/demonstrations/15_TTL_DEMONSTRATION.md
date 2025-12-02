@@ -20,12 +20,14 @@ avec expiration automatique et purge des données.
 **Description** : Les interactions sont automatiquement purgées après 2 ans (63072000 secondes).
 
 **Exigences** :
+
 - TTL par défaut : 2 ans (vs 10 ans pour Domirama)
 - Expiration automatique
 - Purge automatique lors des compactions
 - TTL par écriture possible (USING TTL)
 
 **Configuration** :
+
 - `default_time_to_live = 63072000` (2 ans en secondes)
 - TTL s'applique à toutes les colonnes de la ligne
 - Les données expirées sont automatiquement purgées
@@ -34,10 +36,10 @@ avec expiration automatique et purge des données.
 
 ## 📝 Tests de TTL
 
-
 ### TEST 1 : Vérification du TTL par Défaut
 
 **Requête** :
+
 ```cql
 DESCRIBE TABLE bic_poc.interactions_by_client;
 ```
@@ -45,6 +47,7 @@ DESCRIBE TABLE bic_poc.interactions_by_client;
 **Résultat** : TTL par défaut = 63072000 secondes (2 ans)
 
 **Explication** :
+
 - `default_time_to_live = 63072000` : TTL par défaut de 2 ans
 - Toutes les nouvelles insertions héritent de ce TTL
 - Équivalent HBase : TTL => '63072000 SECONDS (730 DAYS)'
@@ -54,8 +57,9 @@ DESCRIBE TABLE bic_poc.interactions_by_client;
 ### TEST 2 : Insertion avec TTL par Défaut
 
 **Requête** :
+
 ```cql
-INSERT INTO bic_poc.interactions_by_client 
+INSERT INTO bic_poc.interactions_by_client
 (code_efs, numero_client, date_interaction, canal, type_interaction, idt_tech, resultat, json_data, created_at, updated_at, version)
 VALUES ('EFS001', 'CLIENT_TTL_TEST', '2024-01-01 10:00:00+0000', 'email', 'consultation', 'TTL-TEST-001', 'succès', '{"id_interaction":"TTL-TEST-001","test":"ttl_default"}', toTimestamp(now()), toTimestamp(now()), 1);
 ```
@@ -71,8 +75,9 @@ VALUES ('EFS001', 'CLIENT_TTL_TEST', '2024-01-01 10:00:00+0000', 'email', 'consu
 ### TEST 3 : Insertion avec TTL Personnalisé (60 secondes)
 
 **Requête** :
+
 ```cql
-INSERT INTO bic_poc.interactions_by_client 
+INSERT INTO bic_poc.interactions_by_client
 (code_efs, numero_client, date_interaction, canal, type_interaction, idt_tech, resultat, json_data, created_at, updated_at, version)
 VALUES ('EFS001', 'CLIENT_TTL_TEST', '2024-01-01 11:00:00+0000', 'email', 'consultation', 'TTL-TEST-002', 'succès', '{"id_interaction":"TTL-TEST-002","test":"ttl_custom_60s"}', toTimestamp(now()), toTimestamp(now()), 1)
 USING TTL 60;
@@ -82,7 +87,7 @@ USING TTL 60;
 
 **⏱️ Attente de 65 secondes pour démontrer la purge automatique...**
 
-**Résultat APRÈS expiration** : 
+**Résultat APRÈS expiration** :
 La ligne est encore présente (tombstone non encore purgé, peut nécessiter une compaction). ⚠️ **PURGE EN ATTENTE DE COMPACTION**
 
 **Valeur ajoutée HCD** : TTL par écriture (non disponible avec HBase)
@@ -92,10 +97,11 @@ La ligne est encore présente (tombstone non encore purgé, peut nécessiter une
 ### TEST 4 : Vérification du TTL sur Données Existantes
 
 **Requête** :
+
 ```cql
-SELECT code_efs, numero_client, date_interaction, TTL(json_data) as ttl_remaining 
-FROM bic_poc.interactions_by_client 
-WHERE code_efs = 'EFS001' 
+SELECT code_efs, numero_client, date_interaction, TTL(json_data) as ttl_remaining
+FROM bic_poc.interactions_by_client
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
 LIMIT 5;
 ```
@@ -132,15 +138,18 @@ LIMIT 5;
 ## ✅ Conclusion
 
 **Use Cases Validés** :
+
 - ✅ BIC-06 : TTL 2 ans (expiration automatique après 2 ans)
 
 **Validations** :
+
 - ✅ 5 dimensions validées pour chaque test
 - ✅ Comparaisons attendus vs obtenus effectuées
 - ✅ Justesse des résultats validée
 - ✅ Expiration automatique démontrée
 
 **Avantages HCD vs HBase** :
+
 - ✅ TTL par écriture (USING TTL) : Contrôle granulaire
 - ✅ TTL par table : Configuration centralisée
 - ✅ Purge automatique : Pas d'intervention manuelle

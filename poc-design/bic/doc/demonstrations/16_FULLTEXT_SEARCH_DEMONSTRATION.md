@@ -24,6 +24,7 @@ en utilisant les index SAI avec analyseurs Lucene pour des recherches sophistiqu
 **Description** : Recherche full-text dans le contenu JSON avec support linguistique avancé.
 
 **Exigences** (inputs-ibm) :
+
 - Indexation textuelle avec analyseurs Lucene
 - Recherche dans `details` (contenu JSON)
 - Recherche par mots-clés
@@ -32,6 +33,7 @@ en utilisant les index SAI avec analyseurs Lucene pour des recherches sophistiqu
 - Support français
 
 **Avantages vs HBase** :
+
 - Recherche native dans la base (pas besoin d'ElasticSearch/Solr)
 - Analyseurs linguistiques intégrés
 - Recherche floue et par racine
@@ -40,10 +42,10 @@ en utilisant les index SAI avec analyseurs Lucene pour des recherches sophistiqu
 
 ## 📝 Configuration Index SAI avec Analyseurs Lucene
 
-
 ### Configuration Index Full-Text
 
 **Index SAI avec Analyseur Lucene** :
+
 ```cql
 CREATE CUSTOM INDEX IF NOT EXISTS idx_interactions_json_data_fulltext_lucene
 ON bic_poc.interactions_by_client (json_data)
@@ -56,11 +58,13 @@ WITH OPTIONS = {
 ```
 
 **Options** :
+
 - case_sensitive: false : Recherche insensible à la casse
 - normalize: true : Normalisation des caractères
 - analyzer_class: FrenchAnalyzer : Analyseur linguistique français
 
 **Fonctionnalités** :
+
 - Stemming (racines de mots) : "réclamation" → "réclam"
 - Stop words : Ignore "le", "la", "de", etc.
 - Normalisation : Accents, casse
@@ -69,13 +73,13 @@ WITH OPTIONS = {
 
 ## 📝 Requêtes CQL
 
-
 ### TEST 1 : Recherche par Mot-Clé Simple
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
-WHERE code_efs = 'EFS001' 
+SELECT * FROM bic_poc.interactions_by_client
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND json_data : 'reclamation'
 LIMIT 20;
@@ -97,12 +101,14 @@ LIMIT 20;
 | EFS001 | CLIENT123 | 2025-04-05 18:53:33.000000+0000 | email | reclamation | INT-2024-000035 |
 
 **Explication** :
+
 - Recherche full-text avec opérateur : (SAI) utilisant l'index SAI full-text
 - Performance optimale grâce à l'index SAI avec analyseur Lucene
 - Insensible à la casse grâce à l'analyseur
 - Conforme au use case BIC-12 (Recherche full-text avec analyseurs Lucene)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-12
 - ✅ Intégrité : 14 interactions trouvées contenant 'reclamation'
 - ✅ Performance : .791936000s (max: 0.2s)
@@ -114,9 +120,10 @@ LIMIT 20;
 ### TEST 2 : Recherche avec CONTAINS
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
-WHERE code_efs = 'EFS001' 
+SELECT * FROM bic_poc.interactions_by_client
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND json_data : 'réclamation'
 LIMIT 20;
@@ -138,12 +145,14 @@ LIMIT 20;
 | EFS001 | CLIENT123 | 2025-04-05 18:53:33.000000+0000 | email | reclamation | INT-2024-000035 |
 
 **Explication** :
+
 - Recherche avec opérateur : (SAI full-text)
 - Utilise l'index SAI full-text de manière optimale
 - Support du stemming (recherche par racine)
 - Conforme au use case BIC-12 (Recherche full-text avec analyseurs Lucene)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-12
 - ✅ Intégrité : 14 interactions trouvées avec CONTAINS
 - ✅ Performance : Optimale avec index SAI
@@ -155,9 +164,10 @@ LIMIT 20;
 ### TEST 3 : Recherche par Préfixe
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
-WHERE code_efs = 'EFS001' 
+SELECT * FROM bic_poc.interactions_by_client
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND json_data : 'reclam'
 LIMIT 20;
@@ -179,12 +189,14 @@ LIMIT 20;
 | EFS001 | CLIENT123 | 2025-04-05 18:53:33.000000+0000 | email | reclamation | INT-2024-000035 |
 
 **Explication** :
+
 - Recherche par terme avec support du stemming (opérateur : SAI)
 - Utilise l'analyseur Lucene pour recherche par racine
 - Performance optimale grâce à l'index SAI
 - Conforme au use case BIC-12 (Recherche full-text avec analyseurs Lucene)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-12 (stemming)
 - ✅ Intégrité : 14 interactions trouvées avec recherche par préfixe
 - ✅ Performance : Optimale avec index SAI
@@ -196,9 +208,10 @@ LIMIT 20;
 ### TEST 4 : Recherche Combinée (Full-Text + Canal)
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
-WHERE code_efs = 'EFS001' 
+SELECT * FROM bic_poc.interactions_by_client
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND canal = 'email'
   AND json_data : 'reclamation'
@@ -220,12 +233,14 @@ LIMIT 20;
 | EFS001 | CLIENT123 | 2024-11-30 18:53:26.000000+0000 | email | reclamation | INT-2024-000026 |
 
 **Explication** :
+
 - Combinaison de 2 index SAI (full-text + canal)
 - Performance optimale grâce aux index SAI multiples
 - Recherche full-text avec filtre par canal
 - Conforme aux use cases BIC-12 et BIC-04 (combinaison de filtres)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond aux use cases BIC-12 et BIC-04 (combinaison)
 - ✅ Intégrité : 4 interactions trouvées avec 2 filtres combinés
 - ✅ Performance : Optimale avec 2 index SAI simultanés
@@ -237,12 +252,14 @@ LIMIT 20;
 ### TEST 5 : Test de Performance avec Statistiques
 
 **Statistiques** (temps total incluant overheads cqlsh) :
+
 - Temps moyen : .7766s
 - Temps minimum : .746424000s
 - Temps maximum : .822061000s
 - Écart-type : .0200s
 
 **Note importante** :
+
 - ⚠️ Le temps mesuré inclut les overheads de cqlsh (connexion, parsing, formatage)
 - ✅ Le temps réel d'exécution de la requête avec index SAI est < 0.01s (vérifié avec TRACING ON)
 - ✅ L'index SAI idx_interactions_json_data_fulltext est correctement utilisé (vérifié avec TRACING ON)
@@ -253,6 +270,7 @@ LIMIT 20;
 **Stabilité** : Écart-type .0200s (plus faible = plus stable)
 
 **Explication** :
+
 - Test complexe : 10 exécutions pour statistiques fiables
 - Performance mesurée : .7766s (inclut overheads cqlsh)
 - Performance réelle : < 0.01s (vérifié avec TRACING ON)
@@ -261,6 +279,7 @@ LIMIT 20;
 - Index SAI : Correctement utilisé (vérifié avec TRACING ON)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-12 (performance)
 - ✅ Intégrité : Statistiques complètes (min/max/moyenne/écart-type)
 - ✅ Consistance : Performance stable si écart-type faible
@@ -286,12 +305,14 @@ LIMIT 20;
 | EFS001 | CLIENT123 | 2025-08-09 18:53:40.000000+0000 | email | transaction | INT-2024-000044 |
 
 **Explication** :
+
 - Test complexe : Test exhaustif de tous les termes supportés (8 termes)
 - Collecte des IDs pour vérification de cohérence
 - Validation de l'exhaustivité de la recherche full-text
 - Conforme au use case BIC-12 (Recherche full-text exhaustive)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-12 (exhaustivité)
 - ✅ Intégrité : 27 interactions réparties sur 8 termes
 - ✅ Cohérence : Analyse exhaustive de tous les termes
@@ -314,12 +335,14 @@ LIMIT 20;
 | EFS001 | CLIENT123 | 2025-08-09 18:53:40.000000+0000 | email | transaction | INT-2024-000044 |
 
 **Explication** :
+
 - Test complexe : Vérification de la cohérence entre différents termes
 - Analyse de tous les IDs collectés sur tous les termes
 - Validation de l'intégrité (une interaction peut contenir plusieurs termes)
 - Conforme au use case BIC-12 (cohérence multi-termes)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-12 (cohérence)
 - ✅ Intégrité : 27 IDs collectés, 1 uniques
 - ✅ Cohérence : Analyse des résultats multi-termes effectuée
@@ -346,12 +369,14 @@ LIMIT 20;
 | Interaction | 50 | 1.069040000s |
 
 **Explication** :
+
 - Test très complexe : Simulation avec plusieurs termes simultanément
 - Validation de la performance sous charge
 - Mesure du temps moyen par requête sous charge
 - Conforme au use case BIC-12 (charge multi-termes)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-12 (charge)
 - ✅ Intégrité : 5 requêtes réussies sur 5 termes
 - ✅ Performance : .8325s (acceptable sous charge)
@@ -367,6 +392,7 @@ LIMIT 20;
 **Performance moyenne** : .8216s
 
 **Statistiques** :
+
 - Temps minimum : .750485000s
 - Temps maximum : 1.009251000s
 - Écart-type : .0793s
@@ -384,12 +410,14 @@ LIMIT 20;
 | EFS001 | CLIENT123 | 2024-11-30 18:53:26.000000+0000 | email | reclamation | INT-2024-000026 |
 
 **Explication** :
+
 - Test très complexe : Combinaison de 3 index SAI avec performance statistique
 - Utilisation simultanée de 3 index SAI (canal + résultat + full-text)
 - Performance moyenne : .8216s avec statistiques (10 exécutions)
 - Conforme aux use cases BIC-12, BIC-04 et BIC-11 (combinaison de filtres)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond aux use cases BIC-12, BIC-04 et BIC-11 (combinaison)
 - ✅ Intégrité : 4 interactions trouvées avec 3 filtres combinés
 - ✅ Cohérence : Combinaison (4) <= Canal seul (4) et Full-text seul (14)
@@ -442,10 +470,12 @@ LIMIT 20;
 ## ✅ Conclusion
 
 **Use Cases Validés** :
+
 - ✅ BIC-07 : Format JSON + colonnes dynamiques
 - ✅ BIC-12 : Recherche full-text avec analyseurs Lucene
 
 **Validations** :
+
 - ✅ 5 dimensions validées pour chaque test
 - ✅ Comparaisons attendus vs obtenus effectuées
 - ✅ Justesse des résultats validée
@@ -453,12 +483,14 @@ LIMIT 20;
 - ✅ Tests très complexes effectués (charge multi-termes, combinaison complexe avec performance)
 
 **Fonctionnalités** :
+
 - ✅ Recherche par mot-clé
 - ✅ Recherche par préfixe
 - ✅ Support stemming (analyseur Lucene)
 - ✅ Recherche combinée (full-text + filtres)
 
 **Avantages vs HBase** :
+
 - ✅ Recherche native dans la base (pas besoin d'ElasticSearch/Solr)
 - ✅ Analyseurs linguistiques intégrés
 - ✅ Performance optimale avec index SAI

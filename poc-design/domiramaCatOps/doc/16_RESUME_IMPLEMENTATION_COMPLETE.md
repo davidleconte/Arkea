@@ -14,10 +14,12 @@
 ### Objectif Atteint
 
 ✅ **Support de deux modèles d'embeddings** :
+
 - ByteT5-small (1472 dimensions) - Existant
 - multilingual-e5-large (1024 dimensions) - Nouveau
 
 ✅ **Optimisation pour le domaine bancaire** :
+
 - Modèle e5-large recommandé pour meilleure pertinence
 - Données de test pertinentes générées
 - Comparaison des modèles possible
@@ -169,10 +171,12 @@ results = vector_search(session, embedding, code_si, contrat, limit=5)
 ### Amélioration de la Pertinence
 
 **Avant (ByteT5-small)** :
+
 - Pertinence faible : 0-20% pour certaines requêtes
 - Résultats non pertinents (ex: "LOYER IMPAYE" → "CB PARKING")
 
 **Après (e5-large)** :
+
 - Pertinence améliorée : 50-80% attendu
 - Résultats plus pertinents grâce au meilleur support français
 
@@ -226,20 +230,24 @@ pip install sentence-transformers
 ## ✅ Checklist Finale
 
 ### Schéma
+
 - [x] Colonne `libelle_embedding_e5` créée
 - [x] Index `idx_libelle_embedding_e5_vector` créé
 - [x] Limite SAI gérée (index meta_device supprimé)
 
 ### Données
+
 - [x] 80 opérations pertinentes générées
 - [ ] Embeddings e5-large générés (nécessite sentence-transformers)
 
 ### Code
+
 - [x] Module e5-large créé
 - [x] Script de génération créé
 - [x] Script de comparaison créé
 
 ### Documentation
+
 - [x] Analyse et recommandations
 - [x] Guide d'utilisation
 - [x] Résumé d'implémentation
@@ -257,6 +265,7 @@ pip install sentence-transformers
 ### Dépendances
 
 ⚠️ **sentence-transformers requis** pour e5-large :
+
 ```bash
 pip install sentence-transformers
 ```
@@ -266,6 +275,7 @@ pip install sentence-transformers
 ### Migration
 
 ✅ **Migration progressive possible** :
+
 - Colonne créée (NULL par défaut)
 - Embeddings générés progressivement
 - Pas d'impact sur données existantes
@@ -277,6 +287,7 @@ pip install sentence-transformers
 ✅ **Implémentation complète et prête**
 
 **Ce qui est fait** :
+
 - ✅ Schéma mis à jour avec colonne e5-large
 - ✅ Index SAI créé
 - ✅ Données de test pertinentes générées
@@ -285,6 +296,7 @@ pip install sentence-transformers
 - ✅ Documentation complète
 
 **Ce qui reste à faire** :
+
 - ⚠️ Générer les embeddings e5-large (nécessite sentence-transformers)
 - ⚠️ Comparer les modèles pour choisir le meilleur
 - ⚠️ Décider de la stratégie (e5 seul, hybrid, ou les deux)
@@ -296,4 +308,3 @@ pip install sentence-transformers
 **Date de génération** : 2025-11-30  
 **Version** : 1.0  
 **Statut** : ✅ **IMPLÉMENTÉ**
-

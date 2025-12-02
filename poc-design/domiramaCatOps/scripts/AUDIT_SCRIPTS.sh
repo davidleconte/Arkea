@@ -24,34 +24,34 @@ ISSUES=()
 check_script() {
     local script=$1
     local issues=()
-    
+
     # Vérifier si le script existe
     if [ ! -f "$script" ]; then
         echo "❌ Script non trouvé: $script"
         return
     fi
-    
+
     # Vérifier les patterns problématiques
     if grep -q "HCD_DIR=" "$script" && ! grep -q "HCD_HOME" "$script"; then
         issues+=("Utilise HCD_DIR au lieu de HCD_HOME")
     fi
-    
+
     if grep -q "source.*\.poc-profile" "$script" && ! grep -q "source.*\.\.\/\.\.\/\.poc-profile" "$script" && ! grep -q "source.*INSTALL_DIR.*\.poc-profile" "$script"; then
         issues+=("Chemin vers .poc-profile peut être incorrect")
     fi
-    
+
     if ! grep -q "source.*didactique_functions.sh" "$script" && ! grep -q "check_hcd_status\|check_jenv_java_version" "$script"; then
         issues+=("N'utilise pas les fonctions didactiques standardisées")
     fi
-    
+
     if grep -q "cd.*HCD_DIR" "$script" && ! grep -q "cd.*\$HCD_DIR" "$script"; then
         issues+=("Utilise cd avec HCD_DIR sans variable")
     fi
-    
+
     if grep -q "cqlsh" "$script" && ! grep -q "\$HCD_HOME/bin/cqlsh\|HCD_DIR/bin/cqlsh\|\./bin/cqlsh" "$script"; then
         issues+=("Utilise cqlsh sans chemin complet")
     fi
-    
+
     if [ ${#issues[@]} -gt 0 ]; then
         echo "⚠️  $script:"
         for issue in "${issues[@]}"; do
@@ -71,5 +71,3 @@ done
 echo ""
 echo "📊 Total de problèmes identifiés: ${#ISSUES[@]}"
 echo ""
-
-

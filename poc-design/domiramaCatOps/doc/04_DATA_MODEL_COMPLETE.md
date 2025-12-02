@@ -26,6 +26,7 @@
 **Keyspace** : `domiramacatops_poc` (dédié, nouveau keyspace)
 
 **Justification** :
+
 - Séparation claire des responsabilités
 - Pas de couplage avec `domirama2_poc`
 - Conformité aux bonnes pratiques HCD (un keyspace par domaine métier)
@@ -45,11 +46,11 @@ CREATE TABLE domiramacatops_poc.operations_by_account (
     -- Partition Key (regroupe toutes les opérations d'un compte)
     code_si           TEXT,
     contrat           TEXT,
-    
+
     -- Clustering Keys (tri antichronologique)
     date_op           TIMESTAMP,
     numero_op         INT,
-    
+
     -- Données de l'opération
     libelle           TEXT,
     montant           DECIMAL,
@@ -57,13 +58,13 @@ CREATE TABLE domiramacatops_poc.operations_by_account (
     date_valeur       TIMESTAMP,
     type_operation    TEXT,
     sens_operation    TEXT,
-    
+
     -- Données Thrift binaires
     operation_data    BLOB,        -- Données Thrift encodées en binaire
-    
+
     -- Colonnes dynamiques
     meta_flags        MAP<TEXT, TEXT>,
-    
+
     -- ============================================
     -- Colonnes de Recherche Avancée (Conforme Domirama2)
     -- ============================================
@@ -72,20 +73,21 @@ CREATE TABLE domiramacatops_poc.operations_by_account (
     libelle_prefix    TEXT,        -- Préfixe pour recherche partielle (N-Gram)
     libelle_tokens    SET<TEXT>,   -- Tokens/N-Grams pour recherche partielle avec CONTAINS
     libelle_embedding VECTOR<FLOAT, 1472>,  -- Embeddings ByteT5 pour recherche vectorielle
-    
+
     -- Colonnes de Catégorisation (Stratégie Multi-Version)
     cat_auto          TEXT,        -- Catégorie automatique (batch)
     cat_confidence    DECIMAL,     -- Score de confiance (0.0 à 1.0)
     cat_user          TEXT,        -- Catégorie modifiée par client
     cat_date_user     TIMESTAMP,   -- Date de modification par client
     cat_validee       BOOLEAN,     -- Validation par client
-    
+
     PRIMARY KEY ((code_si, contrat), date_op, numero_op)
 ) WITH CLUSTERING ORDER BY (date_op DESC, numero_op ASC)
   AND default_time_to_live = 315619200;  -- TTL 10 ans
 ```
 
 **Caractéristiques** :
+
 - ✅ Key design conforme HBase
 - ✅ Colonnes de catégorisation (cat_auto, cat_user, etc.)
 - ✅ Données Thrift binaires (BLOB)
@@ -93,6 +95,7 @@ CREATE TABLE domiramacatops_poc.operations_by_account (
 - ✅ TTL 10 ans
 
 **Index SAI** (Conforme Domirama2 - Recherche Avancée) :
+
 - **Full-Text Avancé** : `idx_libelle_fulltext_advanced` sur `libelle` (analyzers : lowercase, asciifolding, frenchLightStem)
 - **N-Gram** : `idx_libelle_prefix_ngram` sur `libelle_prefix` (recherche partielle)
 - **Collection** : `idx_libelle_tokens` sur `libelle_tokens` (recherche partielle avec CONTAINS)
@@ -125,7 +128,7 @@ CREATE TABLE domiramacatops_poc.acceptation_client (
     no_pse        TEXT,
     accepted_at   TIMESTAMP,
     accepted      BOOLEAN,
-    
+
     PRIMARY KEY ((code_efs, no_contrat, no_pse))
 );
 ```
@@ -146,7 +149,7 @@ CREATE TABLE domiramacatops_poc.opposition_categorisation (
     no_pse        TEXT,
     opposed       BOOLEAN,
     opposed_at    TIMESTAMP,
-    
+
     PRIMARY KEY ((code_efs, no_pse))
 );
 ```
@@ -169,7 +172,7 @@ CREATE TABLE domiramacatops_poc.historique_opposition (
     status         TEXT,      -- 'opposé' ou 'autorisé'
     timestamp      TIMESTAMP,
     raison         TEXT,      -- Raison du changement (optionnel)
-    
+
     PRIMARY KEY ((code_efs, no_pse), horodate)
 ) WITH CLUSTERING ORDER BY (horodate DESC);
 ```
@@ -192,7 +195,7 @@ CREATE TABLE domiramacatops_poc.feedback_par_libelle (
     categorie          TEXT,      -- Clustering key (remplace colonnes dynamiques)
     count_engine       COUNTER,   -- Compteur moteur
     count_client       COUNTER,   -- Compteur client
-    
+
     PRIMARY KEY ((type_operation, sens_operation, libelle_simplifie), categorie)
 );
 ```
@@ -202,6 +205,7 @@ CREATE TABLE domiramacatops_poc.feedback_par_libelle (
 **Note** : Table de compteurs (toutes les colonnes non-clé sont de type `counter`)
 
 **Index SAI Recommandés** :
+
 - `idx_feedback_libelle_fulltext` : Index SAI full-text sur `libelle_simplifie` (recherche partielle)
 - `idx_feedback_categorie` : Index SAI standard sur `categorie` (filtrage rapide)
 
@@ -221,7 +225,7 @@ CREATE TABLE domiramacatops_poc.feedback_par_ics (
     categorie          TEXT,      -- Clustering key
     count_engine       COUNTER,
     count_client       COUNTER,
-    
+
     PRIMARY KEY ((type_operation, sens_operation, code_ics), categorie)
 );
 ```
@@ -229,6 +233,7 @@ CREATE TABLE domiramacatops_poc.feedback_par_ics (
 **Usage** : Feedbacks moteur/clients par code ICS
 
 **Index SAI Recommandés** :
+
 - `idx_feedback_ics_categorie` : Index SAI standard sur `categorie` (filtrage rapide)
 
 ---
@@ -250,7 +255,7 @@ CREATE TABLE domiramacatops_poc.regles_personnalisees (
     priorite          INT,
     created_at        TIMESTAMP,
     updated_at        TIMESTAMP,
-    
+
     PRIMARY KEY ((code_efs), type_operation, sens_operation, libelle_simplifie)
 );
 ```
@@ -258,6 +263,7 @@ CREATE TABLE domiramacatops_poc.regles_personnalisees (
 **Usage** : Règles de catégorisation personnalisées par client
 
 **Index SAI Recommandés** :
+
 - `idx_regles_libelle_fulltext` : Index SAI full-text sur `libelle_simplifie` (recherche partielle)
 - `idx_regles_categorie_cible` : Index SAI standard sur `categorie_cible` (filtrage rapide)
 - `idx_regles_actif` : Index SAI standard sur `actif` (filtrage règles actives)
@@ -278,7 +284,7 @@ CREATE TABLE domiramacatops_poc.decisions_salaires (
     actif              BOOLEAN,
     created_at         TIMESTAMP,
     updated_at         TIMESTAMP,
-    
+
     PRIMARY KEY (libelle_simplifie)
 );
 ```
@@ -286,6 +292,7 @@ CREATE TABLE domiramacatops_poc.decisions_salaires (
 **Usage** : Méthode de catégorisation sur libellés taggés salaires
 
 **Index SAI Recommandés** :
+
 - `idx_decisions_methode` : Index SAI standard sur `methode_utilisee` (filtrage rapide)
 - `idx_decisions_modele` : Index SAI standard sur `modele` (filtrage rapide)
 - `idx_decisions_actif` : Index SAI standard sur `actif` (filtrage décisions actives)
@@ -299,6 +306,7 @@ CREATE TABLE domiramacatops_poc.decisions_salaires (
 #### 3.1.1 Catégorisation des Opérations
 
 **Flux** :
+
 1. **Batch** écrit dans `operations_by_account.cat_auto` (catégorie automatique)
 2. **Client** peut corriger dans `operations_by_account.cat_user`
 3. **Feedback** mis à jour dans `feedback_par_libelle` (compteurs)
@@ -307,6 +315,7 @@ CREATE TABLE domiramacatops_poc.decisions_salaires (
 #### 3.1.2 Contrôle d'Accès
 
 **Flux** :
+
 1. Vérification `acceptation_client` avant affichage
 2. Vérification `opposition_categorisation` avant catégorisation
 3. Historique dans `historique_opposition`
@@ -314,6 +323,7 @@ CREATE TABLE domiramacatops_poc.decisions_salaires (
 #### 3.1.3 Feedbacks
 
 **Flux** :
+
 1. Chaque catégorisation → incrément compteur dans `feedback_par_libelle` ou `feedback_par_ics`
 2. `count_engine` incrémenté par batch
 3. `count_client` incrémenté par correction client
@@ -327,30 +337,36 @@ CREATE TABLE domiramacatops_poc.decisions_salaires (
 #### 4.1.1 Vérification Acceptation/Opposition
 
 **Avant catégorisation** :
+
 - Vérifier `acceptation_client` (si accepté)
 - Vérifier `opposition_categorisation` (si non opposé)
 
 **Impact POC** :
+
 - Scripts de démonstration doivent inclure ces vérifications
 - Tests de non-catégorisation si opposition
 
 #### 4.1.2 Application des Règles Personnalisées
 
 **Avant catégorisation automatique** :
+
 - Vérifier `regles_personnalisees` pour le client/libellé
 - Appliquer la règle si existe
 
 **Impact POC** :
+
 - Démonstration de l'application des règles
 - Tests de priorité (règle > catégorisation automatique)
 
 #### 4.1.3 Mise à Jour des Feedbacks
 
 **Après catégorisation** :
+
 - Incrémenter `feedback_par_libelle.count_engine` (batch)
 - Incrémenter `feedback_par_libelle.count_client` (correction client)
 
 **Impact POC** :
+
 - Démonstration des compteurs atomiques
 - Tests de cohérence (opération → feedback)
 
@@ -361,6 +377,7 @@ CREATE TABLE domiramacatops_poc.decisions_salaires (
 #### 4.2.1 Scripts à Ajouter/Modifier
 
 **Nouveaux scripts** :
+
 - `13_setup_meta_categories_tables.sh` : Création des 7 tables
 - `14_load_meta_categories_data.sh` : Chargement des données
 - `15_test_acceptation_opposition.sh` : Tests acceptation/opposition
@@ -369,6 +386,7 @@ CREATE TABLE domiramacatops_poc.decisions_salaires (
 - `18_test_historique_opposition.sh` : Tests historique
 
 **Scripts à modifier** :
+
 - `03_load_category_data_batch.sh` : Ajouter mise à jour feedbacks
 - `04_load_category_data_realtime.sh` : Ajouter vérification acceptation/opposition
 - `05_test_category_search.sh` : Ajouter tests avec règles personnalisées
@@ -380,11 +398,13 @@ CREATE TABLE domiramacatops_poc.decisions_salaires (
 #### 4.3.1 Cohérence des Données
 
 **Contraintes à respecter** :
+
 - Si `opposition_categorisation.opposed = true` → pas de catégorisation
 - Si `regles_personnalisees` existe → utiliser `categorie_cible`
 - Chaque catégorisation → mettre à jour feedbacks
 
 **Impact POC** :
+
 - Tests de cohérence multi-tables
 - Validation des contraintes métier
 
@@ -397,6 +417,7 @@ CREATE TABLE domiramacatops_poc.decisions_salaires (
 **Spécification** : Données source en **Parquet uniquement** (pas de SequenceFile)
 
 **Implications** :
+
 - Pas de conversion SequenceFile → Parquet
 - Scripts Spark lisent directement Parquet
 - Structure Parquet doit correspondre au schéma HCD
@@ -406,6 +427,7 @@ CREATE TABLE domiramacatops_poc.decisions_salaires (
 #### 5.2.1 Pour `operations_by_account`
 
 **Colonnes Parquet** :
+
 - `code_si`, `contrat`, `date_op`, `numero_op`
 - `libelle`, `montant`, `devise`, `type_operation`, `sens_operation`
 - `operation_data` (BLOB → Binary dans Parquet)
@@ -415,6 +437,7 @@ CREATE TABLE domiramacatops_poc.decisions_salaires (
 #### 5.2.2 Pour les Tables Meta-Categories
 
 **Parquet séparés par table** :
+
 - `acceptation_client.parquet`
 - `opposition_categorisation.parquet`
 - `historique_opposition.parquet`
@@ -432,6 +455,7 @@ CREATE TABLE domiramacatops_poc.decisions_salaires (
 **Nom** : `domiramacatops_poc`
 
 **Stratégie de réplication** :
+
 - POC : `SimpleStrategy` (replication_factor: 1)
 - Production : `NetworkTopologyStrategy` (par datacenter)
 
@@ -451,42 +475,52 @@ CREATE TABLE domiramacatops_poc.decisions_salaires (
 **Sur `operations_by_account`** :
 
 **Recherche Full-Text** :
+
 - `idx_libelle_fulltext_advanced` : Analyzers français (lowercase, asciifolding, frenchLightStem)
 
 **Recherche Partielle** :
+
 - `idx_libelle_prefix_ngram` : N-Gram sur `libelle_prefix`
 - `idx_libelle_tokens` : Collection sur `libelle_tokens` (CONTAINS)
 
 **Recherche Vectorielle** :
+
 - `idx_libelle_embedding_vector` : ANN sur `libelle_embedding` (ByteT5)
 
 **Recherche Catégories** :
+
 - `idx_cat_auto` : Recherche par catégorie automatique
 - `idx_cat_user` : Recherche par catégorie client
 
 **Filtrage** :
+
 - `idx_montant` : Filtrage par montant
 - `idx_type_operation` : Filtrage par type d'opération
 
 **Sur autres tables** :
 
 **`historique_opposition`** :
+
 - `idx_historique_status` : Index SAI standard sur `status` (recherche par statut)
 - `idx_historique_raison_fulltext` : Index SAI full-text sur `raison` (recherche dans raisons - si nécessaire)
 
 **`feedback_par_libelle`** :
+
 - `idx_feedback_libelle_fulltext` : Index SAI full-text sur `libelle_simplifie` (recherche partielle)
 - `idx_feedback_categorie` : Index SAI standard sur `categorie` (filtrage rapide)
 
 **`feedback_par_ics`** :
+
 - `idx_feedback_ics_categorie` : Index SAI standard sur `categorie` (filtrage rapide)
 
 **`regles_personnalisees`** :
+
 - `idx_regles_libelle_fulltext` : Index SAI full-text sur `libelle_simplifie` (recherche partielle)
 - `idx_regles_categorie_cible` : Index SAI standard sur `categorie_cible` (filtrage rapide)
 - `idx_regles_actif` : Index SAI standard sur `actif` (filtrage règles actives)
 
 **`decisions_salaires`** :
+
 - `idx_decisions_methode` : Index SAI standard sur `methode_utilisee` (filtrage rapide)
 - `idx_decisions_modele` : Index SAI standard sur `modele` (filtrage rapide)
 - `idx_decisions_actif` : Index SAI standard sur `actif` (filtrage décisions actives)
@@ -544,6 +578,7 @@ CREATE TABLE domiramacatops_poc.decisions_salaires (
 ## 🎯 CONCLUSION
 
 Ce data model HCD :
+
 - ✅ **Sépare clairement** les responsabilités (8 tables)
 - ✅ **Respecte les bonnes pratiques** CQL (schémas fixes, pas de colonnes dynamiques)
 - ✅ **Gère les compteurs** avec type `counter` natif
@@ -552,6 +587,7 @@ Ce data model HCD :
 - ✅ **Maintient la cohérence** entre les tables
 
 **Prochaines étapes** :
+
 1. Créer les schémas CQL complets
 2. Créer les scripts de démonstration
 3. Exécuter et valider le POC
@@ -560,4 +596,3 @@ Ce data model HCD :
 
 **Date** : 2024-11-27  
 **Version** : 1.0
-

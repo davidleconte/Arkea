@@ -1,7 +1,7 @@
 # 🔍 Audit : Documentation MD vs Scripts/CQL
 
 **Date** : 2025-11-25  
-**Objectif** : Vérifier que tous les fichiers MD sont à jour avec les scripts *.sh et *.cql
+**Objectif** : Vérifier que tous les fichiers MD sont à jour avec les scripts *.sh et*.cql
 
 ---
 
@@ -90,6 +90,7 @@
 ## 🎯 Objectif
 
 **Mettre à jour tous les fichiers MD pour refléter :**
+
 - ✅ Les nouveaux chemins (`schemas/`, `examples/`)
 - ✅ Les noms numérotés des fichiers CQL (`01_*.cql`, `02_*.cql`, etc.)
 - ✅ Les versions `_v2` des scripts de démonstration
@@ -98,8 +99,3 @@
 ---
 
 **✅ Audit terminé : 10 fichiers MD à corriger**
-
-
-
-
-

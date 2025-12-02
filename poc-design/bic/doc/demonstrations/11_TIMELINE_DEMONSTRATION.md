@@ -8,7 +8,7 @@
 
 ## 📋 Objectif
 
-Démontrer la récupération de la timeline complète d'un client avec pagination, 
+Démontrer la récupération de la timeline complète d'un client avec pagination,
 conformément aux exigences BIC pour l'application conseiller.
 
 ---
@@ -20,6 +20,7 @@ conformément aux exigences BIC pour l'application conseiller.
 **Description** : Afficher toutes les interactions d'un client sur 2 ans, triées par date décroissante.
 
 **Exigences** :
+
 - Requête optimisée par partition key (code_efs, numero_client)
 - Tri chronologique DESC (plus récent en premier)
 - Performance < 100ms
@@ -30,6 +31,7 @@ conformément aux exigences BIC pour l'application conseiller.
 **Description** : Paginer les résultats de la timeline pour éviter de charger toutes les interactions d'un coup.
 
 **Exigences** :
+
 - Pagination avec LIMIT
 - Pagination avec OFFSET (ou token de pagination)
 - Navigation page suivante/précédente
@@ -39,12 +41,12 @@ conformément aux exigences BIC pour l'application conseiller.
 
 ## 📝 Requêtes CQL
 
-
 ### TEST 1 : Timeline Complète
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
+SELECT * FROM bic_poc.interactions_by_client
 WHERE code_efs = 'EFS001' AND numero_client = 'CLIENT123'
 ORDER BY date_interaction DESC
 LIMIT 100;
@@ -55,12 +57,14 @@ LIMIT 100;
 **Performance** : Requête optimisée par partition key (code_efs, numero_client), accès direct aux données.
 
 **Explication** :
+
 - Requête simple sans pagination pour récupérer toutes les interactions d'un client
 - Tri chronologique DESC (plus récent en premier)
 - Utilisation de la partition key pour performance optimale
 - Conforme au use case BIC-01 (Timeline conseiller)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-01
 - ✅ Intégrité : 51 interactions récupérées
 - ✅ Consistance : Test reproductible
@@ -68,12 +72,12 @@ LIMIT 100;
 
 ---
 
-
 ### TEST 2 : Pagination avec LIMIT (Première Page)
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
+SELECT * FROM bic_poc.interactions_by_client
 WHERE code_efs = 'EFS001' AND numero_client = 'CLIENT123'
 ORDER BY date_interaction DESC
 LIMIT 20;
@@ -86,12 +90,14 @@ LIMIT 20;
 **Approche** : Pagination simple avec LIMIT 20.
 
 **Explication** :
+
 - Pagination de base pour récupérer la première page
 - LIMIT 20 pour limiter le nombre de résultats
 - Pour la page suivante, utiliser le dernier date_interaction comme curseur
 - Conforme au use case BIC-14 (Pagination)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-14
 - ✅ Intégrité : 21 interactions (attendu <= 20)
 - ✅ Cohérence : Page 1 (21) <= Total (51)
@@ -103,8 +109,9 @@ LIMIT 20;
 ### TEST 3 : Pagination avec Curseur Dynamique (Page Suivante)
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
+SELECT * FROM bic_poc.interactions_by_client
 WHERE code_efs = 'EFS001' AND numero_client = 'CLIENT123'
   AND date_interaction < '2025-12-01 21:49:24+0000'
 ORDER BY date_interaction DESC
@@ -120,12 +127,14 @@ LIMIT 20;
 **Approche** : Pagination efficace avec curseur (date_interaction).
 
 **Explication** :
+
 - Curseur dynamique extrait depuis TEST 2 (dernière date de la page 1)
 - Utilisation de date_interaction < '2025-12-01 21:49:24+0000' pour la page suivante
 - Cette approche est plus efficace que OFFSET pour la pagination
 - ✅ AMÉLIORATION : Curseur extrait dynamiquement au lieu d'être simulé
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-14 (pagination avancée)
 - ✅ Intégrité : 20 interactions (attendu <= 20)
 - ✅ Cohérence : Page 2 (20) <= PAGE_SIZE (20)
@@ -137,8 +146,9 @@ LIMIT 20;
 ### TEST 4 : Timeline sur Période (2 Ans)
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
+SELECT * FROM bic_poc.interactions_by_client
 WHERE code_efs = 'EFS001' AND numero_client = 'CLIENT123'
   AND date_interaction >= '2023-12-01 21:49:25+0000'
 ORDER BY date_interaction DESC
@@ -154,12 +164,14 @@ LIMIT 20;
 **Conformité** : TTL 2 ans respecté.
 
 **Explication** :
+
 - Filtrage par période : date_interaction >= '2023-12-01 21:49:25+0000'
 - Conforme au TTL de 2 ans défini dans le schéma
 - Pagination avec LIMIT pour limiter le nombre de résultats
 - Conforme au use case BIC-01 (Timeline conseiller sur 2 ans)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-01 (période 2 ans)
 - ✅ Intégrité : 21 interactions sur 2 ans
 - ✅ Consistance : Test reproductible
@@ -172,6 +184,7 @@ LIMIT 20;
 **Requête testée** : TEST 2 (Pagination avec LIMIT)
 
 **Statistiques** :
+
 - Temps moyen : .7594s
 - Temps minimum : .743247000s
 - Temps maximum : .792610000s
@@ -182,12 +195,14 @@ LIMIT 20;
 **Stabilité** : Écart-type .0141s (plus faible = plus stable)
 
 **Explication** :
+
 - Test complexe : 10 exécutions pour statistiques fiables
 - Performance moyenne : .7594s (attendu < 0.1s)
 - Stabilité : Écart-type .0141s (plus faible = plus stable)
 - Consistance : Performance reproductible si écart-type faible
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-01 (performance)
 - ✅ Intégrité : Statistiques complètes (min/max/moyenne/écart-type)
 - ✅ Consistance : Performance stable si écart-type faible
@@ -204,12 +219,14 @@ LIMIT 20;
 **Cohérence** : Total paginé (20) <= Total direct (51) ✅
 
 **Explication** :
+
 - Test complexe : Navigation exhaustive de toutes les pages disponibles
 - Collecte de tous les IDs pour vérifier l'exhaustivité
 - Validation de la cohérence entre pagination et total direct
 - Conforme au use case BIC-14 (pagination exhaustive)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-14 (pagination exhaustive)
 - ✅ Intégrité : 20 interactions récupérées sur 1 pages
 - ✅ Cohérence : Total paginé (20) <= Total direct (51)
@@ -229,11 +246,13 @@ LIMIT 20;
 **Conformité** : Performance acceptable même avec volume élevé ✅
 
 **Explication** :
+
 - Test complexe : Simulation avec volume élevé d'interactions
 - Validation de la performance même avec beaucoup de données
 - Conforme au use case BIC-01 (timeline avec volume élevé)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-01 (volume élevé)
 - ✅ Intégrité : 0 interactions testées
 - ✅ Performance : 0s (acceptable même avec volume élevé)
@@ -249,12 +268,14 @@ LIMIT 20;
 **Cohérence** : ⚠️ 19 doublon(s) détecté(s)
 
 **Explication** :
+
 - Test complexe : Vérification de l'absence de doublons dans la pagination
 - Analyse de tous les IDs collectés sur toutes les pages
 - Validation de l'intégrité de la pagination (aucun doublon attendu)
 - Conforme au use case BIC-14 (pagination cohérente)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-14 (cohérence pagination)
 - ✅ Intégrité : 20 IDs collectés, 1 uniques
 - ✅ Cohérence : 19 doublon(s) détecté(s)
@@ -272,12 +293,14 @@ LIMIT 20;
 **Conformité** : Performance sous charge acceptable ✅
 
 **Explication** :
+
 - Test très complexe : Simulation avec plusieurs clients simultanément
 - Validation de la performance sous charge
 - Mesure du temps moyen par requête sous charge
 - Conforme au use case BIC-01 (timeline sous charge)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-01 (charge)
 - ✅ Intégrité : 5 requêtes réussies sur 5 clients
 - ✅ Performance : .8059s (acceptable sous charge)
@@ -297,17 +320,21 @@ LIMIT 20;
 0) <= PAGE_SIZE (20) ✅
 
 **Explication** :
+
 - Test très complexe : Pagination inversée (navigation vers la page précédente)
 - Utilisation d'un curseur inversé pour remonter dans les données
 - Validation de la pagination bidirectionnelle
 - Conforme au use case BIC-14 (pagination avancée)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-14 (pagination inversée)
 - ✅ Intégrité : 0
 0 interactions récupérées (page précédente)
 - ✅ Cohérence : Page précédente (0
+
 0) <= PAGE_SIZE (20)
+
 - ✅ Performance : .753281000s
 - ✅ Consistance : Pagination inversée reproductible
 - ✅ Conformité : Pagination bidirectionnelle conforme
@@ -349,10 +376,12 @@ LIMIT 20;
 ## ✅ Conclusion
 
 **Use Cases Validés** :
+
 - ✅ BIC-01 : Timeline conseiller (2 ans d'historique)
 - ✅ BIC-14 : Pagination des résultats
 
 **Validations** :
+
 - ✅ 5 dimensions validées pour chaque test
 - ✅ Comparaisons attendus vs obtenus effectuées
 - ✅ Justesse des résultats validée

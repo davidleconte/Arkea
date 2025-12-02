@@ -30,6 +30,7 @@ Lors d'une compaction, Cassandra purge les tombstones expirés (après `gc_grace
 ### Solution
 
 Les prérequis garantissent :
+
 - ✅ Propagation correcte des tombstones (repair)
 - ✅ Cohérence du cluster (vérification état)
 - ✅ Configuration appropriée (gc_grace_seconds)
@@ -44,16 +45,19 @@ Les prérequis garantissent :
 **Objectif** : S'assurer que tous les nœuds sont opérationnels et synchronisés.
 
 **Commande** :
+
 ```bash
 nodetool status
 ```
 
 **Vérifications** :
+
 - ✅ Tous les nœuds en état `UN` (Up Normal)
 - ❌ Aucun nœud en état `DN` (Down)
 - ❌ Aucun nœud en état `UJ` (Up Joining)
 
 **Impact** :
+
 - Si un nœud est down, les tombstones peuvent ne pas être propagés
 - Risque de zombie data après compaction
 
@@ -62,6 +66,7 @@ nodetool status
 **Objectif** : Vérifier que `gc_grace_seconds` est approprié.
 
 **Commande** :
+
 ```cql
 DESCRIBE TABLE domirama2_poc.operations_by_account;
 ```
@@ -69,10 +74,12 @@ DESCRIBE TABLE domirama2_poc.operations_by_account;
 **Valeur par défaut** : 864000 secondes (10 jours)
 
 **Vérifications** :
+
 - ✅ `gc_grace_seconds >= 864000` (recommandé)
 - ⚠️ Si `gc_grace_seconds < 864000`, s'assurer que les repairs sont réguliers
 
 **Impact** :
+
 - Si `gc_grace_seconds` est trop court, risque de purge prématurée
 - Si trop long, accumulation de tombstones
 
@@ -85,20 +92,24 @@ DESCRIBE TABLE domirama2_poc.operations_by_account;
 **Objectif** : Propager les tombstones sur tous les nœuds avant compaction.
 
 **Commande** :
+
 ```bash
 nodetool repair -pr domirama2_poc operations_by_account
 ```
 
 **Options** :
+
 - `-pr` : Primary range only (plus rapide, recommandé pour standalone)
 - Sans `-pr` : Full repair (tous les ranges, plus long)
 
 **Pourquoi c'est critique** :
+
 - ✅ Propage les tombstones sur tous les nœuds
 - ✅ Évite la réapparition de données supprimées (zombie data)
 - ✅ Garantit la cohérence avant compaction
 
 **Quand l'effectuer** :
+
 - ⭐ **AVANT chaque compaction importante** (export mensuel/annuel)
 - ⭐ **Si des suppressions ont eu lieu récemment**
 - ⭐ **Si un nœud a été hors ligne**
@@ -110,15 +121,18 @@ nodetool repair -pr domirama2_poc operations_by_account
 **Objectif** : S'assurer qu'il y a suffisamment d'espace pour la compaction.
 
 **Commande** :
+
 ```bash
 df -h /chemin/vers/hcd
 ```
 
 **Vérifications** :
+
 - ✅ Espace disponible > 20% (recommandé)
 - ⚠️ Si < 20%, risque de problème pendant compaction
 
 **Impact** :
+
 - La compaction nécessite de l'espace temporaire
 - Manque d'espace = compaction échouée
 
@@ -135,6 +149,7 @@ nodetool drain
 ```
 
 **Effets** :
+
 - Vide les memtables sur le disque
 - Empêche de nouvelles écritures
 - Prépare un nœud à l'arrêt
@@ -158,6 +173,7 @@ nodetool drain
 ### Script : `scripts/compact_table_prepare.sh`
 
 **Fonctionnalités** :
+
 1. ✅ Vérification état du cluster
 2. ✅ Vérification gc_grace_seconds
 3. ✅ Repair complet (optionnel mais recommandé)
@@ -166,6 +182,7 @@ nodetool drain
 6. ✅ Vérification post-compaction
 
 **Utilisation** :
+
 ```bash
 # Avec paramètres par défaut (domirama2_poc.operations_by_account)
 ./scripts/compact_table_prepare.sh
@@ -175,6 +192,7 @@ nodetool drain
 ```
 
 **Interactions** :
+
 - Demande confirmation pour repair (recommandé : Oui)
 - Demande confirmation pour compaction (après vérifications)
 
@@ -268,6 +286,7 @@ cqlsh localhost 9042 -e "SELECT COUNT(*) FROM domirama2_poc.operations_by_accoun
 ### 1. Repair en Mode Standalone
 
 En mode standalone (1 nœud), le repair peut échouer ou être ignoré. C'est normal, mais :
+
 - ⚠️ Les tombstones ne sont pas propagés (pas d'autres nœuds)
 - ✅ La compaction fonctionne quand même
 - ✅ Les tombstones expirés seront purgés
@@ -287,6 +306,7 @@ En mode standalone (1 nœud), le repair peut échouer ou être ignoré. C'est no
 ### 4. Monitoring
 
 Surveiller les opérations avec :
+
 ```bash
 # Statut du repair
 nodetool netstats
@@ -322,7 +342,3 @@ nodetool tablestats domirama2_poc operations_by_account
 ---
 
 **✅ Documentation créée le 2025-11-26**
-
-
-
-

@@ -8,7 +8,7 @@
 # OBJECTIF :
 #   Ce script démontre la stratégie multi-version pour la gestion des
 #   catégories d'opérations, en simulant des corrections client.
-#   
+#
 #   Stratégie Multi-Version (conforme IBM) :
 #   - Le BATCH écrit UNIQUEMENT cat_auto et cat_confidence
 #   - Le CLIENT écrit dans cat_user, cat_date_user, cat_validee
@@ -134,4 +134,3 @@ echo "   ✅ Format COBOL: operation_data BLOB"
 echo "   ✅ Nommage aligné: date_op, numero_op"
 echo "   ✅ Logique multi-version: Batch vs Client séparés"
 echo "   ✅ Score de conformité: ~95%"
-

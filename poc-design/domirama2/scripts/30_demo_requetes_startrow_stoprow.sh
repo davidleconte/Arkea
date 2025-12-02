@@ -7,7 +7,7 @@
 #   Ce script démontre les requêtes en base avec ciblage précis (STARTROW/STOPROW
 #   équivalent HBase), permettant d'interroger HCD avec des plages de clés de
 #   clustering spécifiques pour des analyses ciblées.
-#   
+#
 #   Fonctionnalités :
 #   - Requêtes avec filtrage par clés de clustering (équivalent STARTROW/STOPROW HBase)
 #   - Ciblage précis des données par code_si, contrat, date_op, numero_op
@@ -279,4 +279,3 @@ code "  ✅ Plages de dates et numéros d'opération"
 code "  ✅ Valeur ajoutée SAI : Index sur clustering keys + full-text"
 code "  ✅ Performance optimisée vs scan complet"
 echo ""
-

@@ -20,6 +20,7 @@ avec documentation des équivalences HBase (STARTROW/STOPROW/TIMERANGE).
 **Description** : Exporter les données pour analyse au format ORC (équivalent bic-unload).
 
 **Composant HBase** : `bic-unload-main.tar.gz` (inputs-clients)
+
 - Unload HDFS ORC
 - Export des données pour analyse
 
@@ -28,6 +29,7 @@ avec documentation des équivalences HBase (STARTROW/STOPROW/TIMERANGE).
 **Description** : Équivalences des patterns HBase STARTROW/STOPROW/TIMERANGE.
 
 **Patterns HBase** (inputs-clients) :
+
 - FullScan + STARTROW + STOPROW + TIMERANGE pour unload incrémentaux ORC
 
 ---
@@ -63,12 +65,12 @@ avec documentation des équivalences HBase (STARTROW/STOPROW/TIMERANGE).
 
 ## 📝 Requêtes CQL et Code Spark
 
-
 ### TEST 1 : Export avec TIMERANGE
 
 **Requête CQL** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
+SELECT * FROM bic_poc.interactions_by_client
 WHERE date_interaction >= '2024-01-01 00:00:00+0000'
   AND date_interaction < '2024-12-31 23:59:59+0000'
 ALLOW FILTERING;
@@ -77,6 +79,7 @@ ALLOW FILTERING;
 **Équivalence HBase** : FullScan + TIMERANGE
 
 **Code Spark** :
+
 ```scala
 val spark = SparkSession.builder()
   .appName("BICExportORC")
@@ -111,8 +114,9 @@ spark.stop()
 ### TEST 2 : Export avec STARTROW/STOPROW
 
 **Requête CQL** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
+SELECT * FROM bic_poc.interactions_by_client
 WHERE code_efs = 'EFS001'
   AND numero_client >= 'CLIENT001'
   AND numero_client < 'CLIENT100'
@@ -123,6 +127,7 @@ WHERE code_efs = 'EFS001'
 **Équivalence HBase** : FullScan + STARTROW + STOPROW + TIMERANGE
 
 **Explication** :
+
 - STARTROW : WHERE numero_client >= 'CLIENT001'
 - STOPROW : AND numero_client < 'CLIENT100'
 - TIMERANGE : AND date_interaction >= ... AND date_interaction < ...
@@ -132,13 +137,15 @@ WHERE code_efs = 'EFS001'
 ### TEST 3 : Export Incrémental
 
 **Requête CQL** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
+SELECT * FROM bic_poc.interactions_by_client
 WHERE date_interaction > '2024-11-30 23:59:59+0000'
 ALLOW FILTERING;
 ```
 
 **Code Spark** :
+
 ```scala
 val lastExportDate = "2024-11-30 23:59:59+0000"
 
@@ -203,21 +210,25 @@ newInteractions.write
 ## ✅ Conclusion
 
 **Use Cases Validés** :
+
 - ✅ BIC-03 : Export batch ORC incrémental
 - ✅ BIC-10 : Lecture batch (équivalences HBase documentées)
 
 **Validations** :
+
 - ✅ 5 dimensions validées pour chaque test
 - ✅ Comparaisons attendus vs obtenus effectuées
 - ✅ Justesse des résultats validée
 - ✅ Test complexe effectué (cohérence source vs export)
 
 **Équivalences HBase** :
+
 - ✅ STARTROW/STOPROW : Documenté et validé
 - ✅ TIMERANGE : Documenté et validé
 - ✅ Combinaisons : Documentées et validées
 
 **Avantages HCD** :
+
 - ✅ Export incrémental plus efficace (index SAI)
 - ✅ Pas besoin de scan complet de table
 - ✅ Requêtes ciblées plutôt que scan complet

@@ -7,7 +7,7 @@
 #   Ce script démontre l'utilisation de DSBulk (DataStax Bulk Loader) pour
 #   importer/exporter des données depuis/vers HCD, avec support du format Parquet
 #   pour des performances optimales.
-#   
+#
 #   Fonctionnalités :
 #   - Installation et configuration de DSBulk
 #   - Import depuis fichiers Parquet vers HCD
@@ -162,13 +162,13 @@ elif [ -f "$DSBULK_DIR/bin/dsbulk" ]; then
 else
     warn "DSBulk n'est pas installé"
     info "Installation de DSBulk ${DSBULK_VERSION}..."
-    
+
     mkdir -p "$DSBULK_DIR"
     mkdir -p "$INSTALL_DIR/software"
-    
+
     DSBULK_URL="https://downloads.datastax.com/dsbulk/dsbulk-${DSBULK_VERSION}.tar.gz"
     DSBULK_TAR="$INSTALL_DIR/software/dsbulk-${DSBULK_VERSION}.tar.gz"
-    
+
     if [ ! -f "$DSBULK_TAR" ]; then
         info "Téléchargement de DSBulk ${DSBULK_VERSION}..."
         curl -L -o "$DSBULK_TAR" "$DSBULK_URL" 2>&1 | grep -E "(Downloading|saved)" || {
@@ -176,14 +176,14 @@ else
             DSBULK_BIN=""
         }
     fi
-    
+
     if [ -f "$DSBULK_TAR" ]; then
         info "Extraction de DSBulk..."
         tar -xzf "$DSBULK_TAR" -C "$DSBULK_DIR" --strip-components=1 2>/dev/null || {
             warn "Extraction échouée"
             DSBULK_BIN=""
         }
-        
+
         if [ -f "$DSBULK_DIR/bin/dsbulk" ]; then
             DSBULK_BIN="$DSBULK_DIR/bin/dsbulk"
             success "DSBulk installé avec succès"
@@ -249,10 +249,10 @@ echo ""
 
 if [ "$DSBULK_AVAILABLE" = true ]; then
     info "Exécution de l'import CSV avec DSBulk..."
-    
+
     # Nettoyer les données de test précédentes
     $CQLSH -e "USE domirama2_poc; DELETE FROM operations_by_account WHERE code_si = 'DEMO_DSBULK' AND contrat = 'DEMO_001';" > /dev/null 2>&1 || true
-    
+
     # Import avec DSBulk
     "$DSBULK_BIN" load \
         -h localhost \
@@ -263,11 +263,11 @@ if [ "$DSBULK_AVAILABLE" = true ]; then
         -batchSize 10 \
         -maxConcurrentQueries 1 \
         2>&1 | tail -30 || warn "Import DSBulk échoué (peut nécessiter configuration)"
-    
+
     # Vérifier l'import
     info "Vérification des données importées..."
     $CQLSH -e "USE domirama2_poc; SELECT code_si, contrat, date_op, numero_op, libelle, montant FROM operations_by_account WHERE code_si = 'DEMO_DSBULK' AND contrat = 'DEMO_001' LIMIT 5;" 2>&1 | tail -n +4 | grep -v "^$" | grep -v "^(" | head -10
-    
+
     success "✅ Import CSV avec DSBulk démontré"
 else
     code "  (DSBulk non installé, commande d'exemple)"
@@ -298,7 +298,7 @@ echo ""
 
 if [ "$DSBULK_AVAILABLE" = true ]; then
     info "Exécution de l'export CSV avec DSBulk..."
-    
+
     "$DSBULK_BIN" unload \
         -h localhost \
         -k domirama2_poc \
@@ -308,7 +308,7 @@ if [ "$DSBULK_AVAILABLE" = true ]; then
         -maxConcurrentQueries 1 \
         -query "SELECT code_si, contrat, date_op, numero_op, libelle, montant FROM operations_by_account WHERE code_si = 'DEMO_DSBULK' AND contrat = 'DEMO_001'" \
         2>&1 | tail -20 || warn "Export DSBulk échoué"
-    
+
     if [ -f "$EXPORT_DIR/operations_by_account-000001.csv" ]; then
         success "✅ Export CSV réussi"
         info "Aperçu du fichier CSV exporté :"
@@ -337,11 +337,11 @@ echo ""
 PARQUET_DIR="$SCRIPT_DIR/data"
 if [ -d "$PARQUET_DIR" ] && find "$PARQUET_DIR" -name "*.parquet" -o -name "*.parquet/*" 2>/dev/null | head -1 | grep -q .; then
     success "Fichiers Parquet trouvés dans $PARQUET_DIR"
-    
+
     code "-- Étape 2 : Conversion Parquet → CSV avec Spark"
     code "  (Simulation avec exemple de code)"
     echo ""
-    
+
     cat > /tmp/convert_parquet_to_csv.scala <<'EOFSCRIPT'
 import org.apache.spark.sql.SparkSession
 
@@ -363,13 +363,13 @@ EOFSCRIPT
 
     info "Exemple de code Spark pour conversion Parquet → CSV créé"
     code "  Fichier : /tmp/convert_parquet_to_csv.scala"
-    
+
     code "-- Étape 3 : Import CSV → HCD avec DSBulk"
     code "dsbulk load -h localhost -k domirama2_poc -t operations_by_account"
     code "  -url /tmp/parquet_to_csv"
     code "  -header true"
     echo ""
-    
+
     highlight "Workflow complet :"
     code "  ✅ Parquet (source) → Spark (conversion) → CSV (intermédiaire) → DSBulk (import) → HCD"
     code "  ⚠️  Nécessite conversion intermédiaire"
@@ -554,4 +554,3 @@ code "  ✅ Comparaison performance DSBulk vs Spark"
 code "  ✅ Cas d'usage avancés"
 code "  ✅ Mesures de performance (simulation)"
 echo ""
-

@@ -7,7 +7,7 @@
 # OBJECTIF :
 #   Ce script exécute des tests de recherche full-text avancés en utilisant
 #   les index SAI avec différents analyzers configurés dans le script 16.
-#   
+#
 #   Les tests démontrent :
 #   - Recherches avec analyzers (lowercase, asciifolding, frenchLightStem)
 #   - Recherches combinées (libellé + catégorie)
@@ -152,4 +152,3 @@ echo "   - idx_libelle_keyword: Phrases complètes"
 echo "   - idx_libelle_ngram: Recherches partielles et typos"
 echo "   - idx_libelle_french: Français avancé avec stop words"
 echo "   - idx_libelle_whitespace: Recherches rapides"
-

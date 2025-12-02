@@ -93,4 +93,3 @@ echo "   cd binaire/hcd-1.2.3"
 echo "   ./bin/cqlsh localhost 9042"
 echo "   USE poc_hbase_migration;"
 echo "   SELECT * FROM kafka_events;"
-

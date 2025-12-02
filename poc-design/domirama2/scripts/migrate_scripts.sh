@@ -33,27 +33,27 @@ info "Début de la migration des scripts..."
 for script in $SCRIPTS; do
     script_name=$(basename "$script")
     info "Traitement de $script_name..."
-    
+
     # Créer une copie de sauvegarde
     if [ "$DRY_RUN" != "--dry-run" ]; then
         cp "$script" "${script}.bak"
     fi
-    
+
     # Lire le contenu du script
     content=$(cat "$script")
     modified=false
-    
+
     # 1. Remplacer set -e par set -euo pipefail (si pas déjà présent)
     if echo "$content" | grep -q "^set -e$" && ! echo "$content" | grep -q "set -euo pipefail"; then
         content=$(echo "$content" | sed 's/^set -e$/set -euo pipefail/')
         modified=true
         info "  → set -e remplacé par set -euo pipefail"
     fi
-    
+
     # 2. Remplacer les chemins hardcodés INSTALL_DIR
         # Trouver la ligne avec INSTALL_DIR hardcodé
         # Remplacer par le bloc de détection automatique
-        
+
         new_block='# Charger les fonctions utilitaires et configurer les chemins
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ -f "${SCRIPT_DIR}/utils/didactique_functions.sh" ]; then
@@ -68,9 +68,9 @@ else
     HCD_HOST="${HCD_HOST:-localhost}"
     HCD_PORT="${HCD_PORT:-9042}"
 fi'
-        
+
         # Remplacer le bloc (approximation - nécessite un traitement plus précis)
-        content=$(echo "$content" | sed '/INSTALL_DIR="\/Users\/david\.leconte\/Documents\/Arkea"/,/HCD_DIR=/{ 
+        content=$(echo "$content" | sed '/INSTALL_DIR="\/Users\/david\.leconte\/Documents\/Arkea"/,/HCD_DIR=/{
             /INSTALL_DIR=/c\
 # Charger les fonctions utilitaires et configurer les chemins\
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"\
@@ -93,20 +93,20 @@ fi
         modified=true
         info "  → Chemins hardcodés remplacés par détection automatique"
     fi
-    
+
     # 3. Remplacer localhost 9042 par $HCD_HOST $HCD_PORT
     if echo "$content" | grep -q "localhost 9042"; then
         content=$(echo "$content" | sed 's/localhost 9042/"$HCD_HOST" "$HCD_PORT"/g')
         modified=true
         info "  → localhost 9042 remplacé par \$HCD_HOST \$HCD_PORT"
     fi
-    
+
     if echo "$content" | grep -q "localhost:9042"; then
         content=$(echo "$content" | sed 's/localhost:9042/$HCD_HOST:$HCD_PORT/g')
         modified=true
         info "  → localhost:9042 remplacé par \$HCD_HOST:\$HCD_PORT"
     fi
-    
+
     # 4. Ajouter vérification HCD si absente
     if ! echo "$content" | grep -q "check_hcd_prerequisites"; then
         # Chercher la première vérification HCD et la remplacer
@@ -130,7 +130,7 @@ fi/
             info "  → Vérification HCD améliorée"
         fi
     fi
-    
+
     # Écrire le contenu modifié
     if [ "$modified" = true ] && [ "$DRY_RUN" != "--dry-run" ]; then
         echo "$content" > "$script"

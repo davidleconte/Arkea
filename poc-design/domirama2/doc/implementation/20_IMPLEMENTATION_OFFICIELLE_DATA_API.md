@@ -1,7 +1,7 @@
 # ✅ Implémentation Officielle : Data API HCD
 
 **Date** : 2025-11-25  
-**Référence** : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html  
+**Référence** : <https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html>  
 **Objectif** : Implémentation exacte conforme à la documentation officielle
 
 ---
@@ -13,6 +13,7 @@
 **Documentation** : "Instantiate a DataAPIClient object"
 
 **Code implémenté** (100% conforme) :
+
 ```python
 from astrapy import DataAPIClient
 from astrapy.constants import Environment
@@ -29,6 +30,7 @@ client = DataAPIClient(environment=Environment.HCD)
 **Documentation** : "Connect to a database"
 
 **Code implémenté** (100% conforme) :
+
 ```python
 from astrapy.authentication import UsernamePasswordTokenProvider
 
@@ -47,6 +49,7 @@ database = client.get_database(
 **Documentation** : "Get a table" (Table commands)
 
 **Code implémenté** (100% conforme) :
+
 ```python
 table = database.get_table("TABLE_NAME", keyspace="KEYSPACE_NAME")
 ```
@@ -62,6 +65,7 @@ table = database.get_table("TABLE_NAME", keyspace="KEYSPACE_NAME")
 **Documentation** : Table commands - Insert a row
 
 **Code implémenté** (100% conforme) :
+
 ```python
 result = table.insert_one({
     "code_si": "DEMO_OFFICIAL",
@@ -85,6 +89,7 @@ result = table.insert_one({
 **Documentation** : Table commands - Find a row
 
 **Code implémenté** (100% conforme) :
+
 ```python
 result = table.find_one(
     filter={
@@ -105,6 +110,7 @@ result = table.find_one(
 **Documentation** : Table commands - Find rows
 
 **Code implémenté** (100% conforme) :
+
 ```python
 results = table.find(
     filter={
@@ -124,6 +130,7 @@ results = table.find(
 **Documentation** : Table commands - Update a row
 
 **Code implémenté** (100% conforme) :
+
 ```python
 result = table.update_one(
     filter={
@@ -150,6 +157,7 @@ result = table.update_one(
 **Documentation** : Table commands - Delete a row
 
 **Code implémenté** (100% conforme) :
+
 ```python
 result = table.delete_one(
     filter={
@@ -174,6 +182,7 @@ La documentation montre comment utiliser la Data API directement via HTTP avec `
 ### Format de Requête
 
 **Toutes les requêtes utilisent POST** (conforme documentation) :
+
 ```bash
 curl -X POST "API_ENDPOINT/v1/KEYSPACE_NAME/TABLE_NAME" \
   --header "Token: APPLICATION_TOKEN" \
@@ -186,6 +195,7 @@ curl -X POST "API_ENDPOINT/v1/KEYSPACE_NAME/TABLE_NAME" \
 **Conforme documentation** : `Cassandra:BASE64-ENCODED_USERNAME:BASE64_ENCODED_PASSWORD`
 
 **Génération** :
+
 ```bash
 USERNAME_B64=$(echo -n "cassandra" | base64)
 PASSWORD_B64=$(echo -n "cassandra" | base64)
@@ -195,6 +205,7 @@ APPLICATION_TOKEN="Cassandra:${USERNAME_B64}:${PASSWORD_B64}"
 ### Opérations HTTP
 
 #### INSERT (insertOne)
+
 ```bash
 curl -X POST "API_ENDPOINT/v1/KEYSPACE_NAME/TABLE_NAME" \
   --header "Token: APPLICATION_TOKEN" \
@@ -207,6 +218,7 @@ curl -X POST "API_ENDPOINT/v1/KEYSPACE_NAME/TABLE_NAME" \
 ```
 
 #### GET (findOne)
+
 ```bash
 curl -X POST "API_ENDPOINT/v1/KEYSPACE_NAME/TABLE_NAME" \
   --header "Token: APPLICATION_TOKEN" \
@@ -219,6 +231,7 @@ curl -X POST "API_ENDPOINT/v1/KEYSPACE_NAME/TABLE_NAME" \
 ```
 
 #### UPDATE (updateOne)
+
 ```bash
 curl -X POST "API_ENDPOINT/v1/KEYSPACE_NAME/TABLE_NAME" \
   --header "Token: APPLICATION_TOKEN" \
@@ -232,6 +245,7 @@ curl -X POST "API_ENDPOINT/v1/KEYSPACE_NAME/TABLE_NAME" \
 ```
 
 #### DELETE (deleteOne)
+
 ```bash
 curl -X POST "API_ENDPOINT/v1/KEYSPACE_NAME/TABLE_NAME" \
   --header "Token: APPLICATION_TOKEN" \
@@ -275,12 +289,14 @@ curl -X POST "API_ENDPOINT/v1/KEYSPACE_NAME/TABLE_NAME" \
 **Description** : Démonstration complète conforme à la documentation officielle
 
 **Fonctionnalités** :
+
 - ✅ Instanciation DataAPIClient (conforme)
 - ✅ Connexion à la base (conforme)
 - ✅ Accès à la table (conforme)
 - ✅ INSERT, GET, GET Multiple, UPDATE, DELETE (conformes)
 
 **Usage** :
+
 ```bash
 python3 demo_data_api_official.py
 ```
@@ -290,11 +306,13 @@ python3 demo_data_api_official.py
 **Description** : Démonstration HTTP directe via curl (conforme documentation)
 
 **Fonctionnalités** :
+
 - ✅ Génération du token (format conforme)
 - ✅ Requêtes HTTP POST (conforme)
 - ✅ INSERT, GET, UPDATE, DELETE via HTTP (conformes)
 
 **Usage** :
+
 ```bash
 ./demo_data_api_http.sh
 ```
@@ -306,6 +324,7 @@ python3 demo_data_api_official.py
 ### Code Python
 
 **Tous les exemples de code suivent exactement la syntaxe de la documentation** :
+
 - ✅ `DataAPIClient(environment=Environment.HCD)`
 - ✅ `client.get_database(API_ENDPOINT, token=UsernamePasswordTokenProvider(...))`
 - ✅ `database.get_table(TABLE_NAME, keyspace=KEYSPACE_NAME)`
@@ -318,6 +337,7 @@ python3 demo_data_api_official.py
 ### Requêtes HTTP
 
 **Toutes les requêtes HTTP suivent exactement le format de la documentation** :
+
 - ✅ Format : `POST API_ENDPOINT/v1/KEYSPACE_NAME/TABLE_NAME`
 - ✅ Headers : `Token: APPLICATION_TOKEN`, `Content-Type: application/json`
 - ✅ Body : `{"insertOne": {...}}`, `{"findOne": {...}}`, etc.
@@ -347,16 +367,19 @@ python3 demo_data_api_official.py
 ### Prérequis
 
 1. **Podman** : Installé et machine démarrée
+
    ```bash
    podman machine start
    ```
 
 2. **HCD** : Démarré sur `localhost:9042`
+
    ```bash
    ./scripts/setup/03_start_hcd.sh
    ```
 
 3. **Stargate** : Déployé avec Podman
+
    ```bash
    ./39_deploy_stargate.sh
    ```
@@ -364,11 +387,13 @@ python3 demo_data_api_official.py
 ### Exécution
 
 **Avec Client Python** :
+
 ```bash
 python3 demo_data_api_official.py
 ```
 
 **Avec HTTP Direct** :
+
 ```bash
 ./demo_data_api_http.sh
 ```
@@ -384,9 +409,8 @@ python3 demo_data_api_official.py
 - ✅ Les requêtes HTTP suivent le format officiel
 - ✅ Le code fonctionnera dès que Stargate sera accessible
 
-**Référence** : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html
+**Référence** : <https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html>
 
 ---
 
 **✅ Implémentation Officielle : 100% Conforme**
-

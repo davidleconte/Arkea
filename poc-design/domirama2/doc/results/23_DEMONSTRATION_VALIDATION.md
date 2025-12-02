@@ -11,12 +11,14 @@
 ### Besoin 1 : Unload Incrémental ORC
 
 **HBase** :
+
 ```
 Lecture batch pour des unload incrémentaux sur HDFS au format ORC
 FullScan + STARTROW + STOPROW + TIMERANGE pour une fenêtre glissante
 ```
 
 **Solution HCD** :
+
 - ✅ Export incrémental Parquet (format recommandé vs ORC)
 - ✅ WHERE date_op BETWEEN start AND end (équivalent TIMERANGE)
 - ✅ Partitionnement par date_op (performance)
@@ -24,11 +26,13 @@ FullScan + STARTROW + STOPROW + TIMERANGE pour une fenêtre glissante
 ### Besoin 2 : Fenêtre Glissante
 
 **HBase** :
+
 ```
 TIMERANGE pour une fenêtre glissante et un ciblage plus précis des données
 ```
 
 **Solution HCD** :
+
 - ✅ Exports mensuels automatisés
 - ✅ WHERE date_op BETWEEN start AND end
 - ✅ Idempotence (mode overwrite pour rejeux)
@@ -36,11 +40,13 @@ TIMERANGE pour une fenêtre glissante et un ciblage plus précis des données
 ### Besoin 3 : STARTROW/STOPROW
 
 **HBase** :
+
 ```
 STARTROW + STOPROW pour cibler précisément les données
 ```
 
 **Solution HCD** :
+
 - ✅ WHERE sur clustering keys (date_op, numero_op)
 - ✅ Ciblage précis par partition et clustering keys
 
@@ -234,10 +240,10 @@ STARTROW + STOPROW pour cibler précisément les données
 **✅ Les deux scripts fonctionnent et répondent aux besoins Arkéa identifiés dans le PDF !**
 
 **Mise à jour** : 2024-11-27
+
 - ✅ **57 scripts** créés (18 versions didactiques avec documentation automatique)
 - ✅ **18 démonstrations** .md générées automatiquement
 - ✅ **Export incrémental** : Démontré avec DSBulk + Spark (préservation colonne VECTOR)
 - ✅ **Fenêtre glissante** : Démontrée avec DSBulk + Spark (gestion tombstones)
 - ✅ **STARTROW/STOPROW** : Démontré avec requêtes CQL (mesure de performance)
 - ✅ **Tous les gaps critiques comblés** (BLOOMFILTER, colonnes dynamiques, REPLICATION_SCOPE)
-

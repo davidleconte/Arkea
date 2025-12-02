@@ -25,13 +25,13 @@ try {
     .format("org.apache.spark.sql.cassandra")
     .options(Map("keyspace" -> "system", "table" -> "local"))
     .load()
-  
+
   println("✅ Connexion réussie !")
   println(s"Nombre de lignes: ${df.count()}")
   println("\nAperçu des données:")
   df.show(truncate = false)
 } catch {
-  case e: Exception => 
+  case e: Exception =>
     println(s"❌ Erreur: ${e.getMessage}")
     e.printStackTrace()
 }
@@ -43,11 +43,11 @@ try {
     .format("org.apache.spark.sql.cassandra")
     .options(Map("keyspace" -> "system_schema", "table" -> "keyspaces"))
     .load()
-  
+
   println("Keyspaces disponibles:")
   keyspaces.select("keyspace_name").show(truncate = false)
 } catch {
-  case e: Exception => 
+  case e: Exception =>
     println(s"⚠️  Erreur (peut être normal): ${e.getMessage}")
 }
 
@@ -59,8 +59,3 @@ println("=" * 50)
 println("\n💡 Spark Shell reste ouvert pour exploration interactive")
 println("   Tapez 'spark' pour accéder à la session")
 println("   Tapez ':quit' pour quitter")
-
-
-
-
-

@@ -92,12 +92,14 @@ python3 examples/python/search/test_vector_search_robustness.py
 **Fichier** : `test_vector_search_performance.py`
 
 **Métriques** :
+
 - Latence moyenne, médiane, P95, P99
 - Temps de génération d'embedding
 - Temps de recherche HCD
 - Débit (requêtes/seconde)
 
 **Seuils de Validation** :
+
 - Latence moyenne < 100ms
 - Latence P95 < 200ms
 - Débit > 10 req/s
@@ -109,12 +111,14 @@ python3 examples/python/search/test_vector_search_robustness.py
 **Fichier** : `test_vector_search_comparative.py`
 
 **Comparaisons** :
+
 - Vector Search vs Full-Text Search
 - Latence comparée
 - Nombre de résultats comparé
 - Pertinence des résultats
 
 **Cas Testés** :
+
 - Requêtes correctes
 - Requêtes avec typos
 
@@ -125,6 +129,7 @@ python3 examples/python/search/test_vector_search_robustness.py
 **Fichier** : `test_vector_search_limits.py`
 
 **Cas Testés** :
+
 - LIMIT 1, 5, 10, 50, 100
 - Requête vide
 - Requête très longue (500+ caractères)
@@ -139,6 +144,7 @@ python3 examples/python/search/test_vector_search_robustness.py
 **Fichier** : `test_vector_search_robustness.py`
 
 **Cas Testés** :
+
 - Requête NULL
 - Injection SQL (sécurité)
 - Caractères Unicode
@@ -152,6 +158,7 @@ python3 examples/python/search/test_vector_search_robustness.py
 **Fichier** : `test_vector_search_accents.py`
 
 **Cas Testés** :
+
 - 'CAFE' vs 'CAFÉ' (accent aigu)
 - 'PARIS' vs 'PARÎS' (accent circonflexe)
 - 'COMPTE' vs 'COMPTÉ' (accent aigu final)
@@ -165,6 +172,7 @@ python3 examples/python/search/test_vector_search_robustness.py
 **Fichier** : `test_vector_search_abbreviations.py`
 
 **Cas Testés** :
+
 - 'CB' vs 'CARTE BLEUE' vs 'CARTE BANCAIRE'
 - 'VIRT' vs 'VIREMENT' vs 'VIR'
 - 'PAYMT' vs 'PAIEMENT' vs 'PAY'
@@ -180,6 +188,7 @@ python3 examples/python/search/test_vector_search_robustness.py
 **Fichier** : `test_vector_search_consistency.py`
 
 **Vérifications** :
+
 - Même requête répétée 10 fois = mêmes résultats
 - Ordre stable des résultats
 - Résultats déterministes
@@ -191,6 +200,7 @@ python3 examples/python/search/test_vector_search_robustness.py
 **Fichier** : `test_vector_search_synonyms.py`
 
 **Cas Testés** :
+
 - 'LOYER' vs 'LOCATION' vs 'LOUER'
 - 'PAIEMENT' vs 'REGLEMENT' vs 'VERSEMENT'
 - 'RESTAURANT' vs 'BRASSERIE' vs 'BISTROT'
@@ -206,6 +216,7 @@ python3 examples/python/search/test_vector_search_robustness.py
 **Fichier** : `test_vector_search_multilang.py`
 
 **Cas Testés** :
+
 - Français vs Anglais
 - Français vs Espagnol
 - Mélange Français-Anglais
@@ -219,11 +230,13 @@ python3 examples/python/search/test_vector_search_robustness.py
 **Fichier** : `test_vector_search_multiworld.py`
 
 **Cas Testés** :
+
 - Mot unique : 'LOYER', 'PAIEMENT', 'VIREMENT'
 - Deux mots : 'LOYER IMPAYE', 'PAIEMENT CARTE'
 - Trois mots : 'LOYER IMPAYE PARIS', 'PAIEMENT CARTE BANCAIRE'
 
 **Analyse** :
+
 - Mot unique : Meilleur recall, précision variable
 - Deux mots : Bon compromis recall/précision
 - Plusieurs mots : Meilleure précision, recall limité
@@ -235,6 +248,7 @@ python3 examples/python/search/test_vector_search_robustness.py
 **Fichier** : `test_vector_search_threshold.py`
 
 **Seuils Testés** :
+
 - 0.9 : Résultats très similaires uniquement
 - 0.7 : Résultats similaires (recommandé)
 - 0.5 : Résultats peu similaires
@@ -247,6 +261,7 @@ python3 examples/python/search/test_vector_search_robustness.py
 **Fichier** : `test_vector_search_temporal.py`
 
 **Filtres Testés** :
+
 - Vector seul
 - Vector + Filtre temporel (30 derniers jours)
 - Vector + Filtre montant (>= 100)
@@ -259,12 +274,14 @@ python3 examples/python/search/test_vector_search_robustness.py
 **Fichier** : `test_vector_search_volume.py`
 
 **Volumes Testés** :
+
 - Petit (< 1K) : Latence attendue < 50ms
 - Moyen (1K-10K) : Latence attendue < 200ms
 - Grand (10K-100K) : Latence attendue < 500ms
 - Très grand (100K+) : Latence attendue < 2s
 
 **Métriques** :
+
 - Latence moyenne, médiane, P95
 - Validation des seuils selon le volume
 
@@ -275,6 +292,7 @@ python3 examples/python/search/test_vector_search_robustness.py
 **Fichier** : `test_vector_search_precision.py`
 
 **Métriques** :
+
 - Précision
 - Recall
 - F1-Score
@@ -291,6 +309,7 @@ python3 examples/python/search/test_vector_search_robustness.py
 - **Total** : 16 fichiers
 
 **Couverture** :
+
 - ✅ Tests de performance
 - ✅ Tests comparatifs
 - ✅ Tests de limites
@@ -313,6 +332,7 @@ python3 examples/python/search/test_vector_search_robustness.py
 Tous les 15 tests supplémentaires (14 catégories + module de base) ont été implémentés avec succès.
 
 **Prochaines Étapes** :
+
 1. Exécuter `./16_test_fuzzy_search_complete.sh` pour valider tous les tests
 2. Compléter le jeu de test annoté pour les tests de précision/recall
 3. Intégrer ces tests dans la CI/CD si applicable
@@ -320,4 +340,3 @@ Tous les 15 tests supplémentaires (14 catégories + module de base) ont été i
 ---
 
 **Date de génération** : 2025-11-30
-

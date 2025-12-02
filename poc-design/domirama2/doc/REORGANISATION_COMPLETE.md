@@ -67,6 +67,7 @@ domirama2/
 ### 3. Déplacement des Scripts
 
 **61 scripts .sh déplacés** vers `scripts/` :
+
 - Tous les scripts numérotés (10_*.sh à 41_*.sh)
 - Scripts didactiques (_v2_didactique.sh)
 - Scripts utilitaires
@@ -78,6 +79,7 @@ domirama2/
 ### 5. Mise à Jour de la Documentation
 
 ✅ **00_ORGANISATION_DOC.md mis à jour** :
+
 - Chemins mis à jour pour refléter la nouvelle structure
 - Référence à INDEX.md ajoutée
 - Structure documentée
@@ -91,6 +93,7 @@ domirama2/
 Documents de design, analyse, architecture et data model.
 
 **Fichiers principaux** :
+
 - `02_VALUE_PROPOSITION_DOMIRAMA2.md`
 - `03_GAPS_ANALYSIS.md`
 - `04_BILAN_ECARTS_FONCTIONNELS.md`
@@ -105,6 +108,7 @@ Documents de design, analyse, architecture et data model.
 Guides d'utilisation, README par fonctionnalité et références.
 
 **Fichiers principaux** :
+
 - `01_README.md` - Vue d'ensemble du POC
 - `06_README_INDEX_AVANCES.md` - Index SAI avancés
 - `07_README_FUZZY_SEARCH.md` - Recherche floue
@@ -118,6 +122,7 @@ Guides d'utilisation, README par fonctionnalité et références.
 Documents d'implémentation et de développement.
 
 **Fichiers principaux** :
+
 - `10_TIME_TRAVEL_IMPLEMENTATION.md` - Implémentation time travel
 - `20_IMPLEMENTATION_OFFICIELLE_DATA_API.md` - Implémentation Data API
 - `21_STATUT_DATA_API.md` - Statut Data API
@@ -128,6 +133,7 @@ Documents d'implémentation et de développement.
 Résultats de tests, validations et démonstrations.
 
 **Fichiers principaux** :
+
 - `22_DEMONSTRATION_RESUME.md` - Résumé des démonstrations
 - `23_DEMONSTRATION_VALIDATION.md` - Validation des démonstrations
 - `42_DEMONSTRATION_COMPLETE_DOMIRAMA.md` - Démonstration complète
@@ -137,6 +143,7 @@ Résultats de tests, validations et démonstrations.
 Corrections appliquées et améliorations.
 
 **Fichiers principaux** :
+
 - `44_GUIDE_AMELIORATION_SCRIPTS.md` - Guide d'amélioration des scripts
 - `45_GUIDE_GENERALISATION_CAPTURE_RESULTATS.md` - Généralisation capture résultats
 - `69_AMELIORATION_SCRIPTS_16_17_18.md` - Améliorations scripts 16-18
@@ -146,6 +153,7 @@ Corrections appliquées et améliorations.
 Audits et analyses complètes.
 
 **Fichiers principaux** :
+
 - `AUDIT_COMPLET_2025.md` - Audit complet du répertoire (2025)
 - `AUDIT_SCRIPTS_SHELL_2025.md` - Audit scripts shell (2025)
 - `36_STANDARDS_SCRIPTS_SHELL.md` - Standards scripts shell
@@ -252,4 +260,3 @@ Les liens dans les fichiers .md doivent être mis à jour pour refléter la nouv
 **Date de création** : 2025-01-XX  
 **Version** : 1.0  
 **Statut** : ✅ **Réorganisation terminée avec succès**
-

@@ -20,6 +20,7 @@ Les **3 améliorations prioritaires** de la pertinence ont été implémentées 
 **Après** : Distance de Levenshtein complète avec seuil adaptatif
 
 **Implémentation** :
+
 ```python
 def levenshtein_distance(s1, s2):
     """Calcule la distance de Levenshtein complète entre deux chaînes."""
@@ -28,11 +29,13 @@ def levenshtein_distance(s1, s2):
 ```
 
 **Avantages** :
+
 - ✅ Gère les typos avec **2+ caractères différents**
 - ✅ Seuil adaptatif : `max(1, len(term) // 3)`
 - ✅ Score inversement proportionnel : distance 0 → 10, distance 1 → 8, distance 2 → 6, etc.
 
 **Impact** :
+
 - Améliore la détection des typos complexes
 - Meilleure correspondance pour les termes avec plusieurs erreurs
 
@@ -44,6 +47,7 @@ def levenshtein_distance(s1, s2):
 **Après** : Calcul de la similarité cosinus entre embeddings de requête et libellés
 
 **Implémentation** :
+
 ```python
 def cosine_similarity(vec1, vec2):
     """Calcule la similarité cosinus entre deux vecteurs."""
@@ -54,12 +58,14 @@ def cosine_similarity(vec1, vec2):
 ```
 
 **Avantages** :
+
 - ✅ Utilise les **embeddings déjà générés** (pas de coût supplémentaire)
 - ✅ Capture la **similarité sémantique réelle**
 - ✅ Poids : **40% du score total**
 - ✅ Gestion d'erreurs robuste
 
 **Impact** :
+
 - Meilleure pertinence grâce à la similarité sémantique
 - Détection des synonymes et variations linguistiques
 - Résultats plus cohérents avec le contexte
@@ -72,6 +78,7 @@ def cosine_similarity(vec1, vec2):
 **Après** : Score combiné avec plusieurs facteurs pondérés
 
 **Implémentation** :
+
 ```python
 # Score combiné multi-facteurs
 combined_score = (lexical_score * 0.4) + (vector_score * 0.4)
@@ -88,18 +95,21 @@ if normalized_position < 0.2:  # Premier 20%
 ```
 
 **Composantes** :
+
 1. **Score lexical (40%)** : `fuzzy_match_improved()` avec Levenshtein
 2. **Score vectoriel (40%)** : Similarité cosinus entre embeddings
 3. **Bonus multi-termes (20%)** : Favorise les résultats avec tous les termes
 4. **Bonus de position** : Favorise les termes au début du libellé
 
 **Avantages** :
+
 - ✅ Combine plusieurs facteurs de pertinence
 - ✅ Poids adaptatifs selon l'importance
 - ✅ Meilleure pertinence globale
 - ✅ Filtrage adaptatif selon le nombre de termes
 
 **Impact** :
+
 - Résultats plus pertinents et cohérents
 - Meilleure gestion des recherches multi-termes
 - Favorise les résultats où les termes importants sont au début
@@ -119,6 +129,7 @@ if normalized_position < 0.2:  # Premier 20%
 | **Temps exécution** | 0.008s | 0.019s | ⚠️ +0.011s (acceptable) |
 
 **Analyse** :
+
 - ✅ Tous les tests restent cohérents (23/23)
 - ✅ La couverture embeddings reste à 100%
 - ⚠️ Temps d'exécution légèrement supérieur (+0.011s) dû aux calculs supplémentaires
@@ -127,16 +138,19 @@ if normalized_position < 0.2:  # Premier 20%
 ### Améliorations de Pertinence
 
 **Avant** :
+
 - Distance de Levenshtein simplifiée (1 caractère max)
 - Pas de similarité vectorielle
 - Score lexical uniquement
 
 **Après** :
+
 - ✅ Distance de Levenshtein complète (typos multiples)
 - ✅ Similarité cosinus entre embeddings
 - ✅ Score combiné multi-facteurs
 
 **Impact attendu** :
+
 - 🎯 Meilleure détection des typos complexes
 - 🎯 Meilleure pertinence grâce à la similarité sémantique
 - 🎯 Résultats plus cohérents avec le contexte
@@ -165,6 +179,7 @@ if normalized_position < 0.2:  # Premier 20%
 ### Modifications du Système de Scoring
 
 **Avant** :
+
 ```python
 total_score = sum(fuzzy_match(term, libelle) for term in terms)
 if matched_terms == len(terms):
@@ -172,6 +187,7 @@ if matched_terms == len(terms):
 ```
 
 **Après** :
+
 ```python
 lexical_score = sum(fuzzy_match_improved(term, libelle)[0] for term in terms)
 vector_score = cosine_similarity(query_embedding, libelle_embedding) * 10
@@ -181,6 +197,7 @@ combined_score = (lexical_score * 0.4) + (vector_score * 0.4) + bonuses
 ### Modifications de la Requête CQL
 
 **Avant** :
+
 ```cql
 SELECT libelle, montant, cat_auto
 FROM operations_by_account
@@ -188,6 +205,7 @@ FROM operations_by_account
 ```
 
 **Après** :
+
 ```cql
 SELECT libelle, montant, cat_auto, libelle_embedding
 FROM operations_by_account
@@ -203,11 +221,13 @@ FROM operations_by_account
 ### Exemple : Recherche "loyr impay"
 
 **Avant** :
+
 - Score lexical uniquement
 - Distance simplifiée (1 caractère max)
 - Pas de similarité sémantique
 
 **Après** :
+
 - Score lexical (40%) : Levenshtein complète détecte "loyr" → "loyer"
 - Score vectoriel (40%) : Similarité cosinus capture "impay" → "impayé"
 - Bonus multi-termes : Favorise les résultats avec les deux termes
@@ -278,11 +298,13 @@ Les **3 améliorations prioritaires** ont été implémentées avec succès :
 3. ✅ **Score combiné multi-facteurs** : Combine plusieurs facteurs de pertinence
 
 **Résultats** :
+
 - ✅ Tous les tests cohérents (23/23)
 - ✅ Performance acceptable (0.019s par requête)
 - ✅ Meilleure pertinence attendue
 
 **Impact** :
+
 - 🎯 Meilleure détection des typos complexes
 - 🎯 Meilleure pertinence grâce à la similarité vectorielle
 - 🎯 Résultats plus cohérents avec le contexte sémantique
@@ -290,7 +312,3 @@ Les **3 améliorations prioritaires** ont été implémentées avec succès :
 ---
 
 **✅ Améliorations validées et opérationnelles**
-
-
-
-

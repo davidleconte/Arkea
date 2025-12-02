@@ -11,12 +11,14 @@
 ### Architecture HBase Actuelle
 
 **Composants** :
+
 - **Backend Java** : API HBase (clients Java)
 - **Front-end Web** : Application client bancaire
 - **Mobile** : Applications mobiles (iOS/Android)
 - **Batch** : MapReduce/PIG pour ingestion
 
 **Patterns d'Accès** :
+
 - **Temps réel** : API Java → HBase (SCAN, MultiGet)
 - **Recherche** : SCAN complet → Index Solr in-memory → MultiGet
 - **Correction client** : PUT avec timestamp
@@ -24,12 +26,14 @@
 ### Architecture HCD Proposée (POC Domirama2)
 
 **Composants** :
+
 - **Backend Java** : Drivers Cassandra (CQL)
 - **Front-end Web** : Application client bancaire
 - **Mobile** : Applications mobiles (iOS/Android)
 - **Batch** : Spark pour ingestion
 
 **Patterns d'Accès** :
+
 - **Temps réel** : Drivers Cassandra → HCD (SELECT + SAI)
 - **Recherche** : SELECT avec SAI (pas de scan complet)
 - **Correction client** : UPDATE avec cat_user
@@ -43,16 +47,19 @@
 #### Scénario Actuel (CQL Direct)
 
 **Architecture** :
+
 ```
 Front-end Web → Backend Java → Driver Cassandra → HCD
 ```
 
 **Avantages** :
+
 - ✅ Performance optimale (connexion directe)
 - ✅ Contrôle total (requêtes optimisées)
 - ✅ Pas de couche intermédiaire
 
 **Inconvénients** :
+
 - ⚠️ Backend Java nécessaire (couplage)
 - ⚠️ Gestion des connexions (pooling)
 - ⚠️ Maintenance du code driver
@@ -60,11 +67,13 @@ Front-end Web → Backend Java → Driver Cassandra → HCD
 #### Scénario avec Data API
 
 **Architecture** :
+
 ```
 Front-end Web → Data API (REST/GraphQL) → HCD
 ```
 
 **Avantages** :
+
 - ✅ **Simplification** : Pas de backend Java intermédiaire
 - ✅ **Découplage** : Front-end indépendant du backend
 - ✅ **Standard HTTP** : Facile à intégrer (fetch, axios)
@@ -72,10 +81,12 @@ Front-end Web → Data API (REST/GraphQL) → HCD
 - ✅ **Sécurité** : Authentification token centralisée
 
 **Inconvénients** :
+
 - ⚠️ Latence légèrement supérieure (HTTP vs binaire)
 - ⚠️ Moins de contrôle sur les requêtes
 
 **Valeur Ajoutée** : 🟢 **Moyenne à Élevée**
+
 - Simplification architecture
 - Découplage front-end/back-end
 - Développement front-end plus rapide
@@ -87,11 +98,13 @@ Front-end Web → Data API (REST/GraphQL) → HCD
 #### Scénario Actuel (CQL Direct)
 
 **Architecture** :
+
 ```
 Mobile App → Backend API → Driver Cassandra → HCD
 ```
 
 **Problèmes** :
+
 - ⚠️ Backend API nécessaire (couche intermédiaire)
 - ⚠️ Gestion des versions API
 - ⚠️ Latence réseau (mobile → backend → HCD)
@@ -99,11 +112,13 @@ Mobile App → Backend API → Driver Cassandra → HCD
 #### Scénario avec Data API
 
 **Architecture** :
+
 ```
 Mobile App → Data API (REST) → HCD
 ```
 
 **Avantages** :
+
 - ✅ **Accès direct** : Mobile → HCD (sans backend)
 - ✅ **REST standard** : Facile à intégrer (URLSession, Retrofit)
 - ✅ **GraphQL** : Requêtes adaptées au mobile (seulement les champs nécessaires)
@@ -111,6 +126,7 @@ Mobile App → Data API (REST) → HCD
 - ✅ **Offline** : Stratégies de cache/offline plus simples
 
 **Valeur Ajoutée** : 🟢 **Élevée**
+
 - Simplification architecture mobile
 - Réduction latence (moins de sauts)
 - Développement mobile plus rapide
@@ -122,11 +138,13 @@ Mobile App → Data API (REST) → HCD
 #### Scénario Actuel (CQL Direct)
 
 **Architecture** :
+
 ```
 Microservice → Driver Cassandra → HCD
 ```
 
 **Problèmes** :
+
 - ⚠️ Chaque microservice doit gérer le driver
 - ⚠️ Pooling de connexions par service
 - ⚠️ Configuration distribuée
@@ -134,11 +152,13 @@ Microservice → Driver Cassandra → HCD
 #### Scénario avec Data API
 
 **Architecture** :
+
 ```
 Microservice → Data API (REST) → HCD
 ```
 
 **Avantages** :
+
 - ✅ **Unification** : Point d'entrée unique
 - ✅ **API Gateway** : Routage, rate limiting, monitoring
 - ✅ **Découplage** : Microservices indépendants du driver
@@ -146,6 +166,7 @@ Microservice → Data API (REST) → HCD
 - ✅ **Sécurité** : Authentification centralisée
 
 **Valeur Ajoutée** : 🟢 **Élevée**
+
 - Architecture microservices simplifiée
 - Gestion centralisée
 - Monitoring unifié
@@ -157,6 +178,7 @@ Microservice → Data API (REST) → HCD
 #### Scénario Actuel (CQL Direct)
 
 **Problèmes** :
+
 - ❌ **Sécurité** : Impossible d'exposer CQL directement
 - ❌ **Backend nécessaire** : API wrapper obligatoire
 - ❌ **Complexité** : Gestion authentification, rate limiting
@@ -164,6 +186,7 @@ Microservice → Data API (REST) → HCD
 #### Scénario avec Data API
 
 **Avantages** :
+
 - ✅ **Sécurité** : Authentification token (API key)
 - ✅ **Rate limiting** : Contrôle d'accès intégré
 - ✅ **Documentation** : API auto-documentée (OpenAPI/Swagger)
@@ -171,6 +194,7 @@ Microservice → Data API (REST) → HCD
 - ✅ **Monitoring** : Traçabilité des accès
 
 **Valeur Ajoutée** : 🟢 **Très Élevée**
+
 - Exposition sécurisée possible
 - Pas besoin de backend wrapper
 - Intégration partenaires facilitée
@@ -182,6 +206,7 @@ Microservice → Data API (REST) → HCD
 #### Scénario Actuel (CQL Direct)
 
 **Problèmes** :
+
 - ⚠️ Nécessite driver et configuration
 - ⚠️ Courbe d'apprentissage CQL
 - ⚠️ Setup complexe
@@ -189,12 +214,14 @@ Microservice → Data API (REST) → HCD
 #### Scénario avec Data API
 
 **Avantages** :
+
 - ✅ **Rapidité** : Requêtes HTTP simples (curl, Postman)
 - ✅ **Prototypage** : Développement front-end sans backend
 - ✅ **Tests** : Tests d'intégration simplifiés
 - ✅ **Documentation** : Auto-générée (GraphQL schema)
 
 **Valeur Ajoutée** : 🟢 **Moyenne**
+
 - Accélération développement
 - Prototypage facilité
 - Tests simplifiés
@@ -206,6 +233,7 @@ Microservice → Data API (REST) → HCD
 #### Scénario Actuel (CQL Direct)
 
 **Problèmes** :
+
 - ⚠️ Requêtes CQL fixes (backend)
 - ⚠️ Over-fetching (toutes les colonnes)
 - ⚠️ Under-fetching (plusieurs requêtes nécessaires)
@@ -213,12 +241,14 @@ Microservice → Data API (REST) → HCD
 #### Scénario avec Data API (GraphQL)
 
 **Avantages** :
+
 - ✅ **Flexibilité** : Client demande exactement ce qu'il veut
 - ✅ **Efficacité** : Pas d'over-fetching
 - ✅ **Agrégation** : Requêtes combinées (opérations + catégories)
 - ✅ **Évolution** : Ajout de champs sans casser les clients
 
 **Exemple GraphQL** :
+
 ```graphql
 query {
   operations(
@@ -239,6 +269,7 @@ query {
 ```
 
 **Valeur Ajoutée** : 🟢 **Élevée**
+
 - Requêtes optimisées côté client
 - Évolution API sans breaking changes
 - Expérience développeur améliorée
@@ -265,6 +296,7 @@ query {
 **Recommandation** : ⚠️ **Data API non nécessaire**
 
 **Justification** :
+
 - Backend Java déjà en place
 - Performance CQL optimale
 - Pas de besoin d'exposition externe
@@ -278,6 +310,7 @@ query {
 **Recommandation** : ✅ **Data API recommandée**
 
 **Justification** :
+
 - Unification des accès
 - Découplage des services
 - Monitoring centralisé
@@ -291,6 +324,7 @@ query {
 **Recommandation** : ✅ **Data API fortement recommandée**
 
 **Justification** :
+
 - Accès direct mobile → HCD
 - Réduction latence
 - GraphQL pour requêtes optimisées
@@ -304,6 +338,7 @@ query {
 **Recommandation** : 🔴 **Data API critique**
 
 **Justification** :
+
 - Sécurité (API key)
 - Rate limiting
 - Documentation auto-générée
@@ -317,6 +352,7 @@ query {
 **Recommandation** : ✅ **Data API + CQL (complémentaires)**
 
 **Justification** :
+
 - CQL pour backend haute performance
 - Data API pour front-end/mobile/externe
 
@@ -329,6 +365,7 @@ query {
 ### 1. Recherche d'Opérations (Front-end Web)
 
 **Avec CQL Direct** :
+
 ```java
 // Backend Java
 String query = "SELECT * FROM operations_by_account " +
@@ -339,6 +376,7 @@ ResultSet rs = session.execute(stmt.bind(codeSi, contrat, searchTerm));
 ```
 
 **Avec Data API (REST)** :
+
 ```javascript
 // Front-end JavaScript
 const response = await fetch(
@@ -352,6 +390,7 @@ const response = await fetch(
 ```
 
 **Avec Data API (GraphQL)** :
+
 ```graphql
 query SearchOperations($codeSi: String!, $contrat: String!, $searchTerm: String!) {
   operations_by_account(
@@ -374,6 +413,7 @@ query SearchOperations($codeSi: String!, $contrat: String!, $searchTerm: String!
 ```
 
 **Valeur Ajoutée** : 🟢 **Moyenne**
+
 - Front-end peut accéder directement
 - Pas besoin de backend Java
 - GraphQL plus flexible
@@ -383,6 +423,7 @@ query SearchOperations($codeSi: String!, $contrat: String!, $searchTerm: String!
 ### 2. Correction Catégorie Client (Mobile)
 
 **Avec CQL Direct** :
+
 ```java
 // Backend Java nécessaire
 String update = "UPDATE operations_by_account " +
@@ -394,6 +435,7 @@ session.execute(stmt.bind(catUser, codeSi, contrat, dateOp, numeroOp));
 ```
 
 **Avec Data API (REST)** :
+
 ```swift
 // iOS Swift
 let url = URL(string: "https://api.hcd.example/v2/keyspaces/domirama2_poc/operations_by_account/\(operationId)")!
@@ -415,6 +457,7 @@ task.resume()
 ```
 
 **Valeur Ajoutée** : 🟢 **Élevée**
+
 - Mobile peut mettre à jour directement
 - Pas besoin de backend API
 - Code plus simple
@@ -424,11 +467,13 @@ task.resume()
 ### 3. Export Données Partenaire (Externe)
 
 **Avec CQL Direct** :
+
 - ❌ Impossible d'exposer CQL directement
 - ⚠️ Backend wrapper nécessaire
 - ⚠️ Gestion sécurité complexe
 
 **Avec Data API (REST)** :
+
 ```python
 # Partenaire externe
 import requests
@@ -451,6 +496,7 @@ operations = response.json()['data']
 ```
 
 **Valeur Ajoutée** : 🟢 **Très Élevée**
+
 - Exposition sécurisée possible
 - Pas de backend wrapper
 - Rate limiting intégré
@@ -464,6 +510,7 @@ operations = response.json()['data']
 **Valeur Ajoutée** : 🟢 **Moyenne à Élevée**
 
 **Justification** :
+
 - ✅ Applications mobiles : **Élevée** (accès direct)
 - ✅ Microservices : **Élevée** (unification)
 - ✅ Intégration partenaires : **Très Élevée** (sécurité)
@@ -473,10 +520,12 @@ operations = response.json()['data']
 ### Recommandation Globale
 
 **Pour POC** : 🟡 **Optionnel**
+
 - CQL suffit pour démonstration
 - Data API peut être ajoutée si besoin
 
 **Pour Production** : 🟢 **Recommandé** (selon architecture)
+
 - **Obligatoire** si : Intégration partenaires, applications mobiles
 - **Recommandé** si : Architecture microservices, GraphQL souhaité
 - **Optionnel** si : Architecture monolithique, backend Java uniquement
@@ -490,6 +539,7 @@ operations = response.json()['data']
 **Objectif** : Déterminer si Data API apporte une valeur
 
 **Actions** :
+
 1. ✅ Documenter les cas d'usage (ce document)
 2. ⚠️ Tester Data API avec un cas d'usage simple
 3. ⚠️ Comparer performance Data API vs CQL
@@ -503,6 +553,7 @@ operations = response.json()['data']
 **Objectif** : Démontrer Data API pour un cas d'usage concret
 
 **Actions** :
+
 1. ⚠️ Setup Data API HCD
 2. ⚠️ Créer exemple REST (recherche opérations)
 3. ⚠️ Créer exemple GraphQL (requête flexible)
@@ -517,6 +568,7 @@ operations = response.json()['data']
 **Objectif** : Implémenter Data API en production
 
 **Actions** :
+
 1. ⚠️ Configuration Data API HCD
 2. ⚠️ Authentification (API keys)
 3. ⚠️ Rate limiting
@@ -534,6 +586,7 @@ operations = response.json()['data']
 **Score Global** : 🟢 **7/10** (Moyenne à Élevée)
 
 **Détail par Cas d'Usage** :
+
 - Applications mobiles : **9/10** (Élevée)
 - Microservices : **8/10** (Élevée)
 - Intégration partenaires : **10/10** (Très Élevée)
@@ -543,10 +596,12 @@ operations = response.json()['data']
 ### Recommandation Finale
 
 **Pour POC** : ⚠️ **Optionnel**
+
 - Focus sur fonctionnalités core (CQL)
 - Data API peut être ajoutée si besoin spécifique
 
 **Pour Production** : 🟢 **Recommandé** (selon architecture)
+
 - **Critique** si intégration partenaires ou applications mobiles
 - **Recommandé** si architecture microservices
 - **Optionnel** si architecture monolithique backend Java
@@ -554,4 +609,3 @@ operations = response.json()['data']
 ---
 
 **✅ La Data API apporte une valeur significative pour les cas d'usage modernes (mobile, microservices, partenaires), mais reste optionnelle pour les architectures traditionnelles (backend Java monolithique).**
-

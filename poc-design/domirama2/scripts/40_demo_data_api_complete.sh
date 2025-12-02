@@ -7,7 +7,7 @@
 #   Ce script orchestre une démonstration complète de la Data API HCD en
 #   exécutant toutes les étapes nécessaires pour valider le fonctionnement
 #   complet : vérification, déploiement, connexion et opérations CRUD.
-#   
+#
 #   Étapes exécutées :
 #   1. Vérifier HCD démarré
 #   2. Déployer Stargate (si nécessaire)
@@ -153,7 +153,7 @@ if $CONTAINER_CMD ps --filter "name=$STARGATE_CONTAINER" --format "{{.Names}}" 2
 else
     warn "Stargate n'est pas démarré"
     info "Tentative de démarrage..."
-    
+
     # Vérifier si le conteneur existe mais est arrêté
     if $CONTAINER_CMD ps -a --filter "name=$STARGATE_CONTAINER" --format "{{.Names}}" 2>/dev/null | grep -q "$STARGATE_CONTAINER"; then
         info "Démarrage du conteneur existant..."
@@ -182,13 +182,13 @@ echo ""
 
 if [ "$STARGATE_RUNNING" = true ]; then
     info "Test de l'endpoint : $API_ENDPOINT"
-    
+
     # Attendre que Stargate soit prêt
     info "Attente que Stargate soit prêt (10 secondes)..."
     sleep 10
-    
+
     HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 "$API_ENDPOINT/v1/status" 2>&1 || echo "000")
-    
+
     if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "404" ]; then
         success "Endpoint accessible (HTTP Status: $HTTP_STATUS)"
         code "   URL : $API_ENDPOINT"
@@ -260,7 +260,7 @@ try:
     client = DataAPIClient(environment=Environment.HCD)
     print("✅ Client créé")
     print()
-    
+
     # Se connecter
     print("🔌 Connexion à la base de données...")
     database = client.get_database(
@@ -269,7 +269,7 @@ try:
     )
     print("✅ Connexion réussie !")
     print()
-    
+
     # Lister les keyspaces (via admin)
     print("📋 Keyspaces disponibles :")
     try:
@@ -284,13 +284,13 @@ try:
         print(f"   ⚠️  Impossible de lister les keyspaces : {e}")
         print("   (la connexion fonctionne, mais cette opération nécessite des permissions)")
     print()
-    
+
     # Test réussi
     print("=" * 60)
     print("✅ DÉMONSTRATION RÉUSSIE : Data API fonctionne !")
     print("=" * 60)
     sys.exit(0)
-    
+
 except Exception as e:
     print(f"❌ Erreur : {type(e).__name__}")
     print(f"   Message : {str(e)}")
@@ -328,16 +328,16 @@ if [ "$DEMO_SUCCESS" = true ] && [ -f "$SCRIPT_DIR/examples/python/data_api/exam
     echo ""
     info "📋 Étape 6 : Test avec Exemple Existant"
     echo ""
-    
+
     info "Exécution de : examples/python/data_api/examples/01_connect_data_api.py"
     echo ""
-    
+
     if API_ENDPOINT="$API_ENDPOINT" USERNAME="$USERNAME" PASSWORD="$PASSWORD" python3 "$SCRIPT_DIR/examples/python/data_api/examples/01_connect_data_api.py" 2>&1; then
         success "✅ Exemple existant fonctionne !"
     else
         warn "⚠️  Exemple existant a échoué (peut être normal si endpoint non accessible)"
     fi
-    
+
     echo ""
 fi
 
@@ -422,4 +422,3 @@ echo ""
 
 success "✅ Démonstration terminée"
 echo ""
-

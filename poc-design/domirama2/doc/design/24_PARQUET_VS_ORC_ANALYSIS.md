@@ -11,6 +11,7 @@
 **✅ OUI, Parquet est une excellente alternative (voire supérieure) à ORC pour les exports incrémentaux**
 
 **Recommandation** : **Parquet** pour ce POC, car :
+
 1. ✅ Déjà utilisé dans le POC (ingestion Parquet)
 2. ✅ Standard de facto dans l'écosystème Spark
 3. ✅ Performance équivalente ou supérieure à ORC
@@ -45,11 +46,13 @@
 #### Compression
 
 **Parquet** :
+
 - Formats : Snappy (rapide), Gzip (compact), Brotli (très compact)
 - Ratio compression : 2-5x selon données
 - Vitesse : Snappy très rapide, Gzip plus lent mais plus compact
 
 **ORC** :
+
 - Formats : Zlib (par défaut), Snappy, LZO, Zstd
 - Ratio compression : 2-5x selon données
 - Vitesse : Zlib rapide, Zstd très performant
@@ -59,12 +62,14 @@
 #### Lecture (Query Performance)
 
 **Parquet** :
+
 - Prédicats pushdown : ✅ Excellent
 - Projection columnar : ✅ Excellent
 - Index : Row groups avec statistiques
 - Performance : Très rapide pour analytics
 
 **ORC** :
+
 - Prédicats pushdown : ✅ Excellent
 - Projection columnar : ✅ Excellent
 - Index : Stripe-level avec statistiques + bloom filters
@@ -75,11 +80,13 @@
 #### Écriture
 
 **Parquet** :
+
 - Écriture rapide avec Spark
 - Pas de bloom filters (moins d'overhead écriture)
 - Row groups configurables
 
 **ORC** :
+
 - Écriture rapide avec Hive
 - Bloom filters (overhead écriture mais gain lecture)
 - Stripes configurables
@@ -93,6 +100,7 @@
 #### Apache Spark
 
 **Parquet** :
+
 - ✅ **Support natif** depuis Spark 1.0+
 - ✅ Format par défaut recommandé
 - ✅ Optimisations natives (predicate pushdown, column pruning)
@@ -100,6 +108,7 @@
 - ✅ Support complet des types complexes (nested, arrays, maps)
 
 **ORC** :
+
 - ✅ Support depuis Spark 2.0+
 - ⚠️ Moins optimisé que Parquet
 - ⚠️ Nécessite parfois Hive pour meilleures performances
@@ -110,10 +119,12 @@
 #### Hive
 
 **Parquet** :
+
 - ✅ Support complet
 - ⚠️ Moins optimisé que ORC (mais très bon)
 
 **ORC** :
+
 - ✅ **Support natif** (créé par Hive)
 - ✅ Optimisations natives (bloom filters, ACID)
 - ✅ Format recommandé pour Hive
@@ -123,6 +134,7 @@
 #### Autres Outils
 
 **Parquet** :
+
 - ✅ Pandas (Python)
 - ✅ Arrow (interopérabilité)
 - ✅ Presto/Trino
@@ -131,6 +143,7 @@
 - ✅ **Standard de facto** dans l'écosystème data
 
 **ORC** :
+
 - ✅ Hive (excellent)
 - ✅ Presto/Trino
 - ⚠️ Moins supporté par les outils Python
@@ -152,6 +165,7 @@
 #### Analyse
 
 **Parquet** :
+
 - ✅ **Cohérence** : Même format que l'ingestion (simplicité)
 - ✅ **Performance Spark** : Optimisations natives
 - ✅ **Interopérabilité** : Compatible avec tous les outils analytics
@@ -159,6 +173,7 @@
 - ✅ **Évolution** : Standard en croissance
 
 **ORC** :
+
 - ✅ Performance excellente
 - ⚠️ **Incohérence** : Format différent de l'ingestion (Parquet)
 - ⚠️ **Moins optimal** pour Spark (vs Parquet)
@@ -174,6 +189,7 @@
 ### Option 1 : Parquet (Recommandé) ✅
 
 **Avantages** :
+
 1. ✅ **Cohérence** : Même format que l'ingestion (Parquet)
 2. ✅ **Simplicité** : Un seul format dans tout le POC
 3. ✅ **Performance Spark** : Optimisations natives
@@ -182,6 +198,7 @@
 6. ✅ **Maintenance** : Plus simple (un seul format)
 
 **Inconvénients** :
+
 - ⚠️ Si Hive est utilisé intensivement, ORC pourrait être légèrement meilleur
 
 **Recommandation** : **Parquet** pour ce POC
@@ -189,11 +206,13 @@
 ### Option 2 : ORC (Alternative)
 
 **Avantages** :
+
 1. ✅ Performance excellente
 2. ✅ Bloom filters (gain pour certaines requêtes)
 3. ✅ Si Hive est l'outil principal d'analytics
 
 **Inconvénients** :
+
 - ⚠️ Format différent de l'ingestion (Parquet)
 - ⚠️ Moins optimal pour Spark (vs Parquet)
 - ⚠️ Maintenance de deux formats
@@ -204,9 +223,11 @@
 ### Option 3 : Les Deux Formats (Non Recommandé)
 
 **Avantages** :
+
 - ✅ Flexibilité maximale
 
 **Inconvénients** :
+
 - ❌ Complexité de maintenance
 - ❌ Duplication des exports
 - ❌ Pas de valeur ajoutée pour un POC
@@ -274,7 +295,7 @@ def exportIncrementalParquet(
   endDate: LocalDate,
   outputPath: String
 ): Unit = {
-  
+
   val df = spark.read
     .format("org.apache.spark.sql.cassandra")
     .options(Map(
@@ -286,13 +307,13 @@ def exportIncrementalParquet(
       col("date_op") >= startDate.toString &&
       col("date_op") < endDate.toString
     )
-  
+
   df.write
     .mode("overwrite")
     .partitionBy("date_op")
     .option("compression", "snappy")
     .parquet(outputPath)
-  
+
   println(s"✅ Export Parquet : ${startDate} → ${endDate} : ${df.count()} opérations")
 }
 
@@ -367,6 +388,7 @@ exportIncrementalParquet(start, end, "hdfs://.../incremental/2024-01")
 **Recommandation** : **Parquet** pour les exports incrémentaux
 
 **Raisons** :
+
 1. ✅ **Cohérence** : Même format que l'ingestion (Parquet)
 2. ✅ **Simplicité** : Un seul format dans tout le POC
 3. ✅ **Performance** : Optimisations natives Spark
@@ -376,6 +398,7 @@ exportIncrementalParquet(start, end, "hdfs://.../incremental/2024-01")
 ### Quand Utiliser ORC ?
 
 **ORC** est recommandé si :
+
 - Hive est l'outil principal d'analytics (pas Spark)
 - Besoin de bloom filters pour certaines requêtes
 - Écosystème Hive existant à préserver
@@ -383,6 +406,7 @@ exportIncrementalParquet(start, end, "hdfs://.../incremental/2024-01")
 ### Pour la Production
 
 **Recommandation** : **Parquet** sauf si :
+
 - Hive est l'outil principal d'analytics
 - Besoin spécifique de bloom filters ORC
 - Contraintes d'écosystème existant
@@ -394,11 +418,13 @@ exportIncrementalParquet(start, end, "hdfs://.../incremental/2024-01")
 ### 1. Export Incrémental Parquet
 
 **`27_export_incremental_parquet.sh`** :
+
 - Export incrémental depuis HCD vers HDFS (Parquet)
 - Fenêtre glissante avec WHERE date_op BETWEEN
 - Partitionnement par date
 
 **`examples/scala/export_incremental_parquet.scala`** :
+
 - Job Spark pour export Parquet
 - Gestion fenêtre glissante
 - Compression Snappy
@@ -406,6 +432,7 @@ exportIncrementalParquet(start, end, "hdfs://.../incremental/2024-01")
 ### 2. Comparaison Parquet vs ORC (Optionnel)
 
 **`28_comparaison_parquet_vs_orc.sh`** :
+
 - Export dans les deux formats
 - Comparaison performance/taille
 - Recommandation finale
@@ -413,4 +440,3 @@ exportIncrementalParquet(start, end, "hdfs://.../incremental/2024-01")
 ---
 
 **Conclusion** : **Parquet est supérieur pour ce POC** (cohérence, simplicité, performance Spark). ORC serait complémentaire uniquement si Hive est l'outil principal d'analytics.
-

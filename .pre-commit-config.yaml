@@ -89,4 +89,3 @@ repos:
     hooks:
       - id: gitlint
         stages: [commit-msg]
-

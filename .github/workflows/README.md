@@ -10,16 +10,19 @@
 ### 1. `test.yml` - Tests
 
 **Déclenchement** :
+
 - Push sur `main` ou `develop`
 - Pull Request vers `main` ou `develop`
 
 **Jobs** :
+
 - **syntax-check** : Vérification de la syntaxe des scripts shell et Python
 - **config-check** : Vérification des fichiers de configuration
 - **docs-check** : Vérification de la documentation
 - **structure-check** : Vérification de la structure du projet
 
 **Utilisation** :
+
 ```bash
 # Les workflows s'exécutent automatiquement sur push/PR
 # Voir les résultats dans l'onglet "Actions" de GitHub
@@ -30,15 +33,18 @@
 ### 2. `lint.yml` - Linting
 
 **Déclenchement** :
+
 - Push sur `main` ou `develop`
 - Pull Request vers `main` ou `develop`
 
 **Jobs** :
+
 - **shellcheck** : Linting des scripts shell
 - **python-lint** : Linting Python (black, isort, flake8)
 - **markdown-lint** : Linting Markdown
 
 **Utilisation** :
+
 ```bash
 # Les workflows s'exécutent automatiquement sur push/PR
 # Voir les résultats dans l'onglet "Actions" de GitHub
@@ -52,6 +58,7 @@
 
 1. **Créer un repository GitHub** (si pas déjà fait)
 2. **Pousser le code** :
+
 ```bash
 git remote add origin https://github.com/votre-org/Arkea.git
 git push -u origin main
@@ -88,7 +95,7 @@ Exemple d'ajout d'un job de test :
 ```yaml
 jobs:
   # ... jobs existants ...
-  
+
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
@@ -124,6 +131,7 @@ Ajouter dans `README.md` :
 ### Workflow ne s'exécute pas
 
 **Vérifier** :
+
 - ✅ Repository est sur GitHub (pas seulement local)
 - ✅ Fichiers `.github/workflows/*.yml` sont présents
 - ✅ Syntaxe YAML est correcte
@@ -132,9 +140,11 @@ Ajouter dans `README.md` :
 ### Erreurs dans les Workflows
 
 **Vérifier les logs** :
+
 - Onglet "Actions" → Workflow → Job → Logs
 
 **Problèmes courants** :
+
 - Chemins incorrects → Vérifier les chemins dans les workflows
 - Permissions → Vérifier les permissions des actions
 - Versions → Vérifier les versions des actions utilisées
@@ -152,4 +162,3 @@ Ajouter dans `README.md` :
 **Date** : 2025-12-01  
 **Version** : 1.0  
 **Statut** : ✅ **Documentation complète**
-

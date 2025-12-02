@@ -1,7 +1,7 @@
 # 🌟 Stargate - Gateway Data API pour HCD
 
 **Date** : 2025-11-25  
-**Référence** : https://stargate.io/docs/latest/index.html  
+**Référence** : <https://stargate.io/docs/latest/index.html>  
 **Objectif** : Documentation complète pour déployer et utiliser Stargate avec HCD local
 
 ---
@@ -9,12 +9,14 @@
 ## 📋 Qu'est-ce que Stargate ?
 
 **Stargate** est un gateway open-source qui expose Apache Cassandra via des APIs modernes :
+
 - ✅ **REST API** (v1 et v2)
 - ✅ **GraphQL API** (CQL-first et Schema-first)
 - ✅ **Document API** (MongoDB-like)
 - ✅ **gRPC API**
 
 **Pourquoi Stargate pour HCD ?**
+
 - La **Data API HCD** nécessite un gateway pour être accessible
 - Stargate est le gateway recommandé pour HCD/Cassandra
 - Permet d'exposer HCD via HTTP/REST/GraphQL sans driver binaire
@@ -32,11 +34,13 @@
 ### Déploiement Automatique
 
 **Script disponible** :
+
 ```bash
 ./39_deploy_stargate.sh
 ```
 
 Ce script :
+
 1. Vérifie les prérequis (Podman, HCD)
 2. Télécharge l'image Stargate
 3. Déploie le conteneur avec la bonne configuration
@@ -62,6 +66,7 @@ podman run -d \
 ```
 
 **Variables d'environnement** :
+
 - `CLUSTER_NAME` : Nom du cluster (arbitraire pour POC)
 - `CLUSTER_VERSION` : Version Cassandra (4.0 pour HCD 1.2.3)
 - `DEVELOPER_MODE` : Mode développement (simplifie la configuration)
@@ -122,10 +127,12 @@ python3 data_api_examples/01_connect_data_api.py
 ## 🔐 Authentification
 
 **Par défaut** (DEVELOPER_MODE=true) :
+
 - ✅ Pas d'authentification requise
 - ⚠️ **Non sécurisé** - Pour POC uniquement
 
 **Pour Production** :
+
 - Configurer l'authentification via tokens
 - Voir : [Securing Stargate](https://stargate.io/docs/latest/secure/authentication.html)
 
@@ -199,11 +206,13 @@ podman restart stargate
 ### Problème : Stargate ne démarre pas
 
 **Vérifications** :
+
 1. HCD est démarré : `nc -z localhost 9042`
 2. Podman fonctionne : `podman info`
 3. Ports disponibles : `lsof -i :8080`
 
 **Logs** :
+
 ```bash
 podman logs stargate
 ```
@@ -211,6 +220,7 @@ podman logs stargate
 ### Problème : Erreur de connexion au cluster
 
 **Vérifications** :
+
 1. `CLUSTER_SEED` correct : `localhost:9042`
 2. HCD accessible depuis Podman : `podman exec stargate ping localhost`
 3. Version Cassandra correcte : `CLUSTER_VERSION=4.0`
@@ -218,6 +228,7 @@ podman logs stargate
 ### Problème : Client Python échoue
 
 **Vérifications** :
+
 1. Endpoint accessible : `curl http://localhost:8080/v1/status`
 2. Variables d'environnement : `echo $API_ENDPOINT`
 3. Client installé : `pip3 list | grep astrapy`
@@ -227,15 +238,17 @@ podman logs stargate
 ## 📚 Documentation Complète
 
 ### Stargate
-- **Documentation principale** : https://stargate.io/docs/latest/index.html
-- **Installation** : https://stargate.io/docs/latest/install/cassandra-4.0.html
-- **REST API** : https://stargate.io/docs/latest/develop/rest.html
-- **GraphQL API** : https://stargate.io/docs/latest/develop/graphql.html
-- **Sécurité** : https://stargate.io/docs/latest/secure/authentication.html
+
+- **Documentation principale** : <https://stargate.io/docs/latest/index.html>
+- **Installation** : <https://stargate.io/docs/latest/install/cassandra-4.0.html>
+- **REST API** : <https://stargate.io/docs/latest/develop/rest.html>
+- **GraphQL API** : <https://stargate.io/docs/latest/develop/graphql.html>
+- **Sécurité** : <https://stargate.io/docs/latest/secure/authentication.html>
 
 ### Data API HCD
-- **Documentation** : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html
-- **Quickstart** : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/quickstart.html
+
+- **Documentation** : <https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html>
+- **Quickstart** : <https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/quickstart.html>
 
 ---
 
@@ -244,11 +257,13 @@ podman logs stargate
 ### Pour POC
 
 **Option A : Sans Stargate** ✅
+
 - Utiliser CQL direct (déjà démontré)
 - Performance optimale
 - Pas de dépendance supplémentaire
 
 **Option B : Avec Stargate** 🟢
+
 - Tester réellement la Data API
 - Démonstrer l'accès REST/GraphQL
 - Valider les performances
@@ -256,6 +271,7 @@ podman logs stargate
 ### Pour Production
 
 **Obligatoire** : Stargate ou gateway équivalent
+
 - Déployé via Kubernetes
 - Configuration sécurisée (authentification)
 - Monitoring et logging
@@ -276,4 +292,3 @@ podman logs stargate
 ---
 
 **✅ Stargate est le gateway recommandé pour exposer HCD via Data API**
-

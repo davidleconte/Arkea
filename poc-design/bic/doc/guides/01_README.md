@@ -24,6 +24,7 @@ Le **POC BIC (Base d'Interaction Client)** démontre la migration de la table BI
 ### Contexte
 
 La table BIC dans HBase stocke :
+
 - Les interactions entre conseillers et clients
 - Historique sur 2 ans (TTL)
 - Données en format JSON avec colonnes dynamiques
@@ -58,6 +59,7 @@ La table BIC dans HBase stocke :
 **Description** : Afficher toutes les interactions d'un client sur 2 ans
 
 **Requête** :
+
 ```cql
 SELECT * FROM bic_poc.interactions_by_client
 WHERE code_efs = 'EFS001' AND numero_client = 'CLIENT123'
@@ -70,9 +72,10 @@ LIMIT 100;
 **Description** : Filtrer les interactions par canal (email, SMS, agence)
 
 **Requête** :
+
 ```cql
 SELECT * FROM bic_poc.interactions_by_client
-WHERE code_efs = 'EFS001' 
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND canal = 'email'
 ORDER BY date_interaction DESC;
@@ -83,6 +86,7 @@ ORDER BY date_interaction DESC;
 **Description** : Ingérer les événements `bic-event` depuis Kafka
 
 **Flux** :
+
 ```
 Kafka Topic (bic-event)
     ↓
@@ -96,6 +100,7 @@ HCD (interactions_by_client)
 **Description** : Exporter les données pour analyse
 
 **Flux** :
+
 ```
 HCD (interactions_by_client)
     ↓
@@ -213,4 +218,3 @@ cqlsh $HCD_HOST $HCD_PORT -f schemas/03_create_bic_indexes.cql
 
 **Date** : 2025-12-01  
 **Version** : 1.0.0
-

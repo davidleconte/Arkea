@@ -85,11 +85,13 @@ Arkea/
 ### `scripts/` - Scripts Organisés
 
 **Organisation** :
+
 - `setup/` : Scripts d'installation, démarrage, configuration
 - `utils/` : Scripts utilitaires (vérification, listing, helpers)
 - `scala/` : Scripts et tests Scala pour Spark
 
 **Convention** :
+
 - Scripts numérotés (01-06) dans `setup/`
 - Scripts numérotés (70-90) dans `utils/`
 - Fichiers Scala dans `scala/`
@@ -99,6 +101,7 @@ Arkea/
 ### `schemas/` - Schémas CQL
 
 **Organisation** :
+
 - `kafka/` : Schémas liés à Kafka
 - Schémas spécifiques aux POCs dans `poc-design/*/schemas/`
 
@@ -107,10 +110,12 @@ Arkea/
 ### `binaire/` - Logiciels Installés
 
 **Contenu** :
+
 - Logiciels extraits et prêts à l'emploi
 - Exclu du contrôle de version (via `.gitignore`)
 
 **Composants** :
+
 - HCD 1.2.3
 - Spark 3.5.1
 - spark-cassandra-connector
@@ -121,6 +126,7 @@ Arkea/
 ### `software/` - Archives
 
 **Contenu** :
+
 - Fichiers d'archive téléchargés (.tar.gz, .tgz)
 - Conservation pour réinstallation
 
@@ -131,6 +137,7 @@ Arkea/
 ### `docs/` - Documentation
 
 **Organisation** :
+
 - Documentation générale du projet
 - Guides d'installation
 - Analyses et audits
@@ -141,6 +148,7 @@ Arkea/
 ### `poc-design/` - POCs de Démonstration
 
 **Structure** :
+
 - Chaque POC a sa propre structure :
   - `scripts/` : Scripts du POC
   - `doc/` : Documentation du POC
@@ -152,6 +160,7 @@ Arkea/
 ### `logs/` - Logs Organisés
 
 **Organisation** :
+
 - `archive/` : Logs archivés (organisés par date)
 - `current/` : Logs actuels (organisés par date)
 - `UNLOAD_*` : Logs existants (à archiver progressivement)

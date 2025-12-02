@@ -44,73 +44,79 @@ else
 fi
 """
 
+
 def find_config_section(content):
     """Trouve où insérer setup_paths()"""
-    lines = content.split('\n')
-    
+    lines = content.split("\n")
+
     # Chercher après set -euo pipefail ou set -e
     for i, line in enumerate(lines):
-        if re.match(r'set\s+-[euo\s]+pipefail', line) or re.match(r'set\s+-e', line):
+        if re.match(r"set\s+-[euo\s]+pipefail", line) or re.match(r"set\s+-e", line):
             # Chercher la section de configuration qui suit
-            for j in range(i+1, min(i+50, len(lines))):
+            for j in range(i + 1, min(i + 50, len(lines))):
                 # Si on trouve déjà setup_paths, on ne fait rien
-                if 'setup_paths' in lines[j]:
+                if "setup_paths" in lines[j]:
                     return None
                 # Si on trouve SCRIPT_DIR ou INSTALL_DIR, on remplace
-                if re.match(r'SCRIPT_DIR=|INSTALL_DIR=', lines[j]):
+                if re.match(r"SCRIPT_DIR=|INSTALL_DIR=", lines[j]):
                     return j
             # Sinon, insérer après set -e
             return i + 1
-    
+
     return None
+
 
 def update_script(script_path):
     """Met à jour un script pour ajouter setup_paths()"""
-    with open(script_path, 'r', encoding='utf-8') as f:
+    with open(script_path, "r", encoding="utf-8") as f:
         content = f.read()
-    
+
     # Vérifier si setup_paths existe déjà
-    if 'setup_paths' in content:
+    if "setup_paths" in content:
         print(f"  ⚠️  {script_path.name} : setup_paths() déjà présent")
         return False
-    
+
     # Trouver où insérer
     insert_pos = find_config_section(content)
     if insert_pos is None:
         print(f"  ⚠️  {script_path.name} : Impossible de trouver où insérer")
         return False
-    
-    lines = content.split('\n')
-    
+
+    lines = content.split("\n")
+
     # Trouver où commence la section de configuration actuelle
     config_start = insert_pos
     config_end = insert_pos
-    
+
     # Trouver la fin de la section de configuration (jusqu'à la première fonction ou section)
     for i in range(insert_pos, min(insert_pos + 30, len(lines))):
-        if lines[i].strip() and not lines[i].strip().startswith('#') and not re.match(r'[A-Z_]+=', lines[i]):
-            if not lines[i].strip().startswith('$'):
+        if (
+            lines[i].strip()
+            and not lines[i].strip().startswith("#")
+            and not re.match(r"[A-Z_]+=", lines[i])
+        ):
+            if not lines[i].strip().startswith("$"):
                 config_end = i
                 break
         config_end = i + 1
-    
+
     # Remplacer la section de configuration
     new_lines = lines[:config_start]
-    new_lines.extend(SETUP_PATHS_CODE.split('\n'))
-    
+    new_lines.extend(SETUP_PATHS_CODE.split("\n"))
+
     # Garder les lignes après la configuration qui ne sont pas remplacées
     # (sauter les lignes qui définissent SCRIPT_DIR, INSTALL_DIR, HCD_DIR, etc.)
     skip_patterns = [
-        r'^SCRIPT_DIR=',
-        r'^INSTALL_DIR=',
-        r'^HCD_DIR=',
-        r'^SPARK_HOME=',
-        r'^HCD_HOST=',
-        r'^HCD_PORT=',
-        r'^NODETOOL=',
-        r'^CQLSH=',
+        r"^SCRIPT_DIR=",
+        r"^INSTALL_DIR=",
+        r"^HCD_DIR=",
+        r"^SPARK_HOME=",
+        r"^HCD_HOST=",
+        r"^HCD_PORT=",
+        r"^NODETOOL=",
+        r"^CQLSH=",
     ]
-    
+
     for i in range(config_start, config_end):
         line = lines[i]
         should_skip = False
@@ -120,25 +126,26 @@ def update_script(script_path):
                 break
         if not should_skip and line.strip():
             new_lines.append(line)
-    
+
     new_lines.extend(lines[config_end:])
-    
+
     # Sauvegarder
-    backup_path = script_path.with_suffix('.sh.bak')
-    with open(backup_path, 'w', encoding='utf-8') as f:
+    backup_path = script_path.with_suffix(".sh.bak")
+    with open(backup_path, "w", encoding="utf-8") as f:
         f.write(content)
-    
-    with open(script_path, 'w', encoding='utf-8') as f:
-        f.write('\n'.join(new_lines))
-    
+
+    with open(script_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(new_lines))
+
     print(f"  ✅ {script_path.name} : setup_paths() ajouté")
     return True
+
 
 def main():
     """Met à jour tous les scripts"""
     print("🔄 Ajout de setup_paths() aux scripts...")
     print()
-    
+
     updated = 0
     for script_name in SCRIPTS_TO_UPDATE:
         script_path = SCRIPT_DIR / script_name
@@ -147,11 +154,11 @@ def main():
                 updated += 1
         else:
             print(f"  ⚠️  {script_name} : Fichier non trouvé")
-    
+
     print()
     print(f"✅ {updated} scripts mis à jour")
     print(f"📦 Sauvegardes créées : *.sh.bak")
 
+
 if __name__ == "__main__":
     main()
-

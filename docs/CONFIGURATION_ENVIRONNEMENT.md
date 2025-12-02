@@ -75,6 +75,7 @@ fi
 | `JAVA17_HOME` | Détecté automatiquement | Java 17 pour Kafka (macOS/Linux) |
 
 **Détection automatique** :
+
 - **macOS** : Homebrew (`/opt/homebrew/opt/openjdk@11` ou `/usr/local/opt/openjdk@11`)
 - **Linux** : Système (`/usr/lib/jvm/java-11-openjdk-amd64`)
 - **Windows (WSL2)** : Système Linux
@@ -117,6 +118,7 @@ fi
 | `KAFKA_ZOOKEEPER_CONNECT` | `localhost:2181` | Zookeeper (Kafka 2.8+ n'utilise plus Zookeeper) |
 
 **Détection automatique** :
+
 - **macOS** : Homebrew (`/opt/homebrew/opt/kafka` ou `/usr/local/opt/kafka`)
 - **Linux** : `/opt/kafka`, `/usr/local/kafka`, ou `$ARKEA_HOME/binaire/kafka`
 - **Installation** : Utiliser `scripts/setup/02_install_kafka_linux.sh` sur Linux
@@ -204,12 +206,14 @@ Le système de configuration est **entièrement portable** et supporte :
 - ✅ **Windows** (via WSL2)
 
 **Fonctionnalités** :
+
 - Détection automatique de l'OS via `$OSTYPE`
 - Chemins portables (pas de chemins hardcodés)
 - Fonctions utilitaires portables (`check_port`, `kill_process`, `get_realpath`)
 - Support multi-OS pour Java, Kafka, HCD, Spark
 
 **Voir** :
+
 - `docs/GUIDE_INSTALLATION_LINUX.md` pour Linux
 - `docs/GUIDE_INSTALLATION_WINDOWS.md` pour Windows (WSL2)
 - `docs/AUDIT_PORTABILITE_CROSS_PLATFORM_2025.md` pour les détails
@@ -227,4 +231,3 @@ Le système de configuration est **entièrement portable** et supporte :
 ---
 
 **Configuration prête à l'emploi et portable !** ✅
-

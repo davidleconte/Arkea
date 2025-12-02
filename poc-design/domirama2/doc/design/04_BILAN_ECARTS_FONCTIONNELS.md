@@ -22,12 +22,14 @@
 ### Key Design
 
 **HBase** :
+
 - Une ligne par opération
 - `code SI` (entité organisationnelle)
 - `numéro de contrat` (identification du compte)
 - `binaire combinant numéro d'opération + date` pour ordre antichronologique
 
 **POC Domirama2** :
+
 - ✅ `code_si` (partition key)
 - ✅ `contrat` (partition key)
 - ✅ `date_op DESC, numero_op ASC` (clustering keys, ordre antichronologique)
@@ -36,11 +38,13 @@
 ### Format de Stockage
 
 **HBase** :
+
 - `Données Thrift encodées en Binaire dans une colonne`
 - `+ colonnes dynamiques calquées sur propriétés du POJO Thrift`
 - `=> permet filtres sur valeurs dans Scan + Optimisation BLOOMFILTER`
 
 **POC Domirama2** :
+
 - ✅ `operation_data BLOB` (données COBOL/Thrift binaires)
 - ✅ Colonnes normalisées (`libelle`, `montant`, `type_operation`, etc.)
 - ⚠️ **Colonnes dynamiques** : Partiellement démontré (`meta_flags MAP<TEXT, TEXT>`)
@@ -63,6 +67,7 @@
 ### POC Domirama2
 
 **Batch** :
+
 - ✅ Spark (remplace MapReduce)
 - ✅ Spark Cassandra Connector
 - ✅ Format Parquet (remplace SequenceFile)
@@ -71,11 +76,13 @@
 - ⚠️ **SequenceFile** : Non utilisé (Parquet à la place)
 
 **Client** :
+
 - ✅ UPDATE avec `cat_user`, `cat_date_user = toTimestamp(now())`
 - ✅ Stratégie multi-version (client écrit cat_user uniquement)
 - ✅ **Conforme** (remplace temporalité HBase)
 
 **Écarts** :
+
 - ⚠️ **DSBulk** : Non démontré (mentionné par IBM mais pas utilisé)
 - ⚠️ **BulkLoad performance** : Non mesuré (comparaison avec HBase)
 - ⚠️ **SequenceFile** : Non utilisé (Parquet à la place, acceptable)
@@ -97,6 +104,7 @@
 ### POC Domirama2
 
 **Temps Réel** :
+
 - ✅ SELECT avec WHERE (remplace SCAN)
 - ✅ Index SAI pour filtres (remplace value filter)
 - ✅ Full-Text Search (remplace scan complet)
@@ -105,12 +113,14 @@
 - ✅ **Conforme + améliorations**
 
 **Batch (Unload)** :
+
 - ✅ Export incrémental Parquet (équivalent ORC)
 - ✅ Fenêtre glissante (TIMERANGE équivalent)
 - ✅ STARTROW/STOPROW équivalent (WHERE clustering keys)
 - ✅ **Conforme**
 
 **Écarts** :
+
 - ✅ **Aucun écart majeur** (Parquet recommandé vs ORC)
 
 ---
@@ -120,10 +130,12 @@
 ### 1. TTL (Time To Live)
 
 **HBase** :
+
 - `Utilisation du TTL pour purge automatique`
 - TTL = 315619200 secondes (≈ 10 ans)
 
 **POC Domirama2** :
+
 - ✅ `default_time_to_live = 315360000` (10 ans)
 - ✅ **Conforme**
 
@@ -132,12 +144,14 @@
 ### 2. Temporalité des Cellules
 
 **HBase** :
+
 - `Utilisation de la temporalité des cellules`
 - `Le batch écrit toujours sur le même timestamp`
 - `Le client écrit sur le timestamp réel de son action`
 - `=> pas d'écrasement en cas de rejeu du batch`
 
 **POC Domirama2** :
+
 - ✅ Stratégie multi-version (remplace temporalité)
 - ✅ Batch écrit `cat_auto` uniquement (ne touche jamais `cat_user`)
 - ✅ Client écrit `cat_user` avec `cat_date_user = now()`
@@ -148,10 +162,12 @@
 ### 3. BLOOMFILTER
 
 **HBase** :
+
 - `BLOOMFILTER => 'ROWCOL'`
 - Optimisation pour lectures
 
 **POC Domirama2** :
+
 - ⚠️ **Non démontré explicitement**
 - ✅ HCD utilise index SAI (plus performants que BLOOMFILTER)
 - ⚠️ **Écart** : Non documenté/comparé
@@ -159,10 +175,12 @@
 ### 4. REPLICATION_SCOPE
 
 **HBase** :
+
 - `REPLICATION_SCOPE => '1'`
 - Réplication multi-cluster
 
 **POC Domirama2** :
+
 - ⚠️ **Non démontré**
 - ⚠️ **Écart** : Non documenté (si multi-cluster nécessaire)
 
@@ -212,52 +230,63 @@
 #### 1. BLOOMFILTER Équivalent ✅ COMPLÉTÉ (2025-11-26)
 
 **HBase** :
+
 - `BLOOMFILTER => 'ROWCOL'` pour optimisation lectures
 
 **POC Domirama2** :
+
 - ✅ **Démontré** avec script `32_demo_performance_comparison.sh`
 - ✅ HCD utilise index SAI (plus performants)
 - ✅ Performance validée : Accès direct à la partition (équivalent BLOOMFILTER)
 
 **Résultats** :
+
 - ✅ Requêtes optimisées avec index SAI
 - ✅ Pas de scan complet nécessaire
 - ✅ Performance excellente (équivalent ou meilleur que BLOOMFILTER)
 
 **Scripts disponibles** :
+
 - `31_demo_bloomfilter_equivalent_v2.sh` : Démonstration standard
 - `32_demo_performance_comparison.sh` : Comparaison performance détaillée
 
 #### 2. Colonnes Dynamiques ✅ COMPLÉTÉ (2025-11-26)
 
 **HBase** :
+
 - `Colonnes dynamiques calquées sur propriétés du POJO Thrift`
 - Permet filtres sur valeurs dans Scan
 
 **POC Domirama2** :
+
 - ✅ **Démontré** avec script `33_demo_colonnes_dynamiques_v2.sh`
 - ✅ Filtrage sur MAP démontré (10 parties)
 - ✅ Performance validée (tests de charge)
 
 **Résultats** :
+
 - ✅ Filtrage simple et multi-clés fonctionnel
 - ✅ Filtrage combiné (MAP + Index SAI) démontré
 - ✅ Mise à jour dynamique validée
 - ✅ Performance stable (602ms moyenne, 1 req/s)
 
 **Script disponible** :
+
 - `33_demo_colonnes_dynamiques_v2.sh` : Démonstration complète (10 parties)
 
 #### 3. DSBulk pour BulkLoad
 
 **HBase** :
+
 - `MapReduce en bulkLoad` pour chargements massifs
 
 **POC Domirama2** :
+
 - ⚠️ Non démontré (Spark utilisé à la place)
 - Mentionné par IBM mais pas utilisé
 
 **Action** :
+
 - Installer et configurer DSBulk
 - Démontrer import massif
 - Comparer performance vs Spark
@@ -267,20 +296,24 @@
 #### 4. REPLICATION_SCOPE ✅ COMPLÉTÉ (2025-11-26)
 
 **HBase** :
+
 - `REPLICATION_SCOPE => '1'` pour réplication multi-cluster
 
 **POC Domirama2** :
+
 - ✅ **Démontré** avec script `34_demo_replication_scope_v2.sh`
 - ✅ Équivalences documentées (10 parties)
 - ✅ Consistency levels et drivers Java expliqués
 
 **Résultats** :
+
 - ✅ Équivalences REPLICATION_SCOPE documentées
 - ✅ Consistency levels expliqués (QUORUM, LOCAL_QUORUM, etc.)
 - ✅ Driver Java : Configuration et exemples fournis
 - ✅ Exemple Java complet créé
 
 **Script disponible** :
+
 - `34_demo_replication_scope_v2.sh` : Démonstration complète (10 parties)
 
 ---
@@ -337,11 +370,13 @@
 **Script** : `31_demo_bloomfilter_equivalent_v2.sh`
 
 **Objectif** :
+
 - Documenter équivalent SAI
 - Comparer performance avec/sans index
 - Démontrer optimisation lectures
 
 **Contenu** :
+
 - Explication BLOOMFILTER HBase
 - Équivalent SAI (index sur clustering keys)
 - Comparaison performance
@@ -352,11 +387,13 @@
 **Script** : `33_demo_colonnes_dynamiques_v2.sh`
 
 **Objectif** :
+
 - Démontrer utilisation `meta_flags MAP<TEXT, TEXT>`
 - Démontrer filtrage sur colonnes MAP
 - Exemples de requêtes
 
 **Contenu** :
+
 - Utilisation `meta_flags` pour colonnes dynamiques
 - Filtrage sur valeurs MAP
 - Exemples de requêtes avec filtres MAP
@@ -366,11 +403,13 @@
 **Script** : `35_demo_dsbulk_v2.sh`
 
 **Objectif** :
+
 - Installer et configurer DSBulk
 - Démontrer import massif
 - Comparer performance vs Spark
 
 **Contenu** :
+
 - Installation DSBulk
 - Import massif depuis CSV/Parquet
 - Comparaison performance Spark vs DSBulk
@@ -380,11 +419,13 @@
 **Documentation** : `REPLICATION_SCOPE_EQUIVALENT.md`
 
 **Objectif** :
+
 - Documenter équivalent HCD
 - Configuration réplication multi-cluster
 - Comparaison avec HBase
 
 **Contenu** :
+
 - Explication REPLICATION_SCOPE HBase
 - Équivalent HCD (réplication native)
 - Configuration multi-cluster
@@ -418,12 +459,14 @@ Tous les besoins fonctionnels majeurs sont satisfaits.
 ### Couverture Globale : **98%** ✅
 
 **Points Forts** :
+
 - ✅ Tous les besoins fonctionnels majeurs satisfaits
 - ✅ Améliorations significatives vs HBase
 - ✅ Démonstrations complètes et validées
 - ✅ BLOOMFILTER, Colonnes dynamiques, REPLICATION_SCOPE démontrés
 
 **Écarts Restants** :
+
 - ⚠️ 1 écart mineur : DSBulk (optionnel, Spark utilisé)
 - ⚠️ Optionnel ou amélioré par HCD
 
@@ -432,6 +475,7 @@ Tous les besoins fonctionnels majeurs sont satisfaits.
 **Pour POC** : ✅ **Suffisant** (95% de couverture)
 
 **Pour Production** :
+
 - Documenter équivalents (BLOOMFILTER, REPLICATION_SCOPE)
 - Démontrer colonnes dynamiques (MAP)
 - Évaluer DSBulk si volumes très importants
@@ -441,6 +485,7 @@ Tous les besoins fonctionnels majeurs sont satisfaits.
 **✅ Le POC Domirama2 couvre 98% des besoins HBase, avec des améliorations significatives !**
 
 **Mise à jour** : 2024-11-27
+
 - ✅ **BLOOMFILTER** : Démontré avec performance validée (`32_demo_performance_comparison.sh`)
 - ✅ **Colonnes dynamiques** : Démontrées avec 10 parties (`33_demo_colonnes_dynamiques_v2.sh`)
 - ✅ **REPLICATION_SCOPE** : Démontré avec consistency levels et drivers Java (`34_demo_replication_scope_v2.sh`)
@@ -449,4 +494,3 @@ Tous les besoins fonctionnels majeurs sont satisfaits.
 - ✅ **STARTROW/STOPROW** : Démontré avec requêtes CQL (`30_demo_requetes_startrow_stoprow_v2_didactique.sh`)
 - ✅ **57 scripts** créés (18 versions didactiques)
 - ✅ **18 démonstrations** .md générées automatiquement
-

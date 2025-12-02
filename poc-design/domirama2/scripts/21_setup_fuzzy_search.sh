@@ -8,7 +8,7 @@
 #   Ce script configure la recherche floue (fuzzy search) en ajoutant une
 #   colonne vectorielle 'libelle_embedding' de type VECTOR pour stocker
 #   les embeddings ByteT5, permettant des recherches par similarité sémantique.
-#   
+#
 #   Fonctionnalités :
 #   - Ajout de la colonne 'libelle_embedding' (VECTOR<FLOAT, 1472>)
 #   - Création d'un index SAI vectoriel sur 'libelle_embedding'
@@ -122,4 +122,3 @@ info "📝 Prochaines étapes:"
 echo "   1. Installer les dépendances Python: pip install transformers torch"
 echo "   2. Générer les embeddings: ./22_generate_embeddings.sh"
 echo "   3. Tester la recherche floue: ./23_test_fuzzy_search.sh"
-

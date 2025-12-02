@@ -10,7 +10,7 @@
 # OBJECTIF :
 #   Ce script démontre la logique multi-version avec time travel en appelant
 #   un script Python externe qui exécute 10 étapes de démonstration.
-#   
+#
 #   Cette version didactique affiche :
 #   - L'objectif et la stratégie multi-version
 #   - Le schéma nécessaire avec explications
@@ -288,7 +288,7 @@ for match in step_matches:
     step_num = int(match.group(1))
     step_desc = match.group(2).strip()
     step_content = match.group(0)
-    
+
     # Extraire les requêtes CQL de cette étape
     cql_queries = []
     # Pattern pour INSERT
@@ -307,11 +307,11 @@ for match in step_matches:
     delete_pattern = r'DELETE FROM[^;]+;'
     deletes = re.findall(delete_pattern, step_content, re.IGNORECASE | re.DOTALL)
     cql_queries.extend(deletes)
-    
+
     # Extraire les états des données (📊 État)
     state_pattern = r'📊 État (?:actuel|après[^:]+):\s*\n((?:\s+[^\n]+\n?)+)'
     states = re.findall(state_pattern, step_content)
-    
+
     # Extraire les valeurs des colonnes
     cat_values = {}
     cat_auto_match = re.search(r'cat_auto:\s*([^\n(]+)', step_content)
@@ -329,11 +329,11 @@ for match in step_matches:
     cat_val_match = re.search(r'cat_validee:\s*([^\n(]+)', step_content)
     if cat_val_match:
         cat_values['cat_validee'] = cat_val_match.group(1).strip()
-    
+
     # Extraire les dates et catégories mentionnées
     dates = re.findall(r'📅\s*Date[^:]*:\s*([^\n]+)', step_content)
     categories = re.findall(r"Catégorie[^:]*:\s*'?([^'\n]+)'?", step_content)
-    
+
     results["steps"].append({
         "number": step_num,
         "description": step_desc,
@@ -606,7 +606,7 @@ for step in results.get("steps", []):
     step_desc = step['description']
     detailed_desc = step_descriptions.get(step_num, "Démonstration de la logique multi-version")
     explanation = step_explanations.get(step_num, "")
-    
+
     report += f"""
 ### Étape {step_num} : {step_desc}
 
@@ -633,7 +633,7 @@ for step in results.get("steps", []):
 ```
 
 """
-    
+
     # Ajouter les états des données si présents
     if step.get("values"):
         values = step.get("values", {})
@@ -649,7 +649,7 @@ for step in results.get("steps", []):
 | `cat_validee` | {values.get('cat_validee', 'N/A')} | Catégorie validée |
 
 """
-    
+
     # Ajouter les dates et catégories mentionnées
     if step.get("dates") or step.get("categories"):
         if step.get("dates"):
@@ -668,7 +668,7 @@ for step in results.get("steps", []):
             for cat in step.get("categories", []):
                 report += f"- {cat.strip()}\n"
             report += "\n"
-    
+
     # Ajouter le résultat attendu et obtenu
     report += f"""
 **Résultat attendu** : Voir description ci-dessus
@@ -716,7 +716,7 @@ Les tests suivants démontrent que la catégorie valide dépend de la date de re
         categorie = test.get('categorie', 'N/A')
         source = test.get('source', 'N/A')
         details = test.get('details', '')
-        
+
         report += f"""
 #### Test {i} : Time Travel à la date {date}
 
@@ -987,4 +987,3 @@ rm -f "$TEMP_OUTPUT" "$TEMP_RESULTS"
 
 success "✅ Démonstration terminée !"
 echo ""
-

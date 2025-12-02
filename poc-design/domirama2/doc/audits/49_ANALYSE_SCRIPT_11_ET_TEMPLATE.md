@@ -45,35 +45,42 @@ Le script `11_load_domirama2_data_fixed.sh` est un **script d'ingestion/ETL** qu
 ### Fonctionnalités Actuelles
 
 ✅ **Vérifications** :
+
 - HCD démarré
 - Keyspace existe
 - Fichier CSV présent
 
 ✅ **Exécution Spark** :
+
 - Création d'un script Scala temporaire
 - Exécution via `spark-shell`
 - Transformation des données (casting, coalesce, etc.)
 - Écriture dans HCD
 
 ✅ **Vérifications Post-Chargement** :
+
 - Nombre d'opérations chargées
 - Vérification que `cat_user` est null (stratégie batch)
 
 ### Limitations Actuelles
 
 ❌ **Pas d'affichage du code Spark** :
+
 - Le code Scala n'est pas affiché avant exécution
 - Pas d'explication des transformations
 
 ❌ **Vérifications basiques** :
+
 - Vérifications limitées (comptage, null check)
 - Pas d'affichage détaillé des résultats
 
 ❌ **Pas d'explications** :
+
 - Pas d'explications de la stratégie multi-version
 - Pas d'explications des transformations Spark
 
 ❌ **Pas de documentation générée** :
+
 - Pas de rapport markdown généré automatiquement
 
 ---
@@ -119,10 +126,12 @@ Le script `11_load_domirama2_data_fixed.sh` est un **script d'ingestion/ETL** qu
 ### Option 1 : Enrichir un Template Existant
 
 **Avantages** :
+
 - Un seul template pour tous les scripts
 - Cohérence dans la structure
 
 **Inconvénients** :
+
 - Template très complexe avec beaucoup de conditionnels
 - Sections non utilisées pour chaque type de script
 - Difficile à maintenir
@@ -132,12 +141,14 @@ Le script `11_load_domirama2_data_fixed.sh` est un **script d'ingestion/ETL** qu
 ### Option 2 : Créer un Template Spécifique pour Ingestion/ETL
 
 **Avantages** :
+
 - Template adapté spécifiquement aux scripts d'ingestion
 - Structure claire et dédiée
 - Facile à utiliser et maintenir
 - Sections pertinentes uniquement
 
 **Inconvénients** :
+
 - Trois templates à maintenir
 - Nécessite de choisir le bon template
 
@@ -146,10 +157,12 @@ Le script `11_load_domirama2_data_fixed.sh` est un **script d'ingestion/ETL** qu
 ### Option 3 : Template Hybride avec Sections Optionnelles
 
 **Avantages** :
+
 - Un seul template
 - Sections optionnelles selon le type
 
 **Inconvénients** :
+
 - Template très complexe
 - Difficile à comprendre et utiliser
 - Risque d'erreurs
@@ -241,8 +254,3 @@ Le template spécifique pour ingestion (`50_TEMPLATE_SCRIPT_INGESTION_DIDACTIQUE
 ---
 
 **✅ Conclusion : Le template spécifique pour ingestion est nécessaire et doit être créé !**
-
-
-
-
-

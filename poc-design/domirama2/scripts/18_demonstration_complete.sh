@@ -8,7 +8,7 @@
 #   Ce script orchestre une démonstration complète du POC Domirama2 en
 #   exécutant une série de tests et démonstrations pour valider toutes les
 #   fonctionnalités de recherche full-text avec index SAI avancés.
-#   
+#
 #   La démonstration couvre :
 #   - Configuration du schéma et des index
 #   - Chargement des données
@@ -119,7 +119,7 @@ if [ -f "11_load_domirama2_data_parquet.sh" ]; then
     jenv local 11
     eval "$(jenv init -)"
     COUNT=$(./bin/cqlsh "$HCD_HOST" "$HCD_PORT" -e "USE domirama2_poc; SELECT COUNT(*) FROM operations_by_account;" 2>&1 | grep -v "Warnings" | grep -E "^[[:space:]]*[0-9]+" | head -1 | tr -d ' ' || echo "0")
-    
+
     if [ -n "$COUNT" ] && [ "$COUNT" -gt 5000 ]; then
         success "Données déjà chargées : $COUNT opérations"
     else
@@ -485,4 +485,3 @@ info "💡 Utilisation recommandée :"
 echo "   - libelle : Recherches précises avec stemming français"
 echo "   - libelle_prefix : Recherches tolérantes aux typos (préfixe)"
 echo ""
-

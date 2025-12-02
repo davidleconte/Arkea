@@ -166,5 +166,3 @@ Voir le répertoire [demonstrations/](demonstrations/) pour la liste complète d
 
 **Date** : 2025-01-XX  
 **Version** : 1.0
-
-

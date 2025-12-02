@@ -32,16 +32,19 @@ Résultats Pertinents
 ## Avantages
 
 ### 1. Précision du Full-Text
+
 - Filtre initial réduit l'espace de recherche
 - Retourne uniquement les résultats contenant le terme recherché
 - Performance optimale pour requêtes correctes
 
 ### 2. Tolérance aux Typos du Vector Search
+
 - Si Full-Text ne trouve rien (typo), fallback sur Vector Search
 - Les embeddings capturent la similarité sémantique
 - Trouve des résultats même avec des erreurs de frappe
 
 ### 3. Meilleure Pertinence
+
 - Combine la précision du Full-Text avec la flexibilité du Vector
 - Tri par similarité vectorielle améliore le ranking
 - Résultats plus pertinents que chaque approche seule
@@ -76,11 +79,13 @@ python3 hybrid_search.py
 ## Exemples de Requêtes
 
 ### Requête Correcte
+
 - **Input**: `"LOYER IMPAYE"`
 - **Stratégie**: Full-Text + Vector
 - **Résultat**: `"LOYER IMPAYE REGULARISATION"` (1er résultat)
 
 ### Requête avec Typo
+
 - **Input**: `"loyr impay"`
 - **Stratégie**: Fallback Vector Search
 - **Résultat**: `"LOYER PARIS MAISON"` (typo tolérée)
@@ -97,16 +102,19 @@ python3 hybrid_search.py
 ## Recommandations
 
 ### Quand utiliser Full-Text seul
+
 - Recherches exactes avec termes connus
 - Performance critique
 - Pas besoin de tolérance aux typos
 
 ### Quand utiliser Vector seul
+
 - Recherches avec typos fréquents
 - Recherches sémantiques (synonymes)
 - Multilingue
 
 ### Quand utiliser Hybride (recommandé)
+
 - **Production** : Meilleur compromis
 - Expérience utilisateur optimale
 - Tolère les erreurs tout en gardant la précision
@@ -118,7 +126,7 @@ python3 hybrid_search.py
 ```cql
 SELECT libelle, montant, cat_auto
 FROM operations_by_account
-WHERE code_si = '1' 
+WHERE code_si = '1'
   AND contrat = '5913101072'
   AND libelle : 'loyer'  -- Filtre Full-Text
 ORDER BY libelle_embedding ANN OF [0.12, 0.5, ..., -0.03]  -- Tri Vector
@@ -154,9 +162,9 @@ Puis filtrage côté client pour améliorer la pertinence.
 ## Conclusion
 
 La recherche hybride offre le meilleur compromis entre :
+
 - ✅ **Précision** (Full-Text)
 - ✅ **Tolérance aux typos** (Vector)
 - ✅ **Pertinence** (Combinaison des deux)
 
 **Recommandation** : Utiliser la recherche hybride en production pour une expérience utilisateur optimale.
-

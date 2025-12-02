@@ -33,6 +33,7 @@
 - ✅ **Java 17** (pour Kafka 4.1.1, optionnel)
 
 **Installation** :
+
 ```bash
 # macOS (Homebrew)
 brew install openjdk@11
@@ -44,6 +45,7 @@ sudo apt-get install openjdk-17-jdk
 ```
 
 **Vérification** :
+
 ```bash
 java -version
 # Doit afficher Java 11 ou 17
@@ -54,6 +56,7 @@ java -version
 - ✅ **Python 3.8-3.11** (pour cqlsh et scripts)
 
 **Installation** :
+
 ```bash
 # macOS (Homebrew)
 brew install python@3.11
@@ -63,6 +66,7 @@ sudo apt-get install python3.11
 ```
 
 **Vérification** :
+
 ```bash
 python3 --version
 # Doit afficher Python 3.8-3.11
@@ -73,6 +77,7 @@ python3 --version
 - ✅ **Homebrew** (pour Kafka sur macOS)
 
 **Installation** :
+
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
@@ -84,6 +89,7 @@ python3 --version
 - ✅ **jenv** (gestionnaire de versions Java)
 
 **Installation** :
+
 ```bash
 # macOS
 brew install jenv
@@ -111,6 +117,7 @@ cd Arkea
 ```
 
 **Ce script** :
+
 - ✅ Détecte automatiquement l'OS (macOS/Linux/Windows WSL2)
 - ✅ Configure Java 11 automatiquement
 - ✅ Extrait HCD 1.2.3 dans `binaire/hcd-1.2.3/`
@@ -118,6 +125,7 @@ cd Arkea
 - ✅ Vérifie l'installation
 
 **Voir** :
+
 - `docs/GUIDE_INSTALLATION_HCD.md` - Guide détaillé cross-platform
 - `docs/GUIDE_INSTALLATION_LINUX.md` - Guide Linux spécifique
 - `docs/GUIDE_INSTALLATION_WINDOWS.md` - Guide Windows (WSL2)
@@ -125,11 +133,13 @@ cd Arkea
 ### 3. Installer Spark et Kafka
 
 **macOS** :
+
 ```bash
 ./scripts/setup/02_install_spark_kafka.sh
 ```
 
 **Linux** :
+
 ```bash
 # Installer Spark
 ./scripts/setup/02_install_spark_kafka.sh
@@ -139,6 +149,7 @@ cd Arkea
 ```
 
 **Windows (WSL2)** :
+
 ```bash
 # Suivre les étapes Linux dans WSL2
 ./scripts/setup/02_install_spark_kafka.sh
@@ -146,6 +157,7 @@ cd Arkea
 ```
 
 **Ce script** :
+
 - ✅ Détecte automatiquement l'OS
 - ✅ Extrait Spark 3.5.1 dans `binaire/spark-3.5.1/`
 - ✅ Installe Kafka via Homebrew (macOS) ou script Linux
@@ -153,6 +165,7 @@ cd Arkea
 - ✅ Configure les chemins automatiquement
 
 **Voir** :
+
 - `docs/GUIDE_INSTALLATION_SPARK_KAFKA.md` - Guide détaillé
 - `docs/GUIDE_INSTALLATION_LINUX.md` - Guide Linux spécifique
 
@@ -163,6 +176,7 @@ cd Arkea
 ```
 
 **Vérifie** :
+
 - ✅ Java 11 et 17 installés
 - ✅ HCD installé
 - ✅ Spark installé
@@ -186,12 +200,14 @@ check_poc_env
 ```
 
 **Fonctionnalités** :
+
 - ✅ Détection automatique de l'OS (macOS/Linux/Windows WSL2)
 - ✅ Détection automatique des chemins (Java, Kafka, HCD, Spark)
 - ✅ Variables d'environnement surchargeables
 - ✅ Configuration centralisée (`.poc-config.sh`)
 
 **Voir** :
+
 - `docs/CONFIGURATION_ENVIRONNEMENT.md` - Guide de configuration
 - `docs/AUDIT_PORTABILITE_CROSS_PLATFORM_2025.md` - Détails portabilité
 
@@ -214,6 +230,7 @@ source .poc-profile
 **Fichier** : `binaire/hcd-1.2.3/resources/cassandra/conf/cassandra.yaml`
 
 **Paramètres importants** :
+
 - `cluster_name` : Nom du cluster
 - `listen_address` : Adresse d'écoute
 - `rpc_address` : Adresse RPC
@@ -226,6 +243,7 @@ source .poc-profile
 **Fichier** : `$KAFKA_HOME/.bottle/etc/kafka/server.properties` (macOS Homebrew)
 
 **Paramètres importants** :
+
 - `broker.id` : ID du broker
 - `listeners` : Adresses d'écoute
 - `log.dirs` : Répertoires de logs
@@ -247,6 +265,7 @@ source .poc-profile
 ```
 
 **Vérification** :
+
 ```bash
 # Vérifier que HCD est démarré
 cqlsh $HCD_HOST $HCD_PORT -e "DESCRIBE KEYSPACES;"
@@ -263,6 +282,7 @@ cqlsh $HCD_HOST $HCD_PORT -e "DESCRIBE KEYSPACES;"
 ```
 
 **Vérification** :
+
 ```bash
 # Lister les topics
 kafka-topics.sh --list --bootstrap-server localhost:9092
@@ -275,6 +295,7 @@ kafka-topics.sh --list --bootstrap-server localhost:9092
 ```
 
 **Ce script** :
+
 - Crée le keyspace `poc_hbase_migration`
 - Crée la table `kafka_events`
 - Configure les topics Kafka
@@ -286,6 +307,7 @@ kafka-topics.sh --list --bootstrap-server localhost:9092
 ```
 
 **Ce script** :
+
 - Envoie des messages de test à Kafka
 - Vérifie la réception dans HCD
 - Affiche les résultats
@@ -301,6 +323,7 @@ kafka-topics.sh --list --bootstrap-server localhost:9092
 ```
 
 **Vérifie** :
+
 - ✅ Installation de tous les composants
 - ✅ Services démarrés (HCD, Kafka)
 - ✅ Connexions fonctionnelles
@@ -350,10 +373,12 @@ kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test-topic -
 #### HCD ne démarre pas
 
 **Symptômes** :
+
 - Erreur "Address already in use"
 - Erreur "Cannot bind to address"
 
 **Solutions** :
+
 ```bash
 # Vérifier les ports
 lsof -i :9042
@@ -370,10 +395,12 @@ pkill -f hcd
 #### Kafka ne démarre pas
 
 **Symptômes** :
+
 - Erreur "Address already in use"
 - Erreur Zookeeper
 
 **Solutions** :
+
 ```bash
 # Vérifier Zookeeper
 lsof -i :2181
@@ -388,10 +415,12 @@ lsof -i :9092
 #### Erreurs de Connexion
 
 **Symptômes** :
+
 - "Connection refused"
 - "Timeout"
 
 **Solutions** :
+
 ```bash
 # Vérifier que les services sont démarrés
 ./scripts/utils/80_verify_all.sh
@@ -409,10 +438,12 @@ tail -f $KAFKA_HOME/libexec/logs/kafka.log
 #### Problèmes de Mémoire
 
 **Symptômes** :
+
 - OutOfMemoryError
 - Services qui crashent
 
 **Solutions** :
+
 ```bash
 # Augmenter la mémoire Java pour HCD
 export JAVA_OPTS="-Xms2G -Xmx4G"
@@ -429,17 +460,20 @@ export SPARK_EXECUTOR_MEMORY="2g"
 ### Logs
 
 **HCD** :
+
 ```bash
 tail -f binaire/hcd-1.2.3/logs/cassandra/system.log
 tail -f binaire/hcd-1.2.3/logs/cassandra/debug.log
 ```
 
 **Kafka** :
+
 ```bash
 tail -f $KAFKA_HOME/libexec/logs/kafka.log
 ```
 
 **Spark** :
+
 ```bash
 # Logs dans $SPARK_HOME/logs/
 ```
@@ -447,6 +481,7 @@ tail -f $KAFKA_HOME/libexec/logs/kafka.log
 ### Métriques
 
 **HCD** :
+
 ```bash
 # Nodetool
 nodetool status
@@ -455,6 +490,7 @@ nodetool tpstats
 ```
 
 **Kafka** :
+
 ```bash
 # Métriques via JMX (port 9999 par défaut)
 ```
@@ -494,4 +530,3 @@ nodetool tpstats
 **Date** : 2025-12-01  
 **Version** : 1.0  
 **Statut** : ✅ **Documentation complète**
-

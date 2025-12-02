@@ -80,8 +80,8 @@ success "HCD est démarré"
 cat > "$REPORT_FILE" << 'EOF'
 # 🧪 Démonstration : Filtrage par Type d'Interaction
 
-**Date** : 2025-12-01  
-**Script** : `13_test_filtrage_type.sh`  
+**Date** : 2025-12-01
+**Script** : `13_test_filtrage_type.sh`
 **Use Cases** : BIC-05 (Filtrage par type d'interaction)
 
 ---
@@ -134,8 +134,8 @@ demo "Objectif : Récupérer toutes les interactions de type 'consultation'"
 
 TYPE_INTERACTION="consultation"
 
-QUERY1="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY1="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND type_interaction = '$TYPE_INTERACTION'
 LIMIT 50;"
@@ -175,7 +175,7 @@ if [ $EXIT_CODE1 -eq 0 ] && [ -n "$RESULT1" ]; then
     COUNT1=$(echo "$RESULT1" | grep -c "^[[:space:]]*EFS001" || echo "0")
     echo ""
     result "Nombre d'interactions de type 'consultation' : $COUNT1"
-    
+
     # Extraire un échantillon représentatif pour le rapport (5 premières lignes de données)
     SAMPLE1=$(echo "$RESULT1" | grep -E "^[[:space:]]*EFS001" | head -5 | awk -F'|' '{
         for (i=1; i<=NF; i++) {
@@ -185,7 +185,7 @@ if [ $EXIT_CODE1 -eq 0 ] && [ -n "$RESULT1" ]; then
             printf "| %s | %s | %s | %s | %s | %s |\n", $1, $2, $3, $4, $5, $6
         }
     }' || echo "")
-    
+
     # VALIDATION : Comparaison attendus vs obtenus
     EXPECTED_COUNT1=">= 0"
     compare_expected_vs_actual \
@@ -193,12 +193,12 @@ if [ $EXIT_CODE1 -eq 0 ] && [ -n "$RESULT1" ]; then
         "$EXPECTED_COUNT1 interactions de type 'consultation'" \
         "$COUNT1 interactions de type 'consultation'" \
         "0"
-    
+
     # VALIDATION : Justesse (vérifier que toutes ont bien type_interaction='consultation')
     if [ "$COUNT1" -gt 0 ]; then
         success "✅ Justesse validée : Toutes les interactions ont type_interaction='consultation'"
     fi
-    
+
     # VALIDATION COMPLÈTE
     validate_complete \
         "TEST 1 : Filtrage Type Consultation" \
@@ -208,7 +208,7 @@ if [ $EXIT_CODE1 -eq 0 ] && [ -n "$RESULT1" ]; then
         "$EXEC_TIME1" \
         "0" \
         "0.1"
-    
+
     # EXPLICATIONS
     echo ""
     info "📚 Explications détaillées :"
@@ -234,8 +234,8 @@ demo "Objectif : Récupérer toutes les interactions de type 'conseil'"
 
 TYPE_INTERACTION="conseil"
 
-QUERY2="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY2="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND type_interaction = '$TYPE_INTERACTION'
 LIMIT 50;"
@@ -260,7 +260,7 @@ if [ $EXIT_CODE2 -eq 0 ] && [ -n "$RESULT2" ]; then
     success "✅ Requête exécutée avec succès en ${EXEC_TIME2}s"
     COUNT2=$(echo "$RESULT2" | grep -c "^[[:space:]]*EFS001" || echo "0")
     result "Nombre d'interactions de type 'conseil' : $COUNT2"
-    
+
     # Extraire un échantillon représentatif pour le rapport
     SAMPLE2=$(echo "$RESULT2" | grep -E "^[[:space:]]*EFS001" | head -5 | awk -F'|' '{
         for (i=1; i<=NF; i++) {
@@ -270,7 +270,7 @@ if [ $EXIT_CODE2 -eq 0 ] && [ -n "$RESULT2" ]; then
             printf "| %s | %s | %s | %s | %s | %s |\n", $1, $2, $3, $4, $5, $6
         }
     }' || echo "")
-    
+
     # VALIDATION : Comparaison attendus vs obtenus
     EXPECTED_COUNT2=">= 0"
     compare_expected_vs_actual \
@@ -278,7 +278,7 @@ if [ $EXIT_CODE2 -eq 0 ] && [ -n "$RESULT2" ]; then
         "$EXPECTED_COUNT2 interactions de type 'conseil'" \
         "$COUNT2 interactions de type 'conseil'" \
         "0"
-    
+
     # VALIDATION COMPLÈTE
     validate_complete \
         "TEST 2 : Filtrage Type Conseil" \
@@ -304,8 +304,8 @@ demo "Objectif : Récupérer toutes les interactions de type 'transaction'"
 
 TYPE_INTERACTION="transaction"
 
-QUERY3="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY3="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND type_interaction = '$TYPE_INTERACTION'
 LIMIT 50;"
@@ -330,7 +330,7 @@ if [ $EXIT_CODE3 -eq 0 ] && [ -n "$RESULT3" ]; then
     success "✅ Requête exécutée avec succès en ${EXEC_TIME3}s"
     COUNT3=$(echo "$RESULT3" | grep -c "^[[:space:]]*EFS001" || echo "0")
     result "Nombre d'interactions de type 'transaction' : $COUNT3"
-    
+
     # Extraire un échantillon représentatif pour le rapport
     SAMPLE3=$(echo "$RESULT3" | grep -E "^[[:space:]]*EFS001" | head -5 | awk -F'|' '{
         for (i=1; i<=NF; i++) {
@@ -340,7 +340,7 @@ if [ $EXIT_CODE3 -eq 0 ] && [ -n "$RESULT3" ]; then
             printf "| %s | %s | %s | %s | %s | %s |\n", $1, $2, $3, $4, $5, $6
         }
     }' || echo "")
-    
+
     # VALIDATION : Comparaison attendus vs obtenus
     EXPECTED_COUNT3=">= 0"
     compare_expected_vs_actual \
@@ -348,7 +348,7 @@ if [ $EXIT_CODE3 -eq 0 ] && [ -n "$RESULT3" ]; then
         "$EXPECTED_COUNT3 interactions de type 'transaction'" \
         "$COUNT3 interactions de type 'transaction'" \
         "0"
-    
+
     # VALIDATION COMPLÈTE
     validate_complete \
         "TEST 3 : Filtrage Type Transaction" \
@@ -374,8 +374,8 @@ demo "Objectif : Récupérer toutes les interactions de type 'reclamation'"
 
 TYPE_INTERACTION="reclamation"
 
-QUERY4="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY4="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND type_interaction = '$TYPE_INTERACTION'
 LIMIT 50;"
@@ -400,7 +400,7 @@ if [ $EXIT_CODE4 -eq 0 ] && [ -n "$RESULT4" ]; then
     success "✅ Requête exécutée avec succès en ${EXEC_TIME4}s"
     COUNT4=$(echo "$RESULT4" | grep -c "^[[:space:]]*EFS001" || echo "0")
     result "Nombre d'interactions de type 'reclamation' : $COUNT4"
-    
+
     # Extraire un échantillon représentatif pour le rapport
     SAMPLE4=$(echo "$RESULT4" | grep -E "^[[:space:]]*EFS001" | head -5 | awk -F'|' '{
         for (i=1; i<=NF; i++) {
@@ -410,7 +410,7 @@ if [ $EXIT_CODE4 -eq 0 ] && [ -n "$RESULT4" ]; then
             printf "| %s | %s | %s | %s | %s | %s |\n", $1, $2, $3, $4, $5, $6
         }
     }' || echo "")
-    
+
     # VALIDATION : Comparaison attendus vs obtenus
     EXPECTED_COUNT4=">= 0"
     compare_expected_vs_actual \
@@ -418,7 +418,7 @@ if [ $EXIT_CODE4 -eq 0 ] && [ -n "$RESULT4" ]; then
         "$EXPECTED_COUNT4 interactions de type 'reclamation'" \
         "$COUNT4 interactions de type 'reclamation'" \
         "0"
-    
+
     # VALIDATION COMPLÈTE
     validate_complete \
         "TEST 4 : Filtrage Type Réclamation" \
@@ -450,14 +450,14 @@ info "Test de $TOTAL_TYPES types d'interaction..."
 echo ""
 
 for TYPE in "${TYPES[@]}"; do
-    QUERY_TYPE="SELECT COUNT(*) FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+    QUERY_TYPE="SELECT COUNT(*) FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND type_interaction = '$TYPE';"
-    
+
     COUNT_TYPE=$($CQLSH -e "$QUERY_TYPE" 2>&1 | grep -E "^\s+[0-9]+" | tr -d ' ' || echo "0")
     TOTAL_COUNT=$((TOTAL_COUNT + COUNT_TYPE))
-    
+
     if [ "$COUNT_TYPE" -gt 0 ]; then
         success "✅ Type '$TYPE' : $COUNT_TYPE interaction(s)"
     else
@@ -520,16 +520,16 @@ for i in {1..10}; do
     START_TIME_PERF=$(date +%s.%N)
     $CQLSH -e "$QUERY1" > /dev/null 2>&1
     END_TIME_PERF=$(date +%s.%N)
-    
+
     if command -v bc &> /dev/null; then
         DURATION_PERF=$(echo "$END_TIME_PERF - $START_TIME_PERF" | bc)
     else
         DURATION_PERF=$(python3 -c "print($END_TIME_PERF - $START_TIME_PERF)")
     fi
-    
+
     TIMES_PERF+=("$DURATION_PERF")
     TOTAL_TIME_PERF=$(echo "$TOTAL_TIME_PERF + $DURATION_PERF" | bc 2>/dev/null || python3 -c "print($TOTAL_TIME_PERF + $DURATION_PERF)")
-    
+
     # Min/Max
     if (( $(echo "$DURATION_PERF < $MIN_TIME_PERF" | bc -l 2>/dev/null || echo "0") )); then
         MIN_TIME_PERF=$DURATION_PERF
@@ -598,16 +598,16 @@ ALL_TYPE_IDS=()
 TYPE_COUNTS_DETAIL=()
 
 for TYPE_COH in "${TYPES[@]}"; do
-    QUERY_TYPE_COH="SELECT * FROM $KEYSPACE.$TABLE 
-    WHERE code_efs = '$CODE_EFS' 
+    QUERY_TYPE_COH="SELECT * FROM $KEYSPACE.$TABLE
+    WHERE code_efs = '$CODE_EFS'
       AND numero_client = '$NUMERO_CLIENT'
       AND type_interaction = '$TYPE_COH'
     LIMIT 50;"
-    
+
     RESULT_TYPE_COH=$($CQLSH -e "$QUERY_TYPE_COH" 2>&1)
     COUNT_TYPE_COH=$(echo "$RESULT_TYPE_COH" | grep -c "^[[:space:]]*EFS001" || echo "0")
     TYPE_COUNTS_DETAIL+=("$COUNT_TYPE_COH")
-    
+
     # Collecter les IDs
     if [ "$COUNT_TYPE_COH" -gt 0 ]; then
         TYPE_IDS=$(echo "$RESULT_TYPE_COH" | grep -E "^[[:space:]]*EFS001" | awk '{print $7}' | tr '\n' ' ')
@@ -623,19 +623,19 @@ if [ ${#ALL_TYPE_IDS[@]} -gt 0 ]; then
     TOTAL_TYPE_IDS=${#ALL_TYPE_IDS[@]}
     UNIQUE_TYPE_COUNT=${#UNIQUE_TYPE_IDS[@]}
     DUPLICATES_TYPE=$((TOTAL_TYPE_IDS - UNIQUE_TYPE_COUNT))
-    
+
     result "📊 Résultats cohérence multi-types :"
     echo "   - Total IDs collectés : $TOTAL_TYPE_IDS"
     echo "   - IDs uniques : $UNIQUE_TYPE_COUNT"
     echo "   - Doublons détectés : $DUPLICATES_TYPE"
-    
+
     # VALIDATION : Absence de doublons (une interaction ne peut avoir qu'un seul type)
     if [ "$DUPLICATES_TYPE" -eq 0 ]; then
         success "✅ Cohérence validée : Aucun doublon entre types (une interaction = un type)"
     else
         warn "⚠️  Incohérence détectée : $DUPLICATES_TYPE doublon(s) entre types"
     fi
-    
+
     # VALIDATION COMPLÈTE
     validate_complete \
         "TEST 7 : Cohérence Multi-Types" \
@@ -667,23 +667,23 @@ LOAD_TIMES_TYPE=()
 SUCCESSFUL_QUERIES_TYPE=0
 
 for TYPE_LOAD in "${TYPES_LOAD[@]}"; do
-    QUERY_LOAD_TYPE="SELECT COUNT(*) FROM $KEYSPACE.$TABLE 
-    WHERE code_efs = '$CODE_EFS' 
+    QUERY_LOAD_TYPE="SELECT COUNT(*) FROM $KEYSPACE.$TABLE
+    WHERE code_efs = '$CODE_EFS'
       AND numero_client = '$NUMERO_CLIENT'
       AND type_interaction = '$TYPE_LOAD'
     LIMIT 1;"
-    
+
     START_TIME_LOAD_TYPE=$(date +%s.%N)
     RESULT_LOAD_TYPE=$($CQLSH -e "$QUERY_LOAD_TYPE" 2>&1)
     EXIT_CODE_LOAD_TYPE=$?
     END_TIME_LOAD_TYPE=$(date +%s.%N)
-    
+
     if command -v bc &> /dev/null; then
         DURATION_LOAD_TYPE=$(echo "$END_TIME_LOAD_TYPE - $START_TIME_LOAD_TYPE" | bc)
     else
         DURATION_LOAD_TYPE=$(python3 -c "print($END_TIME_LOAD_TYPE - $START_TIME_LOAD_TYPE)")
     fi
-    
+
     if [ $EXIT_CODE_LOAD_TYPE -eq 0 ]; then
         SUCCESSFUL_QUERIES_TYPE=$((SUCCESSFUL_QUERIES_TYPE + 1))
         LOAD_TIMES_TYPE+=("$DURATION_LOAD_TYPE")
@@ -693,19 +693,19 @@ done
 
 if [ "$SUCCESSFUL_QUERIES_TYPE" -gt 0 ]; then
     AVG_LOAD_TIME_TYPE=$(echo "scale=4; $TOTAL_LOAD_TIME_TYPE / $SUCCESSFUL_QUERIES_TYPE" | bc 2>/dev/null || python3 -c "print($TOTAL_LOAD_TIME_TYPE / $SUCCESSFUL_QUERIES_TYPE)")
-    
+
     result "📊 Résultats test de charge multi-types :"
     echo "   - Requêtes réussies : $SUCCESSFUL_QUERIES_TYPE / ${#TYPES_LOAD[@]}"
     echo "   - Temps moyen par requête : ${AVG_LOAD_TIME_TYPE}s"
     echo "   - Temps total : ${TOTAL_LOAD_TIME_TYPE}s"
-    
+
     # VALIDATION : Performance sous charge
     if (( $(echo "$AVG_LOAD_TIME_TYPE < 0.2" | bc -l 2>/dev/null || echo "0") )); then
         success "✅ Performance sous charge validée : Temps moyen acceptable (< 0.2s)"
     else
         warn "⚠️  Performance sous charge : Temps moyen ${AVG_LOAD_TIME_TYPE}s (peut être améliorée)"
     fi
-    
+
     # VALIDATION COMPLÈTE
     validate_complete \
         "TEST 8 : Test de Charge Multi-Types" \
@@ -735,8 +735,8 @@ info "📝 Test très complexe : Combinaison type + résultat avec performance..
 TYPE_COMB="reclamation"
 RESULTAT_COMB="succès"
 
-QUERY_COMB="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY_COMB="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND type_interaction = '$TYPE_COMB'
   AND resultat = '$RESULTAT_COMB'
@@ -762,16 +762,16 @@ for i in {1..10}; do
     START_TIME_COMB=$(date +%s.%N)
     $CQLSH -e "$QUERY_COMB" > /dev/null 2>&1
     END_TIME_COMB=$(date +%s.%N)
-    
+
     if command -v bc &> /dev/null; then
         DURATION_COMB=$(echo "$END_TIME_COMB - $START_TIME_COMB" | bc)
     else
         DURATION_COMB=$(python3 -c "print($END_TIME_COMB - $START_TIME_COMB)")
     fi
-    
+
     TIMES_COMB+=("$DURATION_COMB")
     TOTAL_TIME_COMB=$(echo "$TOTAL_TIME_COMB + $DURATION_COMB" | bc 2>/dev/null || python3 -c "print($TOTAL_TIME_COMB + $DURATION_COMB)")
-    
+
     # Min/Max
     if (( $(echo "$DURATION_COMB < $MIN_TIME_COMB" | bc -l 2>/dev/null || echo "0") )); then
         MIN_TIME_COMB=$DURATION_COMB
@@ -860,14 +860,14 @@ MIN_COUNT=999999
 for i in "${!TYPES[@]}"; do
     TYPE_DIST="${TYPES[$i]}"
     COUNT_DIST="${TYPE_COUNTS_DETAIL[$i]:-0}"
-    
+
     if [ "$COUNT_DIST" -gt "$MAX_COUNT" ]; then
         MAX_COUNT=$COUNT_DIST
     fi
     if [ "$COUNT_DIST" -lt "$MIN_COUNT" ] && [ "$COUNT_DIST" -gt 0 ]; then
         MIN_COUNT=$COUNT_DIST
     fi
-    
+
     if [ "$TOTAL_COUNT" -gt 0 ]; then
         PERCENT=$(echo "scale=2; $COUNT_DIST * 100 / $TOTAL_COUNT" | bc 2>/dev/null || python3 -c "print($COUNT_DIST * 100 / $TOTAL_COUNT)")
         PERCENTAGES+=("$PERCENT")
@@ -1265,7 +1265,7 @@ done)
 
 ---
 
-**Date** : 2025-12-01  
+**Date** : 2025-12-01
 **Script** : \`13_test_filtrage_type.sh\`
 EOF
 
@@ -1275,4 +1275,3 @@ success "✅ Tests terminés avec succès"
 echo ""
 result "📄 Rapport généré : $REPORT_FILE"
 echo ""
-

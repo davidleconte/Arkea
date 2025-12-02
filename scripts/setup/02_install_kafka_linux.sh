@@ -134,4 +134,3 @@ echo "Pour démarrer en arrière-plan :"
 echo "  nohup ${KAFKA_HOME}/bin/kafka-server-start.sh ${KAFKA_CONFIG} > ${KAFKA_HOME}/logs/kafka.log 2>&1 &"
 echo ""
 info "Voir GUIDE_INSTALLATION_LINUX.md pour plus de détails."
-

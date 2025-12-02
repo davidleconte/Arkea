@@ -7,7 +7,7 @@
 #   Ce script démontre l'utilisation et la valeur ajoutée de la Data API HCD,
 #   qui permet un accès simplifié à HCD via des requêtes HTTP REST/GraphQL,
 #   sans nécessiter de drivers binaires CQL.
-#   
+#
 #   Cas d'usage démontrés :
 #   - Recherche d'opérations (find, findOne)
 #   - Mise à jour de catégories (updateOne)
@@ -190,14 +190,14 @@ EXAMPLES_DIR="$SCRIPT_DIR/examples/python/data_api/examples"
 if [ -d "$EXAMPLES_DIR" ]; then
     success "Exemples de code disponibles dans : $EXAMPLES_DIR"
     echo ""
-    
+
     info "📄 Exemples disponibles :"
     code "  1. 01_connect_data_api.py - Connexion à HCD"
     code "  2. 02_search_operations.py - Recherche d'opérations"
     code "  3. 03_update_category.py - Mise à jour catégorie client"
     code "  4. 04_insert_operation.py - Insertion d'opération"
     echo ""
-    
+
     # Afficher un exemple de code
     if [ -f "$EXAMPLES_DIR/02_search_operations.py" ]; then
         info "📝 Exemple : Recherche d'opérations (extrait)"
@@ -393,4 +393,3 @@ code "  ✅ Architecture hybride (CQL + Data API)"
 code "  ✅ Data API pour : Mobile, Front-end, Partenaires"
 code "  ✅ CQL pour : Backend, Batch"
 echo ""
-

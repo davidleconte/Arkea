@@ -79,6 +79,7 @@ mkdir -p scripts
 #### 2.1 Mapping des fichiers vers les catégories
 
 **design/** (~15 fichiers) :
+
 - `02_VALUE_PROPOSITION_DOMIRAMA2.md`
 - `03_GAPS_ANALYSIS.md`
 - `04_BILAN_ECARTS_FONCTIONNELS.md`
@@ -96,6 +97,7 @@ mkdir -p scripts
 - `84_RESUME_MISE_A_JOUR_2024_11_27.md`
 
 **guides/** (~10 fichiers) :
+
 - `01_README.md`
 - `06_README_INDEX_AVANCES.md`
 - `07_README_FUZZY_SEARCH.md`
@@ -113,6 +115,7 @@ mkdir -p scripts
 - `34_GUIDE_DEPLOIEMENT_DATA_API_POC.md`
 
 **implementation/** (~8 fichiers) :
+
 - `10_TIME_TRAVEL_IMPLEMENTATION.md`
 - `19_VALEUR_AJOUTEE_DATA_API.md`
 - `20_IMPLEMENTATION_OFFICIELLE_DATA_API.md`
@@ -123,11 +126,13 @@ mkdir -p scripts
 - `81_AMELIORATIONS_PERTINENCE_IMPLENTEES.md`
 
 **results/** (~3 fichiers) :
+
 - `22_DEMONSTRATION_RESUME.md`
 - `23_DEMONSTRATION_VALIDATION.md`
 - `42_DEMONSTRATION_COMPLETE_DOMIRAMA.md`
 
 **corrections/** (~5 fichiers) :
+
 - `44_GUIDE_AMELIORATION_SCRIPTS.md`
 - `45_GUIDE_GENERALISATION_CAPTURE_RESULTATS.md`
 - `46_RESUME_GENERALISATION_CAPTURE.md`
@@ -135,6 +140,7 @@ mkdir -p scripts
 - `70_AMELIORATIONS_SCRIPTS_B19SH.md`
 
 **audits/** (~35 fichiers) :
+
 - `AUDIT_COMPLET_2025.md`
 - `AUDIT_SCRIPTS_SHELL_2025.md`
 - `36_STANDARDS_SCRIPTS_SHELL.md`
@@ -174,6 +180,7 @@ mkdir -p scripts
 - `91_ANALYSE_SCRIPT_30_ET_TEMPLATE.md`
 
 **Fichiers à conserver à la racine** :
+
 - `00_ORGANISATION_DOC.md`
 - `LISTE_FICHIERS_OBSOLETES.md`
 - `RESUME_MIGRATION_SCRIPTS_2025.md`
@@ -194,6 +201,7 @@ mv *.sh scripts/ 2>/dev/null || true
 ```
 
 **Exceptions** :
+
 - Scripts dans `archive/` : Ne pas déplacer
 - Scripts utilitaires (migrate_scripts.sh, etc.) : Peuvent rester à la racine ou aller dans `scripts/utils/`
 
@@ -212,6 +220,7 @@ Voir le modèle dans `domiramaCatOps/doc/INDEX.md`
 #### 5.1 Script de mise à jour automatique
 
 Créer un script Python pour :
+
 - Détecter tous les liens dans les fichiers .md
 - Mettre à jour les chemins relatifs
 - Générer un rapport des changements
@@ -267,6 +276,7 @@ echo "✅ Structure créée"
 ### Script 2 : Déplacement des fichiers (à créer)
 
 Un script Python serait plus adapté pour :
+
 - Catégoriser automatiquement les fichiers
 - Déplacer les fichiers
 - Mettre à jour les liens
@@ -314,4 +324,3 @@ Un script Python serait plus adapté pour :
 **Date de création** : 2025-01-XX  
 **Version** : 1.0  
 **Statut** : 📋 Plan prêt pour exécution
-

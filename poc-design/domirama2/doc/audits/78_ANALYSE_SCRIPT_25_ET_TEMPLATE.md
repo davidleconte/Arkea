@@ -83,6 +83,7 @@
 | **Génération rapport** | ✅ | ✅ |
 
 **Verdict** : ⚠️ **Partiellement adapté**
+
 - ✅ Structure similaire (DDL, définition, tests, rapport)
 - ❌ Conçu pour un seul test, pas pour plusieurs tests
 - ❌ Pas de section vérification dépendances
@@ -98,6 +99,7 @@
 | **Tests** | ❌ | ✅ (6 tests) |
 
 **Verdict** : ❌ **Non adapté**
+
 - Template 47 est pour la création de schéma, pas pour les tests
 
 ### Template 50 : Script Ingestion Didactique
@@ -109,6 +111,7 @@
 | **Tests** | ❌ | ✅ (6 tests) |
 
 **Verdict** : ❌ **Non adapté**
+
 - Template 50 est pour l'ingestion, pas pour les tests
 
 ### Template 63 : Script Orchestration Didactique
@@ -123,6 +126,7 @@
 | **Génération rapport** | ✅ | ✅ |
 
 **Verdict** : ⚠️ **Partiellement adapté**
+
 - ✅ Supporte tests multiples
 - ✅ Génération rapport
 - ❌ Script 25 n'orchestre pas d'autres scripts
@@ -171,17 +175,20 @@
 ### Option 1 : Adapter le Template 43 (Didactique Général)
 
 **Avantages** :
+
 - ✅ Structure similaire (DDL, définition, tests, rapport)
 - ✅ Déjà conçu pour les démonstrations
 - ✅ Supporte l'affichage de DML
 
 **Inconvénients** :
+
 - ⚠️ Conçu pour un seul test, pas pour plusieurs tests
 - ⚠️ Pas de section vérification dépendances
 - ⚠️ Pas de section démonstration embeddings
 - ⚠️ Pas de section contrôles de cohérence
 
 **Modifications nécessaires** :
+
 1. Ajouter section vérification dépendances
 2. Ajouter section démonstration embeddings
 3. Adapter pour boucle de tests (Python ou shell)
@@ -191,6 +198,7 @@
 ### Option 2 : Créer un Nouveau Template (Template 64 - Script Test Multiples avec Embeddings)
 
 **Avantages** :
+
 - ✅ Spécialement conçu pour scripts avec embeddings
 - ✅ Supporte vérification dépendances Python
 - ✅ Supporte démonstration embeddings
@@ -199,6 +207,7 @@
 - ✅ Supporte comparaison détaillée des approches
 
 **Inconvénients** :
+
 - ⚠️ Nouveau template à créer et maintenir
 
 ---
@@ -208,6 +217,7 @@
 ### **Créer un Nouveau Template : Template 64 - Script Test Multiples avec Embeddings**
 
 **Raisons** :
+
 1. ✅ Le script 25 est fondamentalement différent des autres scripts
 2. ✅ Il combine plusieurs éléments uniques :
    - Vérification dépendances Python
@@ -235,7 +245,7 @@
 # OBJECTIF :
 #   Ce script démontre de manière très didactique [fonctionnalité]
 #   qui utilise des embeddings [modèle] pour [objectif].
-#   
+#  
 #   Cette version améliorée affiche :
 #   - Le DDL complet (schéma avec embeddings)
 #   - Vérification des dépendances Python
@@ -286,26 +296,31 @@
 ## 📝 Sections Détaillées du Nouveau Template
 
 ### 1. **PARTIE 1 : DDL - Schéma avec Embeddings**
+
 - Affiche le DDL complet (table, colonne VECTOR, index vectoriel)
 - Contexte HBase → HCD
 - Explications détaillées
 
 ### 2. **PARTIE 2 : Vérification des Dépendances Python**
+
 - Vérifie Python, transformers, torch, cassandra-driver
 - Installation automatique si nécessaire
 - Configuration Hugging Face
 
 ### 3. **PARTIE 3 : Démonstration de Génération d'Embeddings**
+
 - Définition des embeddings
 - Génération d'un embedding de démonstration
 - Affichage du vecteur généré
 
 ### 4. **PARTIE 4 : Définition et Principe**
+
 - Définition du concept
 - Explication des approches (Full-Text, Vector, Hybrid)
 - Comparaison détaillée (tableau)
 
 ### 5. **PARTIE 5 : Tests Multiples (Boucle Python)**
+
 - Structure de test_cases (description, expected, strategy)
 - Pour chaque test :
   - Description
@@ -318,12 +333,14 @@
   - Stockage dans JSON
 
 ### 6. **PARTIE 6 : Contrôles de Cohérence** (Nouveau)
+
 - Vérification présence données
 - Vérification couverture embeddings
 - Vérification pertinence résultats
 - Métriques de performance
 
 ### 7. **PARTIE 7 : Résumé et Conclusion**
+
 - Résumé de la démonstration
 - Comparaison détaillée des approches (tableau)
 - Avantages et limitations
@@ -366,6 +383,7 @@
 ## 💡 Exemples d'Utilisation
 
 ### Script 25 : Test Recherche Hybride
+
 - PARTIE 1 : DDL (index Full-Text + colonne VECTOR + index vectoriel)
 - PARTIE 2 : Vérification dépendances Python
 - PARTIE 3 : Démonstration génération embeddings
@@ -375,6 +393,7 @@
 - PARTIE 7 : Résumé et conclusion
 
 ### Script Futur : Test Vector Search Seul
+
 - PARTIE 1 : DDL (colonne VECTOR + index vectoriel)
 - PARTIE 2 : Vérification dépendances Python
 - PARTIE 3 : Démonstration génération embeddings
@@ -416,7 +435,3 @@
 ---
 
 **✅ Analyse terminée - Template 64 recommandé**
-
-
-
-

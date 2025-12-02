@@ -7,7 +7,7 @@
 #   Ce script démontre le filtrage sur colonnes MAP (équivalent colonnes
 #   dynamiques HBase), permettant de stocker et interroger des métadonnées
 #   flexibles sans modifier le schéma.
-#   
+#
 #   Fonctionnalités :
 #   - Filtrage sur colonnes MAP<TEXT, TEXT> (équivalent colonnes dynamiques HBase)
 #   - Recherche par clé/valeur dans les MAP
@@ -115,45 +115,45 @@ success "HCD est démarré"
 measure_query_performance() {
     local query_file=$1
     local description=$2
-    
+
     echo ""
     info "📊 Mesure de performance : $description"
-    
+
     # Exécuter avec tracing
     $CQLSH -f "$query_file" > /tmp/query_result.txt 2>&1 || true
-    
+
     # Extraire les métriques du tracing
     local trace_output=$(cat /tmp/query_result.txt 2>/dev/null || echo "")
-    
+
     # Extraire coordinator time
     local coordinator_time=$(echo "$trace_output" | grep "coordinator" | awk -F'|' '{print $4}' | tr -d ' ' | head -1 || echo "")
-    
+
     # Extraire total time
     local total_time=$(echo "$trace_output" | grep "total" | awk -F'|' '{print $4}' | tr -d ' ' | head -1 || echo "")
-    
+
     # Compter les lignes retournées
     local row_count=$(echo "$trace_output" | grep -E "\([0-9]+ rows\)" | grep -oE "[0-9]+" | head -1 || echo "0")
-    
+
     # Extraire le plan d'exécution
     local execution_plan=$(echo "$trace_output" | grep -E "(Executing|single-partition|Read|Scanned|Merging)" | head -3)
-    
+
     echo "   Résultats :"
     echo "   - Lignes retournées : ${row_count:-0}"
-    
+
     if [ -n "$coordinator_time" ] && [ "$coordinator_time" != "" ]; then
         echo "   - Temps coordinateur : ${coordinator_time}μs"
     fi
     if [ -n "$total_time" ] && [ "$total_time" != "" ]; then
         echo "   - Temps total : ${total_time}μs"
     fi
-    
+
     # Afficher le plan d'exécution
     if [ -n "$execution_plan" ]; then
         echo ""
         echo "   Plan d'exécution :"
         echo "$execution_plan" | sed 's/^/     /'
     fi
-    
+
     rm -f /tmp/query_result.txt
     return 0
 }
@@ -636,4 +636,3 @@ code "  ✅ Tests de charge (requêtes multiples)"
 code "  ✅ Analyse du plan d'exécution (tracing)"
 code "  ✅ Requêtes complexes (plusieurs clés MAP)"
 echo ""
-

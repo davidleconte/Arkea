@@ -8,7 +8,7 @@
 #   Ce script orchestre une démonstration complète et très didactique de la
 #   recherche floue (fuzzy search) en exécutant toutes les étapes nécessaires :
 #   configuration, génération des embeddings, et tests de recherche.
-#   
+#
 #   Cette version améliorée affiche :
 #   - Le DDL complet (schéma de la colonne VECTOR et index)
 #   - Les requêtes CQL détaillées (DML) pour chaque test
@@ -505,11 +505,11 @@ def load_model():
     print(f"   Modèle : {MODEL_NAME}")
     print(f"   Dimensions : {VECTOR_DIMENSION}")
     print()
-    
+
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, token=HF_API_KEY)
     model = AutoModel.from_pretrained(MODEL_NAME, token=HF_API_KEY)
     model.eval()
-    
+
     print("✅ Modèle chargé avec succès")
     print()
     return tokenizer, model
@@ -518,7 +518,7 @@ def encode_text(tokenizer, model, text):
     """Encode un texte en vecteur d'embedding."""
     if not text or text.strip() == "":
         return [0.0] * VECTOR_DIMENSION
-    
+
     inputs = tokenizer(
         text,
         return_tensors="pt",
@@ -526,11 +526,11 @@ def encode_text(tokenizer, model, text):
         padding=True,
         max_length=512
     )
-    
+
     with torch.no_grad():
         encoder_outputs = model.encoder(**inputs)
         embeddings = encoder_outputs.last_hidden_state.mean(dim=1)
-    
+
     return embeddings[0].tolist()
 
 def format_vector_preview(embedding, max_dims=5):
@@ -586,12 +586,12 @@ for i, test_case in enumerate(test_cases, 1):
     description = test_case["description"]
     expected = test_case["expected"]
     explanation = test_case.get("explanation", "")
-    
+
     print(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     print(f"  TEST {i}/{len(test_cases)} : '{query_text}' - {title}")
     print(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     print()
-    
+
     print(f"📚 DÉFINITION - {title} :")
     print(f"   {description}")
     print()
@@ -602,7 +602,7 @@ for i, test_case in enumerate(test_cases, 1):
         print(f"💡 Explication :")
         print(f"   {explanation}")
     print()
-    
+
     # Structure pour stocker les résultats de ce test
     test_result = {
         "test_number": i,
@@ -619,18 +619,18 @@ for i, test_case in enumerate(test_cases, 1):
         "encoding_time": None,
         "validation": None
     }
-    
+
     # Générer l'embedding de la requête
     print("🔄 Génération de l'embedding de la requête...")
     start_time = time.time()
     query_embedding = encode_text(tokenizer, model, query_text)
     encoding_time = time.time() - start_time
     test_result["encoding_time"] = encoding_time
-    
+
     print(f"✅ Embedding généré en {encoding_time:.3f}s")
     print(f"   Vecteur : {format_vector_preview(query_embedding)}")
     print()
-    
+
     # Afficher la requête CQL
     print("📝 Requête CQL (DML) :")
     print("   ┌─────────────────────────────────────────────────────────┐")
@@ -643,7 +643,7 @@ for i, test_case in enumerate(test_cases, 1):
     LIMIT 5
     """
     test_result["cql_query"] = cql_query.strip()
-    
+
     # Afficher la requête formatée (tronquer le vecteur pour lisibilité)
     cql_query_display = cql_query.strip()
     # Remplacer le vecteur long par [...] pour l'affichage
@@ -654,32 +654,32 @@ for i, test_case in enumerate(test_cases, 1):
             print(f"   │ {line.strip()}")
     print("   └─────────────────────────────────────────────────────────┘")
     print()
-    
+
     print("   Explication de la requête :")
     print("      - WHERE code_si = ... AND contrat = ... : Cible la partition")
     print("      - ORDER BY libelle_embedding ANN OF [...] : Tri par similarité vectorielle")
     print("      - ANN (Approximate Nearest Neighbor) : Trouve les vecteurs les plus proches")
     print("      - LIMIT 5 : Retourne les 5 résultats les plus similaires")
     print()
-    
+
     # Exécuter la requête
     print("🚀 Exécution de la requête...")
     start_time = time.time()
-    
+
     try:
         statement = SimpleStatement(cql_query, fetch_size=5)
         results = list(session.execute(statement))
         query_time = time.time() - start_time
         test_result["query_time"] = query_time
-        
+
         print(f"✅ Requête exécutée en {query_time:.3f}s")
         print()
-        
+
         # Afficher les résultats
         if results:
             print(f"📊 Résultats obtenus ({len(results)} résultat(s)) :")
             print("   ┌─────────────────────────────────────────────────────────┐")
-            
+
             # Capturer les résultats pour la documentation
             for j, row in enumerate(results, 1):
                 libelle = row.libelle[:50] if row.libelle else "N/A"
@@ -687,7 +687,7 @@ for i, test_case in enumerate(test_cases, 1):
                 cat = row.cat_auto if row.cat_auto else "N/A"
                 print(f"   │ {j}. {libelle}")
                 print(f"   │    Montant: {montant} | Catégorie: {cat}")
-                
+
                 # Stocker le résultat complet
                 test_result["results"].append({
                     "rank": j,
@@ -695,12 +695,12 @@ for i, test_case in enumerate(test_cases, 1):
                     "montant": float(row.montant) if row.montant else None,
                     "cat_auto": row.cat_auto if row.cat_auto else None
                 })
-            
+
             print("   └─────────────────────────────────────────────────────────┘")
             print()
-            
+
             test_result["success"] = True
-            
+
             # Validation
             first_result = results[0].libelle.upper() if results[0].libelle else ""
             if query_text.upper() in first_result or any(query_text.upper()[:3] in r.libelle.upper()[:10] for r in results if r.libelle):
@@ -716,7 +716,7 @@ for i, test_case in enumerate(test_cases, 1):
             print("   - Aucune opération dans cette partition")
             print("   - Embeddings non générés pour cette partition")
             print("   - Typo trop sévère (essayer avec un terme plus proche)")
-        
+
     except Exception as e:
         print(f"❌ Erreur lors de l'exécution : {str(e)}")
         print()
@@ -724,13 +724,13 @@ for i, test_case in enumerate(test_cases, 1):
         print("   - La colonne libelle_embedding existe-t-elle ?")
         print("   - Les embeddings ont-ils été générés ?")
         print("   - L'index idx_libelle_embedding_vector existe-t-il ?")
-        
+
         test_result["success"] = False
         test_result["error"] = str(e)
-    
+
     # Ajouter les résultats de ce test à la liste
     all_results.append(test_result)
-    
+
     print()
     print("-" * 70)
     print()
@@ -758,8 +758,8 @@ print()
 # Récupérer tous les libellés de la partition
 all_libelles_query = f"""
 SELECT libelle, cat_auto, type_operation, devise, libelle_embedding
-FROM operations_by_account 
-WHERE code_si = '{CODE_SI}' 
+FROM operations_by_account
+WHERE code_si = '{CODE_SI}'
   AND contrat = '{CONTRAT}';
 """
 all_libelles = list(session.execute(all_libelles_query))
@@ -768,7 +768,7 @@ all_libelles = list(session.execute(all_libelles_query))
 for test_case in test_cases:
     query_text = test_case["query"]
     expected_keywords = []
-    
+
     # Extraire les mots-clés attendus depuis la description
     if "LOYER" in test_case.get("expected", "").upper():
         expected_keywords.append("LOYER")
@@ -778,7 +778,7 @@ for test_case in test_cases:
         expected_keywords.append("VIREMENT")
     if "PARIS" in test_case.get("expected", "").upper():
         expected_keywords.append("PARIS")
-    
+
     # Compter les libellés pertinents
     relevant_libelles = []
     for libelle_row in all_libelles:
@@ -793,13 +793,13 @@ for test_case in test_cases:
                         "type_operation": libelle_row.type_operation
                     })
                     break
-    
+
     coherence_checks["data_presence"][query_text] = {
         "expected_keywords": expected_keywords,
         "relevant_libelles_count": len(relevant_libelles),
         "relevant_libelles": relevant_libelles[:5]  # Garder les 5 premiers
     }
-    
+
     print(f"   Test '{query_text}' :")
     print(f"      Mots-clés attendus : {', '.join(expected_keywords) if expected_keywords else 'Aucun'}")
     print(f"      Libellés pertinents trouvés : {len(relevant_libelles)}")
@@ -841,7 +841,7 @@ for i, test_result in enumerate(all_results, 1):
     expected = test_result.get("expected", "")
     results = test_result.get("results", [])
     validation = test_result.get("validation", "")
-    
+
     # Extraire les mots-clés attendus
     expected_keywords = []
     if "LOYER" in expected.upper():
@@ -852,7 +852,7 @@ for i, test_result in enumerate(all_results, 1):
         expected_keywords.append("VIREMENT")
     if "PARIS" in expected.upper():
         expected_keywords.append("PARIS")
-    
+
     # Vérifier si les résultats contiennent les mots-clés attendus
     relevant_results = []
     for result in results:
@@ -867,7 +867,7 @@ for i, test_result in enumerate(all_results, 1):
                         "keyword_found": keyword
                     })
                     break
-    
+
     coherence_checks["result_relevance"][query_text] = {
         "expected_keywords": expected_keywords,
         "total_results": len(results),
@@ -876,7 +876,7 @@ for i, test_result in enumerate(all_results, 1):
         "validation": validation,
         "is_coherent": len(relevant_results) > 0
     }
-    
+
     print(f"   Test {i} '{query_text}' :")
     print(f"      Résultats obtenus : {len(results)}")
     print(f"      Résultats pertinents : {len(relevant_results)}")
@@ -1025,8 +1025,8 @@ info "📝 Génération du rapport de démonstration..."
 cat > "$REPORT_FILE" << EOF
 # 🔍 Démonstration Complète : Fuzzy Search avec Vector Search (ByteT5)
 
-**Date** : $(date +"%Y-%m-%d %H:%M:%S")  
-**Script** : \`24_demonstration_fuzzy_search_v2_didactique.sh\`  
+**Date** : $(date +"%Y-%m-%d %H:%M:%S")
+**Script** : \`24_demonstration_fuzzy_search_v2_didactique.sh\`
 **Objectif** : Démontrer complètement la recherche floue avec embeddings ByteT5
 
 ---
@@ -1103,10 +1103,10 @@ LIMIT 5;
 
 ### Améliorations HCD
 
-✅ **Type VECTOR natif** (vs système ML externe)  
-✅ **Index SAI vectoriel intégré** (vs Elasticsearch externe)  
-✅ **Pas de synchronisation** (vs HBase + Elasticsearch + ML)  
-✅ **Performance optimale** (index co-localisé avec données)  
+✅ **Type VECTOR natif** (vs système ML externe)
+✅ **Index SAI vectoriel intégré** (vs Elasticsearch externe)
+✅ **Pas de synchronisation** (vs HBase + Elasticsearch + ML)
+✅ **Performance optimale** (index co-localisé avec données)
 ✅ **Support ANN natif** (Approximate Nearest Neighbor)
 
 ---
@@ -1186,7 +1186,7 @@ Les embeddings sont des représentations vectorielles des textes qui capturent l
 
 ### Exemple de Génération
 
-**Texte** : "LOYER IMPAYE PARIS"  
+**Texte** : "LOYER IMPAYE PARIS"
 **Résultat** : Vecteur de 1472 dimensions généré
 
 ---
@@ -1209,7 +1209,7 @@ try:
     # Lire directement depuis le fichier
     with open('$TEMP_RESULTS', 'r', encoding='utf-8') as f:
         results = json.load(f)
-    
+
     for i, test in enumerate(results, 1):
         query = test.get("query", "N/A")
         title = test.get("title", f"Test {i}")
@@ -1218,7 +1218,7 @@ try:
         explanation = test.get("explanation", "")
         success = test.get("success", False)
         num_results = len(test.get("results", []))
-        
+
         status = "✅" if success else "❌"
         print(f"{i}. **TEST {i}** : '{query}' - {title}")
         print(f"   - Description : {description}")
@@ -1295,11 +1295,11 @@ Utiliser la recherche hybride (Full-Text + Vector) en production :
 
 ### Résumé de la Démonstration
 
-✅ **DDL** : Colonne VECTOR<FLOAT, 1472> et index SAI vectoriel  
-✅ **Dépendances** : Python, transformers, torch, cassandra-driver  
-✅ **Génération** : Embeddings ByteT5 démontrée  
-✅ **DML** : Requêtes avec ORDER BY ... ANN OF [...]  
-✅ **Tests** : 4 requêtes avec typos testées  
+✅ **DDL** : Colonne VECTOR<FLOAT, 1472> et index SAI vectoriel
+✅ **Dépendances** : Python, transformers, torch, cassandra-driver
+✅ **Génération** : Embeddings ByteT5 démontrée
+✅ **DML** : Requêtes avec ORDER BY ... ANN OF [...]
+✅ **Tests** : 4 requêtes avec typos testées
 ✅ **Résultats** : Recherche vectorielle fonctionne
 
 ## 🔍 Contrôles de Cohérence
@@ -1312,25 +1312,25 @@ coherence_file = '$TEMP_COHERENCE'
 if os.path.exists(coherence_file):
     with open(coherence_file, 'r', encoding='utf-8') as f:
         coherence = json.load(f)
-    
+
     # 1. Présence des données
     print("### 1. Vérification de la Présence des Données Attendues")
     print()
     print("Cette vérification contrôle que les libellés attendus sont présents dans la partition testée.")
     print()
-    
+
     data_presence = coherence.get("data_presence", {})
     for query, data in data_presence.items():
         keywords = data.get("expected_keywords", [])
         count = data.get("relevant_libelles_count", 0)
         examples = data.get("relevant_libelles", [])
-        
+
         print(f"#### Test '{query}'")
         print()
         print(f"**Mots-clés attendus** : {', '.join(keywords) if keywords else 'Aucun'}")
         print(f"**Nombre de libellés pertinents trouvés** : {count}")
         print()
-        
+
         if examples:
             print("**Exemples de libellés pertinents :**")
             print()
@@ -1350,23 +1350,23 @@ if os.path.exists(coherence_file):
             print()
         print("---")
         print()
-    
+
     # 2. Couverture des embeddings
     print("### 2. Vérification de la Couverture des Embeddings")
     print()
     print("Cette vérification contrôle que tous les libellés ont des embeddings générés.")
     print()
-    
+
     embedding_coverage = coherence.get("embedding_coverage", {})
     total = embedding_coverage.get("total_rows", 0)
     with_emb = embedding_coverage.get("rows_with_embedding", 0)
     coverage = embedding_coverage.get("coverage_percentage", 0)
-    
+
     print(f"**Total de lignes dans la partition** : {total}")
     print(f"**Lignes avec embeddings** : {with_emb}")
     print(f"**Couverture** : {coverage:.1f}%")
     print()
-    
+
     if coverage == 100:
         print("✅ **Toutes les lignes ont des embeddings**")
     else:
@@ -1377,13 +1377,13 @@ if os.path.exists(coherence_file):
     print()
     print("---")
     print()
-    
+
     # 3. Pertinence des résultats
     print("### 3. Vérification de la Pertinence des Résultats")
     print()
     print("Cette vérification contrôle que les résultats obtenus contiennent les mots-clés attendus.")
     print()
-    
+
     result_relevance = coherence.get("result_relevance", {})
     for query, data in result_relevance.items():
         keywords = data.get("expected_keywords", [])
@@ -1392,7 +1392,7 @@ if os.path.exists(coherence_file):
         relevant_results = data.get("relevant_results", [])
         is_coherent = data.get("is_coherent", False)
         validation = data.get("validation", "N/A")
-        
+
         print(f"#### Test '{query}'")
         print()
         print(f"**Mots-clés attendus** : {', '.join(keywords) if keywords else 'Aucun'}")
@@ -1400,7 +1400,7 @@ if os.path.exists(coherence_file):
         print(f"**Résultats pertinents** : {relevant_count}")
         print(f"**Validation** : {validation}")
         print()
-        
+
         if is_coherent:
             print("✅ **Cohérent** : Les résultats contiennent les mots-clés attendus")
             print()
@@ -1429,27 +1429,27 @@ if os.path.exists(coherence_file):
             print()
         print("---")
         print()
-    
+
     # 4. Métriques de performance
     print("### 4. Métriques de Performance")
     print()
     print("Cette vérification contrôle les temps d'exécution et d'encodage.")
     print()
-    
+
     performance = coherence.get("performance_metrics", {})
     total_tests = performance.get("total_tests", 0)
     total_encoding = performance.get("total_encoding_time", 0)
     total_query = performance.get("total_query_time", 0)
     avg_encoding = performance.get("avg_encoding_time", 0)
     avg_query = performance.get("avg_query_time", 0)
-    
+
     print(f"**Nombre de tests** : {total_tests}")
     print(f"**Temps total d'encodage** : {total_encoding:.3f}s")
     print(f"**Temps total d'exécution** : {total_query:.3f}s")
     print(f"**Temps moyen d'encodage** : {avg_encoding:.3f}s")
     print(f"**Temps moyen d'exécution** : {avg_query:.3f}s")
     print()
-    
+
     if avg_query < 0.01:
         print("✅ **Performance excellente** : Temps d'exécution très rapide (< 10ms)")
     elif avg_query < 0.1:
@@ -1457,22 +1457,22 @@ if os.path.exists(coherence_file):
     else:
         print("⚠️  **Performance à améliorer** : Temps d'exécution > 100ms")
     print()
-    
+
     print("---")
     print()
-    
+
     # Résumé global
     print("### Résumé Global des Contrôles de Cohérence")
     print()
-    
+
     # Compter les tests cohérents
     coherent_tests = sum(1 for data in result_relevance.values() if data.get("is_coherent", False))
     total_tests_coherence = len(result_relevance)
-    
+
     print(f"**Tests cohérents** : {coherent_tests}/{total_tests_coherence}")
     print(f"**Couverture embeddings** : {coverage:.1f}%")
     print()
-    
+
     if coherent_tests == total_tests_coherence and coverage == 100:
         print("✅ **Tous les contrôles sont satisfaisants**")
     elif coherent_tests == total_tests_coherence:
@@ -1486,7 +1486,7 @@ if os.path.exists(coherence_file):
         print("- Cohérence des résultats")
         print("- Couverture des embeddings")
     print()
-    
+
     # Analyse approfondie des causes
     print("### Analyse Approfondie des Causes")
     print()
@@ -1530,7 +1530,7 @@ try:
     # Lire directement depuis le fichier
     with open('$TEMP_RESULTS', 'r', encoding='utf-8') as f:
         results = json.load(f)
-    
+
     for i, test in enumerate(results, 1):
         query = test.get("query", "N/A")
         title = test.get("title", f"Test {i}")
@@ -1544,7 +1544,7 @@ try:
         validation = test.get("validation", "N/A")
         test_results = test.get("results", [])
         cql_query = test.get("cql_query", "N/A")
-        
+
         print(f"#### TEST {i} : {title} - '{query}'")
         print()
         print(f"**Description** : {description}")
@@ -1561,7 +1561,7 @@ try:
         if validation:
             print(f"**Validation** : {validation}")
         print()
-        
+
         if cql_query and cql_query != "N/A":
             print("**Requête CQL exécutée :**")
             print()
@@ -1571,7 +1571,7 @@ try:
             print(cql_query_short)
             print("\\\`\\\`\\\`")
             print()
-        
+
         if test_results:
             print(f"**Résultats obtenus ({len(test_results)} résultat(s)) :**")
             print()
@@ -1591,10 +1591,10 @@ try:
         else:
             print("**Aucun résultat trouvé**")
             print()
-        
+
         print("---")
         print()
-        
+
 except Exception as e:
     print("Erreur lors de la génération des résultats détaillés")
     print(f"Erreur : {str(e)}")
@@ -1605,15 +1605,15 @@ PYTHON_EOF
 
 ### Avantages de la Recherche Vectorielle
 
-✅ **Tolère les typos** (caractères manquants, inversés, remplacés)  
-✅ **Recherche sémantique** (comprend le sens)  
-✅ **Multilingue** (ByteT5)  
+✅ **Tolère les typos** (caractères manquants, inversés, remplacés)
+✅ **Recherche sémantique** (comprend le sens)
+✅ **Multilingue** (ByteT5)
 ✅ **Robuste aux variations de formulation**
 
 ### Limitations
 
-⚠️  **Peut retourner des résultats moins pertinents** que Full-Text  
-⚠️  **Nécessite génération d'embeddings** (coût computationnel)  
+⚠️  **Peut retourner des résultats moins pertinents** que Full-Text
+⚠️  **Nécessite génération d'embeddings** (coût computationnel)
 ⚠️  **Stockage supplémentaire** (1472 floats par libellé)
 
 ---
@@ -1637,7 +1637,7 @@ Utiliser la recherche hybride (Full-Text + Vector) pour :
 
 **✅ Démonstration complète terminée avec succès !**
 
-**Script** : \`24_demonstration_fuzzy_search_v2_didactique.sh\`  
+**Script** : \`24_demonstration_fuzzy_search_v2_didactique.sh\`
 **Script suivant** : \`25_test_hybrid_search_v2_didactique.sh\` (Recherche hybride)
 EOF
 
@@ -1648,5 +1648,3 @@ rm -f "$TEMP_COHERENCE"
 success "✅ Démonstration complète terminée !"
 success "📝 Documentation générée : $REPORT_FILE"
 info "📝 Script suivant : ./25_test_hybrid_search_v2_didactique.sh (Recherche hybride)"
-
-

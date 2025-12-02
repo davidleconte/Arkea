@@ -55,4 +55,3 @@ USING 'org.apache.cassandra.index.sai.StorageAttachedIndex';
 CREATE CUSTOM INDEX IF NOT EXISTS idx_interactions_resultat
 ON bic_poc.interactions_by_client (resultat)
 USING 'org.apache.cassandra.index.sai.StorageAttachedIndex';
-

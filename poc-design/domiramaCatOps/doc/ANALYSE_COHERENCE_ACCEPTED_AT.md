@@ -10,6 +10,7 @@
 ### Situation Actuelle
 
 Dans la table `acceptation_client`, on observe :
+
 - `accepted = false` avec `accepted_at = 2024-05-20` (renseigné)
 
 **Question** : Est-ce cohérent qu'`accepted_at` soit renseigné si `accepted = false` ?
@@ -21,6 +22,7 @@ Dans la table `acceptation_client`, on observe :
 ### Option 1 : `accepted_at` = "Date d'acceptation"
 
 **Logique** :
+
 - Si `accepted = true` → `accepted_at` doit être renseigné (date de l'acceptation)
 - Si `accepted = false` → `accepted_at` devrait être `NULL` (pas d'acceptation, donc pas de date)
 
@@ -29,6 +31,7 @@ Dans la table `acceptation_client`, on observe :
 ### Option 2 : `accepted_at` = "Date de décision client"
 
 **Logique** :
+
 - Le client prend une décision (accepter OU refuser) à une date donnée
 - `accepted_at` = date de cette décision, peu importe le résultat
 - Si `accepted = true` → `accepted_at` = date d'acceptation
@@ -47,6 +50,7 @@ Dans la table `acceptation_client`, on observe :
 **Option 2** : `accepted_at` signifie **"Date de la décision client"** (acceptation OU refus)
 
 **Justification** :
+
 1. Plus logique métier : le client prend une décision à une date donnée
 2. Permet de tracer quand le client a pris sa décision, même s'il refuse
 3. Cohérent avec les données actuelles
@@ -61,6 +65,7 @@ Dans la table `acceptation_client`, on observe :
 ### Recommandation Future
 
 Pour plus de clarté, envisager de renommer `accepted_at` en `decision_at` dans une future version :
+
 - Plus explicite sur la sémantique
 - Évite la confusion avec "date d'acceptation uniquement"
 - Cohérent avec la logique métier
@@ -78,6 +83,7 @@ code_efs | no_contrat | no_pse | accepted | accepted_at
 ```
 
 **Interprétation** :
+
 - Le client a pris la décision de **refuser** l'affichage/catégorisation
 - Cette décision a été prise le **2024-05-20**
 - `accepted_at` = date de cette décision (refus)
@@ -97,5 +103,3 @@ Les données sont **cohérentes** si on interprète `accepted_at` comme **"date 
 ---
 
 **Date de génération** : 2025-11-28
-
-

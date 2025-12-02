@@ -48,7 +48,7 @@ LIMIT 20;
 
 -- Page suivante (avec curseur)
 SELECT * FROM bic_poc.interactions_by_client
-WHERE code_efs = 'EFS001' 
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND date_interaction < '2024-06-15 10:30:00+0000'
 LIMIT 20;
@@ -68,7 +68,7 @@ LIMIT 20;
 
 ```cql
 SELECT * FROM bic_poc.interactions_by_client
-WHERE code_efs = 'EFS001' 
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND canal = 'email'
 LIMIT 100;
@@ -80,7 +80,7 @@ LIMIT 100;
 
 ```cql
 SELECT * FROM bic_poc.interactions_by_client
-WHERE code_efs = 'EFS001' 
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND type_interaction = 'consultation'
 LIMIT 100;
@@ -92,7 +92,7 @@ LIMIT 100;
 
 ```cql
 SELECT * FROM bic_poc.interactions_by_client
-WHERE code_efs = 'EFS001' 
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND resultat = 'succes'
 LIMIT 100;
@@ -104,7 +104,7 @@ LIMIT 100;
 
 ```cql
 SELECT * FROM bic_poc.interactions_by_client
-WHERE code_efs = 'EFS001' 
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND date_interaction >= '2024-01-01 00:00:00+0000'
   AND date_interaction < '2024-12-31 23:59:59+0000'
@@ -132,7 +132,7 @@ LIMIT 100;
 
 ```cql
 SELECT * FROM bic_poc.interactions_by_client
-WHERE code_efs = 'EFS001' 
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND json_data : 'reclamation'
 LIMIT 100;
@@ -142,9 +142,9 @@ LIMIT 100;
 
 ```cql
 SELECT * FROM bic_poc.interactions_by_client
-WHERE code_efs = 'EFS001' 
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
-  AND json_data : 'reclamation' 
+  AND json_data : 'reclamation'
   AND json_data : 'urgent'
 LIMIT 100;
 ```
@@ -152,6 +152,7 @@ LIMIT 100;
 ### Recherche avec Analyseurs Lucene
 
 L'index SAI full-text utilise des analyseurs Lucene pour :
+
 - **Lowercase** : Recherche insensible à la casse
 - **Asciifolding** : Normalisation des accents
 - **French Light Stemming** : Dérivation française
@@ -186,7 +187,7 @@ LIMIT 20;
 
 -- Page 2 (utiliser le dernier date_interaction de la page 1)
 SELECT * FROM bic_poc.interactions_by_client
-WHERE code_efs = 'EFS001' 
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND date_interaction < '2024-06-15 10:30:00+0000'
 LIMIT 20;
@@ -232,7 +233,7 @@ Le script 11 teste la pagination exhaustive (toutes les pages jusqu'à la fin).
 
 ```cql
 SELECT * FROM bic_poc.interactions_by_client
-WHERE code_efs = 'EFS001' 
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND canal = 'email'
   AND type_interaction = 'consultation'
@@ -244,7 +245,7 @@ LIMIT 50;
 
 ```cql
 SELECT * FROM bic_poc.interactions_by_client
-WHERE code_efs = 'EFS001' 
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND json_data : 'reclamation'
   AND canal = 'email'
@@ -255,7 +256,7 @@ LIMIT 50;
 
 ```cql
 SELECT * FROM bic_poc.interactions_by_client
-WHERE code_efs = 'EFS001' 
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND date_interaction >= '2024-01-01 00:00:00+0000'
   AND date_interaction < '2024-12-31 23:59:59+0000';
@@ -270,6 +271,7 @@ WHERE code_efs = 'EFS001'
 **Symptôme** : Requête prend > 1 seconde
 
 **Solution** :
+
 1. Vérifier que les index SAI sont créés
 2. Vérifier que la partition key est utilisée
 3. Utiliser LIMIT pour limiter les résultats
@@ -285,6 +287,7 @@ SELECT * FROM bic_poc.interactions_by_client WHERE ...;
 **Symptôme** : `0 rows`
 
 **Solution** :
+
 1. Vérifier que les données existent : `SELECT COUNT(*) FROM ...`
 2. Vérifier les filtres (canal, type, etc.)
 3. Vérifier la période (date_interaction)

@@ -8,7 +8,7 @@
 #   Ce script orchestre une démonstration complète de la logique multi-version
 #   avec time travel, garantissant qu'aucune correction client ne sera perdue
 #   lors des ré-exécutions du batch.
-#   
+#
 #   Fonctionnalités démontrées :
 #   - Stratégie multi-version : batch écrit cat_auto, client écrit cat_user
 #   - Time travel : récupération des données selon les dates (cat_date_user)

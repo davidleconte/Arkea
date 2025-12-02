@@ -9,7 +9,7 @@
 #   Ce script configure des index SAI (Storage-Attached Index) avancés pour
 #   la table 'operations_by_account' avec différents analyzers Lucene pour
 #   améliorer la pertinence des recherches full-text.
-#   
+#
 #   Cette version améliorée (b19sh) intègre :
 #   - Contexte détaillé (problème + solution + équivalences HBase → HCD)
 #   - DDL avec explications détaillées (analyzers)
@@ -448,8 +448,8 @@ info "📝 Génération du rapport markdown..."
 cat > "$REPORT_FILE" << 'REPORT_EOF'
 # 🎯 Configuration Index SAI Avancés - POC Domirama2
 
-**Date** : $(date +"%Y-%m-%d %H:%M:%S")  
-**Script** : `16_setup_advanced_indexes_b19sh.sh`  
+**Date** : $(date +"%Y-%m-%d %H:%M:%S")
+**Script** : `16_setup_advanced_indexes_b19sh.sh`
 **Version** : Améliorée (b19sh) - Basée sur les apports du script 19
 
 ---
@@ -469,7 +469,7 @@ cat > "$REPORT_FILE" << 'REPORT_EOF'
 
 ### Problème : Recherches Full-Text Limitées
 
-**Scénario** : Recherche de 'loyers' (pluriel) dans les opérations  
+**Scénario** : Recherche de 'loyers' (pluriel) dans les opérations
 **Résultat avec index standard** : ⚠️ Résultats partiels ou manquants
 
 **Limitations de l'index standard** :
@@ -660,7 +660,3 @@ sed -i '' "s/\$(date +\"%Y-%m-%d %H:%M:%S\")/$(date +"%Y-%m-%d %H:%M:%S")/g" "$R
 
 success "✅ Rapport markdown généré : $REPORT_FILE"
 echo ""
-
-
-
-

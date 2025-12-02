@@ -81,18 +81,22 @@ Documentation POC
 ## 🎯 Utilisation de la Documentation
 
 ### Pour comprendre le contexte
+
 - Lire `ANALYSE_ETAT_ART_HBASE.md` pour comprendre l'existant
 - Lire `ARCHITECTURE_POC_COMPLETE.md` pour comprendre l'architecture
 
 ### Pour installer les composants
+
 - Suivre `GUIDE_INSTALLATION_HCD_MAC.md` pour HCD
 - Suivre `GUIDE_INSTALLATION_SPARK_KAFKA.md` pour Spark/Kafka
 
 ### Pour utiliser le système
+
 - Consulter `KAFKA_HCD_STREAMING_READY.md` pour le streaming
 - Consulter `SCRIPTS_A_JOUR.md` pour tous les scripts disponibles
 
 ### Pour vérifier les tests
+
 - Consulter `RESULTATS_TEST_KAFKA_HCD.md` pour les résultats des tests
 
 ---
@@ -103,4 +107,3 @@ Documentation POC
 **7 fichiers essentiels conservés**
 
 La documentation est maintenant **claire, à jour et non redondante**.
-

@@ -241,7 +241,7 @@ generate_report() {
     cat > "$REPORT_FILE" <<EOF
 # 📊 Rapport de Vérification de Cohérence - ARKEA
 
-**Date** : $(date +%Y-%m-%d\ %H:%M:%S)  
+**Date** : $(date +%Y-%m-%d\ %H:%M:%S)
 **Script** : \`91_check_consistency.sh\`
 
 ---
@@ -334,4 +334,3 @@ else
     warn "$TOTAL_ISSUES problème(s) détecté(s)"
     exit 1
 fi
-

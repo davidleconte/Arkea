@@ -46,6 +46,7 @@ Un script de vérification complète est disponible :
 ```
 
 Ce script vérifie :
+
 - ✅ Variables d'environnement (conformes au quickstart)
 - ✅ Test de connexion HTTP
 - ✅ Services Kubernetes (si disponible)
@@ -66,9 +67,10 @@ lsof -i :8080
 
 ### Conformité au Quickstart Officiel
 
-**Documentation** : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/quickstart.html
+**Documentation** : <https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/quickstart.html>
 
 **Variables requises** :
+
 - `API_ENDPOINT` (ou `DATA_API_ENDPOINT` pour fallback POC)
 - `USERNAME` (ou `DATA_API_USERNAME` pour fallback POC)
 - `PASSWORD` (ou `DATA_API_PASSWORD` pour fallback POC)
@@ -92,6 +94,7 @@ lsof -i :8080
 Stargate est un gateway open-source qui expose Cassandra via REST/GraphQL.
 
 **Installation** :
+
 ```bash
 # Via Podman (le plus simple pour POC)
 podman run -d \
@@ -107,6 +110,7 @@ podman run -d \
 ```
 
 **Configuration** :
+
 ```bash
 # Mettre à jour l'endpoint
 export DATA_API_ENDPOINT="http://localhost:8080"
@@ -115,11 +119,13 @@ export DATA_API_ENDPOINT="http://localhost:8080"
 ### Option 2 : HCD avec Data API Intégrée (Production)
 
 Pour HCD en production (Kubernetes), la Data API est généralement intégrée via :
+
 - Service Kubernetes avec NodePort
 - Configuration via Mission Control
 - Gateway intégré au cluster
 
 **Vérification** :
+
 ```bash
 # Trouver le service
 kubectl get svc | grep stargate
@@ -133,12 +139,14 @@ kubectl get svc <service-name> -o jsonpath='{.spec.ports[0].nodePort}'
 ### Option 3 : Démonstration Conceptuelle (Actuel)
 
 **État actuel** : Démonstration conceptuelle
+
 - ✅ Configuration documentée
 - ✅ Exemples de code créés
 - ✅ Valeur ajoutée expliquée
 - ❌ Endpoint réel non déployé
 
 **Justification** :
+
 - Pour un POC, la démonstration conceptuelle est suffisante
 - Les exemples de code montrent comment utiliser la Data API
 - La valeur ajoutée est documentée et expliquée
@@ -151,12 +159,14 @@ kubectl get svc <service-name> -o jsonpath='{.spec.ports[0].nodePort}'
 ### Pour POC
 
 **Option A : Démonstration Conceptuelle (Actuel)** ✅
+
 - ✅ Suffisant pour montrer la valeur ajoutée
 - ✅ Exemples de code fonctionnels (une fois Stargate déployé)
 - ✅ Documentation complète
 - ⚠️ Endpoint non accessible actuellement
 
 **Option B : Déploiement Stargate** 🟢
+
 - ✅ Endpoint réellement accessible
 - ✅ Tests réels possibles
 - ⚠️ Nécessite Podman ou installation Stargate
@@ -165,6 +175,7 @@ kubectl get svc <service-name> -o jsonpath='{.spec.ports[0].nodePort}'
 ### Pour Production
 
 **Obligatoire** : Déploiement Data API via :
+
 - Kubernetes Service (HCD en production)
 - Mission Control (IBM HCD)
 - Stargate intégré
@@ -176,6 +187,7 @@ kubectl get svc <service-name> -o jsonpath='{.spec.ports[0].nodePort}'
 ### Si Déploiement Souhaité (Optionnel pour POC)
 
 1. **Installer Stargate** :
+
    ```bash
    # Via Podman (recommandé)
    podman pull stargateio/stargate-4.0:v1.0.84
@@ -183,11 +195,13 @@ kubectl get svc <service-name> -o jsonpath='{.spec.ports[0].nodePort}'
    ```
 
 2. **Vérifier l'endpoint** :
+
    ```bash
    curl http://localhost:8080/v1/status
    ```
 
 3. **Tester les exemples** :
+
    ```bash
    python3 data_api_examples/01_connect_data_api.py
    ```
@@ -195,6 +209,7 @@ kubectl get svc <service-name> -o jsonpath='{.spec.ports[0].nodePort}'
 ### Si Démonstration Conceptuelle (Actuel)
 
 **Suffisant pour POC** :
+
 - ✅ Configuration documentée
 - ✅ Exemples de code prêts
 - ✅ Valeur ajoutée expliquée
@@ -235,4 +250,3 @@ kubectl get svc <service-name> -o jsonpath='{.spec.ports[0].nodePort}'
 **⚠️ Client Python : Erreur "Environments outside of Astra DB are not supported"**
 
 **Note importante** : Le client `astrapy` avec `Environment.HCD` nécessite un endpoint Data API réellement déployé (Stargate ou gateway HCD). Pour un POC local sans Stargate, utiliser directement les drivers Cassandra (CQL) au lieu de la Data API.
-

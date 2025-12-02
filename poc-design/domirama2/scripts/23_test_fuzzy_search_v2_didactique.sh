@@ -7,7 +7,7 @@
 # OBJECTIF :
 #   Ce script démontre de manière très didactique la recherche floue (fuzzy search)
 #   en utilisant les embeddings ByteT5 stockés dans la colonne 'libelle_embedding'.
-#   
+#
 #   Cette version améliorée affiche :
 #   - Le DDL complet (schéma de la colonne VECTOR et index)
 #   - Les requêtes CQL détaillées (DML)
@@ -402,11 +402,11 @@ def load_model():
     print(f"   Modèle : {MODEL_NAME}")
     print(f"   Dimensions : {VECTOR_DIMENSION}")
     print()
-    
+
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, token=HF_API_KEY)
     model = AutoModel.from_pretrained(MODEL_NAME, token=HF_API_KEY)
     model.eval()
-    
+
     print("✅ Modèle chargé avec succès")
     print()
     return tokenizer, model
@@ -415,7 +415,7 @@ def encode_text(tokenizer, model, text):
     """Encode un texte en vecteur d'embedding."""
     if not text or text.strip() == "":
         return [0.0] * VECTOR_DIMENSION
-    
+
     inputs = tokenizer(
         text,
         return_tensors="pt",
@@ -423,11 +423,11 @@ def encode_text(tokenizer, model, text):
         padding=True,
         max_length=512
     )
-    
+
     with torch.no_grad():
         encoder_outputs = model.encoder(**inputs)
         embeddings = encoder_outputs.last_hidden_state.mean(dim=1)
-    
+
     return embeddings[0].tolist()
 
 def format_vector_preview(embedding, max_dims=5):
@@ -491,35 +491,35 @@ for i, test_case in enumerate(test_cases, 1):
     description = test_case["description"]
     expected = test_case["expected"]
     explanation = test_case.get("explanation", "")
-    
+
     print(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     print(f"  TEST {i}/{len(test_cases)} : {title} - '{query_text}'")
     print(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     print()
-    
+
     print(f"📚 DÉFINITION - {title} :")
     print(f"   {description}")
     print()
-    
+
     print(f"📋 Résultat attendu :")
     print(f"   {expected}")
     print()
-    
+
     if explanation:
         print(f"💡 Explication :")
         print(f"   {explanation}")
         print()
-    
+
     # Générer l'embedding de la requête
     print("🔄 Génération de l'embedding de la requête...")
     start_time = time.time()
     query_embedding = encode_text(tokenizer, model, query_text)
     encoding_time = time.time() - start_time
-    
+
     print(f"✅ Embedding généré en {encoding_time:.3f}s")
     print(f"   Vecteur : {format_vector_preview(query_embedding)}")
     print()
-    
+
     # Afficher la requête CQL
     print("📝 Requête CQL (DML) :")
     print("   ┌─────────────────────────────────────────────────────────┐")
@@ -537,14 +537,14 @@ for i, test_case in enumerate(test_cases, 1):
             print(f"   │ {line.strip()}")
     print("   └─────────────────────────────────────────────────────────┘")
     print()
-    
+
     print("   Explication de la requête :")
     print("      - WHERE code_si = ... AND contrat = ... : Cible la partition")
     print("      - ORDER BY libelle_embedding ANN OF [...] : Tri par similarité vectorielle")
     print("      - ANN (Approximate Nearest Neighbor) : Trouve les vecteurs les plus proches")
     print("      - LIMIT 5 : Retourne les 5 résultats les plus similaires")
     print()
-    
+
     # Structure pour stocker les résultats de ce test
     test_result = {
         "test_number": i,
@@ -561,25 +561,25 @@ for i, test_case in enumerate(test_cases, 1):
         "encoding_time": encoding_time,
         "validation": None
     }
-    
+
     # Exécuter la requête
     print("🚀 Exécution de la requête...")
     start_time = time.time()
-    
+
     try:
         statement = SimpleStatement(cql_query, fetch_size=5)
         results = list(session.execute(statement))
         query_time = time.time() - start_time
         test_result["query_time"] = query_time
-        
+
         print(f"✅ Requête exécutée en {query_time:.3f}s")
         print()
-        
+
         # Afficher les résultats
         if results:
             print(f"📊 Résultats obtenus ({len(results)} résultat(s)) :")
             print("   ┌─────────────────────────────────────────────────────────┐")
-            
+
             # Capturer les résultats pour la documentation
             for j, row in enumerate(results, 1):
                 libelle = row.libelle[:50] if row.libelle else "N/A"
@@ -587,7 +587,7 @@ for i, test_case in enumerate(test_cases, 1):
                 cat = row.cat_auto if row.cat_auto else "N/A"
                 print(f"   │ {j}. {libelle}")
                 print(f"   │    Montant: {montant} | Catégorie: {cat}")
-                
+
                 # Stocker le résultat complet
                 test_result["results"].append({
                     "rank": j,
@@ -595,12 +595,12 @@ for i, test_case in enumerate(test_cases, 1):
                     "montant": float(row.montant) if row.montant else None,
                     "cat_auto": row.cat_auto if row.cat_auto else None
                 })
-            
+
             print("   └─────────────────────────────────────────────────────────┘")
             print()
-            
+
             test_result["success"] = True
-            
+
             # Validation
             first_result = results[0].libelle.upper() if results[0].libelle else ""
             if query_text.upper() in first_result or any(query_text.upper()[:3] in r.libelle.upper()[:10] for r in results if r.libelle):
@@ -616,7 +616,7 @@ for i, test_case in enumerate(test_cases, 1):
             print("   - Aucune opération dans cette partition")
             print("   - Embeddings non générés pour cette partition")
             print("   - Typo trop sévère (essayer avec un terme plus proche)")
-        
+
     except Exception as e:
         print(f"❌ Erreur lors de l'exécution : {str(e)}")
         print()
@@ -624,13 +624,13 @@ for i, test_case in enumerate(test_cases, 1):
         print("   - La colonne libelle_embedding existe-t-elle ?")
         print("   - Les embeddings ont-ils été générés ?")
         print("   - L'index idx_libelle_embedding_vector existe-t-il ?")
-        
+
         test_result["success"] = False
         test_result["error"] = str(e)
-    
+
     # Ajouter les résultats de ce test à la liste
     all_results.append(test_result)
-    
+
     print()
     print("-" * 70)
     print()
@@ -769,8 +769,8 @@ if os.path.exists(temp_results):
 # Générer le rapport
 report = f"""# 🔍 Démonstration : Fuzzy Search avec Vector Search (ByteT5) - POC Domirama2
 
-**Date** : {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}  
-**Script** : `23_test_fuzzy_search_v2_didactique.sh`  
+**Date** : {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+**Script** : `23_test_fuzzy_search_v2_didactique.sh`
 **Objectif** : Démontrer la recherche floue avec embeddings ByteT5
 
 ---
@@ -845,10 +845,10 @@ LIMIT 5;
 
 ### Améliorations HCD
 
-✅ **Type VECTOR natif** (vs système ML externe)  
-✅ **Index SAI vectoriel intégré** (vs Elasticsearch externe)  
-✅ **Pas de synchronisation** (vs HBase + Elasticsearch + ML)  
-✅ **Performance optimale** (index co-localisé avec données)  
+✅ **Type VECTOR natif** (vs système ML externe)
+✅ **Index SAI vectoriel intégré** (vs Elasticsearch externe)
+✅ **Pas de synchronisation** (vs HBase + Elasticsearch + ML)
+✅ **Performance optimale** (index co-localisé avec données)
 ✅ **Support ANN natif** (Approximate Nearest Neighbor)
 
 ---
@@ -909,9 +909,9 @@ La recherche vectorielle utilise des embeddings générés par ByteT5 pour captu
 
 ### Avantages
 
-✅ **Tolère les typos** (caractères manquants, inversés, remplacés)  
-✅ **Recherche sémantique** (comprend le sens, pas juste les mots)  
-✅ **Multilingue** (ByteT5 supporte plusieurs langues)  
+✅ **Tolère les typos** (caractères manquants, inversés, remplacés)
+✅ **Recherche sémantique** (comprend le sens, pas juste les mots)
+✅ **Multilingue** (ByteT5 supporte plusieurs langues)
 ✅ **Robuste aux variations de formulation**
 
 ### Comparaison avec Full-Text Search
@@ -968,7 +968,7 @@ for i, test in enumerate(results, 1):
     description = test.get("description", "N/A")
     expected = test.get("expected", "N/A")
     explanation = test.get("explanation", "")
-    
+
     report += f"""
 {i}. **TEST {i}** : '{query}' - {title}
    - Description : {description}
@@ -1026,9 +1026,9 @@ Utiliser la recherche hybride (Full-Text + Vector) en production :
 
 ### Résumé de la Démonstration
 
-✅ **DDL** : Colonne VECTOR<FLOAT, 1472> et index SAI vectoriel  
-✅ **DML** : Requêtes avec ORDER BY ... ANN OF [...]  
-✅ **Tests** : 4 requêtes avec typos testées  
+✅ **DDL** : Colonne VECTOR<FLOAT, 1472> et index SAI vectoriel
+✅ **DML** : Requêtes avec ORDER BY ... ANN OF [...]
+✅ **Tests** : 4 requêtes avec typos testées
 ✅ **Résultats** : Recherche vectorielle fonctionne
 
 ### Résultats Réels des Requêtes CQL
@@ -1049,11 +1049,11 @@ for i, test in enumerate(results, 1):
     validation = test.get("validation", "N/A")
     test_results = test.get("results", [])
     cql_query = test.get("cql_query", "N/A")
-    
+
     report += f"""
 #### TEST {i} : {title} - '{query}'
 
-**Description** : {description}  
+**Description** : {description}
 **Résultat attendu** : {expected}
 """
     if explanation:
@@ -1068,7 +1068,7 @@ for i, test in enumerate(results, 1):
     if validation:
         report += f"**Validation** : {validation}\n"
     report += "\n"
-    
+
     if cql_query and cql_query != "N/A":
         report += "**Requête CQL exécutée :**\n\n"
         report += "```cql\n"
@@ -1076,7 +1076,7 @@ for i, test in enumerate(results, 1):
         cql_query_short = re.sub(r'ANN OF \[.*?\]', 'ANN OF [...]', cql_query, flags=re.DOTALL)
         report += cql_query_short + "\n"
         report += "```\n\n"
-    
+
     if test_results:
         report += f"**Résultats obtenus ({len(test_results)} résultat(s)) :**\n\n"
         report += "| Rang | Libellé | Montant | Catégorie |\n"
@@ -1092,7 +1092,7 @@ for i, test in enumerate(results, 1):
         report += "\n"
     else:
         report += "**Résultats obtenus** : Aucun résultat\n\n"
-    
+
     report += "---\n\n"
 
 report += """
@@ -1102,22 +1102,22 @@ report += """
 
 ### Résumé
 
-✅ **DDL** : Colonne VECTOR<FLOAT, 1472> et index SAI vectoriel  
-✅ **DML** : Requêtes avec ORDER BY ... ANN OF [...]  
-✅ **Tests** : 4 requêtes avec typos testées  
+✅ **DDL** : Colonne VECTOR<FLOAT, 1472> et index SAI vectoriel
+✅ **DML** : Requêtes avec ORDER BY ... ANN OF [...]
+✅ **Tests** : 4 requêtes avec typos testées
 ✅ **Résultats** : Recherche vectorielle fonctionne
 
 ### Avantages de la Recherche Vectorielle
 
-✅ Tolère les typos (caractères manquants, inversés, remplacés)  
-✅ Recherche sémantique (comprend le sens)  
-✅ Multilingue (ByteT5)  
+✅ Tolère les typos (caractères manquants, inversés, remplacés)
+✅ Recherche sémantique (comprend le sens)
+✅ Multilingue (ByteT5)
 ✅ Robuste aux variations de formulation
 
 ### Limitations
 
-⚠️  Peut retourner des résultats moins pertinents que Full-Text  
-⚠️  Nécessite génération d'embeddings (coût computationnel)  
+⚠️  Peut retourner des résultats moins pertinents que Full-Text
+⚠️  Nécessite génération d'embeddings (coût computationnel)
 ⚠️  Stockage supplémentaire (1472 floats par libellé)
 
 ### Recommandation
@@ -1146,4 +1146,3 @@ rm -f "$TEMP_RESULTS"
 success "✅ Démonstration terminée !"
 success "📝 Documentation générée : $REPORT_FILE"
 info "📝 Script suivant : ./25_test_hybrid_search.sh (Recherche hybride)"
-

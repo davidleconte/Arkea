@@ -21,17 +21,20 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/lang/fr/).
 ### Ajouté
 
 #### Guides de Documentation
+
 - **GUIDE_CHOIX_POC.md** - Guide pour choisir entre BIC, domirama2, domiramaCatOps
 - **GUIDE_COMPARAISON_POCS.md** - Comparaison technique détaillée des POCs
 - **GUIDE_CONTRIBUTION_POCS.md** - Standards pour contribuer aux POCs
 - **GUIDE_MAINTENANCE.md** - Processus de maintenance et archivage
 
 #### Scripts Utilitaires
+
 - **scripts/utils/91_check_consistency.sh** - Vérification de cohérence (chemins hardcodés, scripts, documentation)
 - **scripts/utils/92_generate_docs.sh** - Génération automatique de documentation (index, listes, tableaux)
 - **scripts/utils/93_fix_hardcoded_paths.sh** - Correction automatique des chemins hardcodés
 
 #### Tests
+
 - **tests/unit/test_portability.sh** - Tests de portabilité cross-platform (5 tests)
 - **tests/unit/test_consistency.sh** - Tests de cohérence du projet (6 tests)
 - **tests/integration/test_poc_structure.sh** - Tests de structure des POCs
@@ -41,16 +44,20 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/lang/fr/).
 ### Modifié
 
 #### Configuration
+
 - **.poc-profile** - Fallback hardcodé remplacé par détection automatique portable
 
 #### Scripts
+
 - **12 scripts** corrigés avec ajout de `set -euo pipefail`
 - **4 scripts** avec références `localhost` remplacées par variables d'environnement
 
 #### CI/CD
+
 - **.github/workflows/test-multi-os.yml** - Enrichi avec vérifications de cohérence et chemins hardcodés
 
 #### Documentation
+
 - **tests/README.md** - Mis à jour avec les nouveaux tests
 - **tests/run_all_tests.sh** - Mis à jour pour inclure les nouveaux tests
 - **docs/INDEX.md** - Ajout des nouveaux guides

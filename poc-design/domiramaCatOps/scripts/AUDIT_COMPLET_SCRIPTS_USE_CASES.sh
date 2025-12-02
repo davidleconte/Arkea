@@ -27,10 +27,10 @@ for script in "$SCRIPT_DIR"/*.sh; do
     if [ -f "$script" ] && [[ ! "$(basename "$script")" =~ ^(AUDIT_|FIX_) ]]; then
         script_name=$(basename "$script")
         echo "📝 Analyse de: $script_name"
-        
+
         # Extraire les use cases mentionnés
         use_cases=$(grep -iE "UC-|use.?case|démontre|démonstration|objectif" "$script" | head -5)
-        
+
         # Déterminer le type de script
         if [[ "$script_name" =~ ^0[1-4]_ ]]; then
             type="Setup"
@@ -45,7 +45,7 @@ for script in "$SCRIPT_DIR"/*.sh; do
         else
             type="Autre"
         fi
-        
+
         SCRIPTS_STATUS["$script_name"]="$type"
         SCRIPTS_USE_CASES["$script_name"]="$use_cases"
     fi
@@ -54,5 +54,3 @@ done
 echo ""
 echo "✅ Analyse terminée"
 echo "📊 Rapport généré : $AUDIT_REPORT"
-
-

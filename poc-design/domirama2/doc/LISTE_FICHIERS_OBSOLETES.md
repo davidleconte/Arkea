@@ -21,6 +21,7 @@ Ces fichiers sont des audits successifs qui se chevauchent. Le plus récent (`AU
 | `AUDIT_COMPLET_2025.md` | 2025-01-XX | ✅ **ACTUEL** | Audit le plus récent et complet |
 
 **Recommandation** :
+
 - ✅ Conserver `AUDIT_COMPLET_2025.md` comme référence principale
 - ⚠️ Archiver ou supprimer `27_AUDIT_COMPLET_DOMIRAMA2.md` et `29_AUDIT_FINAL_DOMIRAMA2.md` (historiques)
 - ⚠️ Archiver `40_AUDIT_DOCUMENTATION_MD.md` et `41_AUDIT_MD_COMPLET.md` (spécialisés, peuvent être utiles pour référence)
@@ -35,6 +36,7 @@ Ces fichiers sont des audits successifs qui se chevauchent. Le plus récent (`AU
 | `00_ORGANISATION_DOC.md` | 2024-11-27 | ✅ **ACTUEL** | Version complète et à jour |
 
 **Recommandation** :
+
 - ✅ Conserver `00_ORGANISATION_DOC.md`
 - ⚠️ Supprimer `35_ORGANISATION_DOC.md` (redondant)
 
@@ -47,6 +49,7 @@ Ces fichiers sont des audits successifs qui se chevauchent. Le plus récent (`AU
 | `28_REORGANISATION_COMPLETE.md` | 2025-11-25 | ⚠️ **HISTORIQUE** | Documente une réorganisation passée, utile pour historique mais pas pour usage courant |
 
 **Recommandation** :
+
 - ⚠️ Conserver pour historique (documente les actions de réorganisation)
 - ⚠️ Ou archiver dans un sous-répertoire `archive/` ou `historique/`
 
@@ -67,6 +70,7 @@ Ces documents ne sont pas obsolètes eux-mêmes, mais contiennent des référenc
 **Note** : Selon `41_AUDIT_MD_COMPLET.md`, ces références ont été corrigées, mais il faut vérifier.
 
 **Recommandation** :
+
 - ⚠️ Vérifier que toutes les références sont à jour
 - ⚠️ Si corrigées, ces documents ne sont pas obsolètes
 
@@ -83,6 +87,7 @@ Ces documents peuvent avoir un contenu similaire ou se chevaucher. À examiner p
 | `44_GUIDE_AMELIORATION_SCRIPTS.md` | `44_RESUME_MISE_A_JOUR_2024_11_27.md` | Même numéro (44) | ⚠️ **Examiner** la relation |
 
 **Recommandation** :
+
 - ⚠️ Examiner le contenu pour déterminer s'ils doivent être fusionnés
 - ⚠️ Si redondants, fusionner en un seul document
 - ⚠️ Si complémentaires, clarifier les différences dans les titres
@@ -104,6 +109,7 @@ Ces documents peuvent avoir un contenu similaire ou se chevaucher. À examiner p
 | `78_ANALYSE_SCRIPT_25_ET_TEMPLATE.md` | `78_ANALYSE_SCRIPT_30_ET_TEMPLATE.md` | Même numéro (78) | ⚠️ **Renommer** l'un des deux |
 
 **Recommandation** :
+
 - ⚠️ Renommer les fichiers pour éviter les conflits de numérotation
 - ⚠️ Utiliser des numéros séquentiels uniques
 
@@ -181,4 +187,3 @@ Les fichiers suivants sont **actuels** et doivent être **conservés** :
 ---
 
 **✅ Liste créée le 2025-01-XX**
-

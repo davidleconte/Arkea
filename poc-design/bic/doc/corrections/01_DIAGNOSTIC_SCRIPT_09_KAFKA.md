@@ -9,6 +9,7 @@
 ## ❌ Problème Identifié
 
 ### Erreur
+
 ```
 Couldn't find bic_poc or any similarly named keyspaces
 ```
@@ -16,15 +17,18 @@ Couldn't find bic_poc or any similarly named keyspaces
 ### Vérifications Effectuées
 
 #### ✅ Keyspace Existe
+
 - Le keyspace `bic_poc` existe bien dans HCD
 - Vérifié via `cqlsh` : `SELECT keyspace_name FROM system_schema.keyspaces WHERE keyspace_name = 'bic_poc';`
 - Résultat : **Keyspace présent**
 
 #### ✅ Table Existe
+
 - La table `interactions_by_client` existe dans le keyspace `bic_poc`
 - Schéma correct et conforme
 
 #### ❌ Spark-Cassandra Connector
+
 - **Problème** : Spark ne peut pas se connecter à HCD ou ne trouve pas le keyspace
 - Test d'écriture simple échoue avec la même erreur
 - Test de lecture échoue également
@@ -34,16 +38,19 @@ Couldn't find bic_poc or any similarly named keyspaces
 ## 🔍 Causes Probables
 
 ### 1. Problème de Connexion Spark-HCD
+
 - Spark Cassandra Connector ne peut pas établir la connexion
 - Problème de réseau ou de configuration
 - Version incompatible du connecteur
 
 ### 2. Configuration Spark-Cassandra
+
 - Configuration `spark.cassandra.connection.host` incorrecte
 - Configuration `spark.cassandra.connection.port` incorrecte
 - Problème avec `spark.sql.extensions`
 
 ### 3. Visibilité du Keyspace
+
 - Le keyspace n'est pas visible depuis Spark
 - Problème de permissions ou de réplication
 
@@ -54,17 +61,20 @@ Couldn't find bic_poc or any similarly named keyspaces
 ### Solution 1 : Driver Python Cassandra (Recommandée)
 
 **Avantages** :
+
 - ✅ Plus fiable pour l'ingestion Kafka
 - ✅ Contourne les problèmes Spark-Cassandra
 - ✅ Plus simple à déboguer
 - ✅ Meilleure gestion des erreurs
 
 **Implémentation** :
+
 - Utiliser `kafka-python` pour consommer Kafka
 - Utiliser `cassandra-driver` pour écrire dans HCD
 - Script Python créé : `/tmp/bic_kafka_direct_*.py`
 
 **Code** :
+
 ```python
 from kafka import KafkaConsumer
 from cassandra.cluster import Cluster
@@ -89,12 +99,14 @@ for message in consumer:
 ### Solution 2 : Corriger Spark-Cassandra Connector
 
 **Actions** :
+
 1. Vérifier la version du connecteur
 2. Vérifier la configuration réseau
 3. Tester avec une connexion directe
 4. Vérifier les logs Spark pour plus de détails
 
 **Configuration à vérifier** :
+
 ```scala
 .config("spark.cassandra.connection.host", "localhost")
 .config("spark.cassandra.connection.port", "9042")
@@ -107,10 +119,12 @@ for message in consumer:
 ### Solution 3 : Approche Hybride (Spark + Python)
 
 **Étapes** :
+
 1. Lire Kafka avec Spark → Écrire en Parquet
 2. Lire Parquet avec Python → Écrire dans HCD via driver Python
 
 **Avantages** :
+
 - ✅ Utilise Spark pour le traitement (puissant)
 - ✅ Utilise Python pour l'écriture (fiable)
 
@@ -119,18 +133,21 @@ for message in consumer:
 ## 📋 Plan d'Action
 
 ### Phase 1 : Solution Immédiate (Python)
+
 - [x] Créer script Python pour ingestion directe
 - [ ] Installer dépendances (`kafka-python`, `cassandra-driver`)
 - [ ] Tester l'ingestion avec données réelles
 - [ ] Intégrer dans le script 09
 
 ### Phase 2 : Correction Spark-Cassandra (Optionnel)
+
 - [ ] Vérifier la version du connecteur
 - [ ] Tester différentes configurations
 - [ ] Vérifier les logs Spark détaillés
 - [ ] Documenter la solution
 
 ### Phase 3 : Amélioration (Long terme)
+
 - [ ] Créer un script hybride (Spark + Python)
 - [ ] Optimiser les performances
 - [ ] Ajouter monitoring et alertes
@@ -144,17 +161,20 @@ Le script Python suivant a été créé pour contourner le problème :
 **Fichier** : `/tmp/bic_kafka_direct_*.py`
 
 **Fonctionnalités** :
+
 - ✅ Consomme Kafka (topic `bic-event`)
 - ✅ Parse JSON
 - ✅ Transforme vers format HCD
 - ✅ Écrit directement dans HCD via driver Python
 
 **Dépendances** :
+
 ```bash
 pip install kafka-python cassandra-driver
 ```
 
 **Exécution** :
+
 ```bash
 python3 /tmp/bic_kafka_direct_*.py
 ```
@@ -164,6 +184,7 @@ python3 /tmp/bic_kafka_direct_*.py
 ## 📊 Résultats Attendus
 
 Avec la solution Python :
+
 - ✅ Lecture depuis Kafka : **OK**
 - ✅ Parsing JSON : **OK**
 - ✅ Écriture dans HCD : **À tester**
@@ -180,4 +201,3 @@ Avec la solution Python :
 
 **Date** : 2025-12-01  
 **Statut** : Diagnostic complet, solution proposée
-

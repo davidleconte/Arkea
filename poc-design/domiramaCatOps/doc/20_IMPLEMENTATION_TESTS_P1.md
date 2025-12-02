@@ -21,6 +21,7 @@
 **Script Python** : `examples/python/test_migration_complexe.py`
 
 **Fonctionnalités** :
+
 - ✅ Export par plages précises (STARTROW/STOPROW équivalents)
 - ✅ Validation cohérence source vs export
 - ✅ Gestion des doublons (déduplication)
@@ -28,6 +29,7 @@
 - ✅ Validation multi-tables
 
 **Tests inclus** :
+
 1. Export par plages précises (3 plages testées)
 2. Validation cohérence (comptage source vs export)
 3. Gestion doublons (déduplication automatique)
@@ -42,12 +44,14 @@
 **Script Python** : `examples/python/test_charge_concurrente.py`
 
 **Fonctionnalités** :
+
 - ✅ Charge lecture (100+ requêtes simultanées)
 - ✅ Charge écriture (100+ insertions simultanées)
 - ✅ Charge mixte (50% lecture, 50% écriture)
 - ✅ Mesure latence (p50, p95, p99) et throughput
 
 **Tests inclus** :
+
 1. Charge lecture concurrente (10 threads × 10 requêtes = 100 requêtes)
 2. Charge écriture concurrente (10 threads × 10 insertions = 100 insertions)
 3. Charge mixte (5 threads lecture + 5 threads écriture)
@@ -61,12 +65,14 @@
 **Script Python** : `examples/python/test_recherche_multi_modeles_fusion.py`
 
 **Fonctionnalités** :
+
 - ✅ Recherche avec ByteT5 + e5-large + Facturation simultanément
 - ✅ Fusion des résultats (déduplication, scoring combiné)
 - ✅ Ranking personnalisé (score combiné)
 - ✅ Fallback automatique (modèle 1 → modèle 2 → modèle 3)
 
 **Tests inclus** :
+
 1. Recherche multi-modèles (3 requêtes testées)
 2. Fusion résultats (déduplication, scoring pondéré)
 3. Ranking personnalisé (tri par score combiné)
@@ -80,6 +86,7 @@
 **Script Python** : `examples/python/test_coherence_transactionnelle.py`
 
 **Fonctionnalités** :
+
 - ✅ Cohérence référentielle (foreign keys équivalents)
 - ✅ Cohérence temporelle (dates cohérentes)
 - ✅ Cohérence compteurs (feedbacks_count = SUM feedbacks)
@@ -87,6 +94,7 @@
 - ✅ Cohérence règles (cat_auto doit exister dans regles_personnalisees)
 
 **Tests inclus** :
+
 1. Cohérence référentielle (acceptation_client → operations_by_account)
 2. Cohérence temporelle (dates cohérentes)
 3. Cohérence compteurs (validation compteurs feedbacks)
@@ -195,6 +203,7 @@ python3 examples/python/test_coherence_transactionnelle.py
 **Tous les tests P1 sont implémentés et prêts à être exécutés.**
 
 **Prochaines étapes** :
+
 1. Exécuter les tests pour valider leur fonctionnement
 2. Analyser les résultats et générer les rapports
 3. Implémenter les tests P2 (Priorité Haute) si nécessaire
@@ -203,4 +212,3 @@ python3 examples/python/test_coherence_transactionnelle.py
 
 **Date de génération** : 2025-11-30  
 **Version** : 1.0
-

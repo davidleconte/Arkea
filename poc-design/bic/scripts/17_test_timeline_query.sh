@@ -84,8 +84,8 @@ success "HCD est démarré"
 cat > "$REPORT_FILE" << 'EOF'
 # 🧪 Démonstration : Timeline Query Avancées
 
-**Date** : 2025-12-01  
-**Script** : `17_test_timeline_query.sh`  
+**Date** : 2025-12-01
+**Script** : `17_test_timeline_query.sh`
 **Use Cases** : BIC-01 (Timeline conseiller avancée)
 
 ---
@@ -127,8 +127,8 @@ demo "Objectif : Récupérer la timeline filtrée par canal (email uniquement)"
 CANAL="email"
 PAGE_SIZE=20
 
-QUERY1="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY1="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND canal = '$CANAL'
 LIMIT $PAGE_SIZE;"
@@ -169,7 +169,7 @@ if [ $EXIT_CODE1 -eq 0 ] && [ -n "$RESULT1" ]; then
     COUNT1=$(echo "$RESULT1" | grep -c "^[[:space:]]*EFS001" || echo "0")
     echo ""
     result "Nombre d'interactions email : $COUNT1"
-    
+
     # Extraire un échantillon représentatif pour le rapport
     SAMPLE1=$(echo "$RESULT1" | grep -E "^[[:space:]]*EFS001" | head -5 | awk -F'|' '{
         for (i=1; i<=NF; i++) {
@@ -179,7 +179,7 @@ if [ $EXIT_CODE1 -eq 0 ] && [ -n "$RESULT1" ]; then
             printf "| %s | %s | %s | %s | %s | %s |\n", $1, $2, $3, $4, $5, $6
         }
     }' || echo "")
-    
+
     # VALIDATION : Comparaison attendus vs obtenus (COUNT1 <= PAGE_SIZE)
     if [ "$COUNT1" -le "$PAGE_SIZE" ]; then
         success "✅ Comparaison réussie : $COUNT1 <= $PAGE_SIZE (pagination correcte)"
@@ -191,7 +191,7 @@ if [ $EXIT_CODE1 -eq 0 ] && [ -n "$RESULT1" ]; then
         "$COUNT1" \
         "$COUNT1" \
         "0"
-    
+
     # VALIDATION COMPLÈTE (COUNT1 peut être <= PAGE_SIZE, c'est normal)
     validate_complete \
         "TEST 1 : Timeline avec Filtre Canal" \
@@ -219,8 +219,8 @@ demo "Objectif : Récupérer la timeline des 6 derniers mois"
 # Calculer la date il y a 6 mois (macOS et Linux)
 SIX_MONTHS_AGO=$(date -u -v-6m +"%Y-%m-%d %H:%M:%S+0000" 2>/dev/null || date -u -d "6 months ago" +"%Y-%m-%d %H:%M:%S+0000" 2>/dev/null || echo "2025-06-01 00:00:00+0000")
 
-QUERY2="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY2="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND date_interaction >= '$SIX_MONTHS_AGO'
 LIMIT $PAGE_SIZE;"
@@ -257,7 +257,7 @@ if [ $EXIT_CODE2 -eq 0 ] && [ -n "$RESULT2" ]; then
     success "✅ Requête exécutée avec succès en ${EXEC_TIME2}s"
     COUNT2=$(echo "$RESULT2" | grep -c "^[[:space:]]*EFS001" || echo "0")
     result "Nombre d'interactions (6 mois) : $COUNT2"
-    
+
     # Extraire un échantillon représentatif pour le rapport
     SAMPLE2=$(echo "$RESULT2" | grep -E "^[[:space:]]*EFS001" | head -5 | awk -F'|' '{
         for (i=1; i<=NF; i++) {
@@ -267,7 +267,7 @@ if [ $EXIT_CODE2 -eq 0 ] && [ -n "$RESULT2" ]; then
             printf "| %s | %s | %s | %s | %s | %s |\n", $1, $2, $3, $4, $5, $6
         }
     }' || echo "")
-    
+
     # VALIDATION : Comparaison attendus vs obtenus (COUNT2 <= PAGE_SIZE)
     if [ "$COUNT2" -le "$PAGE_SIZE" ]; then
         success "✅ Comparaison réussie : $COUNT2 <= $PAGE_SIZE (pagination correcte)"
@@ -279,7 +279,7 @@ if [ $EXIT_CODE2 -eq 0 ] && [ -n "$RESULT2" ]; then
         "$COUNT2" \
         "$COUNT2" \
         "0"
-    
+
     # VALIDATION COMPLÈTE (COUNT2 peut être <= PAGE_SIZE, c'est normal)
     validate_complete \
         "TEST 2 : Timeline avec Filtre Période" \
@@ -305,8 +305,8 @@ demo "Objectif : Timeline avec filtres combinés (canal email + 6 derniers mois)
 
 CANAL="email"
 
-QUERY3="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY3="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND canal = '$CANAL'
   AND date_interaction >= '$SIX_MONTHS_AGO'
@@ -344,7 +344,7 @@ if [ $EXIT_CODE3 -eq 0 ] && [ -n "$RESULT3" ]; then
     success "✅ Requête exécutée avec succès en ${EXEC_TIME3}s"
     COUNT3=$(echo "$RESULT3" | grep -c "^[[:space:]]*EFS001" || echo "0")
     result "Nombre d'interactions email (6 mois) : $COUNT3"
-    
+
     # Extraire un échantillon représentatif pour le rapport
     SAMPLE3=$(echo "$RESULT3" | grep -E "^[[:space:]]*EFS001" | head -5 | awk -F'|' '{
         for (i=1; i<=NF; i++) {
@@ -354,7 +354,7 @@ if [ $EXIT_CODE3 -eq 0 ] && [ -n "$RESULT3" ]; then
             printf "| %s | %s | %s | %s | %s | %s |\n", $1, $2, $3, $4, $5, $6
         }
     }' || echo "")
-    
+
     # VALIDATION : Cohérence (COUNT3 <= COUNT1 et COUNT3 <= COUNT2)
     if [ "$COUNT3" -le "$COUNT1" ] && [ "$COUNT3" -le "$COUNT2" ]; then
         success "✅ Cohérence validée : Interactions filtrées ($COUNT3) <= Interactions canal ($COUNT1) et période ($COUNT2)"
@@ -365,7 +365,7 @@ if [ $EXIT_CODE3 -eq 0 ] && [ -n "$RESULT3" ]; then
     else
         warn "⚠️  Incohérence : Interactions filtrées ($COUNT3) > Interactions canal ($COUNT1) ou période ($COUNT2)"
     fi
-    
+
     # VALIDATION COMPLÈTE (COUNT3 peut être <= PAGE_SIZE, c'est normal)
     validate_complete \
         "TEST 3 : Timeline avec Filtres Combinés" \
@@ -392,8 +392,8 @@ demo "Objectif : Timeline filtrée par type 'reclamation' avec résultat 'succè
 TYPE_INTERACTION="reclamation"
 RESULTAT="succès"
 
-QUERY4="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY4="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND type_interaction = '$TYPE_INTERACTION'
   AND resultat = '$RESULTAT'
@@ -430,7 +430,7 @@ if [ $EXIT_CODE4 -eq 0 ] && [ -n "$RESULT4" ]; then
     success "✅ Requête exécutée avec succès en ${EXEC_TIME4}s"
     COUNT4=$(echo "$RESULT4" | grep -c "^[[:space:]]*EFS001" || echo "0")
     result "Nombre de réclamations avec succès : $COUNT4"
-    
+
     # Extraire un échantillon représentatif pour le rapport
     SAMPLE4=$(echo "$RESULT4" | grep -E "^[[:space:]]*EFS001" | head -5 | awk -F'|' '{
         for (i=1; i<=NF; i++) {
@@ -440,7 +440,7 @@ if [ $EXIT_CODE4 -eq 0 ] && [ -n "$RESULT4" ]; then
             printf "| %s | %s | %s | %s | %s | %s |\n", $1, $2, $3, $4, $5, $6
         }
     }' || echo "")
-    
+
     # VALIDATION COMPLÈTE (COUNT4 peut être <= PAGE_SIZE, c'est normal)
     validate_complete \
         "TEST 4 : Timeline avec Filtres Type + Résultat" \
@@ -467,8 +467,8 @@ demo "Objectif : Timeline sur une plage de dates précise (janvier 2025)"
 START_DATE="2025-01-01 00:00:00+0000"
 END_DATE="2025-01-31 23:59:59+0000"
 
-QUERY5="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY5="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND date_interaction >= '$START_DATE'
   AND date_interaction <= '$END_DATE'
@@ -506,7 +506,7 @@ if [ $EXIT_CODE5 -eq 0 ] && [ -n "$RESULT5" ]; then
     success "✅ Requête exécutée avec succès en ${EXEC_TIME5}s"
     COUNT5=$(echo "$RESULT5" | grep -c "^[[:space:]]*EFS001" || echo "0")
     result "Nombre d'interactions (janvier 2025) : $COUNT5"
-    
+
     # Extraire un échantillon représentatif pour le rapport
     SAMPLE5=$(echo "$RESULT5" | grep -E "^[[:space:]]*EFS001" | head -5 | awk -F'|' '{
         for (i=1; i<=NF; i++) {
@@ -516,7 +516,7 @@ if [ $EXIT_CODE5 -eq 0 ] && [ -n "$RESULT5" ]; then
             printf "| %s | %s | %s | %s | %s | %s |\n", $1, $2, $3, $4, $5, $6
         }
     }' || echo "")
-    
+
     # VALIDATION COMPLÈTE (COUNT5 peut être <= PAGE_SIZE, c'est normal)
     validate_complete \
         "TEST 5 : Timeline avec Plage de Dates" \
@@ -544,8 +544,8 @@ CANAL_COMPLEX="email"
 TYPE_COMPLEX="reclamation"
 RESULTAT_COMPLEX="succès"
 
-QUERY_COMPLEX="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY_COMPLEX="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND canal = '$CANAL_COMPLEX'
   AND type_interaction = '$TYPE_COMPLEX'
@@ -585,7 +585,7 @@ if [ $EXIT_CODE_COMPLEX -eq 0 ] && [ -n "$RESULT_COMPLEX" ]; then
     success "✅ Requête exécutée avec succès en ${EXEC_TIME_COMPLEX}s"
     COUNT_COMPLEX=$(echo "$RESULT_COMPLEX" | grep -c "^[[:space:]]*EFS001" || echo "0")
     result "Nombre d'interactions (4 filtres combinés) : $COUNT_COMPLEX"
-    
+
     # Extraire un échantillon représentatif pour le rapport
     SAMPLE_COMPLEX=$(echo "$RESULT_COMPLEX" | grep -E "^[[:space:]]*EFS001" | head -5 | awk -F'|' '{
         for (i=1; i<=NF; i++) {
@@ -595,7 +595,7 @@ if [ $EXIT_CODE_COMPLEX -eq 0 ] && [ -n "$RESULT_COMPLEX" ]; then
             printf "| %s | %s | %s | %s | %s | %s |\n", $1, $2, $3, $4, $5, $6
         }
     }' || echo "")
-    
+
     # VALIDATION : Cohérence (COUNT_COMPLEX <= COUNT3, COUNT4)
     if [ "$COUNT_COMPLEX" -le "$COUNT3" ] && [ "$COUNT_COMPLEX" -le "$COUNT4" ]; then
         success "✅ Cohérence validée : Interactions 4 filtres ($COUNT_COMPLEX) <= Interactions 2 filtres"
@@ -606,7 +606,7 @@ if [ $EXIT_CODE_COMPLEX -eq 0 ] && [ -n "$RESULT_COMPLEX" ]; then
     else
         warn "⚠️  Incohérence : Interactions 4 filtres ($COUNT_COMPLEX) > Interactions 2 filtres"
     fi
-    
+
     # VALIDATION COMPLÈTE (COUNT_COMPLEX peut être <= PAGE_SIZE, c'est normal)
     validate_complete \
         "TEST COMPLEXE : Timeline 4 Filtres Combinés" \
@@ -642,16 +642,16 @@ for i in {1..10}; do
     START_TIME_PERF=$(date +%s.%N)
     $CQLSH -e "$QUERY1" > /dev/null 2>&1
     END_TIME_PERF=$(date +%s.%N)
-    
+
     if command -v bc &> /dev/null; then
         DURATION_PERF=$(echo "$END_TIME_PERF - $START_TIME_PERF" | bc)
     else
         DURATION_PERF=$(python3 -c "print($END_TIME_PERF - $START_TIME_PERF)")
     fi
-    
+
     TIMES_PERF+=("$DURATION_PERF")
     TOTAL_TIME_PERF=$(echo "$TOTAL_TIME_PERF + $DURATION_PERF" | bc 2>/dev/null || python3 -c "print($TOTAL_TIME_PERF + $DURATION_PERF)")
-    
+
     # Min/Max
     if (( $(echo "$DURATION_PERF < $MIN_TIME_PERF" | bc -l 2>/dev/null || echo "0") )); then
         MIN_TIME_PERF=$DURATION_PERF
@@ -727,23 +727,23 @@ SAMPLE7_ALL=""
 for CANAL_TEST in "${CANAUX_TEST[@]}"; do
     for TYPE_TEST in "${TYPES_TEST[@]}"; do
         for RESULTAT_TEST in "${RESULTATS_TEST[@]}"; do
-            QUERY_COMB_TEST="SELECT COUNT(*) FROM $KEYSPACE.$TABLE 
-            WHERE code_efs = '$CODE_EFS' 
+            QUERY_COMB_TEST="SELECT COUNT(*) FROM $KEYSPACE.$TABLE
+            WHERE code_efs = '$CODE_EFS'
               AND numero_client = '$NUMERO_CLIENT'
               AND canal = '$CANAL_TEST'
               AND type_interaction = '$TYPE_TEST'
               AND resultat = '$RESULTAT_TEST'
             LIMIT 1;"
-            
+
             COUNT_COMB_TEST=$($CQLSH -e "$QUERY_COMB_TEST" 2>&1 | grep -E "^\s+[0-9]+" | tr -d ' ' || echo "0")
             COMBINATION_COUNTS+=("$COUNT_COMB_TEST")
             TOTAL_COMBINATIONS=$((TOTAL_COMBINATIONS + COUNT_COMB_TEST))
-            
+
             if [ "$COUNT_COMB_TEST" -gt 0 ]; then
                 success "✅ Combinaison ($CANAL_TEST + $TYPE_TEST + $RESULTAT_TEST) : $COUNT_COMB_TEST interaction(s)"
                 # Collecter un échantillon pour cette combinaison
-                QUERY_SAMPLE7="SELECT * FROM $KEYSPACE.$TABLE 
-                WHERE code_efs = '$CODE_EFS' 
+                QUERY_SAMPLE7="SELECT * FROM $KEYSPACE.$TABLE
+                WHERE code_efs = '$CODE_EFS'
                   AND numero_client = '$NUMERO_CLIENT'
                   AND canal = '$CANAL_TEST'
                   AND type_interaction = '$TYPE_TEST'
@@ -880,13 +880,13 @@ for i in "${!QUERIES_LOAD[@]}"; do
     RESULT_LOAD_TIMELINE=$($CQLSH -e "$QUERY_LOAD_TIMELINE" 2>&1)
     EXIT_CODE_LOAD_TIMELINE=$?
     END_TIME_LOAD_TIMELINE=$(date +%s.%N)
-    
+
     if command -v bc &> /dev/null; then
         DURATION_LOAD_TIMELINE=$(echo "$END_TIME_LOAD_TIMELINE - $START_TIME_LOAD_TIMELINE" | bc)
     else
         DURATION_LOAD_TIMELINE=$(python3 -c "print($END_TIME_LOAD_TIMELINE - $START_TIME_LOAD_TIMELINE)")
     fi
-    
+
     if [ $EXIT_CODE_LOAD_TIMELINE -eq 0 ]; then
         SUCCESSFUL_QUERIES_TIMELINE=$((SUCCESSFUL_QUERIES_TIMELINE + 1))
         LOAD_TIMES_TIMELINE+=("$DURATION_LOAD_TIMELINE")
@@ -903,19 +903,19 @@ done
 
 if [ "$SUCCESSFUL_QUERIES_TIMELINE" -gt 0 ]; then
     AVG_LOAD_TIME_TIMELINE=$(echo "scale=4; $TOTAL_LOAD_TIME_TIMELINE / $SUCCESSFUL_QUERIES_TIMELINE" | bc 2>/dev/null || python3 -c "print($TOTAL_LOAD_TIME_TIMELINE / $SUCCESSFUL_QUERIES_TIMELINE)")
-    
+
     result "📊 Résultats test de charge multi-filtres :"
     echo "   - Requêtes réussies : $SUCCESSFUL_QUERIES_TIMELINE / ${#QUERIES_LOAD[@]}"
     echo "   - Temps moyen par requête : ${AVG_LOAD_TIME_TIMELINE}s"
     echo "   - Temps total : ${TOTAL_LOAD_TIME_TIMELINE}s"
-    
+
     # VALIDATION : Performance sous charge
     if (( $(echo "$AVG_LOAD_TIME_TIMELINE < 0.2" | bc -l 2>/dev/null || echo "0") )); then
         success "✅ Performance sous charge validée : Temps moyen acceptable (< 0.2s)"
     else
         warn "⚠️  Performance sous charge : Temps moyen ${AVG_LOAD_TIME_TIMELINE}s (peut être améliorée)"
     fi
-    
+
     # VALIDATION COMPLÈTE
     validate_complete \
         "TEST 9 : Test de Charge Multi-Filtres" \
@@ -952,7 +952,7 @@ PAGE_SIZE_PAG=10
 info "🚀 Démarrage de la pagination avancée pour client $NUMERO_CLIENT..."
 
 while [ "$PAGE_NUM" -le "$MAX_PAGES" ]; do
-    QUERY_PAGE="SELECT * FROM $KEYSPACE.$TABLE 
+    QUERY_PAGE="SELECT * FROM $KEYSPACE.$TABLE
     WHERE code_efs = '$CODE_EFS' AND numero_client = '$NUMERO_CLIENT'"
     if [ -n "$CURRENT_DATE_CURSOR" ]; then
         QUERY_PAGE="$QUERY_PAGE AND date_interaction < '$CURRENT_DATE_CURSOR'"
@@ -973,7 +973,7 @@ while [ "$PAGE_NUM" -le "$MAX_PAGES" ]; do
     fi
 
     info "Page $PAGE_NUM : $PAGE_COUNT interactions trouvées."
-    
+
     # Extraire les IDs et la dernière date pour le curseur
     PAGE_IDS=$(echo "$PAGE_RESULT" | grep -E "^[[:space:]]*EFS001" | awk -F'|' '{for (i=1; i<=NF; i++) {gsub(/^[[:space:]]+|[[:space:]]+$/, "", $i)} if (NF >= 6) {print $6}}')
     for id in $PAGE_IDS; do
@@ -981,7 +981,7 @@ while [ "$PAGE_NUM" -le "$MAX_PAGES" ]; do
             ALL_PAGINATED_IDS+=("$id")
         fi
     done
-    
+
     # Collecter un échantillon de la première page pour le rapport
     if [ "$PAGE_NUM" -eq 1 ]; then
         SAMPLE10=$(echo "$PAGE_RESULT" | grep -E "^[[:space:]]*EFS001" | head -5 | awk -F'|' '{
@@ -993,7 +993,7 @@ while [ "$PAGE_NUM" -le "$MAX_PAGES" ]; do
             }
         }' || echo "")
     fi
-    
+
     # Extraire la dernière date pour le curseur (colonne 3 = date_interaction)
     CURRENT_DATE_CURSOR=$(echo "$PAGE_RESULT" | grep -E "^[[:space:]]*EFS001" | tail -1 | awk -F'|' '{for (i=1; i<=NF; i++) {gsub(/^[[:space:]]+|[[:space:]]+$/, "", $i)} if (NF >= 3) {print $3}}')
 
@@ -1012,7 +1012,7 @@ if [ ${#ALL_PAGINATED_IDS[@]} -gt 0 ]; then
     UNIQUE_PAGINATED_IDS=($(printf '%s\n' "${ALL_PAGINATED_IDS[@]}" | sort -u))
     UNIQUE_PAGINATED_COUNT=${#UNIQUE_PAGINATED_IDS[@]}
     DUPLICATES_PAGINATED=$((TOTAL_PAGINATED_COUNT - UNIQUE_PAGINATED_COUNT))
-    
+
     if [ "$DUPLICATES_PAGINATED" -eq 0 ]; then
         success "✅ Cohérence validée : Aucun doublon dans la pagination ($TOTAL_PAGINATED_COUNT IDs uniques)"
     else
@@ -1318,7 +1318,7 @@ $([ -n "$SAMPLE10" ] && echo "$SAMPLE10" || echo "| *Aucune donnée à afficher*
 
 ---
 
-**Date** : 2025-12-01  
+**Date** : 2025-12-01
 **Script** : \`17_test_timeline_query.sh\`
 EOF
 
@@ -1328,4 +1328,3 @@ success "✅ Tests terminés avec succès"
 echo ""
 result "📄 Rapport généré : $REPORT_FILE"
 echo ""
-

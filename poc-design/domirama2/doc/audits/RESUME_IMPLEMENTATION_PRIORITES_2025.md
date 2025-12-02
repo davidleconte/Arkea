@@ -24,10 +24,12 @@
 ### Script corrigé : `compact_table_prepare.sh`
 
 **Problèmes identifiés** :
+
 - ❌ Manquait `set -euo pipefail` (avait seulement `set -e`)
 - ❌ localhost hardcodé (lignes 83, 117)
 
 **Corrections appliquées** :
+
 - ✅ Remplacé `set -e` par `set -euo pipefail`
 - ✅ Ajouté `setup_paths()` pour la configuration
 - ✅ Remplacé `localhost` par `$HCD_HOST` (ligne 83)
@@ -42,6 +44,7 @@
 ### Scripts mis à jour : 18 scripts
 
 **Scripts corrigés** :
+
 1. ✅ `24_demonstration_fuzzy_search.sh`
 2. ✅ `27_export_incremental_parquet_spark_shell.sh`
 3. ✅ `28_demo_fenetre_glissante.sh`
@@ -62,6 +65,7 @@
 18. ✅ `demo_data_api_http.sh`
 
 **Modifications appliquées** :
+
 - ✅ Ajout de la section de configuration avec `setup_paths()`
 - ✅ Remplacement des chemins hardcodés par la fonction `setup_paths()`
 - ✅ Conservation des variables existantes si nécessaire
@@ -76,9 +80,11 @@
 ### Script corrigé : `demo_data_api_http.sh`
 
 **Problème identifié** :
+
 - ❌ localhost hardcodé dans `API_ENDPOINT` (ligne 68)
 
 **Correction appliquée** :
+
 - ✅ Ajout de `HCD_HOST="${HCD_HOST:-localhost}"`
 - ✅ Utilisation de `$HCD_HOST` dans `API_ENDPOINT` : `http://${HCD_HOST}:8080`
 
@@ -189,6 +195,7 @@
 - ✅ **Priorité 3** : 1 script corrigé (localhost)
 
 **Résultat** :
+
 - ✅ **Score global amélioré** : 91.7% → **97.1%** (+5.4 points)
 - ✅ **100% de conformité** sur la gestion des erreurs
 - ✅ **98% de conformité** sur la gestion des chemins
@@ -201,4 +208,3 @@
 **Date de création** : 2025-01-XX  
 **Version** : 1.0  
 **Statut** : ✅ **Implémentation terminée avec succès**
-

@@ -24,6 +24,7 @@
 **Fichier** : `examples/python/search/test_vector_search_base.py`
 
 **Changement** :
+
 ```python
 # Avant
 _model = AutoModel.from_pretrained(MODEL_NAME, token=HF_API_KEY)
@@ -51,6 +52,7 @@ _model = _model.to('cpu')  # S'assurer que le modèle est sur CPU
 **Fichier** : `examples/python/search/test_vector_search_base_invoice.py`
 
 **Changement** :
+
 ```python
 # Avant
 def encode_text_invoice(model, text: str):
@@ -75,6 +77,7 @@ def encode_text_invoice(model, text: str):
 ### Problème Identifié
 
 **Erreurs** :
+
 1. `Undefined column name code_si in table acceptation_client`
 2. `Undefined column name libelle in table feedback_par_libelle`
 3. `Undefined column name code_si in table historique_opposition`
@@ -91,6 +94,7 @@ def encode_text_invoice(model, text: str):
 #### 3.1 Test Référentiel
 
 **Avant** :
+
 ```python
 query_acceptation = f"""
 SELECT code_si, contrat
@@ -100,6 +104,7 @@ WHERE code_si = '{code_si}' AND contrat = '{contrat}'
 ```
 
 **Après** :
+
 ```python
 # Note: acceptation_client utilise code_efs, no_contrat, no_pse (pas code_si, contrat)
 # Pour ce test, on vérifie simplement que operations_by_account existe
@@ -113,6 +118,7 @@ WHERE code_si = '{code_si}' AND contrat = '{contrat}'
 #### 3.2 Test Compteurs
 
 **Avant** :
+
 ```python
 query_counters = f"""
 SELECT libelle, count
@@ -121,6 +127,7 @@ FROM {KEYSPACE}.feedback_par_libelle
 ```
 
 **Après** :
+
 ```python
 # Note: feedback_par_libelle utilise libelle_simplifie (pas libelle)
 query_counters = f"""
@@ -133,6 +140,7 @@ LIMIT 10
 #### 3.3 Test Historique
 
 **Avant** :
+
 ```python
 query_hist = f"""
 SELECT no_pse
@@ -142,6 +150,7 @@ WHERE code_si = '{code_si}' AND contrat = '{contrat}'
 ```
 
 **Après** :
+
 ```python
 # Note: historique_opposition utilise code_efs, no_pse (pas code_si, contrat)
 query_hist = f"""
@@ -154,6 +163,7 @@ LIMIT 1
 #### 3.4 Test Règles
 
 **Avant** :
+
 ```python
 query_ops = f"""
 SELECT DISTINCT cat_auto
@@ -164,6 +174,7 @@ LIMIT 10
 ```
 
 **Après** :
+
 ```python
 # Note: HCD ne supporte pas IS NOT NULL ni SELECT DISTINCT
 query_ops = f"""
@@ -229,4 +240,3 @@ PRIMARY KEY ((code_efs, no_pse), horodate)
 
 **Date de génération** : 2025-11-30  
 **Version** : 1.0
-

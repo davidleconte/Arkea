@@ -26,6 +26,7 @@
 **Fichier** : `scripts/01_setup_bic_keyspace.sh`
 
 **Vérifications** :
+
 - ✅ Script existe et est exécutable
 - ✅ Utilise `set -euo pipefail`
 - ✅ Source `utils/didactique_functions.sh`
@@ -36,6 +37,7 @@
 - ✅ Gestion d'erreurs complète
 
 **Dépendances** :
+
 - ✅ `schemas/01_create_bic_keyspace.cql` existe
 - ✅ `utils/didactique_functions.sh` existe
 - ✅ `.poc-config.sh` existe à la racine ARKEA
@@ -100,4 +102,3 @@ cd /Users/david.leconte/Documents/Arkea/poc-design/bic
 **Date** : 2025-12-01  
 **Version** : 1.0.0  
 **Statut** : ✅ Prêt pour exécution
-

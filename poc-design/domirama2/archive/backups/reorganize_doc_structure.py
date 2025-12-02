@@ -121,24 +121,25 @@ KEEP_AT_ROOT = [
     "PLAN_REORGANISATION_STRUCTURE.md",
 ]
 
+
 def main():
     """Déplace les fichiers selon le mapping"""
     moved = 0
     not_found = []
-    
+
     print("🔄 Réorganisation de la documentation...")
     print()
-    
+
     for category, files in MAPPING.items():
         category_dir = DOC_DIR / category
         category_dir.mkdir(exist_ok=True)
-        
+
         print(f"📁 {category}/ ({len(files)} fichiers)")
-        
+
         for filename in files:
             source = DOC_DIR / filename
             dest = category_dir / filename
-            
+
             if source.exists():
                 shutil.move(str(source), str(dest))
                 print(f"  ✅ {filename}")
@@ -146,15 +147,15 @@ def main():
             else:
                 print(f"  ⚠️  {filename} (non trouvé)")
                 not_found.append(filename)
-    
+
     print()
     print(f"✅ {moved} fichiers déplacés")
-    
+
     if not_found:
         print(f"⚠️  {len(not_found)} fichiers non trouvés:")
         for f in not_found:
             print(f"   - {f}")
-    
+
     print()
     print("📋 Fichiers conservés à la racine:")
     for f in KEEP_AT_ROOT:
@@ -163,6 +164,6 @@ def main():
         else:
             print(f"  ⚠️  {f} (non trouvé)")
 
+
 if __name__ == "__main__":
     main()
-

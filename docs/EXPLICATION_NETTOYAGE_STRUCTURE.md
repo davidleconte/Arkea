@@ -27,6 +27,7 @@ drwxr-xr-x@ 27 david.leconte  staff  864 Dec  2 14:20 ..
 ```
 
 **Problème** :
+
 - ✅ Répertoire **vide** (seulement `.` et `..`)
 - ⚠️ Pas de **README.md** expliquant son utilisation
 - ⚠️ Pas de **documentation** sur son rôle
@@ -100,6 +101,7 @@ logs/archive/2025-11/UNLOAD_20251130-094638-033087
 ```
 
 **Problème** :
+
 - ⚠️ **10+ répertoires temporaires** avec noms `UNLOAD_YYYYMMDD-HHMMSS-XXXXXX`
 - ⚠️ Probablement créés par des scripts d'export ou de déchargement
 - ⚠️ **Pollution** de la structure `logs/archive/`
@@ -177,6 +179,7 @@ $ ls -la binaire/hcd-1.2.3/ | grep -E "(=|\$|REPORT)"
 ```
 
 **Problème** :
+
 - ❌ **Fichier `=`** : Nom invalide (caractère spécial)
 - ❌ **Fichier `$REPORT_FILE`** : Nom de variable shell (30 KB)
 - ❌ **Fichier `${REPORT_FILE}`** : Nom de variable shell avec accolades (1.3 KB)
@@ -237,6 +240,7 @@ mv binaire/hcd-1.2.3/= logs/errors/
 **Corriger les scripts qui créent ces fichiers** :
 
 1. **Vérifier que les variables sont définies** :
+
 ```bash
 # Avant
 echo "Résultats" > $REPORT_FILE
@@ -250,6 +254,7 @@ echo "Résultats" > "$REPORT_FILE"
 ```
 
 2. **Utiliser `set -euo pipefail`** pour éviter ces erreurs :
+
 ```bash
 #!/bin/bash
 set -euo pipefail  # Détecte les variables non définies
@@ -342,4 +347,3 @@ Après le nettoyage :
 ---
 
 **Document créé le 2025-12-02** ✅
-

@@ -20,6 +20,7 @@ en utilisant les index SAI pour des performances optimales.
 **Description** : Combinaison de tous les filtres possibles (canal + type + résultat + période).
 
 **Exigences** :
+
 - Toutes les combinaisons de filtres testées
 - Utilisation des index SAI multiples
 - Performance optimale pour chaque combinaison
@@ -28,13 +29,13 @@ en utilisant les index SAI pour des performances optimales.
 
 ## 📝 Requêtes CQL
 
-
 ### TEST 1 : Filtre Combiné (Canal + Type)
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
-WHERE code_efs = 'EFS001' 
+SELECT * FROM bic_poc.interactions_by_client
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND canal = 'email'
   AND type_interaction = 'reclamation'
@@ -58,9 +59,10 @@ LIMIT 50;
 ### TEST 2 : Filtre Combiné (Canal + Résultat)
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
-WHERE code_efs = 'EFS001' 
+SELECT * FROM bic_poc.interactions_by_client
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND canal = 'SMS'
   AND resultat = 'succès'
@@ -85,9 +87,10 @@ LIMIT 50;
 ### TEST 3 : Filtre Combiné (Type + Résultat)
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
-WHERE code_efs = 'EFS001' 
+SELECT * FROM bic_poc.interactions_by_client
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND type_interaction = 'consultation'
   AND resultat = 'succès'
@@ -112,9 +115,10 @@ LIMIT 50;
 ### TEST 4 : Filtre Combiné (Canal + Type + Résultat)
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
-WHERE code_efs = 'EFS001' 
+SELECT * FROM bic_poc.interactions_by_client
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND canal = 'agence'
   AND type_interaction = 'conseil'
@@ -137,9 +141,10 @@ LIMIT 50;
 ### TEST 5 : Filtre Combiné (Canal + Type + Résultat + Période)
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
-WHERE code_efs = 'EFS001' 
+SELECT * FROM bic_poc.interactions_by_client
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND canal = 'email'
   AND type_interaction = 'reclamation'
@@ -179,6 +184,7 @@ LIMIT 50;
 ### TEST 7 : Test de Performance avec Statistiques
 
 **Statistiques** :
+
 - Temps moyen : .7702s
 - Temps minimum : .749749000s
 - Temps maximum : .783269000s
@@ -197,6 +203,7 @@ LIMIT 50;
 **Cohérence** : ⚠️ 4 / 5 combinaisons cohérentes
 
 **Détails** :
+
 - TEST 1 (Canal+Type) : 4
 - TEST 2 (Canal+Résultat) : 13
 - TEST 3 (Type+Résultat) : 18
@@ -237,6 +244,7 @@ LIMIT 50;
 **Cohérence** : ✅ Total combinaisons <= Total client
 
 **Détails** :
+
 - Canaux testés : 3 (email SMS agence)
 - Types testés : 3 (consultation conseil reclamation)
 - Résultats testés : 2 (succès échec)
@@ -297,12 +305,14 @@ LIMIT 50;
 ## ✅ Conclusion
 
 **Use Cases Validés** :
+
 - ✅ BIC-04 : Filtrage par canal (tous les canaux testés)
 - ✅ BIC-05 : Filtrage par type d'interaction
 - ✅ BIC-11 : Filtrage par résultat
 - ✅ BIC-15 : Filtres combinés exhaustifs (toutes les combinaisons testées)
 
 **Validations** :
+
 - ✅ 5 dimensions validées pour chaque test
 - ✅ Comparaisons attendus vs obtenus effectuées
 - ✅ Justesse des résultats validée
@@ -310,6 +320,7 @@ LIMIT 50;
 - ✅ Tests très complexes effectués (charge multi-combinaisons, analyse exhaustive)
 
 **Combinaisons Testées** :
+
 - ✅ Canal + Type
 - ✅ Canal + Résultat
 - ✅ Type + Résultat

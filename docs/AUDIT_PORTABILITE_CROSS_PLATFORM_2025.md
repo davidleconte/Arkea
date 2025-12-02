@@ -11,11 +11,13 @@
 **Score de Portabilité Global** : **~75%** ⚠️
 
 **Plateformes Supportées** :
+
 - ✅ **macOS** 12+ (testé et fonctionnel)
 - ✅ **Linux** (Ubuntu 20.04+, CentOS 7+) - Partiellement testé
 - ❌ **Windows** (non supporté actuellement)
 
 **Points Forts** :
+
 - ✅ Configuration centralisée (`.poc-config.sh`) avec détection automatique
 - ✅ Détection OS via `$OSTYPE` (darwin, linux-gnu)
 - ✅ Chemins relatifs utilisés dans la majorité des scripts
@@ -23,6 +25,7 @@
 - ✅ Scripts shell compatibles bash 4.0+
 
 **Points d'Amélioration** :
+
 - ⚠️ Chemins hardcodés macOS restants (31 occurrences dans `scripts/`, 125 dans `poc-design/`)
 - ⚠️ Dépendance à Homebrew pour Kafka (macOS uniquement)
 - ⚠️ Dépendance à `podman` (non disponible sur Windows)
@@ -41,6 +44,7 @@
 **Statut** : ✅ **Entièrement Supporté**
 
 **Détection** :
+
 ```bash
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # Configuration macOS
@@ -48,12 +52,14 @@ fi
 ```
 
 **Dépendances Spécifiques** :
+
 - ✅ Homebrew (`/opt/homebrew/` ou `/usr/local/`)
 - ✅ Kafka via Homebrew (`brew install kafka`)
 - ✅ Java via Homebrew (`brew install openjdk@11`)
 - ✅ jenv (optionnel, recommandé)
 
 **Chemins Hardcodés Identifiés** :
+
 - `/opt/homebrew/opt/kafka` (3 occurrences)
 - `/opt/homebrew/opt/zookeeper` (2 occurrences)
 - `/opt/homebrew/opt/openjdk@11` (5 occurrences)
@@ -69,6 +75,7 @@ fi
 **Statut** : ✅ **Partiellement Supporté**
 
 **Détection** :
+
 ```bash
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
     # Configuration Linux
@@ -76,6 +83,7 @@ fi
 ```
 
 **Dépendances** :
+
 - ✅ Java 11 et 17 (via `apt-get`, `yum`, etc.)
 - ✅ Python 3.8-3.11
 - ⚠️ Kafka (installation manuelle requise, pas via Homebrew)
@@ -83,11 +91,13 @@ fi
 - ✅ HCD (téléchargement et extraction)
 
 **Chemins Standard Linux** :
+
 - `/opt/kafka` (détecté automatiquement)
 - `/usr/local/kafka` (fallback)
 - `/opt/zookeeper` (détecté automatiquement)
 
 **Problèmes Identifiés** :
+
 - ⚠️ Scripts d'installation Kafka supposent Homebrew (macOS uniquement)
 - ⚠️ Pas de guide d'installation Linux détaillé
 - ⚠️ `readlink -f` utilisé (GNU Linux uniquement, pas compatible BSD/macOS)
@@ -101,6 +111,7 @@ fi
 **Statut** : ❌ **Non Supporté**
 
 **Problèmes Majeurs** :
+
 1. **Scripts Shell** : Tous les scripts sont `.sh` (bash), non exécutables nativement sur Windows
 2. **Outils Unix** : Dépendances à `lsof`, `readlink`, `which`, `grep`, `sed`, `awk`
 3. **Chemins** : Utilisation de `/` au lieu de `\`
@@ -109,6 +120,7 @@ fi
 6. **Homebrew** : Non disponible sur Windows (nécessite WSL2)
 
 **Solutions Possibles** :
+
 - ✅ **WSL2** (Windows Subsystem for Linux) - Recommandé
 - ✅ **Git Bash** - Partiel (certaines commandes ne fonctionnent pas)
 - ✅ **Docker Desktop** - Pour conteneurisation
@@ -123,10 +135,12 @@ fi
 #### 2.1 Java
 
 **Versions Requises** :
+
 - ✅ Java 11 (HCD, Spark 3.5.1)
 - ✅ Java 17 (Kafka 4.1.1, optionnel)
 
 **Détection Multi-OS** :
+
 ```bash
 # .poc-config.sh
 if [ -z "${JAVA_HOME:-}" ]; then
@@ -134,14 +148,14 @@ if [ -z "${JAVA_HOME:-}" ]; then
     if command -v jenv &> /dev/null; then
         # jenv (multi-OS)
     fi
-    
+
     # Fallback Homebrew (macOS uniquement)
     if [[ "$OSTYPE" == "darwin"* ]]; then
         if [ -d "/opt/homebrew/opt/openjdk@11" ]; then
             export JAVA_HOME="/opt/homebrew/opt/openjdk@11/..."
         fi
     fi
-    
+
     # Fallback système (Linux)
     if [ -z "$JAVA_HOME" ] && command -v java &> /dev/null; then
         export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java) 2>/dev/null || which java)))
@@ -150,6 +164,7 @@ fi
 ```
 
 **Problèmes** :
+
 - ⚠️ `readlink -f` non disponible sur macOS (BSD) - Utilise `readlink` avec fallback
 - ⚠️ Chemins Java hardcodés macOS (`/opt/homebrew/opt/openjdk@11`)
 
@@ -160,10 +175,12 @@ fi
 #### 2.2 Kafka
 
 **Installation** :
+
 - **macOS** : Via Homebrew (`brew install kafka`)
 - **Linux** : Téléchargement manuel requis (pas de script automatique)
 
 **Détection** :
+
 ```bash
 # .poc-config.sh
 if [ -z "${KAFKA_HOME:-}" ]; then
@@ -186,6 +203,7 @@ fi
 ```
 
 **Problèmes** :
+
 - ⚠️ Script `02_install_spark_kafka.sh` suppose Homebrew (macOS uniquement)
 - ⚠️ Pas de script d'installation automatique pour Linux
 
@@ -198,6 +216,7 @@ fi
 **Installation** : ✅ **Portable** (tarball extrait dans `binaire/`)
 
 **Détection** :
+
 ```bash
 # .poc-config.sh
 if [ -z "${HCD_DIR:-}" ] && [ -z "${HCD_HOME:-}" ]; then
@@ -216,6 +235,7 @@ fi
 **Installation** : ✅ **Portable** (tarball extrait dans `binaire/`)
 
 **Détection** :
+
 ```bash
 # .poc-config.sh
 if [ -z "${SPARK_HOME:-}" ]; then
@@ -234,10 +254,12 @@ fi
 **Utilisation** : Déploiement Stargate (Data API)
 
 **Statut** :
+
 - ✅ **Podman** : Disponible sur macOS et Linux
 - ❌ **Windows** : Non disponible (nécessite WSL2 ou Docker Desktop)
 
 **Scripts Affectés** :
+
 - `poc-design/domirama2/scripts/39_deploy_stargate.sh`
 - `poc-design/domirama2/scripts/41_demo_complete_podman.sh`
 
@@ -252,10 +274,12 @@ fi
 **Shebang** : `#!/bin/bash`
 
 **Versions Testées** :
+
 - ✅ Bash 4.0+ (macOS, Linux)
 - ⚠️ Bash 3.x (macOS par défaut) - Peut nécessiter `brew install bash`
 
 **Fonctionnalités Utilisées** :
+
 - ✅ `set -euo pipefail` (bash 4.0+)
 - ✅ `[[ "$OSTYPE" == "darwin"* ]]` (bash 4.0+)
 - ✅ `BASH_SOURCE[0]` (bash 3.0+)
@@ -268,6 +292,7 @@ fi
 #### 3.2 Commandes Unix
 
 **Commandes Utilisées** :
+
 - ✅ `grep`, `sed`, `awk` - Disponibles sur macOS/Linux
 - ✅ `which`, `command -v` - Disponibles sur macOS/Linux
 - ⚠️ `readlink -f` - GNU Linux uniquement (pas macOS BSD)
@@ -275,6 +300,7 @@ fi
 - ⚠️ `pkill` - Disponible sur macOS/Linux, pas Windows
 
 **Problèmes Identifiés** :
+
 ```bash
 # scripts/setup/03_start_hcd.sh
 if lsof -Pi :9042 -sTCP:LISTEN -t >/dev/null 2>&1 ; then
@@ -302,6 +328,7 @@ fi
 | `/opt/homebrew/opt/openjdk@17` | 2 | `.poc-config.sh` | macOS | 🟡 Moyen |
 
 **Solutions** :
+
 - ✅ `.poc-config.sh` détecte automatiquement selon `$OSTYPE`
 - ⚠️ Scripts individuels ont encore des chemins hardcodés
 - ⚠️ Documentation contient des exemples avec chemins macOS
@@ -313,11 +340,13 @@ fi
 #### 4.2 Variables d'Environnement
 
 **Architecture** :
+
 1. **Niveau 1** : Variables d'environnement système (priorité maximale)
 2. **Niveau 2** : `.poc-config.sh` (valeurs par défaut)
 3. **Niveau 3** : Détection automatique (fallback)
 
 **Exemple** :
+
 ```bash
 # .poc-config.sh
 if [ -z "${ARKEA_HOME:-}" ]; then
@@ -335,10 +364,12 @@ fi
 #### 5.1 Workflows
 
 **Fichiers** :
+
 - `.github/workflows/test.yml`
 - `.github/workflows/lint.yml`
 
 **Plateformes Testées** :
+
 - ✅ `ubuntu-latest` (Linux)
 - ❌ macOS (non testé dans CI)
 - ❌ Windows (non testé dans CI)
@@ -356,6 +387,7 @@ fi
 **Action** : Remplacer tous les chemins hardcodés par `setup_paths()` ou variables d'environnement
 
 **Fichiers Affectés** :
+
 - `scripts/setup/01_install_hcd.sh` (10 occurrences)
 - `scripts/setup/02_install_spark_kafka.sh` (3 occurrences)
 - `scripts/setup/03_start_hcd.sh` (5 occurrences)
@@ -363,6 +395,7 @@ fi
 - `poc-design/*/scripts/*.sh` (125 occurrences)
 
 **Exemple de Correction** :
+
 ```bash
 # AVANT
 HCD_DIR="/Users/david.leconte/Documents/Arkea/binaire/hcd-1.2.3"
@@ -379,6 +412,7 @@ HCD_DIR="${HCD_DIR:-${ARKEA_HOME}/binaire/hcd-1.2.3}"
 **Problème** : `readlink -f` n'existe pas sur macOS (BSD)
 
 **Solution** :
+
 ```bash
 # Fonction portable
 get_realpath() {
@@ -394,6 +428,7 @@ get_realpath() {
 ```
 
 **Fichiers Affectés** :
+
 - `.poc-config.sh` (ligne 150)
 
 ---
@@ -403,6 +438,7 @@ get_realpath() {
 **Problème** : `lsof` non disponible sur Windows
 
 **Solution** :
+
 ```bash
 # Fonction portable pour vérifier un port
 check_port() {
@@ -418,6 +454,7 @@ check_port() {
 ```
 
 **Fichiers Affectés** :
+
 - `scripts/setup/03_start_hcd.sh`
 - `scripts/setup/04_start_kafka.sh`
 
@@ -430,6 +467,7 @@ check_port() {
 **Action** : Créer `scripts/setup/02_install_kafka_linux.sh`
 
 **Contenu** :
+
 ```bash
 #!/bin/bash
 # Installation Kafka pour Linux
@@ -455,6 +493,7 @@ export KAFKA_HOME="$INSTALL_DIR/binaire/kafka"
 **Action** : Créer `docs/GUIDE_INSTALLATION_LINUX.md`
 
 **Contenu** :
+
 - Installation Java 11/17 (apt-get, yum)
 - Installation Kafka (téléchargement manuel)
 - Configuration des variables d'environnement
@@ -467,6 +506,7 @@ export KAFKA_HOME="$INSTALL_DIR/binaire/kafka"
 **Action** : Créer `docs/GUIDE_INSTALLATION_WINDOWS.md`
 
 **Contenu** :
+
 - Installation WSL2
 - Installation des dépendances dans WSL2
 - Configuration Git Bash (alternative)
@@ -490,7 +530,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Test on macOS
         run: ./scripts/utils/80_verify_all.sh
-  
+
   test-windows:
     runs-on: windows-latest
     steps:
@@ -508,6 +548,7 @@ jobs:
 **Action** : Créer versions PowerShell des scripts principaux
 
 **Fichiers** :
+
 - `scripts/setup/01_install_hcd.ps1`
 - `scripts/setup/02_install_spark_kafka.ps1`
 
@@ -520,6 +561,7 @@ jobs:
 **Action** : Mettre à jour `README.md` avec section "Supported Platforms"
 
 **Contenu** :
+
 - Tableau comparatif macOS / Linux / Windows
 - Instructions d'installation par plateforme
 - Limitations connues
@@ -541,6 +583,7 @@ jobs:
 | **CI/CD** | ❌ | ✅ | ❌ | Seulement Linux testé |
 
 **Légende** :
+
 - ✅ **Entièrement Supporté**
 - ⚠️ **Partiellement Supporté** (nécessite ajustements)
 - ❌ **Non Supporté**
@@ -576,6 +619,7 @@ jobs:
 **Score de Portabilité** : **~75%**
 
 **Actions Prioritaires** :
+
 1. Éliminer les chemins hardcodés restants
 2. Corriger les commandes Unix non portables (`readlink -f`, `lsof`)
 3. Créer des guides d'installation pour Linux et Windows (WSL2)
@@ -587,4 +631,3 @@ jobs:
 **Date** : 2025-12-01  
 **Version** : 1.0  
 **Statut** : ✅ **Audit Complet**
-

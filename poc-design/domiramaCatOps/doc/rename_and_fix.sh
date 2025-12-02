@@ -64,4 +64,3 @@ success "✅ Références mises à jour : $REFERENCE_COUNT fichier(s)"
 echo ""
 success "✅ Script terminé avec succès !"
 warn "⚠️  Note : Les autres actions (enrichissement, corrections) doivent être faites manuellement"
-

@@ -9,21 +9,25 @@
 ## 🔍 Analyse du Problème
 
 ### Question
+
 Pourquoi le Spark-Cassandra Connector ne fonctionne pas pour BIC alors qu'il fonctionne pour domiramaCatOps et domirama2 ?
 
 ### Différences Identifiées
 
 #### 1. Version du Connecteur
+
 - **domiramaCatOps** : `com.datastax.spark:spark-cassandra-connector_2.12:3.5.0`
 - **BIC script 08** : `com.datastax.spark:spark-cassandra-connector_2.12:3.4.1`
 - **BIC script 09** : `com.datastax.spark:spark-cassandra-connector_2.12:3.4.1` ❌
 
 #### 2. Méthode d'Exécution
+
 - **domiramaCatOps** : `spark-shell -i fichier.scala` ✅
 - **BIC script 08** : `spark-shell < fichier.scala` ✅
 - **BIC script 09** : `pyspark < fichier.py` ❌
 
 #### 3. Format du Code
+
 - **domiramaCatOps** : Code Scala complet dans un fichier ✅
 - **BIC script 08** : Code Scala complet dans un fichier ✅
 - **BIC script 09** : Code Python (ne fonctionne pas bien avec Spark-Cassandra) ❌
@@ -52,6 +56,7 @@ Pourquoi le Spark-Cassandra Connector ne fonctionne pas pour BIC alors qu'il fon
 ## 📋 Code Corrigé
 
 ### Avant (Ne fonctionnait pas)
+
 ```bash
 # Exécution avec pyspark
 "$SPARK_HOME/bin/pyspark" \
@@ -60,6 +65,7 @@ Pourquoi le Spark-Cassandra Connector ne fonctionne pas pour BIC alors qu'il fon
 ```
 
 ### Après (Fonctionne comme domiramaCatOps)
+
 ```bash
 # Exécution avec spark-shell -i (même méthode que domiramaCatOps)
 SPARK_OUTPUT=$("$SPARK_HOME/bin/spark-shell" \
@@ -76,15 +82,18 @@ SPARK_OUTPUT=$("$SPARK_HOME/bin/spark-shell" \
 ## 🔍 Pourquoi ça ne fonctionnait pas ?
 
 ### 1. Version du Connecteur
+
 - La version `3.4.1` peut avoir des problèmes de compatibilité
 - La version `3.5.0` est plus stable et testée
 
 ### 2. Format Python vs Scala
+
 - Spark-Cassandra Connector est mieux supporté avec Scala
 - Python peut avoir des problèmes de typage et de compatibilité
 - Le mode interactif Python (`pyspark < script`) ne fonctionne pas bien
 
 ### 3. Méthode d'Exécution
+
 - `spark-shell -i fichier.scala` : Exécute le fichier complet
 - `pyspark < script.py` : Mode interactif, problèmes de typage
 - `spark-shell < script.scala` : Fonctionne mais `-i` est plus fiable
@@ -94,6 +103,7 @@ SPARK_OUTPUT=$("$SPARK_HOME/bin/spark-shell" \
 ## ✅ Résultat
 
 Le script 09 utilise maintenant :
+
 - ✅ Même version du connecteur que domiramaCatOps (`3.5.0`)
 - ✅ Même méthode d'exécution (`spark-shell -i`)
 - ✅ Même format de code (Scala complet)
@@ -113,4 +123,3 @@ Le script 09 utilise maintenant :
 
 **Date** : 2025-12-01  
 **Statut** : Correction appliquée, prêt pour test
-

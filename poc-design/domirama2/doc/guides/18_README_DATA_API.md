@@ -10,6 +10,7 @@
 La **Data API** est une API REST/GraphQL fournie par HCD pour simplifier l'accès aux données sans nécessiter de driver binaire ou de connexion CQL directe.
 
 **Avantages** :
+
 - ✅ **Simplification** : Accès HTTP standard (REST/JSON)
 - ✅ **Découplage** : Front-end/mobile indépendants du backend
 - ✅ **GraphQL** : Requêtes flexibles côté client
@@ -17,8 +18,9 @@ La **Data API** est une API REST/GraphQL fournie par HCD pour simplifier l'accè
 - ✅ **Documentation** : API auto-documentée
 
 **Documentation officielle** :
-- Quickstart : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/quickstart.html
-- Reference : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html
+
+- Quickstart : <https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/quickstart.html>
+- Reference : <https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html>
 
 ---
 
@@ -29,11 +31,13 @@ La **Data API** est une API REST/GraphQL fournie par HCD pour simplifier l'accè
 L'endpoint a la forme : `http://CLUSTER_HOST:GATEWAY_PORT`
 
 **Pour POC local** :
+
 ```bash
 export DATA_API_ENDPOINT="http://localhost:8080"
 ```
 
 **Pour Production (Kubernetes)** :
+
 ```bash
 # Trouver le CLUSTER_HOST
 kubectl get nodes -o wide
@@ -49,6 +53,7 @@ export DATA_API_ENDPOINT="http://EXTERNAL-IP:NODEPORT"
 Le token a le format : `Cassandra:BASE64-USERNAME:BASE64-PASSWORD`
 
 **Génération** :
+
 ```bash
 # Via script
 ./36_setup_data_api.sh
@@ -62,6 +67,7 @@ TOKEN="Cassandra:${USERNAME_B64}:${PASSWORD_B64}"
 ### 3. Variables d'Environnement
 
 Les variables sont sauvegardées dans `.poc-profile` :
+
 ```bash
 source .poc-profile
 echo $DATA_API_ENDPOINT
@@ -154,12 +160,14 @@ table.update_one(
 ### 1. Application Web Front-End
 
 **Avant (CQL)** :
+
 ```javascript
 // Nécessite backend Java
 fetch('/api/operations?code_si=...&contrat=...')
 ```
 
 **Avec Data API** :
+
 ```javascript
 // Accès direct depuis le front-end
 fetch('http://api.hcd.example/v2/keyspaces/domirama2_poc/operations_by_account?where={...}', {
@@ -172,12 +180,14 @@ fetch('http://api.hcd.example/v2/keyspaces/domirama2_poc/operations_by_account?w
 ### 2. Application Mobile
 
 **Avant (CQL)** :
+
 ```swift
 // Nécessite backend API
 let url = URL(string: "https://api.example.com/operations")!
 ```
 
 **Avec Data API** :
+
 ```swift
 // Accès direct mobile → HCD
 let url = URL(string: "http://api.hcd.example/v2/keyspaces/domirama2_poc/operations_by_account")!
@@ -186,10 +196,12 @@ let url = URL(string: "http://api.hcd.example/v2/keyspaces/domirama2_poc/operati
 ### 3. Intégration Partenaires
 
 **Avant (CQL)** :
+
 - ❌ Impossible d'exposer CQL directement
 - ⚠️ Backend wrapper nécessaire
 
 **Avec Data API** :
+
 - ✅ Exposition sécurisée (API key)
 - ✅ Rate limiting intégré
 - ✅ Documentation auto-générée
@@ -229,7 +241,7 @@ let url = URL(string: "http://api.hcd.example/v2/keyspaces/domirama2_poc/operati
 
 ## 📚 Références
 
-- Documentation officielle : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html
+- Documentation officielle : <https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html>
 - Clients disponibles : Python, TypeScript, Java
 - Exemples : `data_api_examples/`
 

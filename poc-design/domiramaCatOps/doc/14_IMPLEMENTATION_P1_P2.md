@@ -23,11 +23,13 @@ Toutes les recommandations P1 et P2 ont été implémentées avec succès :
 **Script créé** : `14_improve_startrow_stoprow_tests.sh`
 
 **Fonctionnalités** :
+
 - ✅ Test 1 : Filtrage par code_si + contrat (simple)
 - ✅ Test 2 : Filtrage avec plage de dates réduite
 - ✅ Test 3 : Export toutes les partitions (sans filtre)
 
 **Résultats** :
+
 - Tous les tests fonctionnent correctement
 - Validation de différents scénarios de filtrage
 
@@ -38,6 +40,7 @@ Toutes les recommandations P1 et P2 ont été implémentées avec succès :
 **Script créé** : `14_validate_export_advanced.py`
 
 **Fonctionnalités** :
+
 - ✅ Validation du schéma Parquet complet (toutes les colonnes attendues)
 - ✅ Validation de la présence et du format VECTOR
 - ✅ Statistiques détaillées :
@@ -49,10 +52,12 @@ Toutes les recommandations P1 et P2 ont été implémentées avec succès :
 - ✅ Comparaison avec source (cohérence count)
 
 **Intégration** :
+
 - Intégré dans `14_test_incremental_export.sh`
 - Appelé automatiquement après chaque export
 
 **Exemple de sortie** :
+
 ```
 📋 1. Validation du Schéma Parquet
 ✅ Schéma Parquet complet et correct
@@ -82,12 +87,14 @@ Toutes les recommandations P1 et P2 ont été implémentées avec succès :
 **Script créé** : `14_improve_sliding_window.sh`
 
 **Fonctionnalités** :
+
 - ✅ Calcul automatique des fenêtres (mensuelles, hebdomadaires)
 - ✅ Validation détaillée de chaque fenêtre
 - ✅ Rapports par fenêtre avec statistiques
 - ✅ Statistiques globales (total opérations, fichiers, etc.)
 
 **Améliorations** :
+
 - Validation avancée pour chaque fenêtre
 - Rapports détaillés générés automatiquement
 - Gestion des erreurs par fenêtre (continue même si une fenêtre échoue)
@@ -117,6 +124,7 @@ Toutes les recommandations P1 et P2 ont été implémentées avec succès :
    - ✅ Export réussi même avec volume important
 
 **Résultats** :
+
 - Tous les formats de compression fonctionnent
 - Dates NULL gérées correctement
 - Performance acceptable sur volume important
@@ -150,6 +158,7 @@ Toutes les recommandations P1 et P2 ont été implémentées avec succès :
 ## ✅ Intégration dans le Script Principal
 
 Le script principal `14_test_incremental_export.sh` a été mis à jour pour :
+
 - ✅ Utiliser la validation avancée automatiquement
 - ✅ Documenter que toutes les recommandations P1 et P2 sont implémentées
 
@@ -158,14 +167,17 @@ Le script principal `14_test_incremental_export.sh` a été mis à jour pour :
 ## 📊 Résultats des Tests
 
 ### Tests STARTROW/STOPROW Améliorés
+
 - ✅ 3 tests créés
 - ✅ Tous fonctionnent correctement
 
 ### Tests Cas Limites
+
 - ✅ 3 catégories de tests
 - ✅ Tous fonctionnent correctement
 
 ### Fenêtre Glissante Améliorée
+
 - ✅ Validation par fenêtre
 - ✅ Rapports détaillés générés
 
@@ -185,5 +197,3 @@ Le script principal `14_test_incremental_export.sh` a été mis à jour pour :
 ---
 
 **Date de génération** : 2025-11-30
-
-

@@ -9,7 +9,7 @@
 #   'operations_by_account' avec toutes les colonnes de catégorisation
 #   (cat_auto, cat_confidence, cat_user, cat_date_user, cat_validee).
 #   Il crée également les index SAI pour la recherche full-text.
-#   
+#
 #   Ce script est le premier à exécuter pour configurer le POC Domirama2.
 #   Il doit être lancé avant tout chargement de données ou test.
 #
@@ -150,4 +150,3 @@ echo "   ✅ Colonnes complètes: cat_confidence, cat_date_user, cat_validée"
 echo "   ✅ Format COBOL: operation_data BLOB (conforme IBM)"
 echo "   ✅ Nommage aligné: date_op, numero_op (conforme IBM)"
 echo "   ✅ Logique multi-version: Batch vs Client séparés"
-

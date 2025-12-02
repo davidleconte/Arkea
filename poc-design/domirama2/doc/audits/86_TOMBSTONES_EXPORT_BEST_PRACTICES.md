@@ -69,11 +69,12 @@ Lors d'un export Spark depuis HCD, les tombstones peuvent causer :
 ### Exemple d'Avertissement
 
 ```
-Scanned over 1248 tombstone rows for query SELECT * FROM domirama2_poc.operations_by_account 
+Scanned over 1248 tombstone rows for query SELECT * FROM domirama2_poc.operations_by_account
 BYTES LIMIT 2097152 - more than the warning threshold 1000
 ```
 
 **Signification** :
+
 - Plus de 1000 tombstones scannés (seuil d'avertissement)
 - Performance potentiellement dégradée
 - Nécessite une action (compaction ou filtrage)
@@ -86,7 +87,7 @@ BYTES LIMIT 2097152 - more than the warning threshold 1000
 
 ```cql
 -- Vérifier le nombre de tombstones dans une table
-SELECT COUNT(*) FROM domirama2_poc.operations_by_account 
+SELECT COUNT(*) FROM domirama2_poc.operations_by_account
 WHERE date_op >= '2024-01-01' AND date_op < '2024-02-01';
 -- Avertissement affiché si > 1000 tombstones
 ```
@@ -127,11 +128,13 @@ val df = spark.read
 **Principe** : Effectuer une compaction manuelle avant l'export pour purger les tombstones expirés.
 
 **Avantages** :
+
 - ✅ Purge physique des tombstones expirés
 - ✅ Amélioration des performances de lecture
 - ✅ Réduction des avertissements
 
 **Inconvénients** :
+
 - ⚠️ Consommation de ressources (CPU, I/O)
 - ⚠️ Nécessite un accès nodetool (production)
 
@@ -146,6 +149,7 @@ nodetool compact domirama2_poc
 ```
 
 **Quand l'utiliser** :
+
 - Avant un export important (mensuel, annuel)
 - Si le nombre de tombstones est élevé (> 1000)
 - Si les performances sont dégradées
@@ -155,11 +159,13 @@ nodetool compact domirama2_poc
 **Principe** : Spark Cassandra Connector filtre automatiquement les tombstones.
 
 **Avantages** :
+
 - ✅ Automatique, aucune action requise
 - ✅ Les tombstones ne sont pas exportés
 - ✅ Pas d'impact sur les données exportées
 
 **Inconvénients** :
+
 - ⚠️ Les avertissements peuvent apparaître dans les logs
 - ⚠️ Performance potentiellement dégradée si beaucoup de tombstones
 
@@ -183,10 +189,12 @@ val df = spark.read
 **Principe** : Ajuster `gc_grace_seconds` pour purger les tombstones plus rapidement.
 
 **Avantages** :
+
 - ✅ Purge plus rapide des tombstones
 - ✅ Réduction de l'accumulation
 
 **Inconvénients** :
+
 - ⚠️ Risque si les réparations ne sont pas régulières
 - ⚠️ Nécessite une configuration au niveau table
 
@@ -194,7 +202,7 @@ val df = spark.read
 
 ```cql
 -- Réduire gc_grace_seconds (défaut : 864000 = 10 jours)
-ALTER TABLE domirama2_poc.operations_by_account 
+ALTER TABLE domirama2_poc.operations_by_account
 WITH gc_grace_seconds = 432000;  -- 5 jours
 
 -- Vérifier la configuration
@@ -202,6 +210,7 @@ DESCRIBE TABLE domirama2_poc.operations_by_account;
 ```
 
 **Quand l'utiliser** :
+
 - Si les réparations sont effectuées régulièrement
 - Si le cluster est stable
 - Si l'accumulation de tombstones est un problème récurrent
@@ -211,6 +220,7 @@ DESCRIBE TABLE domirama2_poc.operations_by_account;
 **Principe** : Utiliser TWCS pour les tables avec TTL, facilitant la purge des tombstones.
 
 **Avantages** :
+
 - ✅ Optimisé pour les données temporelles avec TTL
 - ✅ Purge efficace des tombstones expirés
 - ✅ Performance améliorée pour les exports par fenêtre temporelle
@@ -219,7 +229,7 @@ DESCRIBE TABLE domirama2_poc.operations_by_account;
 
 ```cql
 -- Changer la stratégie de compaction
-ALTER TABLE domirama2_poc.operations_by_account 
+ALTER TABLE domirama2_poc.operations_by_account
 WITH compaction = {
   'class': 'TimeWindowCompactionStrategy',
   'compaction_window_unit': 'DAYS',
@@ -228,6 +238,7 @@ WITH compaction = {
 ```
 
 **Quand l'utiliser** :
+
 - Tables avec TTL (comme `operations_by_account`)
 - Exports par fenêtre temporelle
 - Données de type séries temporelles
@@ -336,6 +347,7 @@ Le rapport markdown généré doit inclure :
    ```
 
 2. **Vérification gc_grace_seconds** :
+
    ```cql
    DESCRIBE TABLE domirama2_poc.operations_by_account;
    ```
@@ -347,6 +359,7 @@ Le rapport markdown généré doit inclure :
 - ✅ **Export réussi** : Les tombstones ont été automatiquement filtrés
 - ⚠️  **Performance** : Légère dégradation due aux tombstones
 - ✅ **Données** : Aucun tombstone exporté (comportement attendu)
+
 ```
 
 ---
@@ -378,7 +391,3 @@ Le rapport markdown généré doit inclure :
 ---
 
 **✅ Documentation créée le 2025-11-26**
-
-
-
-

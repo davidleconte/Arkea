@@ -25,9 +25,9 @@ test_function() {
     local test_name="$1"
     local expected="$2"
     local actual="$3"
-    
+
     TOTAL=$((TOTAL + 1))
-    
+
     if [ "$expected" = "$actual" ]; then
         echo "✅ $test_name"
         PASSED=$((PASSED + 1))
@@ -53,28 +53,28 @@ for poc_dir in "$ARKEA_HOME/poc-design"/*; do
     if [ -d "$poc_dir" ]; then
         POC_NAME="$(basename "$poc_dir")"
         echo "📋 Test POC : $POC_NAME"
-        
+
         # Test 1 : README.md
         if [ -f "$poc_dir/README.md" ]; then
             test_function "$POC_NAME : README.md existe" "true" "true"
         else
             test_function "$POC_NAME : README.md existe" "true" "false"
         fi
-        
+
         # Test 2 : Répertoire scripts/
         if [ -d "$poc_dir/scripts" ]; then
             test_function "$POC_NAME : Répertoire scripts/ existe" "true" "true"
         else
             test_function "$POC_NAME : Répertoire scripts/ existe" "true" "false"
         fi
-        
+
         # Test 3 : Répertoire doc/
         if [ -d "$poc_dir/doc" ]; then
             test_function "$POC_NAME : Répertoire doc/ existe" "true" "true"
         else
             test_function "$POC_NAME : Répertoire doc/ existe" "true" "false"
         fi
-        
+
         # Test 4 : Au moins un script
         SCRIPT_COUNT=$(find "$poc_dir/scripts" -type f -name "*.sh" ! -path "*/archive/*" 2>/dev/null | wc -l | tr -d ' ')
         if [ "$SCRIPT_COUNT" -gt 0 ]; then
@@ -82,7 +82,7 @@ for poc_dir in "$ARKEA_HOME/poc-design"/*; do
         else
             test_function "$POC_NAME : Au moins un script existe" "true" "false"
         fi
-        
+
         echo ""
     fi
 done
@@ -107,4 +107,3 @@ else
     echo "❌ $FAILED test(s) ont échoué"
     exit 1
 fi
-

@@ -212,4 +212,3 @@ domiramaCatOps/
 
 **Date de création** : 2025-12-01  
 **Dernière mise à jour** : 2025-12-01
-

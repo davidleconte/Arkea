@@ -8,7 +8,7 @@
 #   Ce script orchestre une démonstration complète du POC Domirama2 en
 #   exécutant une série de tests et démonstrations pour valider toutes les
 #   fonctionnalités de recherche full-text avec index SAI avancés.
-#   
+#
 #   Cette version didactique affiche :
 #   - Les étapes d'orchestration avec explications
 #   - Pour chaque démonstration : définition, requête, explication, résultats
@@ -267,27 +267,27 @@ execute_demo() {
     local DEMO_EXPECTED="$4"
     local DEMO_QUERY="$5"
     local DEMO_EXPLANATION="$6"
-    
+
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "  🔍 DÉMONSTRATION $DEMO_NUM : $DEMO_TITLE"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-    
+
     info "📚 DÉFINITION - $DEMO_TITLE :"
     echo "$DEMO_DESC" | sed 's/^/   /'
     echo ""
-    
+
     info "📝 Requête CQL :"
     code "$DEMO_QUERY"
     echo ""
-    
+
     info "💡 Ce que nous démontrons :"
     echo "$DEMO_EXPLANATION" | sed 's/^/   /'
     echo ""
-    
+
     expected "📋 Résultat attendu : $DEMO_EXPECTED"
     echo ""
-    
+
     # Exécuter la requête et mesurer le temps
     START_TIME=$(date +%s.%N)
     # Construire la requête complète avec USE
@@ -305,19 +305,19 @@ execute_demo() {
         # Fallback avec awk si bc n'est pas disponible
         QUERY_TIME=$(awk "BEGIN {printf \"%.3f\", $END_TIME - $START_TIME}" 2>/dev/null || echo "0.000")
     fi
-    
+
     # Filtrer les warnings et lignes vides
     QUERY_RESULTS=$(echo "$QUERY_OUTPUT" | grep -vE "^Warnings|^$|^\([0-9]+ rows\)")
-    
+
     # Compter les résultats (lignes avec des données, pas les en-têtes ni les séparateurs)
     # Les résultats de cqlsh ont un format avec des pipes (|) et des données
     RESULT_COUNT=$(echo "$QUERY_RESULTS" | grep -vE "^[[:space:]]*[-+]+|^[[:space:]]*$|^[[:space:]]*libelle|^[[:space:]]*code_si" | grep -E "\|" | wc -l | tr -d " ")
-    
+
     # Si aucun résultat avec cette méthode, essayer de compter les lignes avec des données (non vides, non séparateurs)
     if [ "$RESULT_COUNT" -eq 0 ]; then
         RESULT_COUNT=$(echo "$QUERY_RESULTS" | grep -vE "^[[:space:]]*[-+]+|^[[:space:]]*$|^[[:space:]]*\([0-9]+ rows\)" | grep -vE "^[[:space:]]*libelle|^[[:space:]]*code_si" | wc -l | tr -d " ")
     fi
-    
+
     # Afficher les résultats
     if [ $EXIT_CODE -eq 0 ]; then
         result "📊 Résultats obtenus ($RESULT_COUNT ligne(s)) en ${QUERY_TIME}s :"
@@ -328,7 +328,7 @@ execute_demo() {
             fi
         done
         echo "   └─────────────────────────────────────────────────────────┘"
-        
+
         if [ "$RESULT_COUNT" -gt 0 ]; then
             SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
             success "✅ Démonstration $DEMO_NUM réussie"
@@ -341,14 +341,14 @@ execute_demo() {
         error "❌ Démonstration $DEMO_NUM : Erreur lors de l'exécution"
         echo "$QUERY_OUTPUT"
     fi
-    
+
     # Stocker les résultats dans le JSON temporaire (via fichiers temporaires pour éviter problèmes d'échappement)
     TEMP_TITLE="${SCRIPT_DIR}/.temp_title_${DEMO_NUM}.txt"
     TEMP_DESC="${SCRIPT_DIR}/.temp_desc_${DEMO_NUM}.txt"
     TEMP_EXPECTED="${SCRIPT_DIR}/.temp_expected_${DEMO_NUM}.txt"
     TEMP_QUERY="${SCRIPT_DIR}/.temp_query_${DEMO_NUM}.txt"
     TEMP_OUTPUT="${SCRIPT_DIR}/.temp_output_${DEMO_NUM}.txt"
-    
+
     echo "$DEMO_TITLE" > "$TEMP_TITLE"
     echo "$DEMO_DESC" > "$TEMP_DESC"
     echo "$DEMO_EXPECTED" > "$TEMP_EXPECTED"
@@ -356,7 +356,7 @@ execute_demo() {
     echo "$DEMO_QUERY" > "$TEMP_QUERY"
     # Sauvegarder la sortie complète
     echo "$QUERY_OUTPUT" > "$TEMP_OUTPUT"
-    
+
     python3 << PYEOF
 import json
 import sys
@@ -441,7 +441,7 @@ with open(temp_results, "w", encoding='utf-8') as f:
 # Ne PAS nettoyer les fichiers temporaires ici
 # Ils seront nettoyés après la génération du rapport
 PYEOF
-    
+
     DEMO_COUNT=$((DEMO_COUNT + 1))
     echo ""
 }
@@ -759,7 +759,7 @@ else:
     # Lire les résultats
     with open(temp_results, "r", encoding='utf-8') as f:
         demos = json.load(f)
-    
+
     # Debug : Vérifier que les données sont présentes
     if len(demos) > 0:
         first_demo = demos[0]
@@ -771,8 +771,8 @@ else:
 # Générer le rapport
 report = f"""# 🎯 Démonstration Complète : POC Domirama2 - Full-Text Search
 
-**Date** : {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}  
-**Script** : `18_demonstration_complete_v2_didactique.sh`  
+**Date** : {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+**Script** : `18_demonstration_complete_v2_didactique.sh`
 **Objectif** : Démontrer toutes les fonctionnalités de recherche full-text avec index SAI avancés
 
 ---
@@ -886,9 +886,9 @@ for demo in demos:
     query_time = demo.get('query_time', 0)
     success = demo.get('success', False)
     output = demo.get('output', '')
-    
+
     status = "✅ Succès" if success else "⚠️  Échec (attendu pour démontrer les limites)"
-    
+
     # Extraire les résultats de la sortie cqlsh
     results_lines = []
     if output and output.strip():
@@ -901,7 +901,7 @@ for demo in demos:
         in_results = False
         header_found = False
         separator_found = False
-        
+
         for i, line in enumerate(lines):
             line_stripped = line.strip()
             # Ignorer les warnings et lignes vides
@@ -913,12 +913,12 @@ for demo in demos:
             # Ignorer les lignes de comptage (X rows)
             if line_stripped.startswith('(') and 'row' in line_stripped.lower():
                 continue
-            
+
             # Détecter l'en-tête (ligne avec colonnes - peut commencer par des espaces)
             if '|' in line and ('libelle' in line.lower() or 'code_si' in line.lower() or 'montant' in line.lower() or 'cat_auto' in line.lower() or 'type_operation' in line.lower() or 'date_op' in line.lower()):
                 header_found = True
                 continue
-            
+
             # Détecter la ligne de séparation (lignes avec seulement des - et +)
             if header_found and '|' in line and not separator_found:
                 sep_line = line_stripped.replace('|', '').replace('-', '').replace('+', '').replace(' ', '')
@@ -926,7 +926,7 @@ for demo in demos:
                     separator_found = True
                     in_results = True
                     continue
-            
+
             # Extraire les lignes de données (après l'en-tête et la séparation)
             if in_results and '|' in line and line_stripped:
                 # Vérifier que c'est une ligne de données (contient des chiffres ou du texte, pas juste des séparateurs)
@@ -938,7 +938,7 @@ for demo in demos:
                 # Arrêter si on trouve une ligne de comptage
                 if line_stripped.startswith('(') and 'row' in line_stripped.lower():
                     break
-    
+
     # Formater les résultats
     if results_lines:
         results_preview = '\n'.join(results_lines[:10])
@@ -971,7 +971,7 @@ for demo in demos:
                 results_preview = "Aucun résultat trouvé"
         else:
             results_preview = "Aucun résultat trouvé"
-    
+
     # Formater la requête CQL avec indentation
     query_formatted = query.strip() if query and query.strip() else "Requête non disponible"
     if query_formatted and query_formatted != "Requête non disponible":
@@ -980,14 +980,14 @@ for demo in demos:
         # Ajouter des retours à la ligne pour la lisibilité si pas déjà présents
         if '\n' not in query_formatted:
             query_formatted = query_formatted.replace('SELECT', 'SELECT\n').replace('FROM', '\nFROM').replace('WHERE', '\nWHERE').replace('AND', '\n  AND').replace('LIMIT', '\nLIMIT')
-    
+
     explanation = demo.get('explanation', '')
-    
+
     # Échapper les caractères spéciaux pour le markdown
     query_escaped = query_formatted.replace('{', '{{').replace('}', '}}')
     results_escaped = results_preview.replace('{', '{{').replace('}', '}}')
     explanation_escaped = explanation.replace('{', '{{').replace('}', '}}') if explanation else "Voir description ci-dessus"
-    
+
     report += f"""### DÉMONSTRATION {num} : {title}
 
 **Description** : {desc}
@@ -1036,7 +1036,7 @@ report += f"""## 📊 Résumé des Résultats
   - Concepts de base (full-text, stemming, asciifolding)
   - Limites (typos, inversions)
   - Solutions (préfixe, stemming)
-  
+
 - **Démonstrations avancées (11-20)** : 10
   - Filtres (type, date, montant, catégorie)
   - Multi-critères complexes
@@ -1091,19 +1091,19 @@ report += f"""## 📊 Résumé des Résultats
 
 ### Index Disponibles
 
-- **Index SAI standard (libelle)** : 
+- **Index SAI standard (libelle)** :
   - Gère : stemming, accents, casse
   - Utilisation : Recherches précises avec variations grammaticales
-  
-- **Index SAI N-Gram (libelle_prefix)** : 
+
+- **Index SAI N-Gram (libelle_prefix)** :
   - Gère : recherche par préfixe
   - Utilisation : Recherches tolérantes aux typos (préfixe)
-  
-- **Index SAI Collection (libelle_tokens)** : 
+
+- **Index SAI Collection (libelle_tokens)** :
   - Gère : vraie recherche partielle avec CONTAINS
   - Utilisation : Recherches partielles vraies (ex: "carref" trouve "CARREFOUR")
-  
-- **Index SAI Vector (libelle_embedding)** : 
+
+- **Index SAI Vector (libelle_embedding)** :
   - Gère : fuzzy search par similarité sémantique
   - Utilisation : Recherches avec typos avancées (ByteT5)
 
@@ -1179,4 +1179,3 @@ echo ""
 
 success "✅ DÉMONSTRATION COMPLÈTE TERMINÉE"
 echo ""
-

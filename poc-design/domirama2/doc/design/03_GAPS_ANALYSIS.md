@@ -23,12 +23,14 @@
 #### Key Design
 
 **HBase** :
+
 - Une ligne par opération
 - `code SI` (entité organisationnelle)
 - `numéro de contrat` (identification du compte)
 - `binaire combinant numéro d'opération + date` pour ordre antichronologique
 
 **POC Domirama2** :
+
 - ✅ `code_si` (partition key)
 - ✅ `contrat` (partition key)
 - ✅ `date_op DESC, numero_op ASC` (clustering keys, ordre antichronologique)
@@ -37,11 +39,13 @@
 #### Format de Stockage
 
 **HBase** :
+
 - `Données Thrift encodées en Binaire dans une colonne`
 - `+ colonnes dynamiques calquées sur propriétés du POJO Thrift`
 - `=> permet filtres sur valeurs dans Scan + Optimisation BLOOMFILTER`
 
 **POC Domirama2** :
+
 - ✅ `operation_data BLOB` (données COBOL/Thrift binaires)
 - ✅ Colonnes normalisées (`libelle`, `montant`, `type_operation`, etc.)
 - ✅ Colonnes de catégorisation (`cat_auto`, `cat_user`, etc.)
@@ -65,6 +69,7 @@
 ### POC Domirama2
 
 **Batch** :
+
 - ✅ Spark (remplace MapReduce)
 - ✅ Spark Cassandra Connector
 - ✅ Format Parquet (remplace SequenceFile)
@@ -72,11 +77,13 @@
 - ✅ Stratégie multi-version (batch écrit cat_auto uniquement)
 
 **Client** :
+
 - ✅ UPDATE avec `cat_user`, `cat_date_user = toTimestamp(now())`
 - ✅ Stratégie multi-version (client écrit cat_user uniquement)
 - ✅ **Conforme** (remplace temporalité HBase)
 
 **Gaps** :
+
 - ⚠️ **DSBulk** : Non démontré (mentionné par IBM mais pas utilisé)
 - ⚠️ **BulkLoad performance** : Non mesuré (comparaison avec HBase)
 
@@ -97,6 +104,7 @@
 ### POC Domirama2
 
 **Temps Réel** :
+
 - ✅ SELECT avec WHERE (remplace SCAN)
 - ✅ Index SAI pour filtres (remplace value filter)
 - ✅ Full-Text Search (remplace scan complet)
@@ -105,12 +113,14 @@
 - ✅ **Conforme + améliorations**
 
 **Batch (Unload)** :
+
 - ✅ **Export incrémental Parquet** : Démontré (`27_export_incremental_parquet.sh`, `28_export_incremental_parquet_spark_submit.sh`)
 - ✅ **FullScan avec STARTROW/STOPROW** : Démontré (`13_demo_requetes_timerange_startrow.sh`)
 - ✅ **TIMERANGE (fenêtre glissante)** : Démontré (`13_demo_requetes_timerange_startrow.sh`, `29_export_fenetre_glissante.sh`)
 - ✅ **Export Parquet** : Démontré (format Parquet recommandé au lieu d'ORC)
 
 **Gaps** :
+
 - ✅ **Export incrémental Parquet** : Démontré (Parquet recommandé vs ORC)
 - ✅ **Fenêtre glissante avec TIMERANGE** : Démontré
 - ✅ **Export vers fichiers** : Démontré (Parquet)
@@ -122,28 +132,33 @@
 ### 1. TTL (Time To Live)
 
 **HBase** :
+
 - `Utilisation du TTL pour purge automatique`
 - TTL = 315619200 secondes (≈ 10 ans)
 
 **POC Domirama2** :
+
 - ✅ `default_time_to_live = 315360000` (10 ans)
 - ✅ **Conforme**
 
 ### 2. Temporalité des Cellules
 
 **HBase** :
+
 - `Utilisation de la temporalité des cellules`
 - `Le batch écrit toujours sur le même timestamp`
 - `Le client écrit sur le timestamp réel de son action`
 - `=> pas d'écrasement en cas de rejeu du batch`
 
 **POC Domirama2** :
+
 - ✅ Stratégie multi-version (remplace temporalité)
 - ✅ Batch écrit `cat_auto` uniquement (ne touche jamais `cat_user`)
 - ✅ Client écrit `cat_user` avec `cat_date_user = now()`
 - ✅ **Conforme** (logique explicite vs temporalité implicite)
 
 **Gaps** :
+
 - ✅ **Aucun** : La stratégie multi-version est supérieure à la temporalité HBase
 
 ---
@@ -190,10 +205,12 @@
 #### 1. Unload Incrémental vers fichiers (Parquet) ✅ COMPLÉTÉ
 
 **HBase** :
+
 - `Lecture batch pour des unload incrémentaux sur HDFS au format ORC`
 - `FullScan + STARTROW + STOPROW + TIMERANGE`
 
 **Démontré** :
+
 - ✅ Export incrémental depuis HCD vers fichiers (format **Parquet** recommandé)
 - ✅ Scripts : `27_export_incremental_parquet.sh`, `28_export_incremental_parquet_spark_submit.sh`
 - ✅ Format Parquet recommandé au lieu d'ORC pour cohérence avec l'ingestion
@@ -203,9 +220,11 @@
 #### 2. Fenêtre Glissante avec TIMERANGE ✅ COMPLÉTÉ
 
 **HBase** :
+
 - `TIMERANGE pour une fenêtre glissante et un ciblage plus précis`
 
 **Démontré** :
+
 - ✅ SELECT avec `WHERE date_op >= start_date AND date_op <= end_date`
 - ✅ Export incrémental par plages de dates
 - ✅ Script : `29_export_fenetre_glissante.sh`
@@ -216,9 +235,11 @@
 #### 3. STARTROW/STOPROW Équivalent ✅ COMPLÉTÉ
 
 **HBase** :
+
 - `STARTROW + STOPROW` pour cibler précisément les données
 
 **Démontré** :
+
 - ✅ SELECT avec WHERE sur clustering keys (date_op, numero_op)
 - ✅ Export par plages précises
 - ✅ Requêtes in-base : `13_demo_requetes_timerange_startrow.sh`
@@ -232,22 +253,27 @@
 #### 4. DSBulk pour BulkLoad ⚠️ OPTIONNEL
 
 **IBM Recommandation** :
+
 - DSBulk pour chargements massifs
 
 **Statut** :
+
 - ⚠️ Non démontré (Spark utilisé à la place)
 - ✅ Spark fonctionne bien pour le POC
 - ⚠️ DSBulk peut être évalué si volumes très importants
 
 **Scripts disponibles** :
+
 - `35_demo_dsbulk_v2.sh` : Démonstration DSBulk (si nécessaire)
 
 #### 5. BLOOMFILTER Équivalent ✅ COMPLÉTÉ
 
 **HBase** :
+
 - `BLOOMFILTER = 'ROWCOL'` pour optimisation lectures
 
 **Démontré** :
+
 - ✅ HCD utilise des index SAI (plus performants que BLOOMFILTER)
 - ✅ Comparaison performance avec/sans index
 - ✅ Script : `32_demo_performance_comparison.sh`
@@ -256,9 +282,11 @@
 #### 6. REPLICATION_SCOPE Équivalent ✅ COMPLÉTÉ
 
 **HBase** :
+
 - `REPLICATION_SCOPE = '1'` pour réplication multi-cluster
 
 **Démontré** :
+
 - ✅ Configuration réplication HCD documentée
 - ✅ Consistency levels expliqués (QUORUM, LOCAL_QUORUM, etc.)
 - ✅ Driver Java : Configuration et exemples
@@ -268,9 +296,11 @@
 #### 7. Colonnes Dynamiques ✅ COMPLÉTÉ
 
 **HBase** :
+
 - `Colonnes dynamiques calquées sur propriétés du POJO Thrift`
 
 **Démontré** :
+
 - ✅ Utilisation de `MAP<TEXT, TEXT>` pour colonnes dynamiques
 - ✅ Exemple avec `meta_flags MAP<TEXT, TEXT>`
 - ✅ Filtrage sur colonnes MAP (10 parties démontrées)
@@ -389,6 +419,7 @@
 **Conclusion** : ✅ **Tous les gaps critiques ont été comblés** (2024-11-27). Les opérations batch d'export (Parquet), fenêtre glissante, TIMERANGE, STARTROW/STOPROW, BLOOMFILTER, colonnes dynamiques et REPLICATION_SCOPE sont tous démontrés avec performance validée. Il reste uniquement DSBulk qui est optionnel (Spark utilisé à la place, acceptable).
 
 **Mise à jour** : 2024-11-27
+
 - ✅ **BLOOMFILTER** : Démontré avec performance validée (`32_demo_performance_comparison.sh`)
 - ✅ **Colonnes dynamiques** : Démontrées avec 10 parties (`33_demo_colonnes_dynamiques_v2.sh`)
 - ✅ **REPLICATION_SCOPE** : Démontré avec consistency levels et drivers Java (`34_demo_replication_scope_v2.sh`)
@@ -397,4 +428,3 @@
 - ✅ **STARTROW/STOPROW** : Démontré avec requêtes CQL (`30_demo_requetes_startrow_stoprow_v2_didactique.sh`)
 - ✅ **57 scripts** créés (18 versions didactiques avec documentation automatique)
 - ✅ **18 démonstrations** .md générées automatiquement
-

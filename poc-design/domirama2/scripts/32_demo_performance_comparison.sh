@@ -7,7 +7,7 @@
 #   Ce script effectue une comparaison performance détaillée entre BLOOMFILTER
 #   HBase et SAI HCD, avec des mesures précises de latence, throughput et
 #   utilisation des ressources.
-#   
+#
 #   Métriques comparées :
 #   - Latence des requêtes (p50, p95, p99)
 #   - Throughput (requêtes/seconde)
@@ -164,4 +164,3 @@ echo "   ✅ Performance excellente (équivalent ou meilleur que BLOOMFILTER)"
 echo ""
 
 rm -f /tmp/perf1.cql /tmp/perf2.cql /tmp/trace1.txt /tmp/trace2.txt
-

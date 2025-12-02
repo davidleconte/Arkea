@@ -55,7 +55,7 @@ echo ""
 echo "2. Vérification du keyspace $KEYSPACE..."
 if $CQLSH -e "DESCRIBE KEYSPACE $KEYSPACE;" &>/dev/null; then
     echo -e "${GREEN}   ✅ Keyspace $KEYSPACE existe${NC}"
-    
+
     # Afficher les détails
     REPLICATION=$($CQLSH -e "DESCRIBE KEYSPACE $KEYSPACE;" 2>/dev/null | grep "replication_factor" | head -1)
     echo "      $REPLICATION"
@@ -110,4 +110,3 @@ else
     echo -e "${RED}❌ Vérification terminée - $ERRORS erreur(s) détectée(s)${NC}"
     exit 1
 fi
-

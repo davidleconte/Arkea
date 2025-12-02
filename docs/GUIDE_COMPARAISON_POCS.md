@@ -299,6 +299,7 @@ WITH OPTIONS = {'index_mode': 'vector', 'dimensions': 768};
 **Similaire** : Structure de base identique (`operations_by_account`)
 
 **Différences** :
+
 - Ajout colonnes catégorisation
 - Ajout 7 tables meta-categories
 - Ajout compteurs atomiques
@@ -323,6 +324,6 @@ WITH OPTIONS = {'index_mode': 'vector', 'dimensions': 768};
 ---
 
 **Pour plus d'informations, voir** :
+
 - `docs/GUIDE_CHOIX_POC.md` - Guide de choix
 - `poc-design/*/README.md` - Documentation de chaque POC
-

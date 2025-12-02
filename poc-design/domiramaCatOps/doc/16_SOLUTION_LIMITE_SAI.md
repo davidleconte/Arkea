@@ -34,15 +34,18 @@
 **Stratégie** : Supprimer `idx_meta_device` (priorité basse) pour libérer un slot.
 
 **Avantages** :
+
 - ✅ Libère un slot pour l'index e5-large
 - ✅ Impact minimal (index meta peu utilisé)
 - ✅ Solution simple et rapide
 
 **Inconvénients** :
+
 - ⚠️ Perte de capacité de filtrage par device
 - ⚠️ Nécessite ALLOW FILTERING si besoin (non recommandé)
 
 **Action** :
+
 ```cql
 -- Supprimer l'index meta_device
 DROP INDEX IF EXISTS idx_meta_device;
@@ -61,11 +64,13 @@ WITH OPTIONS = {'similarity_function': 'COSINE'};
 **Stratégie** : Supprimer `idx_meta_device` ET `idx_meta_source` pour libérer 2 slots.
 
 **Avantages** :
+
 - ✅ Libère 2 slots (1 pour e5-large + 1 de réserve)
 - ✅ Impact minimal (index meta peu utilisés)
 - ✅ Plus de flexibilité future
 
 **Action** :
+
 ```cql
 -- Supprimer les index meta
 DROP INDEX IF EXISTS idx_meta_device;
@@ -85,10 +90,12 @@ WITH OPTIONS = {'similarity_function': 'COSINE'};
 **Stratégie** : Utiliser la colonne `libelle_embedding_e5` sans index SAI.
 
 **Avantages** :
+
 - ✅ Pas besoin de supprimer d'index
 - ✅ Colonne disponible pour stockage
 
 **Inconvénients** :
+
 - ❌ Pas de recherche ANN optimisée
 - ❌ Nécessite scan complet + calcul de similarité côté client
 - ❌ Performance très dégradée
@@ -101,15 +108,18 @@ WITH OPTIONS = {'similarity_function': 'COSINE'};
 **Stratégie** : Modifier la configuration HCD pour augmenter la limite.
 
 **Avantages** :
+
 - ✅ Garde tous les index existants
 - ✅ Ajoute l'index e5-large
 
 **Inconvénients** :
+
 - ⚠️ Nécessite modification de configuration HCD
 - ⚠️ Impact sur les performances (plus d'index = plus de maintenance)
 - ⚠️ Non recommandé par défaut
 
 **Configuration** :
+
 ```yaml
 # Dans cassandra.yaml ou configuration HCD
 sai_index_max_per_table: 15  # Au lieu de 10 par défaut
@@ -122,6 +132,7 @@ sai_index_max_per_table: 15  # Au lieu de 10 par défaut
 **Supprimer `idx_meta_device` et `idx_meta_source`**
 
 **Justification** :
+
 1. ✅ Index meta peu utilisés dans les tests actuels
 2. ✅ Libère 2 slots (1 pour e5-large + 1 de réserve)
 3. ✅ Impact minimal sur les fonctionnalités
@@ -134,6 +145,7 @@ sai_index_max_per_table: 15  # Au lieu de 10 par défaut
 **Script à créer** : `scripts/17_add_e5_embedding_column_v2.sh`
 
 **Actions** :
+
 1. Supprimer `idx_meta_device`
 2. Supprimer `idx_meta_source` (optionnel)
 3. Créer `idx_libelle_embedding_e5_vector`
@@ -143,4 +155,3 @@ sai_index_max_per_table: 15  # Au lieu de 10 par défaut
 
 **Date de génération** : 2025-11-30  
 **Version** : 1.0
-

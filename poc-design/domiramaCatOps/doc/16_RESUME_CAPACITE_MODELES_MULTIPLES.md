@@ -14,11 +14,13 @@
 **Oui, on peut ajouter d'autres colonnes vectorielles**, mais il y a une **limite de 10 index SAI par table**.
 
 **Actuellement** :
+
 - ✅ **2 modèles** : ByteT5-small + multilingual-e5-large
 - ✅ **10/10 index SAI** utilisés (limite atteinte)
 - ⚠️ **0 slot disponible** pour nouveaux modèles
 
 **Capacité selon scénario** :
+
 - **Sans modification** : 0 modèle supplémentaire
 - **Supprimer 1 index** : 1 modèle supplémentaire (3 modèles total)
 - **Supprimer 2 index** : 2 modèles supplémentaires (4 modèles total)
@@ -61,11 +63,13 @@
 **Action** : Supprimer `idx_meta_source` (priorité basse)
 
 **Modèles** :
+
 1. ✅ ByteT5-small (existant)
 2. ✅ e5-large (existant)
 3. 🆕 **Modèle Facturation** (`NoureddineSa/Invoices_bilingual-embedding-large`, dimensions à vérifier)
 
 **Avantages** :
+
 - ✅ **Modèle spécialisé facturation** : Plus pertinent pour libellés bancaires
 - ✅ **Comparaison spécialisé vs généraliste** : Facturation vs e5-large
 - ✅ **Meilleure compréhension terminologie bancaire** : LOYER, VIREMENT, TAXE, etc.
@@ -82,12 +86,14 @@
 **Action** : Supprimer `idx_meta_source` + `idx_type_operation`
 
 **Modèles** :
+
 1. ✅ ByteT5-small
 2. ✅ e5-large
 3. 🆕 e5-base
 4. 🆕 **MiniLM-L12** (`paraphrase-multilingual-MiniLM-L12-v2`, 384 dim)
 
 **Avantages** :
+
 - ✅ Couverture complète : rapide (MiniLM) + équilibré (e5-base) + optimal (e5-large)
 - ✅ Comparaison exhaustive
 
@@ -100,6 +106,7 @@
 **Action** : Modifier configuration HCD (`sai_index_max_per_table: 15`)
 
 **Modèles** :
+
 1. ✅ ByteT5-small
 2. ✅ e5-large
 3. 🆕 e5-base
@@ -107,10 +114,12 @@
 5. 🆕 **Camembert** (spécialisé français, 768 dim)
 
 **Avantages** :
+
 - ✅ Comparaison exhaustive
 - ✅ Choix optimal basé sur données réelles
 
 **Inconvénients** :
+
 - ⚠️ Impact sur performances
 - ⚠️ Complexité de maintenance
 
@@ -122,7 +131,7 @@
 
 - **Modèle** : `NoureddineSa/Invoices_bilingual-embedding-large`
 - **Dimensions** : À vérifier (probablement 768-1024)
-- **Avantages** : 
+- **Avantages** :
   - ✅ Spécialisé facturation/invoices
   - ✅ Meilleure compréhension terminologie bancaire
   - ✅ Optimisé pour documents structurés
@@ -170,6 +179,7 @@
 ### Pour le POC : **3 Modèles** (Scénario 1)
 
 **Justification** :
+
 - ✅ **Modèle spécialisé facturation** : Plus pertinent pour libellés bancaires
 - ✅ Comparaison pertinente (ByteT5 vs e5-large vs facturation)
 - ✅ Impact minimal (suppression d'1 index non critique)
@@ -177,6 +187,7 @@
 - ✅ Couverture complète des cas d'usage bancaire
 
 **Modèles** :
+
 1. ByteT5-small (rapide, bon pour "CB")
 2. e5-large (optimal généraliste, meilleure pertinence globale)
 3. **Modèle Facturation** (spécialisé, meilleure pertinence bancaire)
@@ -198,4 +209,3 @@
 
 **Date de génération** : 2025-11-30  
 **Version** : 1.0
-

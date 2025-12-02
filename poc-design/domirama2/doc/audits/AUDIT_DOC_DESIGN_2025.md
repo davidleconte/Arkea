@@ -78,6 +78,7 @@
 #### Vérification dans doc/design
 
 **Fichiers analysés** :
+
 - ✅ `02_VALUE_PROPOSITION_DOMIRAMA2.md` : Décrit la configuration HBase (lignes 13-48)
 - ✅ `03_GAPS_ANALYSIS.md` : Compare HBase vs POC (lignes 10-50)
 - ✅ `04_BILAN_ECARTS_FONCTIONNELS.md` : Bilan complet (lignes 10-50)
@@ -105,11 +106,13 @@
 #### Exigences Inputs-Clients
 
 **Écriture** :
+
 - ✅ Batch MapReduce avec PIG (préparation)
 - ✅ BulkLoad HBase
 - ✅ Client API avec PUT timestampé
 
 **Lecture** :
+
 - ✅ SCAN complet + Solr in-memory (problème performance)
 - ✅ MultiGet des clés
 - ✅ Export batch ORC (STARTROW/STOPROW/TIMERANGE)
@@ -117,6 +120,7 @@
 #### Vérification dans doc/design
 
 **Fichiers analysés** :
+
 - ✅ `02_VALUE_PROPOSITION_DOMIRAMA2.md` : Décrit patterns HBase (lignes 28-47)
 - ✅ `03_GAPS_ANALYSIS.md` : Compare écriture/lecture (lignes 53-125)
 - ✅ `04_BILAN_ECARTS_FONCTIONNELS.md` : Bilan patterns (lignes 51-115)
@@ -143,6 +147,7 @@
 #### Exigences Inputs-IBM (PROPOSITION_MECE)
 
 **Schéma proposé** :
+
 ```cql
 CREATE TABLE operations_by_account (
     code_si TEXT,
@@ -162,6 +167,7 @@ CREATE TABLE operations_by_account (
 ```
 
 **Stratégie Multi-Version** :
+
 - Batch écrit `cat_auto` uniquement
 - Client écrit `cat_user` avec timestamp
 - Application priorise `cat_user` si non nul
@@ -169,6 +175,7 @@ CREATE TABLE operations_by_account (
 #### Vérification dans doc/design
 
 **Fichiers analysés** :
+
 - ✅ `02_VALUE_PROPOSITION_DOMIRAMA2.md` : Schéma CQL détaillé (lignes 55-100)
 - ✅ `05_AUDIT_COMPLET_GAP_FONCTIONNEL.md` : Comparaison schéma (lignes 74-83)
 - ✅ `43_SYNTHESE_COMPLETE_ANALYSE_2024.md` : Schéma IBM (lignes 74-96)
@@ -192,6 +199,7 @@ CREATE TABLE operations_by_account (
 #### Exigences Inputs-IBM
 
 **SAI (Storage-Attached Indexing)** :
+
 - Index persistant intégré (remplace Solr)
 - Analyzers Lucene (français, stemming, asciifolding)
 - Requêtes `WHERE libelle : 'terme'`
@@ -200,6 +208,7 @@ CREATE TABLE operations_by_account (
 #### Vérification dans doc/design
 
 **Fichiers analysés** :
+
 - ✅ `02_VALUE_PROPOSITION_DOMIRAMA2.md` : SAI détaillé (lignes 81-85)
 - ✅ `05_AUDIT_COMPLET_GAP_FONCTIONNEL.md` : Comparaison Solr vs SAI (lignes 104-110)
 - ✅ `57_POURQUOI_PAS_NGRAM_SUR_LIBELLE.md` : Analyse N-Gram
@@ -226,6 +235,7 @@ CREATE TABLE operations_by_account (
 #### Exigences Inputs-IBM
 
 **Vector Search** :
+
 - Embeddings (ByteT5, 1472 dimensions)
 - ANN (Approximate Nearest Neighbor)
 - Hybrid Search (Full-Text + Vector)
@@ -234,6 +244,7 @@ CREATE TABLE operations_by_account (
 #### Vérification dans doc/design
 
 **Fichiers analysés** :
+
 - ✅ `02_VALUE_PROPOSITION_DOMIRAMA2.md` : Vector search (lignes 86-89)
 - ✅ `05_AUDIT_COMPLET_GAP_FONCTIONNEL.md` : Vector (lignes 106-107)
 
@@ -254,12 +265,14 @@ CREATE TABLE operations_by_account (
 #### Exigences Inputs-IBM
 
 **Ingestion** :
+
 - Spark (remplace MapReduce/PIG)
 - Spark Cassandra Connector
 - DSBulk (bulk loads)
 - Format Parquet (POC1) ou SequenceFile (POC2)
 
 **Export** :
+
 - Export incrémental Parquet
 - Fenêtre glissante (TIMERANGE équivalent)
 - Gestion tombstones
@@ -267,6 +280,7 @@ CREATE TABLE operations_by_account (
 #### Vérification dans doc/design
 
 **Fichiers analysés** :
+
 - ✅ `24_PARQUET_VS_ORC_ANALYSIS.md` : Comparaison formats (417 lignes)
 - ✅ `25_ANALYSE_DEPENDANCES_POC2.md` : Dépendances POC2 (326 lignes)
 - ✅ `26_ANALYSE_MIGRATION_CSV_PARQUET.md` : Migration CSV→Parquet (371 lignes)
@@ -291,6 +305,7 @@ CREATE TABLE operations_by_account (
 #### Exigences Inputs-IBM
 
 **Data API** :
+
 - REST/GraphQL (remplace drivers binaires)
 - Authentification token (`Cassandra:base64(user):base64(pass)`)
 - Endpoints HTTP
@@ -299,6 +314,7 @@ CREATE TABLE operations_by_account (
 #### Vérification dans doc/design
 
 **Fichiers analysés** :
+
 - ✅ `02_VALUE_PROPOSITION_DOMIRAMA2.md` : Data API (lignes 97-99)
 - ✅ `05_AUDIT_COMPLET_GAP_FONCTIONNEL.md` : Data API (mentionné)
 
@@ -323,6 +339,7 @@ CREATE TABLE operations_by_account (
 #### `02_VALUE_PROPOSITION_DOMIRAMA2.md`
 
 **Contenu** :
+
 - ✅ Comparaison triangulaire (HBase / IBM / POC)
 - ✅ Schéma CQL détaillé
 - ✅ Stratégie multi-version
@@ -330,6 +347,7 @@ CREATE TABLE operations_by_account (
 - ✅ Data API
 
 **Conformité** :
+
 - ✅ **Inputs-Clients** : 100%
 - ✅ **Inputs-IBM** : 95% (Data API moins détaillé)
 
@@ -340,12 +358,14 @@ CREATE TABLE operations_by_account (
 #### `03_GAPS_ANALYSIS.md`
 
 **Contenu** :
+
 - ✅ Caractéristiques HBase détaillées
 - ✅ Comparaison HBase vs POC
 - ✅ Gaps identifiés
 - ✅ Statut de chaque gap
 
 **Conformité** :
+
 - ✅ **Inputs-Clients** : 100%
 - ✅ **Inputs-IBM** : 100%
 
@@ -356,11 +376,13 @@ CREATE TABLE operations_by_account (
 #### `04_BILAN_ECARTS_FONCTIONNELS.md`
 
 **Contenu** :
+
 - ✅ Bilan complet des écarts
 - ✅ Tableau récapitulatif
 - ✅ Priorités d'action
 
 **Conformité** :
+
 - ✅ **Inputs-Clients** : 100%
 - ✅ **Inputs-IBM** : 100%
 
@@ -371,12 +393,14 @@ CREATE TABLE operations_by_account (
 #### `05_AUDIT_COMPLET_GAP_FONCTIONNEL.md`
 
 **Contenu** :
+
 - ✅ Audit exhaustif
 - ✅ Analyse comparative détaillée
 - ✅ Sources analysées
 - ✅ 98% de couverture
 
 **Conformité** :
+
 - ✅ **Inputs-Clients** : 100%
 - ✅ **Inputs-IBM** : 100%
 
@@ -389,11 +413,13 @@ CREATE TABLE operations_by_account (
 #### `24_PARQUET_VS_ORC_ANALYSIS.md`
 
 **Contenu** :
+
 - ✅ Comparaison technique détaillée
 - ✅ Recommandation Parquet
 - ✅ Justification technique
 
 **Conformité** :
+
 - ✅ **Inputs-IBM** : 100% (mentionne Parquet et ORC)
 
 **Statut** : ✅ **Excellent**
@@ -403,11 +429,13 @@ CREATE TABLE operations_by_account (
 #### `25_ANALYSE_DEPENDANCES_POC2.md`
 
 **Contenu** :
+
 - ✅ Dépendances JARs Arkéa
 - ✅ Vérification disponibilité
 - ✅ Alternatives proposées
 
 **Conformité** :
+
 - ✅ **Inputs-IBM** : 100% (POC2 SequenceFile mentionné)
 
 **Statut** : ✅ **Excellent**
@@ -417,11 +445,13 @@ CREATE TABLE operations_by_account (
 #### `26_ANALYSE_MIGRATION_CSV_PARQUET.md`
 
 **Contenu** :
+
 - ✅ Migration CSV → Parquet
 - ✅ Modifications nécessaires
 - ✅ Avantages/Inconvénients
 
 **Conformité** :
+
 - ✅ **Inputs-IBM** : 100% (POC1 CSV mentionné)
 
 **Statut** : ✅ **Excellent**
@@ -433,11 +463,13 @@ CREATE TABLE operations_by_account (
 #### `57_POURQUOI_PAS_NGRAM_SUR_LIBELLE.md`
 
 **Contenu** :
+
 - ✅ Analyse N-Gram
 - ✅ Justification choix
 - ✅ Alternatives
 
 **Conformité** :
+
 - ✅ **Inputs-IBM** : 100% (analyzers mentionnés)
 
 **Statut** : ✅ **Excellent**
@@ -447,11 +479,13 @@ CREATE TABLE operations_by_account (
 #### `58-61_ANALYSE_*.md` (4 fichiers)
 
 **Contenu** :
+
 - ✅ Analyses détaillées des tests
 - ✅ Fallback automatique
 - ✅ Tokens collection
 
 **Conformité** :
+
 - ✅ **Inputs-IBM** : 100% (recherche full-text)
 
 **Statut** : ✅ **Excellent**
@@ -463,12 +497,14 @@ CREATE TABLE operations_by_account (
 #### `43_SYNTHESE_COMPLETE_ANALYSE_2024.md`
 
 **Contenu** :
+
 - ✅ Synthèse exhaustive
 - ✅ Analyse inputs-clients
 - ✅ Analyse inputs-ibm
 - ✅ Analyse scripts
 
 **Conformité** :
+
 - ✅ **Inputs-Clients** : 100%
 - ✅ **Inputs-IBM** : 100%
 
@@ -479,10 +515,12 @@ CREATE TABLE operations_by_account (
 #### `83_README_PARQUET_10000.md`
 
 **Contenu** :
+
 - ✅ Guide Parquet
 - ✅ Utilisation 10000 opérations
 
 **Conformité** :
+
 - ✅ **Inputs-IBM** : 100%
 
 **Statut** : ✅ **Excellent**
@@ -492,10 +530,12 @@ CREATE TABLE operations_by_account (
 #### `84_RESUME_MISE_A_JOUR_2024_11_27.md`
 
 **Contenu** :
+
 - ✅ Résumé mise à jour
 - ✅ Points clés
 
 **Conformité** :
+
 - ✅ **Inputs-Clients** : 100%
 - ✅ **Inputs-IBM** : 100%
 
@@ -553,12 +593,14 @@ CREATE TABLE operations_by_account (
 #### Gap 1 : Data API Moins Documentée
 
 **Problème** :
+
 - Data API mentionnée dans `02_VALUE_PROPOSITION_DOMIRAMA2.md` mais moins détaillée
 - Pas de guide spécifique Data API dans `doc/design/`
 
 **Impact** : ⚠️ **Mineur** (Data API documentée dans `doc/guides/18_README_DATA_API.md`)
 
 **Recommandation** :
+
 - ✅ **Option 1** : Enrichir `02_VALUE_PROPOSITION_DOMIRAMA2.md` avec section Data API détaillée
 - ✅ **Option 2** : Créer `doc/design/XX_GUIDE_DATA_API.md` dédié
 - ✅ **Option 3** : Ajouter référence croisée vers `doc/guides/18_README_DATA_API.md`
@@ -570,12 +612,14 @@ CREATE TABLE operations_by_account (
 #### Gap 2 : POC2 SequenceFile Moins Couvert
 
 **Problème** :
+
 - `25_ANALYSE_DEPENDANCES_POC2.md` mentionne POC2 mais dépendances JARs manquantes
 - Pas de guide complet POC2 dans `doc/design/`
 
 **Impact** : ⚠️ **Mineur** (POC1 Parquet privilégié)
 
 **Recommandation** :
+
 - ✅ Documenter l'approche POC2 si JARs disponibles
 - ✅ Ou documenter pourquoi POC1 est privilégié (déjà fait)
 
@@ -602,6 +646,7 @@ CREATE TABLE operations_by_account (
 #### Recommandation 1 : Enrichir Data API
 
 **Action** :
+
 - Ajouter section détaillée Data API dans `02_VALUE_PROPOSITION_DOMIRAMA2.md`
 - Ou créer fichier dédié `doc/design/XX_GUIDE_DATA_API.md`
 
@@ -614,6 +659,7 @@ CREATE TABLE operations_by_account (
 #### Recommandation 2 : Index de Navigation
 
 **Action** :
+
 - Créer `doc/design/INDEX.md` avec navigation rapide
 - Organiser par catégories (Proposition, Analyse, Technique, Synthèse)
 
@@ -626,6 +672,7 @@ CREATE TABLE operations_by_account (
 #### Recommandation 3 : Mise à Jour Dates
 
 **Action** :
+
 - Vérifier que toutes les dates sont à jour (2025)
 - Mettre à jour les dates si nécessaire
 
@@ -664,6 +711,7 @@ CREATE TABLE operations_by_account (
 **✅ La documentation `doc/design/` est conforme aux exigences des inputs-clients et inputs-ibm**
 
 **Recommandations** :
+
 - 🟡 Enrichir la documentation Data API (priorité moyenne)
 - 🟢 Créer un index de navigation (priorité basse)
 - 🟢 Vérifier les dates (priorité basse)
@@ -673,4 +721,3 @@ CREATE TABLE operations_by_account (
 **Date de création** : 2025-01-XX  
 **Version** : 1.0  
 **Statut** : ✅ **Audit terminé avec succès**
-

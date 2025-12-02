@@ -48,6 +48,7 @@ git checkout -b fix/nom-du-bug
 ```
 
 **Conventions de nommage** :
+
 - `feature/` : Nouvelles fonctionnalités
 - `fix/` : Corrections de bugs
 - `docs/` : Documentation uniquement
@@ -85,12 +86,14 @@ git push origin feature/nom-de-votre-feature
 ### Shell Scripts
 
 **Obligatoire** :
+
 - ✅ `set -euo pipefail` au début de chaque script
 - ✅ Utiliser `setup_paths()` pour les chemins
 - ✅ Documentation complète en en-tête
 - ✅ Gestion d'erreurs robuste
 
 **Exemple** :
+
 ```bash
 #!/bin/bash
 set -euo pipefail
@@ -114,12 +117,14 @@ setup_paths
 ### Python
 
 **Obligatoire** :
+
 - ✅ PEP 8 (style guide)
 - ✅ Docstrings pour toutes les fonctions
 - ✅ Type hints si Python 3.6+
 - ✅ Gestion d'erreurs explicite
 
 **Exemple** :
+
 ```python
 #!/usr/bin/env python3
 """
@@ -130,11 +135,11 @@ Description : Description détaillée
 def fonction_exemple(param1: str, param2: int) -> bool:
     """
     Description de la fonction.
-    
+
     Args:
         param1: Description du paramètre 1
         param2: Description du paramètre 2
-    
+
     Returns:
         Description de la valeur de retour
     """
@@ -149,6 +154,7 @@ def fonction_exemple(param1: str, param2: int) -> bool:
 ### Markdown
 
 **Obligatoire** :
+
 - ✅ En-tête avec date et objectif
 - ✅ Table des matières pour documents longs
 - ✅ Formatage cohérent
@@ -293,6 +299,7 @@ Description détaillée des changements
 ## 📞 Questions ?
 
 Pour toute question :
+
 - 📧 Email : [votre-email]
 - 💬 Issues GitHub : Créer une issue
 - 📖 Documentation : Voir `docs/`
@@ -300,4 +307,3 @@ Pour toute question :
 ---
 
 **Merci de contribuer au projet ARKEA !** 🎉
-

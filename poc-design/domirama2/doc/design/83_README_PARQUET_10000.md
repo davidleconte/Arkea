@@ -12,6 +12,7 @@
 **Fichier** : `generate_realistic_data.py`
 
 **Caractéristiques** :
+
 - ✅ **10 000 lignes** de données réalistes
 - ✅ **Libellés complexes** : Opérations bancaires françaises avec accents, variations
 - ✅ **50 comptes différents** pour varier les données
@@ -21,6 +22,7 @@
 ### Libellés Inclus
 
 **Catégories variées** :
+
 - 🏠 **Habitation** : Loyers, charges, taxes foncières
 - 🛒 **Alimentation** : Supermarchés, marchés, boulangeries
 - 🍽️ **Restaurants** : Restaurants, fast-food, livraison
@@ -32,6 +34,7 @@
 - 🏦 **Banque** : Frais bancaires, agios
 
 **Complexité des libellés** :
+
 - ✅ Accents français (é, è, à, ç, etc.)
 - ✅ Variations (LOYER JANVIER, LOYER FEVRIER, etc.)
 - ✅ Noms propres (CARREFOUR, MONOPRIX, EDF, etc.)
@@ -45,6 +48,7 @@
 ### CSV Source
 
 **Fichier** : `data/operations_10000.csv`
+
 - **Lignes** : 10 001 (en-tête + 10 000 données)
 - **Taille** : ~1.5 MB
 - **Format** : CSV avec en-tête
@@ -52,6 +56,7 @@
 ### Parquet Optimisé
 
 **Fichier** : `data/operations_10000.parquet/`
+
 - **Format** : Parquet (binaire optimisé)
 - **Taille** : ~300-500 KB (compression)
 - **Schéma** : Typé (String, Int, Decimal, Timestamp)
@@ -239,4 +244,3 @@ LIMIT 20;
 
 **Date de création** : 2025-11-25  
 **Statut** : ✅ **Prêt pour démonstration full-text search**
-

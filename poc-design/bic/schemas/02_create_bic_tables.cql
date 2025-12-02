@@ -20,23 +20,23 @@ CREATE TABLE IF NOT EXISTS bic_poc.interactions_by_client (
     -- Partition Key
     code_efs text,                    -- Code établissement financier
     numero_client text,                -- Numéro client
-    
+
     -- Clustering Columns
     date_interaction timestamp,        -- Date/heure de l'interaction
     canal text,                        -- Canal (email, SMS, agence, telephone, web, etc.)
     type_interaction text,             -- Type (consultation, conseil, transaction, reclamation, etc.)
     idt_tech text,                     -- Identifiant technique unique
-    
+
     -- Données
     resultat text,                     -- Résultat/statut (succès, échec, en_cours, annule) - BIC-11
     json_data text,                    -- Données JSON complètes de l'interaction
     colonnes_dynamiques map<text, text>, -- Colonnes dynamiques (flexibilité)
-    
+
     -- Métadonnées
     created_at timestamp,               -- Date de création de l'enregistrement
     updated_at timestamp,              -- Date de mise à jour
     version int,                        -- Version de l'enregistrement
-    
+
     PRIMARY KEY ((code_efs, numero_client), date_interaction, canal, type_interaction, idt_tech)
 ) WITH CLUSTERING ORDER BY (date_interaction DESC, canal ASC, type_interaction ASC)
   AND default_time_to_live = 63072000;  -- 2 ans en secondes (2 * 365 * 24 * 60 * 60)
@@ -60,11 +60,10 @@ CREATE TABLE IF NOT EXISTS bic_poc.interactions_by_conseiller (
     created_at timestamp,
     updated_at timestamp,
     version int,
-    
+
     PRIMARY KEY ((code_efs, id_conseiller), date_interaction, numero_client, canal, type_interaction, idt_tech)
 ) WITH CLUSTERING ORDER BY (date_interaction DESC, numero_client ASC)
   AND default_time_to_live = 63072000;  -- 2 ans
 
 -- Afficher les tables créées
 DESCRIBE TABLES;
-

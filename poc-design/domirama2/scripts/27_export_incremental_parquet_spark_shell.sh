@@ -8,7 +8,7 @@
 #   au lieu de spark-submit. Il démontre l'export incrémental de données depuis
 #   HCD vers des fichiers Parquet, équivalent aux exports HBase avec FullScan,
 #   STARTROW, STOPROW et TIMERANGE.
-#   
+#
 #   NOTE : La version spark-submit (27_export_incremental_parquet.sh) est
 #   recommandée pour la production. Cette version spark-shell est utile pour
 #   le développement et le débogage.
@@ -219,7 +219,7 @@ try {
   val dfRead = spark.read.parquet(outputPath)
   val countRead = dfRead.count()
   println(s"✅ Vérification OK : \$countRead opérations lues depuis Parquet")
-  
+
   if (count != countRead) {
     println(s"⚠️  ATTENTION : Incohérence (\$count exportées vs \$countRead lues)")
   }
@@ -246,4 +246,3 @@ rm -f "$TEMP_SCRIPT"
 echo ""
 success "✅ Export incrémental Parquet terminé"
 info "   Fichiers Parquet créés dans : $OUTPUT_PATH"
-

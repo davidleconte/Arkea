@@ -10,6 +10,7 @@
 Ce répertoire contient les sauvegardes (`.bak`) de tous les scripts shell qui ont été migrés pour implémenter les priorités 1, 2 et 3 de l'audit.
 
 **Migration effectuée** :
+
 - ✅ Priorité 1 : Standardisation des chemins (détection automatique)
 - ✅ Priorité 2 : Standardisation localhost/port (variables d'environnement)
 - ✅ Priorité 3 : Amélioration gestion d'erreurs (`set -euo pipefail`)
@@ -42,4 +43,3 @@ done
 ---
 
 **Note** : Ces fichiers peuvent être supprimés après validation complète de la migration.
-

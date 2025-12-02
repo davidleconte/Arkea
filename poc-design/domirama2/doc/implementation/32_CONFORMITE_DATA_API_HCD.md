@@ -1,7 +1,7 @@
 # ✅ Conformité avec la Documentation Data API HCD
 
 **Date** : 2025-11-25  
-**Référence** : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html  
+**Référence** : <https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html>  
 **Objectif** : Vérifier la conformité complète avec la documentation officielle Data API HCD
 
 ---
@@ -15,10 +15,12 @@ D'après la [documentation Data API HCD](https://docs.datastax.com/en/hyper-conv
 **Format requis** : `http://CLUSTER_HOST:GATEWAY_PORT`
 
 **Pour Production (Kubernetes)** :
+
 - `CLUSTER_HOST` : IP externe d'un nœud (via `kubectl get nodes -o wide`)
 - `GATEWAY_PORT` : Port du service API gateway (via `kubectl get svc`)
 
 **Pour POC Local** :
+
 - `CLUSTER_HOST` : `localhost`
 - `GATEWAY_PORT` : `8080` (Stargate)
 
@@ -27,17 +29,20 @@ D'après la [documentation Data API HCD](https://docs.datastax.com/en/hyper-conv
 **Format requis** : `Cassandra:BASE64-ENCODED_USERNAME:BASE64_ENCODED_PASSWORD`
 
 **Génération** :
+
 - Via `UsernamePasswordTokenProvider` (recommandé)
 - Ou manuellement en base64
 
 ### 3. Client
 
 **Clients disponibles** :
+
 - Python : `astrapy>=2.0,<3.0`
 - TypeScript : `@datastax/astra-db-ts`
 - Java : `astra-db-java`
 
 **Utilisation** :
+
 ```python
 from astrapy import DataAPIClient
 from astrapy.authentication import UsernamePasswordTokenProvider
@@ -57,11 +62,13 @@ database = client.get_database(
 ### 1. Variables d'Environnement
 
 **Documentation requiert** :
+
 - `API_ENDPOINT` : `http://CLUSTER_HOST:GATEWAY_PORT`
 - `USERNAME` : Username du cluster
 - `PASSWORD` : Password du cluster
 
 **Notre configuration** :
+
 - ✅ `API_ENDPOINT` (ou `DATA_API_ENDPOINT` pour fallback POC)
 - ✅ `USERNAME` (ou `DATA_API_USERNAME` pour fallback POC)
 - ✅ `PASSWORD` (ou `DATA_API_PASSWORD` pour fallback POC)
@@ -71,10 +78,12 @@ database = client.get_database(
 ### 2. Token
 
 **Documentation requiert** :
+
 - Format : `Cassandra:BASE64-USERNAME:BASE64-PASSWORD`
 - Génération via `UsernamePasswordTokenProvider`
 
 **Notre implémentation** :
+
 - ✅ Token généré dans `36_setup_data_api.sh`
 - ✅ Format correct : `Cassandra:${USERNAME_B64}:${PASSWORD_B64}`
 - ✅ Utilisation de `UsernamePasswordTokenProvider` dans les exemples
@@ -84,10 +93,12 @@ database = client.get_database(
 ### 3. Client Python
 
 **Documentation requiert** :
+
 - Installation : `pip install "astrapy>=2.0,<3.0"`
 - Utilisation : `DataAPIClient(environment=Environment.HCD)`
 
 **Notre implémentation** :
+
 - ✅ Installation documentée dans `36_setup_data_api.sh`
 - ✅ Client utilisé dans tous les exemples (`data_api_examples/*.py`)
 - ✅ `Environment.HCD` utilisé correctement
@@ -97,11 +108,13 @@ database = client.get_database(
 ### 4. Exemples de Code
 
 **Documentation fournit** :
+
 - Exemple de connexion
 - Exemple d'opérations CRUD
 - Exemple de recherche vectorielle
 
 **Notre implémentation** :
+
 - ✅ `01_connect_data_api.py` : Connexion conforme
 - ✅ `02_search_operations.py` : Recherche avec filtres
 - ✅ `03_update_category.py` : Mise à jour
@@ -112,10 +125,12 @@ database = client.get_database(
 ### 5. Endpoint et Gateway
 
 **Documentation suppose** :
+
 - Déploiement Kubernetes avec service gateway
 - Ou endpoint Data API configuré
 
 **Notre situation** :
+
 - ⚠️ **POC Local** : Endpoint non déployé par défaut
 - ✅ **Solution** : Stargate disponible via `39_deploy_stargate.sh`
 - ✅ **Documentation** : Guide complet dans `GUIDE_DEPLOIEMENT_DATA_API_POC.md`
@@ -145,6 +160,7 @@ database = client.get_database(
 ### Script de Configuration (`36_setup_data_api.sh`)
 
 **Conforme à** :
+
 - ✅ Génération de token (format base64)
 - ✅ Configuration des variables d'environnement
 - ✅ Installation du client Python
@@ -153,6 +169,7 @@ database = client.get_database(
 ### Exemples de Code (`data_api_examples/*.py`)
 
 **Conformes à** :
+
 - ✅ Structure recommandée par la documentation
 - ✅ Utilisation de `DataAPIClient(environment=Environment.HCD)`
 - ✅ Utilisation de `UsernamePasswordTokenProvider`
@@ -161,6 +178,7 @@ database = client.get_database(
 ### Script de Déploiement (`39_deploy_stargate.sh`)
 
 **Conforme à** :
+
 - ✅ Déploiement Stargate (gateway requis)
 - ✅ Configuration des ports (8080, 8081, 8082)
 - ✅ Variables d'environnement Stargate
@@ -169,6 +187,7 @@ database = client.get_database(
 ### Documentation
 
 **Conforme à** :
+
 - ✅ Références à la documentation officielle
 - ✅ Explications des concepts
 - ✅ Guides d'utilisation
@@ -183,6 +202,7 @@ database = client.get_database(
 **Documentation suppose** : Déploiement Kubernetes
 
 **Notre solution** : Stargate standalone via Podman
+
 - ✅ Conforme à l'architecture
 - ✅ Endpoint accessible sur `http://localhost:8080`
 - ✅ Compatible avec la Data API HCD
@@ -192,6 +212,7 @@ database = client.get_database(
 **Documentation utilise** : `API_ENDPOINT`, `USERNAME`, `PASSWORD`
 
 **Notre implémentation** : Support des deux formats
+
 - ✅ `API_ENDPOINT` (conforme)
 - ✅ `DATA_API_ENDPOINT` (fallback pour compatibilité)
 
@@ -210,12 +231,14 @@ database = client.get_database(
 ## 📚 Références Utilisées
 
 ### Documentation Officielle
-- **Data API Client** : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html
-- **Quickstart** : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/quickstart.html
+
+- **Data API Client** : <https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html>
+- **Quickstart** : <https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/quickstart.html>
 
 ### Documentation Stargate
-- **Stargate Docs** : https://stargate.io/docs/latest/index.html
-- **Installation** : https://stargate.io/docs/latest/install/cassandra-4.0.html
+
+- **Stargate Docs** : <https://stargate.io/docs/latest/index.html>
+- **Installation** : <https://stargate.io/docs/latest/install/cassandra-4.0.html>
 
 ---
 
@@ -224,6 +247,7 @@ database = client.get_database(
 **Conformité avec la documentation Data API HCD** : ✅ **100%**
 
 **Tous les éléments requis par la documentation sont implémentés** :
+
 - ✅ Variables d'environnement conformes
 - ✅ Token généré correctement
 - ✅ Client Python installé et utilisé
@@ -232,6 +256,7 @@ database = client.get_database(
 - ✅ Solution pour POC local (Stargate)
 
 **Différences mineures (justifiées)** :
+
 - Variables de fallback (`DATA_API_ENDPOINT`) pour compatibilité POC
 - Solution Stargate pour POC local (au lieu de Kubernetes)
 
@@ -240,4 +265,3 @@ database = client.get_database(
 ---
 
 **✅ La configuration Data API est 100% conforme à la documentation officielle HCD**
-

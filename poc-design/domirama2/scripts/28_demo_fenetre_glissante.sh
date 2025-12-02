@@ -7,7 +7,7 @@
 #   Ce script démontre la fenêtre glissante pour les exports incrémentaux,
 #   équivalent au TIMERANGE HBase, permettant d'exporter des données sur une
 #   plage de dates spécifique avec un décalage progressif.
-#   
+#
 #   Fonctionnalités :
 #   - Export par fenêtre de dates (équivalent TIMERANGE HBase)
 #   - Fenêtre glissante avec décalage progressif
@@ -159,7 +159,7 @@ export_window() {
     local year=$1
     local month=$2
     local start_date="${year}-$(printf "%02d" $month)-01"
-    
+
     # Calculer la date de fin (mois suivant)
     local next_month=$((month + 1))
     local next_year=$year
@@ -168,12 +168,12 @@ export_window() {
         next_year=$((year + 1))
     fi
     local end_date="${next_year}-$(printf "%02d" $next_month)-01"
-    
+
     local output_path="${OUTPUT_BASE}/${year}-$(printf "%02d" $month)"
-    
+
     info "📅 Export fenêtre : $start_date → $end_date"
     code "   Output : $output_path"
-    
+
     TEMP_SCRIPT=$(mktemp)
     cat > "$TEMP_SCRIPT" <<EOFSCRIPT
 import org.apache.spark.sql.SparkSession
@@ -219,7 +219,7 @@ if (count > 0) {
     .partitionBy("date_op")
     .option("compression", "snappy")
     .parquet("$output_path")
-  
+
   println(s"✅ Export terminé : \${count} opérations")
 } else {
   println("⚠️  Aucune donnée à exporter")
@@ -236,7 +236,7 @@ EOFSCRIPT
       --driver-memory 2g \
       --executor-memory 2g \
       -i "$TEMP_SCRIPT" 2>&1 | grep -v "^scala>" | grep -v "^     |" | grep -v "^Welcome to" | grep -v "WARN NativeCodeLoader" | grep -E "(✅|⚠️|opérations|Export|Terminé|count)" | head -10
-    
+
     rm -f "$TEMP_SCRIPT"
     echo ""
 }
@@ -284,4 +284,3 @@ code "  ✅ Idempotence (mode overwrite pour rejeux)"
 code "  ✅ Partitionnement par date_op (performance)"
 code "  ✅ Format Parquet (cohérent avec ingestion)"
 echo ""
-

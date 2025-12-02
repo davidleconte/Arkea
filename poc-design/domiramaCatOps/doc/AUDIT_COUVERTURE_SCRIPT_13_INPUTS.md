@@ -9,6 +9,7 @@
 ## 📋 Résumé Exécutif
 
 ### État Actuel
+
 - ✅ **18 tests** couvrent les cas de base, complexes et cas potentiels
 - ✅ **Colonnes dérivées + Index SAI** implémentées
 - ✅ **Stratégie de migration** validée
@@ -16,6 +17,7 @@
 - ⚠️  **Limite de 10 index SAI** atteinte (impact sur certaines colonnes dérivées)
 
 ### Score de Couverture
+
 - **Cas de base (Inputs-Clients)** : 8/8 (100%)
 - **Cas complexes (Inputs-Clients)** : 6/6 (100%)
 - **Use-cases IBM** : 5/5 (100%)
@@ -33,6 +35,7 @@
 **Source HBase** : `Column Family 'meta'` avec colonnes dynamiques
 
 **Caractéristiques HBase** :
+
 - **Column Family** : `meta`
 - **Column Qualifiers** : Dynamiques (`source`, `device`, `channel`, `ip`, `location`, `fraud_score`, etc.)
 - **Column Values** : Valeurs textuelles (`mobile`, `iphone`, `app`, etc.)
@@ -257,14 +260,17 @@
 ### 6.1 Recommandations Prioritaires
 
 #### Priorité 1 (Critique) - **AUCUNE**
+
 ✅ Tous les cas critiques sont couverts
 
 #### Priorité 2 (Haute) - **AUCUNE**
+
 ✅ Tous les cas de haute priorité sont couverts
 
 #### Priorité 3 (Moyenne) - **1 Recommandation**
 
 **REC-03-01** : Documenter la stratégie pour filtrage par range sur colonnes dérivées
+
 - **Description** : Pour `fraud_score >= 0.8`, créer un index SAI range si nécessaire
 - **Impact** : Amélioration performance pour cas d'usage détection fraude
 - **Effort** : Faible (documentation)
@@ -325,4 +331,3 @@
 **Date de génération** : 2025-11-30  
 **Auditeur** : Analyse Automatique  
 **Statut** : ✅ **VALIDÉ**
-

@@ -47,6 +47,7 @@
 **Objectif** : Créer le keyspace `bic_poc`
 
 **Contrôles de Validation** :
+
 - ✅ **Pertinence** : Keyspace créé avec réplication SimpleStrategy (POC)
 - ✅ **Cohérence** : Nom conforme (`bic_poc`)
 - ✅ **Intégrité** : Vérification que le keyspace existe après création
@@ -54,6 +55,7 @@
 - ✅ **Conformité** : Conforme aux exigences IBM (keyspace dédié)
 
 **Critères de Qualité** :
+
 - [x] Utilise `set -euo pipefail`
 - [x] Utilise `setup_paths()` depuis `utils/didactique_functions.sh`
 - [x] Messages colorés (info, success, error, warn)
@@ -72,6 +74,7 @@
 **Objectif** : Créer les tables `interactions_by_client` et `interactions_by_conseiller`
 
 **Contrôles de Validation** :
+
 - ✅ **Pertinence** : Tables créées avec schéma conforme IBM
 - ✅ **Cohérence** : Partition key `(code_efs, numero_client)` conforme
 - ✅ **Intégrité** : Clustering ORDER BY `date_interaction DESC` conforme
@@ -79,6 +82,7 @@
 - ✅ **Conformité** : Colonnes conformes aux exigences (json_data, colonnes_dynamiques)
 
 **Critères de Qualité** :
+
 - [x] Utilise `set -euo pipefail`
 - [x] Utilise `setup_paths()`
 - [x] Messages colorés
@@ -97,6 +101,7 @@
 **Objectif** : Créer les index SAI pour recherche avancée
 
 **Contrôles de Validation** :
+
 - ✅ **Pertinence** : Index SAI sur colonnes filtrables (canal, type_interaction, date_interaction, json_data)
 - ✅ **Cohérence** : Index conformes aux exigences IBM (SAI Storage-Attached Index)
 - ✅ **Intégrité** : Index créés avec options correctes (case_sensitive, normalize)
@@ -104,6 +109,7 @@
 - ✅ **Conformité** : Index full-text sur json_data conforme
 
 **Critères de Qualité** :
+
 - [x] Utilise `set -euo pipefail`
 - [x] Utilise `setup_paths()`
 - [x] Messages colorés
@@ -122,6 +128,7 @@
 **Objectif** : Vérifier que le setup est complet et fonctionnel
 
 **Contrôles de Validation** :
+
 - ✅ **Pertinence** : Vérifie keyspace, tables, index
 - ✅ **Cohérence** : Vérifie que tous les éléments sont présents
 - ✅ **Intégrité** : Test de connexion et requête
@@ -129,6 +136,7 @@
 - ✅ **Conformité** : Vérifie conformité aux exigences
 
 **Critères de Qualité** :
+
 - [x] Utilise `set -euo pipefail`
 - [x] Utilise `setup_paths()`
 - [x] Messages colorés
@@ -149,6 +157,7 @@
 **Objectif** : Générer des données de test Parquet pour BIC
 
 **Exigences** :
+
 - Générer au moins 10 000 interactions
 - Couvrir tous les canaux (email, SMS, agence, telephone, web, RDV)
 - Couvrir tous les types (consultation, conseil, transaction, reclamation)
@@ -156,6 +165,7 @@
 - Format : Parquet avec colonnes conformes au schéma
 
 **Contrôles de Validation** :
+
 - ⏳ **Pertinence** : Données réalistes et variées
 - ⏳ **Cohérence** : Format Parquet conforme
 - ⏳ **Intégrité** : Toutes les colonnes requises présentes
@@ -163,6 +173,7 @@
 - ⏳ **Conformité** : Conforme au schéma `interactions_by_client`
 
 **Critères de Qualité** (au moins égal à domiramaCatOps) :
+
 - [ ] Utilise `set -euo pipefail`
 - [ ] Utilise `setup_paths()`
 - [ ] Messages colorés (info, success, error, warn, demo, code, section, result, expected)
@@ -186,12 +197,14 @@
 **Objectif** : Générer des données de test JSON pour ingestion temps réel
 
 **Exigences** :
+
 - Générer des événements JSON conformes au format Kafka `bic-event`
 - Format compatible avec ingestion Kafka
 - Au moins 1 000 événements
 - Structure JSON conforme aux exigences
 
 **Contrôles de Validation** :
+
 - ⏳ **Pertinence** : Format JSON conforme Kafka
 - ⏳ **Cohérence** : Structure conforme aux exigences
 - ⏳ **Intégrité** : Tous les champs requis présents
@@ -199,6 +212,7 @@
 - ⏳ **Conformité** : Conforme au format `bic-event`
 
 **Critères de Qualité** :
+
 - [ ] Utilise `set -euo pipefail`
 - [ ] Utilise `setup_paths()`
 - [ ] Messages colorés
@@ -219,11 +233,13 @@
 **Objectif** : Générer des données de test spécifiques pour les tests
 
 **Exigences** :
+
 - Données ciblées pour chaque test
 - Scénarios de test couverts
 - Données de validation
 
 **Contrôles de Validation** :
+
 - ⏳ **Pertinence** : Données adaptées aux tests
 - ⏳ **Cohérence** : Format conforme
 - ⏳ **Intégrité** : Couverture complète des scénarios
@@ -231,6 +247,7 @@
 - ⏳ **Conformité** : Conforme aux besoins de test
 
 **Critères de Qualité** :
+
 - [ ] Utilise `set -euo pipefail`
 - [ ] Utilise `setup_paths()`
 - [ ] Messages colorés
@@ -252,6 +269,7 @@
 **Objectif** : Ingestion batch des données Parquet dans HCD (équivalent bulkLoad HBase - BIC-09)
 
 **Exigences** :
+
 - Lecture Parquet via Spark
 - Écriture dans `interactions_by_client`
 - Transformation des données si nécessaire
@@ -260,6 +278,7 @@
 - **NOUVEAU** : Documenter équivalence avec bulkLoad HBase (inputs-clients)
 
 **Contrôles de Validation** :
+
 - ⏳ **Pertinence** : Ingestion batch conforme
 - ⏳ **Cohérence** : Mapping Parquet → HCD correct
 - ⏳ **Intégrité** : Toutes les données chargées
@@ -267,6 +286,7 @@
 - ⏳ **Conformité** : Conforme aux exigences batch
 
 **Critères de Qualité** (au moins égal à domiramaCatOps) :
+
 - [ ] Utilise `set -euo pipefail`
 - [ ] Utilise `setup_paths()`
 - [ ] Messages colorés complets
@@ -291,6 +311,7 @@
 **Objectif** : Ingestion temps réel depuis Kafka (topic `bic-event`)
 
 **Exigences** :
+
 - Consumer Kafka pour topic `bic-event`
 - Spark Streaming ou Kafka Connect
 - Écriture en temps réel dans HCD
@@ -298,6 +319,7 @@
 - Monitoring du flux
 
 **Contrôles de Validation** :
+
 - ✅ **Pertinence** : Ingestion temps réel conforme
 - ✅ **Cohérence** : Format Kafka → HCD correct
 - ✅ **Intégrité** : Tous les événements traités
@@ -305,6 +327,7 @@
 - ✅ **Conformité** : Conforme aux exigences Kafka (BIC-02)
 
 **Critères de Qualité** :
+
 - [x] Utilise `set -euo pipefail`
 - [x] Utilise `setup_paths()`
 - [x] Messages colorés complets
@@ -329,11 +352,13 @@
 **Objectif** : Ingestion de fichiers JSON individuels
 
 **Exigences** :
+
 - Lecture de fichiers JSON
 - Écriture dans HCD
 - Gestion des erreurs
 
 **Contrôles de Validation** :
+
 - ✅ **Pertinence** : Ingestion JSON conforme
 - ✅ **Cohérence** : Format JSON → HCD correct
 - ✅ **Intégrité** : Toutes les données chargées
@@ -341,6 +366,7 @@
 - ✅ **Conformité** : Conforme aux exigences
 
 **Critères de Qualité** :
+
 - [x] Utilise `set -euo pipefail`
 - [x] Utilise `setup_paths()`
 - [x] Messages colorés
@@ -362,6 +388,7 @@
 **Objectif** : Tester la timeline conseiller (BIC-01) avec pagination (BIC-14)
 
 **Exigences** :
+
 - Requête timeline complète d'un client
 - Tri chronologique DESC
 - **NOUVEAU** : Pagination explicite (LIMIT/OFFSET) - **BIC-14**
@@ -369,6 +396,7 @@
 - Couverture 2 ans d'historique
 
 **Contrôles de Validation** :
+
 - ⏳ **Pertinence** : Timeline conforme aux exigences
 - ⏳ **Cohérence** : Tri chronologique correct
 - ⏳ **Intégrité** : Toutes les interactions présentes
@@ -376,6 +404,7 @@
 - ⏳ **Conformité** : Conforme BIC-01 (timeline 2 ans) et BIC-14 (pagination)
 
 **Critères de Qualité** (au moins égal à domiramaCatOps) :
+
 - [ ] Utilise `set -euo pipefail`
 - [ ] Utilise `setup_paths()` et fonctions didactiques
 - [ ] Messages colorés complets
@@ -400,12 +429,14 @@
 **Objectif** : Tester le filtrage par canal (BIC-04) et par résultat (BIC-11)
 
 **Exigences** :
+
 - Filtrage par canal (email, SMS, agence, telephone, web, RDV, agenda, mail)
 - Filtrage par résultat (succès, échec, etc.) - **BIC-11**
 - Utilisation des index SAI
 - Performance optimale
 
 **Contrôles de Validation** :
+
 - ⏳ **Pertinence** : Filtrage conforme (canal + résultat)
 - ⏳ **Cohérence** : Utilisation des index SAI
 - ⏳ **Intégrité** : Résultats corrects
@@ -413,6 +444,7 @@
 - ⏳ **Conformité** : Conforme BIC-04 et BIC-11
 
 **Critères de Qualité** :
+
 - [ ] Utilise `set -euo pipefail`
 - [ ] Utilise `setup_paths()` et fonctions didactiques
 - [ ] Messages colorés complets
@@ -434,11 +466,13 @@
 **Objectif** : Tester le filtrage par type d'interaction (BIC-05)
 
 **Exigences** :
+
 - Filtrage par type (consultation, conseil, transaction, reclamation)
 - Utilisation des index SAI
 - Performance optimale
 
 **Contrôles de Validation** :
+
 - ✅ **Pertinence** : Filtrage conforme
 - ✅ **Cohérence** : Utilisation des index SAI
 - ✅ **Intégrité** : Résultats corrects
@@ -446,6 +480,7 @@
 - ✅ **Conformité** : Conforme BIC-05
 
 **Critères de Qualité** :
+
 - [x] Utilise `set -euo pipefail`
 - [x] Utilise `setup_paths()` et fonctions didactiques
 - [x] Messages colorés complets
@@ -466,6 +501,7 @@
 **Objectif** : Tester l'export batch ORC (BIC-03) avec équivalences HBase (BIC-10)
 
 **Exigences** :
+
 - Export incrémental ORC
 - Filtrage par période
 - Format ORC conforme
@@ -474,6 +510,7 @@
 - **NOUVEAU** : Documenter équivalence TIMERANGE (filtrage par date_interaction)
 
 **Contrôles de Validation** :
+
 - ⏳ **Pertinence** : Export conforme
 - ⏳ **Cohérence** : Format ORC correct
 - ⏳ **Intégrité** : Toutes les données exportées
@@ -481,6 +518,7 @@
 - ⏳ **Conformité** : Conforme BIC-03 (bic-unload)
 
 **Critères de Qualité** :
+
 - [ ] Utilise `set -euo pipefail`
 - [ ] Utilise `setup_paths()`
 - [ ] Messages colorés complets
@@ -502,11 +540,13 @@
 **Objectif** : Tester le TTL 2 ans (BIC-06)
 
 **Exigences** :
+
 - Vérification du TTL 2 ans
 - Test d'expiration automatique
 - Validation de la purge
 
 **Contrôles de Validation** :
+
 - ✅ **Pertinence** : TTL conforme
 - ✅ **Cohérence** : TTL 2 ans (63072000 secondes)
 - ✅ **Intégrité** : Expiration automatique fonctionnelle
@@ -514,6 +554,7 @@
 - ✅ **Conformité** : Conforme BIC-06
 
 **Critères de Qualité** :
+
 - [x] Utilise `set -euo pipefail`
 - [x] Utilise `setup_paths()`
 - [x] Messages colorés complets
@@ -536,6 +577,7 @@
 **Objectif** : Tester la recherche full-text sur json_data/details (BIC-07, BIC-12)
 
 **Exigences** :
+
 - Recherche full-text dans json_data/details
 - Utilisation des index SAI full-text
 - Recherche par mots-clés
@@ -544,6 +586,7 @@
 - **NOUVEAU** : Recherche floue (fuzzy)
 
 **Contrôles de Validation** :
+
 - ⏳ **Pertinence** : Recherche full-text conforme avec analyseurs
 - ⏳ **Cohérence** : Utilisation des index SAI avec analyseurs Lucene
 - ⏳ **Intégrité** : Résultats corrects
@@ -551,6 +594,7 @@
 - ⏳ **Conformité** : Conforme BIC-07 et BIC-12
 
 **Critères de Qualité** :
+
 - [ ] Utilise `set -euo pipefail`
 - [ ] Utilise `setup_paths()` et fonctions didactiques
 - [ ] Messages colorés complets
@@ -575,11 +619,13 @@
 **Objectif** : Tests avancés de requêtes timeline
 
 **Exigences** :
+
 - Requêtes timeline complexes
 - Filtres combinés
 - Pagination avancée
 
 **Contrôles de Validation** :
+
 - ✅ **Pertinence** : Requêtes conformes
 - ✅ **Cohérence** : Logique correcte
 - ✅ **Intégrité** : Résultats corrects
@@ -587,6 +633,7 @@
 - ✅ **Conformité** : Conforme BIC-01
 
 **Critères de Qualité** :
+
 - [x] Utilise `set -euo pipefail`
 - [x] Utilise `setup_paths()` et fonctions didactiques
 - [x] Messages colorés complets
@@ -607,12 +654,14 @@
 **Objectif** : Tests de filtrage avancé exhaustif (BIC-15)
 
 **Exigences** :
+
 - **NOUVEAU** : Tous les filtres combinés (canal + type + résultat + période) - **BIC-15**
 - Utilisation des index SAI multiples
 - Performance optimale
 - Toutes les combinaisons de filtres testées
 
 **Contrôles de Validation** :
+
 - ⏳ **Pertinence** : Filtrage combiné exhaustif conforme
 - ⏳ **Cohérence** : Utilisation des index SAI
 - ⏳ **Intégrité** : Résultats corrects pour toutes les combinaisons
@@ -620,6 +669,7 @@
 - ⏳ **Conformité** : Conforme BIC-04, BIC-05, BIC-11, BIC-15
 
 **Critères de Qualité** :
+
 - [ ] Utilise `set -euo pipefail`
 - [ ] Utilise `setup_paths()` et fonctions didactiques
 - [ ] Messages colorés complets
@@ -642,12 +692,14 @@
 **Objectif** : Tests de performance globaux
 
 **Exigences** :
+
 - Tests de latence
 - Tests de débit
 - Comparaison avec HBase (si possible)
 - Métriques détaillées
 
 **Contrôles de Validation** :
+
 - ⏳ **Pertinence** : Tests de performance pertinents
 - ⏳ **Cohérence** : Métriques cohérentes
 - ⏳ **Intégrité** : Tests complets
@@ -655,6 +707,7 @@
 - ⏳ **Conformité** : Conforme aux exigences de performance
 
 **Critères de Qualité** :
+
 - [ ] Utilise `set -euo pipefail`
 - [ ] Utilise `setup_paths()`
 - [ ] Messages colorés complets
@@ -675,12 +728,14 @@
 **Objectif** : Tester l'API backend conseiller (BIC-08)
 
 **Exigences** :
+
 - Tests d'API REST/GraphQL (Data API)
 - Lecture temps réel
 - Filtres via API
 - Performance API
 
 **Contrôles de Validation** :
+
 - ⏳ **Pertinence** : API conforme
 - ⏳ **Cohérence** : Format API correct
 - ⏳ **Intégrité** : Toutes les fonctionnalités testées
@@ -688,6 +743,7 @@
 - ⏳ **Conformité** : Conforme BIC-08
 
 **Critères de Qualité** :
+
 - [ ] Utilise `set -euo pipefail`
 - [ ] Utilise `setup_paths()`
 - [ ] Messages colorés complets
@@ -708,11 +764,13 @@
 **Objectif** : Démonstration complète de la timeline (BIC-01)
 
 **Exigences** :
+
 - Démonstration complète
 - Scénarios réalistes
 - Documentation auto-générée
 
 **Contrôles de Validation** :
+
 - ⏳ **Pertinence** : Démonstration complète
 - ⏳ **Cohérence** : Scénarios cohérents
 - ⏳ **Intégrité** : Tous les aspects couverts
@@ -720,6 +778,7 @@
 - ⏳ **Conformité** : Conforme BIC-01
 
 **Critères de Qualité** :
+
 - [ ] Utilise `set -euo pipefail`
 - [ ] Utilise `setup_paths()` et fonctions didactiques
 - [ ] Messages colorés complets
@@ -739,11 +798,13 @@
 **Objectif** : Démonstration streaming Kafka (BIC-02)
 
 **Exigences** :
+
 - Démonstration complète
 - Scénarios réalistes
 - Documentation auto-générée
 
 **Contrôles de Validation** :
+
 - ⏳ **Pertinence** : Démonstration complète
 - ⏳ **Cohérence** : Scénarios cohérents
 - ⏳ **Intégrité** : Tous les aspects couverts
@@ -751,6 +812,7 @@
 - ⏳ **Conformité** : Conforme BIC-02
 
 **Critères de Qualité** :
+
 - [ ] Utilise `set -euo pipefail`
 - [ ] Utilise `setup_paths()`
 - [ ] Messages colorés complets
@@ -770,11 +832,13 @@
 **Objectif** : Démonstration export batch (BIC-03)
 
 **Exigences** :
+
 - Démonstration complète
 - Scénarios réalistes
 - Documentation auto-générée
 
 **Contrôles de Validation** :
+
 - ⏳ **Pertinence** : Démonstration complète
 - ⏳ **Cohérence** : Scénarios cohérents
 - ⏳ **Intégrité** : Tous les aspects couverts
@@ -782,6 +846,7 @@
 - ⏳ **Conformité** : Conforme BIC-03
 
 **Critères de Qualité** :
+
 - [ ] Utilise `set -euo pipefail`
 - [ ] Utilise `setup_paths()`
 - [ ] Messages colorés complets
@@ -801,11 +866,13 @@
 **Objectif** : Démonstration Data API (BIC-08)
 
 **Exigences** :
+
 - Démonstration complète
 - Scénarios réalistes
 - Documentation auto-générée
 
 **Contrôles de Validation** :
+
 - ⏳ **Pertinence** : Démonstration complète
 - ⏳ **Cohérence** : Scénarios cohérents
 - ⏳ **Intégrité** : Tous les aspects couverts
@@ -813,6 +880,7 @@
 - ⏳ **Conformité** : Conforme BIC-08
 
 **Critères de Qualité** :
+
 - [ ] Utilise `set -euo pipefail`
 - [ ] Utilise `setup_paths()`
 - [ ] Messages colorés complets
@@ -832,11 +900,13 @@
 **Objectif** : Démonstration complète de tous les use cases
 
 **Exigences** :
+
 - Démonstration complète de tous les use cases BIC
 - Scénarios réalistes
 - Documentation auto-générée complète
 
 **Contrôles de Validation** :
+
 - ⏳ **Pertinence** : Démonstration complète
 - ⏳ **Cohérence** : Tous les use cases couverts
 - ⏳ **Intégrité** : Tous les aspects couverts
@@ -844,6 +914,7 @@
 - ⏳ **Conformité** : Conforme à tous les use cases BIC
 
 **Critères de Qualité** :
+
 - [ ] Utilise `set -euo pipefail`
 - [ ] Utilise `setup_paths()`
 - [ ] Messages colorés complets
@@ -869,6 +940,7 @@
 ### Niveau de Qualité Minimum
 
 **Au moins égal à domiramaCatOps** :
+
 - ✅ `set -euo pipefail`
 - ✅ `setup_paths()` depuis `utils/didactique_functions.sh`
 - ✅ Messages colorés complets (info, success, error, warn, demo, code, section, result, expected)
@@ -943,4 +1015,3 @@ Pour chaque script créé, vérifier :
 **Date** : 2025-12-01  
 **Version** : 1.0.0  
 **Statut** : ✅ Plan complet établi
-

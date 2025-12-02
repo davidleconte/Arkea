@@ -21,6 +21,7 @@ Peut-on implémenter un fall-back d'une colonne sur l'autre si pas de résultat 
 **Fall-back** : Si une recherche sur `libelle` ne donne pas de résultat, essayer automatiquement avec `libelle_prefix`.
 
 **Exemple** :
+
 ```cql
 -- Tentative 1 : Recherche sur libelle (terme complet)
 SELECT * FROM operations_by_account
@@ -40,18 +41,21 @@ WHERE code_si = '1' AND contrat = '5913101072'
 ### ✅ **OUI, c'est pertinent** pour certains cas d'usage
 
 **Avantages** :
+
 1. ✅ **Tolérance aux typos** : Si l'utilisateur tape "carref" au lieu de "carrefour", le fall-back trouve quand même
 2. ✅ **Recherche partielle automatique** : Pas besoin de savoir si c'est un terme complet ou partiel
 3. ✅ **Meilleure expérience utilisateur** : L'utilisateur obtient des résultats même avec une recherche partielle
 4. ✅ **Couverture complète** : Combine les forces des deux index
 
 **Cas d'usage pertinents** :
+
 - 🔍 Recherche utilisateur avec termes partiels
 - 🔍 Autocomplétion
 - 🔍 Tolérance aux erreurs de saisie
 - 🔍 Recherche progressive (terme complet → partiel)
 
 **Cas d'usage moins pertinents** :
+
 - ⚠️ Recherche exacte (on veut uniquement les termes complets)
 - ⚠️ Performance critique (deux requêtes au lieu d'une)
 
@@ -66,31 +70,35 @@ WHERE code_si = '1' AND contrat = '5913101072'
 **Principe** : L'application exécute d'abord la recherche sur `libelle`, puis sur `libelle_prefix` si aucun résultat.
 
 **Avantages** :
+
 - ✅ Contrôle total sur la logique
 - ✅ Peut combiner les résultats des deux recherches
 - ✅ Peut ajouter de la logique métier (score, tri, etc.)
 - ✅ Performance optimisée (ne fait la 2ème requête que si nécessaire)
 
 **Inconvénients** :
+
 - ⚠️ Nécessite du code applicatif
 - ⚠️ Deux requêtes potentielles
 
 **Exemple en Java** :
+
 ```java
 public List<Operation> search(String searchTerm) {
     // Tentative 1 : Recherche sur libelle (terme complet)
     List<Operation> results = searchOnLibelle(searchTerm);
-    
+
     // Fall-back : Si aucun résultat, essayer libelle_prefix
     if (results.isEmpty()) {
         results = searchOnLibellePrefix(searchTerm);
     }
-    
+
     return results;
 }
 ```
 
 **Exemple en Python** :
+
 ```python
 def search_operations(search_term):
     # Tentative 1 : Recherche sur libelle
@@ -99,7 +107,7 @@ def search_operations(search_term):
         "WHERE code_si = ? AND contrat = ? AND libelle : ?",
         (code_si, contrat, search_term)
     )
-    
+
     # Fall-back : Si aucun résultat, essayer libelle_prefix
     if not results:
         results = session.execute(
@@ -107,7 +115,7 @@ def search_operations(search_term):
             "WHERE code_si = ? AND contrat = ? AND libelle_prefix : ?",
             (code_si, contrat, search_term)
         )
-    
+
     return results
 ```
 
@@ -118,6 +126,7 @@ def search_operations(search_term):
 **Limitation** : ❌ **CQL ne supporte pas UNION** dans les versions récentes de Cassandra/HCD.
 
 **Alternative** : Utiliser une requête avec OR (mais moins efficace) :
+
 ```cql
 -- ⚠️ Cette approche n'est pas optimale
 SELECT * FROM operations_by_account
@@ -127,6 +136,7 @@ LIMIT 10;
 ```
 
 **Problèmes** :
+
 - ❌ Performance : Les deux index sont consultés même si le premier trouve des résultats
 - ❌ Pas de priorité : Les résultats de `libelle` et `libelle_prefix` sont mélangés
 - ⚠️ Peut retourner des doublons si les deux conditions matchent
@@ -136,6 +146,7 @@ LIMIT 10;
 **Principe** : Créer une vue qui combine les deux colonnes.
 
 **Problèmes** :
+
 - ❌ Complexité élevée
 - ❌ Maintenance difficile
 - ❌ Performance dégradée
@@ -148,10 +159,11 @@ LIMIT 10;
 **Cas d'usage** : Recherche dans des fichiers Parquet/CSV avant insertion.
 
 **Exemple** :
+
 ```scala
 val searchTerm = "carref"
 val results = df.filter(
-  col("libelle").contains(searchTerm) || 
+  col("libelle").contains(searchTerm) ||
   col("libelle_prefix").contains(searchTerm)
 )
 ```
@@ -163,16 +175,19 @@ val results = df.filter(
 ### Stratégie Recommandée
 
 **1. Recherche principale sur `libelle`** (terme complet)
+
 - ✅ Meilleure pertinence (stemming, asciifolding)
 - ✅ Performance optimale
 - ✅ Résultats les plus précis
 
 **2. Fall-back sur `libelle_prefix`** (si aucun résultat)
+
 - ✅ Pour recherche partielle
 - ✅ Pour tolérance aux typos
 - ✅ Seulement si la recherche principale échoue
 
 **3. Combinaison optionnelle** (pour certains cas)
+
 - ⚠️ Recherche sur les deux colonnes simultanément
 - ⚠️ Fusionner et dédupliquer les résultats
 - ⚠️ Trier par pertinence (libelle en premier)
@@ -193,11 +208,11 @@ def search_with_fallback(code_si, contrat, search_term, limit=10):
         LIMIT {limit}
     """
     results1 = session.execute(query1)
-    
+
     if results1:
         # Si on a des résultats, les retourner
         return list(results1)
-    
+
     # Fall-back : Recherche sur libelle_prefix (partielle)
     query2 = f"""
         SELECT * FROM operations_by_account
@@ -207,7 +222,7 @@ def search_with_fallback(code_si, contrat, search_term, limit=10):
         LIMIT {limit}
     """
     results2 = session.execute(query2)
-    
+
     return list(results2)
 ```
 
@@ -228,7 +243,7 @@ def search_combined(code_si, contrat, search_term, limit=10):
         LIMIT {limit * 2}
     """
     results1 = set(session.execute(query1))
-    
+
     # Recherche sur libelle_prefix
     query2 = f"""
         SELECT * FROM operations_by_account
@@ -238,17 +253,17 @@ def search_combined(code_si, contrat, search_term, limit=10):
         LIMIT {limit * 2}
     """
     results2 = set(session.execute(query2))
-    
+
     # Fusionner et dédupliquer (par clé primaire)
     all_results = results1.union(results2)
-    
+
     # Trier par pertinence : libelle en premier
     sorted_results = sorted(
         all_results,
         key=lambda x: (x not in results1, x.date_op),
         reverse=True
     )
-    
+
     return sorted_results[:limit]
 ```
 
@@ -259,11 +274,13 @@ def search_combined(code_si, contrat, search_term, limit=10):
 ### Impact sur les Performances
 
 **Approche Fall-back (séquentielle)** :
+
 - ✅ **Meilleure performance** : Ne fait la 2ème requête que si nécessaire
 - ✅ **Latence minimale** : Si la 1ère requête trouve, pas de 2ème requête
 - ⚠️ **Latence maximale** : 2 requêtes si la 1ère échoue
 
 **Approche Combinée (parallèle)** :
+
 - ⚠️ **Performance moyenne** : Toujours 2 requêtes
 - ⚠️ **Latence constante** : Attente des 2 requêtes
 - ✅ **Plus de résultats** : Combine les deux sources
@@ -279,10 +296,12 @@ def search_combined(code_si, contrat, search_term, limit=10):
 **Scénario** : L'utilisateur tape "carref" dans la barre de recherche.
 
 **Sans fall-back** :
+
 - Recherche sur `libelle : 'carref'` → 0 résultat
 - ❌ Utilisateur frustré
 
 **Avec fall-back** :
+
 - Recherche sur `libelle : 'carref'` → 0 résultat
 - Fall-back sur `libelle_prefix : 'carref'` → Trouve "CARREFOUR"
 - ✅ Utilisateur satisfait
@@ -292,10 +311,12 @@ def search_combined(code_si, contrat, search_term, limit=10):
 **Scénario** : L'utilisateur tape "virement" (terme complet).
 
 **Sans fall-back** :
+
 - Recherche sur `libelle : 'virement'` → Trouve des résultats
 - ✅ Fonctionne parfaitement
 
 **Avec fall-back** :
+
 - Recherche sur `libelle : 'virement'` → Trouve des résultats
 - Fall-back non déclenché (déjà des résultats)
 - ✅ Performance identique
@@ -305,10 +326,12 @@ def search_combined(code_si, contrat, search_term, limit=10):
 **Scénario** : L'utilisateur tape "loyr" (typo de "loyer").
 
 **Sans fall-back** :
+
 - Recherche sur `libelle : 'loyr'` → 0 résultat
 - ❌ Pas de résultat
 
 **Avec fall-back** :
+
 - Recherche sur `libelle : 'loyr'` → 0 résultat
 - Fall-back sur `libelle_prefix : 'loyr'` → Peut trouver "LOYER"
 - ✅ Tolérance aux typos
@@ -320,11 +343,13 @@ def search_combined(code_si, contrat, search_term, limit=10):
 ### ✅ **OUI, c'est pertinent et faisable**
 
 **Pertinence** : ✅ **Élevée**
+
 - Améliore l'expérience utilisateur
 - Tolérance aux typos et recherches partielles
 - Couverture complète des cas d'usage
 
 **Faisabilité** : ✅ **Élevée**
+
 - Implémentation simple côté application
 - Pas de modification de schéma nécessaire
 - Performance acceptable
@@ -332,14 +357,12 @@ def search_combined(code_si, contrat, search_term, limit=10):
 **Recommandation** : ✅ **Implémenter le fall-back côté application**
 
 **Approche recommandée** :
+
 1. Recherche principale sur `libelle` (terme complet)
 2. Fall-back sur `libelle_prefix` si aucun résultat
 3. Optionnel : Recherche combinée pour certains cas d'usage
 
 **Performance** : ✅ **Acceptable**
+
 - Latence minimale si la 1ère requête trouve
 - Latence maximale = 2 requêtes (acceptable pour la tolérance aux typos)
-
-
-
-

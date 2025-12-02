@@ -94,6 +94,7 @@
 ```
 
 **Résultat** :
+
 - ✅ Colonne `libelle_embedding_e5` créée
 - ✅ Index `idx_libelle_embedding_e5_vector` créé
 - ✅ Index `idx_meta_device` supprimé (slot libéré)
@@ -105,6 +106,7 @@
 ```
 
 **Résultat** :
+
 - ✅ 80 opérations avec libellés pertinents générées
 - ✅ Couverture de toutes les requêtes de test
 
@@ -115,9 +117,11 @@
 ```
 
 **Prérequis** :
+
 - `pip install sentence-transformers`
 
 **Résultat** :
+
 - ✅ Embeddings e5-large générés pour toutes les opérations
 - ✅ Colonne `libelle_embedding_e5` remplie
 
@@ -128,6 +132,7 @@ python3 examples/python/search/test_vector_search_comparison_models.py
 ```
 
 **Résultat** :
+
 - ✅ Comparaison ByteT5 vs e5-large
 - ✅ Métriques de pertinence et latence
 
@@ -156,22 +161,26 @@ python3 examples/python/search/test_vector_search_comparison_models.py
 ### Stratégie 1 : Utiliser e5-large Seul (RECOMMANDÉ après validation)
 
 **Avantages** :
+
 - ✅ Meilleure pertinence attendue
 - ✅ Meilleure performance en français
 - ✅ Moins de stockage (1024 vs 1472 dimensions)
 
 **Action** :
+
 - Utiliser uniquement `libelle_embedding_e5` dans les recherches
 - Supprimer `libelle_embedding` (ByteT5) si validation réussie
 
 ### Stratégie 2 : Utiliser les Deux (Hybrid)
 
 **Avantages** :
+
 - ✅ Comparaison continue
 - ✅ Fallback si un modèle échoue
 - ✅ Optimisation progressive
 
 **Action** :
+
 - Utiliser e5-large par défaut
 - Garder ByteT5 comme fallback
 - Comparer les résultats
@@ -179,10 +188,12 @@ python3 examples/python/search/test_vector_search_comparison_models.py
 ### Stratégie 3 : Sélection Dynamique
 
 **Avantages** :
+
 - ✅ Utiliser le meilleur modèle selon le contexte
 - ✅ Optimisation par type de requête
 
 **Action** :
+
 - Tester les deux modèles
 - Sélectionner le meilleur selon la requête
 - Mettre en cache les résultats
@@ -258,10 +269,12 @@ python3 examples/python/search/test_vector_search_comparison_models.py
 ### Performance
 
 **Latence attendue** :
+
 - ByteT5-small : ~40-50ms (embedding) + ~5-10ms (recherche)
 - e5-large : ~50-100ms (embedding) + ~5-10ms (recherche)
 
 **Stockage** :
+
 - ByteT5 : 1472 * 4 bytes = 5.9 KB par embedding
 - e5-large : 1024 * 4 bytes = 4.1 KB par embedding
 - **Économie** : ~30% de stockage avec e5-large
@@ -271,4 +284,3 @@ python3 examples/python/search/test_vector_search_comparison_models.py
 **Date de génération** : 2025-11-30  
 **Version** : 1.0  
 **Statut** : ✅ Implémenté et prêt pour tests
-

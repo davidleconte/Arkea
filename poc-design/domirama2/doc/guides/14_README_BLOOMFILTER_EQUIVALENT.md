@@ -10,6 +10,7 @@
 ### Configuration
 
 **HBase** :
+
 ```
 BLOOMFILTER => 'ROWCOL'
 ```
@@ -49,6 +50,7 @@ PRIMARY KEY ((code_si, contrat), date_op DESC, numero_op ASC)
 ```
 
 **Équivalent BLOOMFILTER** :
+
 - ✅ **Cible directement la partition** : Évite de scanner d'autres comptes
 - ✅ **Déterministe** : Pas de faux positifs (contrairement à BLOOMFILTER)
 - ✅ **Performance** : Accès direct via partition key
@@ -66,6 +68,7 @@ WHERE code_si = 'DEMO_MV' AND contrat = 'DEMO_001'
 ```
 
 **Équivalent BLOOMFILTER** :
+
 - ✅ **Index exact** : Pas de faux positifs (contrairement à BLOOMFILTER)
 - ✅ **Performance** : Accès direct via index (meilleur que BLOOMFILTER)
 - ✅ **Persistant** : Pas de reconstruction nécessaire
@@ -97,6 +100,7 @@ WHERE code_si = 'DEMO_MV' AND contrat = 'DEMO_001'
 ```
 
 **Valeur ajoutée** :
+
 - ✅ **Index full-text** : Non disponible avec BLOOMFILTER HBase
 - ✅ **Recherche combinée** : Clustering keys + colonnes
 - ✅ **Performance optimale** : Index exact sur tous les filtres
@@ -124,6 +128,7 @@ WHERE code_si = 'DEMO_MV' AND contrat = 'DEMO_001'
 ### 1. Ciblage par Partition (Équivalent BLOOMFILTER Rowkey)
 
 **HBase** :
+
 ```java
 // BLOOMFILTER évite de lire les HFiles qui ne contiennent pas la rowkey
 Scan scan = new Scan();
@@ -131,6 +136,7 @@ scan.setStartRow(startRow);  // code_si + contrat + date_op + numero_op
 ```
 
 **HCD** :
+
 ```cql
 -- Partition key (code_si, contrat) isole les données
 -- Équivalent BLOOMFILTER : Cible directement la partition
@@ -139,6 +145,7 @@ WHERE code_si = 'DEMO_MV' AND contrat = 'DEMO_001';
 ```
 
 **Équivalent** :
+
 - ✅ **Partition key** = Équivalent BLOOMFILTER sur rowkey
 - ✅ **Déterministe** : Pas de faux positifs
 - ✅ **Performance** : Accès direct (meilleur que BLOOMFILTER)
@@ -146,6 +153,7 @@ WHERE code_si = 'DEMO_MV' AND contrat = 'DEMO_001';
 ### 2. Index sur Clustering Keys (Équivalent BLOOMFILTER ROWCOL)
 
 **HBase** :
+
 ```java
 // BLOOMFILTER ROWCOL optimise rowkey + column qualifier
 Scan scan = new Scan();
@@ -154,6 +162,7 @@ scan.addColumn(family, qualifier);
 ```
 
 **HCD** :
+
 ```cql
 -- Index natif sur clustering keys (date_op, numero_op)
 -- Équivalent BLOOMFILTER ROWCOL : Cible rowkey + column
@@ -163,6 +172,7 @@ WHERE code_si = 'DEMO_MV' AND contrat = 'DEMO_001'
 ```
 
 **Équivalent** :
+
 - ✅ **Clustering keys** = Équivalent BLOOMFILTER ROWCOL
 - ✅ **Index exact** : Pas de faux positifs
 - ✅ **Performance** : Accès direct via index
@@ -170,10 +180,12 @@ WHERE code_si = 'DEMO_MV' AND contrat = 'DEMO_001'
 ### 3. Index SAI sur Colonnes (Valeur Ajoutée)
 
 **HBase** :
+
 - ❌ BLOOMFILTER ne fonctionne pas sur colonnes (seulement rowkeys)
 - ❌ Pas de recherche full-text native
 
 **HCD** :
+
 ```cql
 -- Index SAI full-text sur colonnes (valeur ajoutée)
 SELECT * FROM operations_by_account
@@ -182,6 +194,7 @@ WHERE code_si = 'DEMO_MV' AND contrat = 'DEMO_001'
 ```
 
 **Valeur ajoutée** :
+
 - ✅ **Index full-text** : Non disponible avec BLOOMFILTER
 - ✅ **Recherche combinée** : Clustering keys + colonnes
 - ✅ **Performance optimale** : Index exact sur tous les filtres
@@ -193,6 +206,7 @@ WHERE code_si = 'DEMO_MV' AND contrat = 'DEMO_001'
 ### Test 1 : Requête avec Partition + Clustering Keys
 
 **Requête** :
+
 ```cql
 SELECT * FROM operations_by_account
 WHERE code_si = 'DEMO_MV' AND contrat = 'DEMO_001'
@@ -200,11 +214,13 @@ WHERE code_si = 'DEMO_MV' AND contrat = 'DEMO_001'
 ```
 
 **Performance** :
+
 - ✅ **Partition key** : Cible directement la partition (équivalent BLOOMFILTER)
 - ✅ **Clustering keys** : Index natif pour accès direct
 - ✅ **Pas de scan complet** : Accès direct via index
 
 **Équivalent BLOOMFILTER** :
+
 - ✅ Évite de scanner d'autres partitions (équivalent BLOOMFILTER rowkey)
 - ✅ Cible directement les données (équivalent BLOOMFILTER ROWCOL)
 - ✅ **Meilleur** : Index exact vs probabiliste
@@ -212,6 +228,7 @@ WHERE code_si = 'DEMO_MV' AND contrat = 'DEMO_001'
 ### Test 2 : Requête avec Index SAI Full-Text
 
 **Requête** :
+
 ```cql
 SELECT * FROM operations_by_account
 WHERE code_si = 'DEMO_MV' AND contrat = 'DEMO_001'
@@ -219,11 +236,13 @@ WHERE code_si = 'DEMO_MV' AND contrat = 'DEMO_001'
 ```
 
 **Performance** :
+
 - ✅ **Index SAI full-text** : Recherche indexée
 - ✅ **Pas de scan complet** : Accès direct via index
 - ✅ **Recherche combinée** : Partition + clustering + full-text
 
 **Valeur ajoutée** :
+
 - ✅ **Non disponible avec BLOOMFILTER** : BLOOMFILTER ne fonctionne pas sur colonnes
 - ✅ **Recherche full-text** : Capacité supplémentaire
 
@@ -248,6 +267,7 @@ WHERE code_si = 'DEMO_MV' AND contrat = 'DEMO_001'
 ### Valeur Ajoutée
 
 **HCD avec SAI** apporte :
+
 - ✅ **Index exact** : Pas de faux positifs
 - ✅ **Index persistant** : Pas de reconstruction
 - ✅ **Index full-text** : Capacité supplémentaire
@@ -262,6 +282,7 @@ WHERE code_si = 'DEMO_MV' AND contrat = 'DEMO_001'
 **Fichier** : `31_demo_bloomfilter_equivalent_v2.sh`
 
 **Contenu** :
+
 - Explication BLOOMFILTER vs Index SAI
 - Requêtes optimisées
 - Comparaison performance
@@ -272,6 +293,7 @@ WHERE code_si = 'DEMO_MV' AND contrat = 'DEMO_001'
 **Fichier** : `31_demo_bloomfilter_equivalent_v2.sh`
 
 **Améliorations** :
+
 - ✅ Mesures de performance précises (latence)
 - ✅ Comparaison avec/sans index
 - ✅ Tests de charge (requêtes multiples)
@@ -280,6 +302,7 @@ WHERE code_si = 'DEMO_MV' AND contrat = 'DEMO_001'
 - ✅ Tableaux comparatifs
 
 **Usage** :
+
 ```bash
 ./31_demo_bloomfilter_equivalent_v2.sh
 ```
@@ -289,11 +312,13 @@ WHERE code_si = 'DEMO_MV' AND contrat = 'DEMO_001'
 **Fichier** : `32_demo_performance_comparison.sh`
 
 **Contenu** :
+
 - Mesures de latence précises
 - Tableaux comparatifs
 - Analyse du plan d'exécution
 
 **Usage** :
+
 ```bash
 ./32_demo_performance_comparison.sh
 ```
@@ -307,17 +332,20 @@ WHERE code_si = 'DEMO_MV' AND contrat = 'DEMO_001'
 **Résultats** :
 
 #### TEST 1 : Requête Optimisée (Partition + Clustering Keys)
+
 - ✅ **Lignes scannées** : 1 (accès direct à la partition)
 - ✅ **Plan d'exécution** : `Executing single-partition query`
 - ✅ **Performance** : Excellente (pas de scan complet)
 - ✅ **Démontre** : Équivalent BLOOMFILTER avec accès direct à la partition
 
 #### TEST 2 : Requête avec Index SAI Full-Text
+
 - ✅ **Lignes scannées** : 0 (recherche indexée)
 - ✅ **Performance** : Excellente (recherche indexée)
 - ✅ **Démontre** : Index SAI full-text fonctionne efficacement
 
 **Conclusion** :
+
 - ✅ Requêtes optimisées avec index SAI
 - ✅ Pas de scan complet nécessaire
 - ✅ Performance excellente (équivalent ou meilleur que BLOOMFILTER)
@@ -326,4 +354,3 @@ WHERE code_si = 'DEMO_MV' AND contrat = 'DEMO_001'
 ---
 
 **✅ L'équivalent BLOOMFILTER est démontré, avec des avantages significatifs !**
-

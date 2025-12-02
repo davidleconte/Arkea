@@ -11,6 +11,7 @@
 ### Type de Script
 
 Le script 20 est un **script de test/comparaison** qui :
+
 - ✅ Exécute 3 tests de comparaison entre `libelle` et `libelle_prefix`
 - ✅ Démontre la tolérance aux typos
 - ✅ Compare les comportements de deux colonnes différentes
@@ -53,11 +54,13 @@ Le script 20 est un **script de test/comparaison** qui :
 | **Contexte** | ⚠️ Basique | ⚠️ Basique |
 
 **Points communs** :
+
 - ✅ Structure de test/démonstration
 - ✅ Affichage de requêtes CQL
 - ✅ Explications des résultats
 
 **Différences** :
+
 - ⚠️ Script 20 : 3 tests au lieu de 1
 - ⚠️ Script 20 : Comparaisons entre colonnes
 - ⚠️ Script 20 : Pas de rapport markdown
@@ -101,12 +104,14 @@ Le script 20 est un **script de test/comparaison** qui :
 ### Option 1 : Utiliser le Template 43 (Adapté)
 
 **Avantages** :
+
 - ✅ Structure similaire (test/démonstration)
 - ✅ Déjà conçu pour les démonstrations
 - ✅ Supporte l'affichage de DML
 - ✅ Peut être adapté pour plusieurs tests
 
 **Adaptations nécessaires** :
+
 1. **Ajouter contexte** : Pourquoi ces tests ? Équivalences HBase → HCD
 2. **Structurer les 3 tests** : Chaque test avec définition, requête, explication, résultats
 3. **Ajouter comparaisons** : Tableau comparatif libelle vs libelle_prefix
@@ -114,6 +119,7 @@ Le script 20 est un **script de test/comparaison** qui :
 5. **Enrichir les explications** : Détails sur les différences entre colonnes
 
 **Structure proposée** :
+
 ```bash
 # PARTIE 0: CONTEXTE - Pourquoi tester la tolérance aux typos ?
 # PARTIE 1: TEST 1 - Recherche avec Typo (caractère manquant)
@@ -126,11 +132,13 @@ Le script 20 est un **script de test/comparaison** qui :
 ### Option 2 : Créer un Nouveau Template (Comparaison)
 
 **Avantages** :
+
 - ✅ Spécialement conçu pour scripts de comparaison
 - ✅ Structure optimisée pour comparer deux colonnes/stratégies
 - ✅ Tableaux comparatifs intégrés
 
 **Inconvénients** :
+
 - ⚠️ Nouveau template à créer et maintenir
 - ⚠️ Peut-être trop spécifique (peu de scripts de comparaison)
 
@@ -141,6 +149,7 @@ Le script 20 est un **script de test/comparaison** qui :
 ### **Utiliser le Template 43 (Adapté) avec Enrichissements**
 
 **Raisons** :
+
 1. ✅ Le script 20 est fondamentalement un script de test/démonstration
 2. ✅ Le Template 43 est conçu pour ce type de script
 3. ✅ Les adaptations nécessaires sont mineures
@@ -185,6 +194,7 @@ echo ""
 #### 2. **PARTIE 1-3: TESTS** (Enrichis)
 
 Chaque test doit inclure :
+
 - **Définition** : Explication du concept testé
 - **Requête CQL** : Affichage formaté avant exécution
 - **Explication** : Ce que nous démontrons
@@ -229,6 +239,7 @@ echo ""
 #### 4. **PARTIE 5: GÉNÉRATION RAPPORT** (Nouveau)
 
 Générer un rapport markdown structuré avec :
+
 - Table des matières
 - Contexte et objectifs
 - Détails des 3 tests avec résultats
@@ -300,12 +311,14 @@ Générer un rapport markdown structuré avec :
 **Template recommandé** : **Template 43 (Adapté)** avec enrichissements
 
 **Raisons** :
+
 1. ✅ Le script 20 est un script de test/démonstration (comme Template 43)
 2. ✅ Les adaptations nécessaires sont mineures
 3. ✅ Cohérence avec les autres scripts de test
 4. ✅ Pas besoin de créer un nouveau template spécifique
 
 **Améliorations à apporter** :
+
 - ✅ Ajouter contexte (PARTIE 0)
 - ✅ Enrichir chaque test (définition, requête, explication, résultats)
 - ✅ Ajouter résumé comparatif (PARTIE 4)
@@ -314,4 +327,3 @@ Générer un rapport markdown structuré avec :
 ---
 
 *Analyse créée le 2025-11-26 pour déterminer le template approprié pour le script 20*
-

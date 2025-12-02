@@ -101,6 +101,7 @@ Les fichiers sont triés du **plus récent au plus ancien** (par date de modific
 ### Pour installer
 
 **Choisir selon votre OS** :
+
 1. **GUIDE_INSTALLATION_HCD.md** - Installer HCD (cross-platform)
 2. **GUIDE_INSTALLATION_LINUX.md** - Guide Linux complet
 3. **GUIDE_INSTALLATION_WINDOWS.md** - Guide Windows (WSL2)

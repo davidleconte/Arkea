@@ -136,4 +136,3 @@ else
     echo ""
     "$KAFKA_BIN" "$KAFKA_CONFIG"
 fi
-

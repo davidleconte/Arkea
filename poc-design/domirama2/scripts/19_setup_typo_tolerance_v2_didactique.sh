@@ -8,7 +8,7 @@
 #   Ce script configure la tolérance aux typos en ajoutant une colonne
 #   'libelle_prefix' qui contient les premiers caractères du libellé,
 #   permettant des recherches partielles pour tolérer les erreurs de saisie.
-#   
+#
 #   Cette version didactique affiche :
 #   - Le contexte et le problème des typos
 #   - Le DDL complet (ALTER TABLE, CREATE INDEX) avec explications
@@ -236,7 +236,7 @@ if [ "$COLUMN_EXISTS" -eq 0 ]; then
     demo "🚀 Exécution du DDL..."
     ./bin/cqlsh "$HCD_HOST" "$HCD_PORT" -e "USE domirama2_poc; ALTER TABLE operations_by_account ADD libelle_prefix TEXT;" 2>&1 | grep -v "Warnings" || true
     sleep 2
-    
+
     # Vérification
     COLUMN_CHECK=$(./bin/cqlsh "$HCD_HOST" "$HCD_PORT" -e "USE domirama2_poc; DESCRIBE TABLE operations_by_account;" 2>&1 | grep "libelle_prefix" | head -1)
     if echo "$COLUMN_CHECK" | grep -q "libelle_prefix"; then
@@ -419,7 +419,7 @@ if [ -n "$DATA_CHECK" ]; then
     TOTAL=$(echo "$DATA_CHECK" | awk '{print $1}')
     AVEC_PREFIX=$(echo "$DATA_CHECK" | awk '{print $2}')
     SANS_PREFIX=$((TOTAL - AVEC_PREFIX))
-    
+
     echo ""
     result "📊 État des données :"
     echo "   ┌─────────────────────────────────────────────────────────┐"
@@ -428,7 +428,7 @@ if [ -n "$DATA_CHECK" ]; then
     echo "   │ Sans libelle_prefix (NULL): $SANS_PREFIX" | sed 's/^/   │ /'
     echo "   └─────────────────────────────────────────────────────────┘"
     echo ""
-    
+
     if [ "$SANS_PREFIX" -gt 0 ]; then
         warn "⚠️  $SANS_PREFIX opération(s) ont libelle_prefix = NULL"
         echo "   Pour mettre à jour les données existantes :"
@@ -504,8 +504,8 @@ info "📝 Génération du rapport de démonstration..."
 cat > "$REPORT_FILE" << EOF
 # 🔧 Démonstration : Configuration Tolérance aux Typos
 
-**Date** : $(date +"%Y-%m-%d %H:%M:%S")  
-**Script** : $(basename "$0")  
+**Date** : $(date +"%Y-%m-%d %H:%M:%S")
+**Script** : $(basename "$0")
 **Objectif** : Démontrer l'ajout de la colonne libelle_prefix et de l'index N-Gram pour la tolérance aux typos
 
 ---
@@ -556,8 +556,8 @@ AND libelle_prefix : 'loy';  -- Préfixe : trouve 'LOYER'
 
 ### Améliorations HCD
 
-✅ **Index intégré** (vs Elasticsearch externe)  
-✅ **Pas de synchronisation** (vs HBase + Elasticsearch)  
+✅ **Index intégré** (vs Elasticsearch externe)
+✅ **Pas de synchronisation** (vs HBase + Elasticsearch)
 ✅ **Performance optimale** (index co-localisé avec données)
 
 ---
@@ -680,9 +680,9 @@ fi)
 
 La configuration de la tolérance aux typos a été effectuée avec succès :
 
-$(if [ "$COLUMN_ADDED" -eq 1 ]; then echo "✅ **Colonne** : libelle_prefix ajoutée"; else echo "✅ **Colonne** : libelle_prefix existe déjà"; fi)  
-$(if [ "$INDEX_EXISTS_CHECK" -gt 0 ]; then echo "✅ **Index** : idx_libelle_prefix_ngram créé"; else echo "⚠️ **Index** : idx_libelle_prefix_ngram en cours de création"; fi)  
-✅ **Configuration** : Analyzers configurés (standard, lowercase, asciifolding)  
+$(if [ "$COLUMN_ADDED" -eq 1 ]; then echo "✅ **Colonne** : libelle_prefix ajoutée"; else echo "✅ **Colonne** : libelle_prefix existe déjà"; fi)
+$(if [ "$INDEX_EXISTS_CHECK" -gt 0 ]; then echo "✅ **Index** : idx_libelle_prefix_ngram créé"; else echo "⚠️ **Index** : idx_libelle_prefix_ngram en cours de création"; fi)
+✅ **Configuration** : Analyzers configurés (standard, lowercase, asciifolding)
 ✅ **Équivalence HBase → HCD** : Validée
 
 ### Utilisation
@@ -713,7 +713,3 @@ EOF
 
 success "✅ Rapport généré : $REPORT_FILE"
 echo ""
-
-
-
-

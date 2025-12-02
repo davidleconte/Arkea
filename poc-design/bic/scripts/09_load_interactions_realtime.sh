@@ -134,15 +134,15 @@ fi
 cat > "$REPORT_FILE" << EOF
 # 📥 Démonstration : Ingestion Temps Réel via Kafka
 
-**Date** : 2025-12-01  
-**Script** : \`09_load_interactions_realtime.sh\`  
+**Date** : 2025-12-01
+**Script** : \`09_load_interactions_realtime.sh\`
 **Use Cases** : BIC-02 (Ingestion Kafka temps réel), BIC-07 (Format JSON)
 
 ---
 
 ## 📋 Objectif
 
-Ingérer les interactions client en temps réel depuis Kafka (topic \`bic-event\`) 
+Ingérer les interactions client en temps réel depuis Kafka (topic \`bic-event\`)
 vers HCD via Spark Structured Streaming.
 
 ---
@@ -346,7 +346,7 @@ val query = eventsDF.writeStream
         ))
         .mode(\"append\")
         .save()
-      
+
       println(s\"✅ Batch \$batchId : \$count événement(s) écrit(s)\")
     }
   }
@@ -501,7 +501,7 @@ object BICStreamingKafka {
             ))
             .mode("append")
             .save()
-          
+
           println(s"✅ Batch $batchId : $count événement(s) écrit(s)")
         }
       }
@@ -532,7 +532,7 @@ SCALA_EOF
 # Exécuter avec spark-shell -i (même méthode que domiramaCatOps)
 if [ -f "$SPARK_HOME/bin/spark-shell" ]; then
     info "   Exécution avec spark-shell -i (méthode domiramaCatOps)..."
-    
+
     # Créer un script Scala complet (comme domiramaCatOps) - Mode batch pour test
     SPARK_SCALA_SCRIPT=$(mktemp)
     cat > "$SPARK_SCALA_SCRIPT" << 'SPARK_SCALA_EOF'
@@ -614,10 +614,10 @@ if (msgCount > 0) {
       col("version")
     )
     .filter(col("code_efs").isNotNull)
-  
+
   val count = eventsDF.count()
   println(s"✅ $count événement(s) parsé(s)")
-  
+
   if (count > 0) {
     println("💾 Écriture dans HCD...")
     eventsDF.write
@@ -628,7 +628,7 @@ if (msgCount > 0) {
       ))
       .mode("append")
       .save()
-    
+
     println(s"✅ $count événement(s) écrit(s) dans HCD")
   }
 }
@@ -651,14 +651,14 @@ SPARK_SCALA_EOF
         --conf spark.sql.extensions=com.datastax.spark.connector.CassandraSparkExtensions \
         -i "$SPARK_SCALA_SCRIPT" \
         2>&1)
-    
+
     SPARK_EXIT_CODE=${PIPESTATUS[0]}
-    
+
     # Afficher la sortie filtrée
     echo "$SPARK_OUTPUT" | grep -E "(✅|📊|📥|🔄|💾|📋|ERROR|Exception|message|événement|Total|interactions|Écriture|lu|parsé|écrit)" || true
-    
+
     rm -f "$SPARK_SCALA_SCRIPT" "$SCALA_STREAMING_FILE"
-    
+
     if [ $SPARK_EXIT_CODE -eq 0 ]; then
         success "✅ Job Spark exécuté avec succès"
     else
@@ -672,16 +672,16 @@ SPARK_SCALA_EOF
         rm -f "$SPARK_SCALA_SCRIPT" "$SCALA_STREAMING_FILE"
         exit 1
     fi
-    
+
     # Vérification post-exécution (test de santé)
     echo ""
     info "🔍 Test de santé post-ingestion..."
     sleep 3  # Attendre que les données soient disponibles
-    
+
     TOTAL_BEFORE=$(execute_cql_safe "SELECT COUNT(*) FROM $TABLE;" "$KEYSPACE" 2>/dev/null | grep -E "^\s+[0-9]+" | tr -d ' ' || echo "0")
     sleep 2
     TOTAL_AFTER=$(execute_cql_safe "SELECT COUNT(*) FROM $TABLE;" "$KEYSPACE" 2>/dev/null | grep -E "^\s+[0-9]+" | tr -d ' ' || echo "0")
-    
+
     if [ "$TOTAL_AFTER" -gt "$TOTAL_BEFORE" ]; then
         NEW_EVENTS=$((TOTAL_AFTER - TOTAL_BEFORE))
         success "✅ $NEW_EVENTS nouvel(le)(s) interaction(s) ajoutée(s) depuis Kafka"
@@ -694,7 +694,7 @@ SPARK_SCALA_EOF
         warn "   Cela peut être normal si le topic Kafka était vide"
         warn "   Vérifiez manuellement avec : $CQLSH -e \"SELECT COUNT(*) FROM $KEYSPACE.$TABLE;\""
     fi
-    
+
     # Utiliser la fonction check_ingestion_health si disponible
     if type check_ingestion_health &>/dev/null && [ "$TOTAL_AFTER" != "0" ]; then
         if check_ingestion_health "$KEYSPACE" "$TABLE" 1; then
@@ -786,15 +786,15 @@ $SPARK_STREAMING_CODE
 
 ## ✅ Validation
 
-**Pertinence** : ✅ Conforme BIC-02 (Ingestion Kafka temps réel)  
-**Cohérence** : ✅ Format Kafka → HCD correct  
-**Intégrité** : ✅ Tous les événements traités  
-**Consistance** : ✅ Pas de perte de données  
+**Pertinence** : ✅ Conforme BIC-02 (Ingestion Kafka temps réel)
+**Cohérence** : ✅ Format Kafka → HCD correct
+**Intégrité** : ✅ Tous les événements traités
+**Consistance** : ✅ Pas de perte de données
 **Conformité** : ✅ Conforme aux exigences clients/IBM
 
 ---
 
-**Date** : 2025-12-01  
+**Date** : 2025-12-01
 **Script** : \`09_load_interactions_realtime.sh\`
 EOF
 
@@ -808,4 +808,3 @@ echo "   3. Exécuter le code Spark Streaming (voir rapport)"
 echo ""
 result "📄 Rapport généré : $REPORT_FILE"
 echo ""
-

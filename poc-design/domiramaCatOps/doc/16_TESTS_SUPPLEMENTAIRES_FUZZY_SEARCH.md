@@ -33,6 +33,7 @@
 **Objectif** : Mesurer la latence et le débit de la recherche vectorielle
 
 **Tests à Ajouter** :
+
 - ⏱️ **Latence moyenne** : Mesurer le temps de réponse pour 100 requêtes
 - ⏱️ **Latence P95/P99** : Mesurer les latences aux percentiles 95 et 99
 - 📊 **Débit** : Nombre de requêtes par seconde supportées
@@ -41,12 +42,14 @@
 - 📊 **Temps total** : De la requête utilisateur au résultat final
 
 **Métriques Attendues** :
+
 - Latence moyenne : < 100ms
 - Latence P95 : < 200ms
 - Latence P99 : < 500ms
 - Débit : > 10 requêtes/seconde
 
 **Implémentation** :
+
 ```python
 import time
 import statistics
@@ -60,7 +63,7 @@ def benchmark_search(session, queries, iterations=100):
             results = vector_search(session, query_embedding, code_si, contrat)
             latency = (time.time() - start) * 1000  # ms
             latencies.append(latency)
-    
+
     return {
         'mean': statistics.mean(latencies),
         'p95': statistics.quantiles(latencies, n=20)[18],
@@ -76,6 +79,7 @@ def benchmark_search(session, queries, iterations=100):
 **Objectif** : Évaluer la qualité des résultats retournés
 
 **Tests à Ajouter** :
+
 - 🎯 **Précision** : Pourcentage de résultats pertinents parmi ceux retournés
 - 🎯 **Recall** : Pourcentage de résultats pertinents trouvés parmi tous les pertinents
 - 🎯 **F1-Score** : Moyenne harmonique de précision et recall
@@ -83,10 +87,12 @@ def benchmark_search(session, queries, iterations=100):
 - 🎯 **NDCG (Normalized Discounted Cumulative Gain)** : Qualité du classement des résultats
 
 **Jeu de Test Recommandé** :
+
 - 50 requêtes avec résultats attendus annotés manuellement
 - Comparaison résultats attendus vs résultats obtenus
 
 **Implémentation** :
+
 ```python
 def evaluate_precision_recall(expected_results, actual_results):
     relevant_found = len(set(expected_results) & set(actual_results))
@@ -103,6 +109,7 @@ def evaluate_precision_recall(expected_results, actual_results):
 **Objectif** : Vérifier la robustesse aux accents et caractères spéciaux
 
 **Tests à Ajouter** :
+
 - ✅ 'PAIEMENT CAFE' vs 'PAIEMENT CAFÉ' (accent aigu)
 - ✅ 'RESTAURANT PARIS' vs 'RESTAURANT PARÎS' (accent circonflexe)
 - ✅ 'VIREMENT COMPTE' vs 'VIREMENT COMPTÉ' (accent aigu final)
@@ -110,6 +117,7 @@ def evaluate_precision_recall(expected_results, actual_results):
 - ✅ 'CARTE CREDIT' vs 'CARTE CRÉDIT' (accent aigu)
 
 **Résultats Attendus** :
+
 - Les deux variantes (avec/sans accent) doivent retourner des résultats similaires
 - La recherche doit être insensible aux accents
 
@@ -120,6 +128,7 @@ def evaluate_precision_recall(expected_results, actual_results):
 **Objectif** : Vérifier la compréhension des abréviations courantes
 
 **Tests à Ajouter** :
+
 - ✅ 'CB' vs 'CARTE BLEUE' vs 'CARTE BANCAIRE'
 - ✅ 'VIREMENT' vs 'VIRT' vs 'VIR'
 - ✅ 'PAIEMENT' vs 'PAYMT' vs 'PAY'
@@ -127,6 +136,7 @@ def evaluate_precision_recall(expected_results, actual_results):
 - ✅ 'SUPERMARCHE' vs 'SUPER' vs 'SUP'
 
 **Résultats Attendus** :
+
 - Les abréviations doivent trouver les libellés complets correspondants
 - Score de similarité acceptable (> 0.7)
 
@@ -137,6 +147,7 @@ def evaluate_precision_recall(expected_results, actual_results):
 **Objectif** : Vérifier la compréhension sémantique (synonymes)
 
 **Tests à Ajouter** :
+
 - ✅ 'LOYER' vs 'LOCATION' vs 'LOUER'
 - ✅ 'PAIEMENT' vs 'REGLEMENT' vs 'VERSEMENT'
 - ✅ 'RESTAURANT' vs 'BRASSERIE' vs 'BISTROT'
@@ -144,6 +155,7 @@ def evaluate_precision_recall(expected_results, actual_results):
 - ✅ 'VIREMENT' vs 'TRANSFERT' vs 'VERSEMENT'
 
 **Résultats Attendus** :
+
 - Les synonymes doivent retourner des résultats pertinents
 - Score de similarité acceptable (> 0.6)
 
@@ -154,6 +166,7 @@ def evaluate_precision_recall(expected_results, actual_results):
 **Objectif** : Comparer les performances et résultats entre Vector Search et Full-Text Search
 
 **Tests à Ajouter** :
+
 - 📊 **Même requête** : Comparer résultats Vector vs Full-Text
 - 📊 **Requête avec typo** : Vector doit trouver, Full-Text ne trouve pas
 - 📊 **Requête exacte** : Full-Text doit être plus rapide et précis
@@ -161,18 +174,19 @@ def evaluate_precision_recall(expected_results, actual_results):
 - 📊 **Pertinence** : Comparer qualité des résultats
 
 **Implémentation** :
+
 ```python
 def compare_vector_vs_fulltext(session, query, code_si, contrat):
     # Vector Search
     start_vector = time.time()
     vector_results = vector_search(session, query_embedding, code_si, contrat)
     vector_time = time.time() - start_vector
-    
+
     # Full-Text Search
     start_ft = time.time()
     ft_results = fulltext_search(session, query, code_si, contrat)
     ft_time = time.time() - start_ft
-    
+
     return {
         'vector': {'results': vector_results, 'time': vector_time},
         'fulltext': {'results': ft_results, 'time': ft_time}
@@ -186,6 +200,7 @@ def compare_vector_vs_fulltext(session, query, code_si, contrat):
 **Objectif** : Tester les limites et cas limites de la recherche
 
 **Tests à Ajouter** :
+
 - 🔢 **Limite de résultats** : Tester avec LIMIT 1, 5, 10, 50, 100
 - 🔢 **Requête vide** : Comportement avec requête vide ou None
 - 🔢 **Requête très longue** : Requête de 500+ caractères
@@ -195,6 +210,7 @@ def compare_vector_vs_fulltext(session, query, code_si, contrat):
 - 🔢 **Requête avec emojis** : 'PAIEMENT 😊' (comportement attendu)
 
 **Résultats Attendus** :
+
 - Gestion gracieuse des cas limites
 - Pas d'erreur système
 - Résultats cohérents
@@ -206,18 +222,20 @@ def compare_vector_vs_fulltext(session, query, code_si, contrat):
 **Objectif** : Vérifier la cohérence des résultats (même requête = mêmes résultats)
 
 **Tests à Ajouter** :
+
 - 🔄 **Même requête répétée** : 10 fois la même requête, résultats identiques
 - 🔄 **Ordre des résultats** : L'ordre doit être stable (même score = même ordre)
 - 🔄 **Résultats déterministes** : Pas de variation aléatoire
 
 **Implémentation** :
+
 ```python
 def test_consistency(session, query, iterations=10):
     results_list = []
     for _ in range(iterations):
         results = vector_search(session, query_embedding, code_si, contrat)
         results_list.append([r.libelle for r in results])
-    
+
     # Vérifier que tous les résultats sont identiques
     first = results_list[0]
     all_same = all(r == first for r in results_list)
@@ -231,12 +249,14 @@ def test_consistency(session, query, iterations=10):
 **Objectif** : Tester la performance avec un grand volume de données
 
 **Tests à Ajouter** :
+
 - 📊 **10K opérations** : Latence acceptable (< 200ms)
 - 📊 **100K opérations** : Latence acceptable (< 500ms)
 - 📊 **1M opérations** : Latence acceptable (< 2s)
 - 📊 **Scalabilité** : Latence augmente linéairement avec le volume
 
 **Métriques Attendues** :
+
 - Latence < 200ms pour 10K opérations
 - Latence < 500ms pour 100K opérations
 - Latence < 2s pour 1M opérations
@@ -248,12 +268,14 @@ def test_consistency(session, query, iterations=10):
 **Objectif** : Vérifier le support multilingue de ByteT5
 
 **Tests à Ajouter** :
+
 - 🌍 **Français** : 'LOYER IMPAYE' (déjà testé)
 - 🌍 **Anglais** : 'UNPAID RENT' vs 'LOYER IMPAYE'
 - 🌍 **Espagnol** : 'ALQUILER IMPAGADO' vs 'LOYER IMPAYE'
 - 🌍 **Mélange** : 'LOYER UNPAID' (français + anglais)
 
 **Résultats Attendus** :
+
 - ByteT5 doit comprendre les différentes langues
 - Résultats pertinents même avec mélange de langues
 
@@ -264,12 +286,14 @@ def test_consistency(session, query, iterations=10):
 **Objectif** : Comparer la pertinence selon le nombre de mots
 
 **Tests à Ajouter** :
+
 - 📝 **Mot unique** : 'LOYER' vs 'PAIEMENT' vs 'VIREMENT'
 - 📝 **Deux mots** : 'LOYER IMPAYE' vs 'PAIEMENT CARTE'
 - 📝 **Trois mots** : 'LOYER IMPAYE PARIS' vs 'PAIEMENT CARTE BANCAIRE'
 - 📝 **Plusieurs mots** : 'VIREMENT COMPTE BANCAIRE PARIS'
 
 **Résultats Attendus** :
+
 - Plus de mots = meilleure précision
 - Moins de mots = meilleur recall
 
@@ -280,6 +304,7 @@ def test_consistency(session, query, iterations=10):
 **Objectif** : Tester la robustesse face aux requêtes malformées
 
 **Tests à Ajouter** :
+
 - 🛡️ **Requête NULL** : Gestion gracieuse
 - 🛡️ **Requête avec caractères invalides** : Gestion gracieuse
 - 🛡️ **Requête avec injection SQL** : Sécurité (pas d'injection)
@@ -287,6 +312,7 @@ def test_consistency(session, query, iterations=10):
 - 🛡️ **Requête avec espaces multiples** : Normalisation correcte
 
 **Résultats Attendus** :
+
 - Pas d'erreur système
 - Gestion gracieuse des erreurs
 - Messages d'erreur clairs
@@ -298,12 +324,14 @@ def test_consistency(session, query, iterations=10):
 **Objectif** : Tester différents seuils de similarité pour filtrer les résultats
 
 **Tests à Ajouter** :
+
 - 🎯 **Seuil 0.9** : Résultats très similaires uniquement
 - 🎯 **Seuil 0.7** : Résultats similaires (recommandé)
 - 🎯 **Seuil 0.5** : Résultats peu similaires (trop permissif)
 - 🎯 **Seuil 0.3** : Résultats très peu similaires (non pertinent)
 
 **Implémentation** :
+
 ```python
 def vector_search_with_threshold(session, query_embedding, code_si, contrat, threshold=0.7, limit=5):
     # Recherche avec seuil de similarité
@@ -320,15 +348,17 @@ def vector_search_with_threshold(session, query_embedding, code_si, contrat, thr
 **Objectif** : Tester la recherche vectorielle combinée avec des filtres temporels
 
 **Tests à Ajouter** :
+
 - 📅 **Vector + Date** : Recherche vectorielle + filtre sur date_op
 - 📅 **Vector + Période** : Recherche vectorielle + filtre sur période (TIMERANGE)
 - 📅 **Vector + Montant** : Recherche vectorielle + filtre sur montant
 - 📅 **Vector + Catégorie** : Recherche vectorielle + filtre sur cat_auto
 
 **Implémentation** :
+
 ```python
-def vector_search_with_filters(session, query_embedding, code_si, contrat, 
-                                date_start=None, date_end=None, 
+def vector_search_with_filters(session, query_embedding, code_si, contrat,
+                                date_start=None, date_end=None,
                                 montant_min=None, montant_max=None,
                                 categorie=None, limit=5):
     # Construire la requête avec filtres
@@ -341,7 +371,7 @@ def vector_search_with_filters(session, query_embedding, code_si, contrat,
         filters.append(f"montant <= {montant_max}")
     if categorie:
         filters.append(f"cat_auto = '{categorie}'")
-    
+
     where_clause = " AND ".join(filters) if filters else ""
     # Requête CQL avec filtres + ANN
     ...
@@ -354,6 +384,7 @@ def vector_search_with_filters(session, query_embedding, code_si, contrat,
 **Objectif** : Tester la combinaison Full-Text + Vector Search
 
 **Tests à Ajouter** :
+
 - 🔀 **Full-Text filtre + Vector trie** : Meilleure pertinence
 - 🔀 **Vector seul avec fallback** : Si Full-Text ne trouve rien
 - 🔀 **Comparaison pertinence** : Hybride vs Vector seul vs Full-Text seul
@@ -426,6 +457,7 @@ Créer un script `16_test_fuzzy_search_complete.sh` qui exécute tous les tests 
 **Total** : ~100+ tests individuels
 
 **Bénéfices** :
+
 - ✅ Couverture complète des cas d'usage
 - ✅ Validation de la qualité et performance
 - ✅ Détection précoce des problèmes
@@ -434,4 +466,3 @@ Créer un script `16_test_fuzzy_search_complete.sh` qui exécute tous les tests 
 ---
 
 **Date de génération** : 2025-11-30
-

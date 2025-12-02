@@ -81,8 +81,8 @@ success "HCD est démarré"
 cat > "$REPORT_FILE" << 'EOF'
 # 🧪 Démonstration : Recherche Full-Text avec Analyseurs Lucene
 
-**Date** : 2025-12-01  
-**Script** : `16_test_fulltext_search.sh`  
+**Date** : 2025-12-01
+**Script** : `16_test_fulltext_search.sh`
 **Use Cases** : BIC-07 (Format JSON), BIC-12 (Recherche full-text avec analyseurs Lucene)
 
 ---
@@ -221,8 +221,8 @@ CODE_EFS="EFS001"
 NUMERO_CLIENT="CLIENT123"
 SEARCH_TERM="reclamation"
 
-QUERY1="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY1="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND json_data : '$SEARCH_TERM'
 LIMIT 20;"
@@ -264,7 +264,7 @@ if [ $EXIT_CODE1 -eq 0 ] || [ "$COUNT1" -gt 0 ]; then
     COUNT1=$(echo "$RESULT1" | grep -c "^[[:space:]]*EFS001" || echo "0")
     echo ""
     result "Nombre d'interactions trouvées : $COUNT1"
-    
+
     # Extraire un échantillon représentatif pour le rapport (5 premières lignes de données)
     SAMPLE1=$(echo "$RESULT1" | grep -E "^[[:space:]]*EFS001" | head -5 | awk -F'|' '{
         for (i=1; i<=NF; i++) {
@@ -274,7 +274,7 @@ if [ $EXIT_CODE1 -eq 0 ] || [ "$COUNT1" -gt 0 ]; then
             printf "| %s | %s | %s | %s | %s | %s |\n", $1, $2, $3, $4, $5, $6
         }
     }' || echo "")
-    
+
     # VALIDATION : Comparaison attendus vs obtenus
     EXPECTED_COUNT1=">= 0"
     compare_expected_vs_actual \
@@ -282,7 +282,7 @@ if [ $EXIT_CODE1 -eq 0 ] || [ "$COUNT1" -gt 0 ]; then
         "$EXPECTED_COUNT1 interactions contenant 'réclamation'" \
         "$COUNT1 interactions contenant 'réclamation'" \
         "0"
-    
+
     # VALIDATION : Justesse (vérifier que les résultats contiennent bien le terme)
     if [ "$COUNT1" -gt 0 ]; then
         TERM_FOUND=$(echo "$RESULT1" | grep -i "$SEARCH_TERM" | wc -l || echo "0")
@@ -292,7 +292,7 @@ if [ $EXIT_CODE1 -eq 0 ] || [ "$COUNT1" -gt 0 ]; then
             warn "⚠️  Justesse partielle : Vérification du terme à approfondir"
         fi
     fi
-    
+
     # VALIDATION COMPLÈTE
     validate_complete \
         "TEST 1 : Recherche Full-Text" \
@@ -302,7 +302,7 @@ if [ $EXIT_CODE1 -eq 0 ] || [ "$COUNT1" -gt 0 ]; then
         "$EXEC_TIME1" \
         "0" \
         "0.2"
-    
+
     # EXPLICATIONS
     echo ""
     info "📚 Explications détaillées :"
@@ -330,8 +330,8 @@ demo "Objectif : Rechercher avec CONTAINS (plus efficace avec index SAI)"
 SEARCH_TERM="réclamation"
 
 # Note : CONTAINS peut nécessiter une syntaxe spécifique selon la version HCD
-QUERY2="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY2="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND json_data : '$SEARCH_TERM'
 LIMIT 20;"
@@ -353,7 +353,7 @@ if [ $EXIT_CODE2 -eq 0 ]; then
     success "✅ Requête exécutée avec succès"
     COUNT2=$(echo "$RESULT2" | grep -c "^[[:space:]]*EFS001" || echo "0")
     result "Nombre d'interactions trouvées : $COUNT2"
-    
+
     # Extraire un échantillon représentatif pour le rapport
     SAMPLE2=$(echo "$RESULT2" | grep -E "^[[:space:]]*EFS001" | head -5 | awk -F'|' '{
         for (i=1; i<=NF; i++) {
@@ -380,8 +380,8 @@ demo "Objectif : Rechercher par préfixe (ex: 'réclam' trouve 'réclamation', '
 
 PREFIX="reclam"
 
-QUERY3="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY3="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND json_data : '$PREFIX'
 LIMIT 20;"
@@ -408,7 +408,7 @@ if [ $EXIT_CODE3 -eq 0 ]; then
     success "✅ Requête exécutée avec succès"
     COUNT3=$(echo "$RESULT3" | grep -c "^[[:space:]]*EFS001" || echo "0")
     result "Nombre d'interactions trouvées : $COUNT3"
-    
+
     # Extraire un échantillon représentatif pour le rapport
     SAMPLE3=$(echo "$RESULT3" | grep -E "^[[:space:]]*EFS001" | head -5 | awk -F'|' '{
         for (i=1; i<=NF; i++) {
@@ -437,8 +437,8 @@ NUMERO_CLIENT="CLIENT123"
 CANAL="email"
 SEARCH_TERM="reclamation"
 
-QUERY4="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY4="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND canal = '$CANAL'
   AND json_data : '$SEARCH_TERM'
@@ -466,7 +466,7 @@ if [ $EXIT_CODE4 -eq 0 ]; then
     success "✅ Requête exécutée avec succès"
     COUNT4=$(echo "$RESULT4" | grep -c "^[[:space:]]*EFS001" || echo "0")
     result "Nombre d'interactions trouvées : $COUNT4"
-    
+
     # Extraire un échantillon représentatif pour le rapport
     SAMPLE4=$(echo "$RESULT4" | grep -E "^[[:space:]]*EFS001" | head -5 | awk -F'|' '{
         for (i=1; i<=NF; i++) {
@@ -504,16 +504,16 @@ for i in {1..10}; do
     START_TIME_PERF=$(date +%s.%N)
     timeout 10 $CQLSH -e "$QUERY_PERF" > /dev/null 2>&1 || true
     END_TIME_PERF=$(date +%s.%N)
-    
+
     if command -v bc &> /dev/null; then
         DURATION_PERF=$(echo "$END_TIME_PERF - $START_TIME_PERF" | bc)
     else
         DURATION_PERF=$(python3 -c "print($END_TIME_PERF - $START_TIME_PERF)")
     fi
-    
+
     TIMES_PERF+=("$DURATION_PERF")
     TOTAL_TIME_PERF=$(echo "$TOTAL_TIME_PERF + $DURATION_PERF" | bc 2>/dev/null || python3 -c "print($TOTAL_TIME_PERF + $DURATION_PERF)")
-    
+
     # Min/Max
     if (( $(echo "$DURATION_PERF < $MIN_TIME_PERF" | bc -l 2>/dev/null || echo "0") )); then
         MIN_TIME_PERF=$DURATION_PERF
@@ -584,17 +584,17 @@ ALL_SEARCH_IDS=()
 SAMPLE6_ALL=""
 
 for TERM_TEST in "${SEARCH_TERMS[@]}"; do
-    QUERY_TERM="SELECT * FROM $KEYSPACE.$TABLE 
-    WHERE code_efs = '$CODE_EFS' 
+    QUERY_TERM="SELECT * FROM $KEYSPACE.$TABLE
+    WHERE code_efs = '$CODE_EFS'
       AND numero_client = '$NUMERO_CLIENT'
       AND json_data : '$TERM_TEST'
     LIMIT 10;"
-    
+
     RESULT_TERM=$(timeout 10 $CQLSH -e "$QUERY_TERM" 2>&1) || true
     COUNT_TERM=$(echo "$RESULT_TERM" | grep -c "^[[:space:]]*EFS001" || echo "0")
     TERM_COUNTS+=("$COUNT_TERM")
     TOTAL_SEARCH_COUNT=$((TOTAL_SEARCH_COUNT + COUNT_TERM))
-    
+
     # Collecter les IDs pour vérification de cohérence
     if [ "$COUNT_TERM" -gt 0 ]; then
         TERM_IDS=$(echo "$RESULT_TERM" | grep -E "^[[:space:]]*EFS001" | awk '{print $7}' | tr '\n' ' ')
@@ -618,7 +618,7 @@ for TERM_TEST in "${SEARCH_TERMS[@]}"; do
             fi
         fi
     fi
-    
+
     success "✅ Terme '$TERM_TEST' : $COUNT_TERM interaction(s)"
 done
 
@@ -654,18 +654,18 @@ if [ ${#ALL_SEARCH_IDS[@]} -gt 0 ]; then
     TOTAL_SEARCH_IDS=${#ALL_SEARCH_IDS[@]}
     UNIQUE_SEARCH_COUNT=${#UNIQUE_SEARCH_IDS[@]}
     DUPLICATES_SEARCH=$((TOTAL_SEARCH_IDS - UNIQUE_SEARCH_COUNT))
-    
+
     result "📊 Résultats cohérence multi-termes :"
     echo "   - Total IDs collectés : $TOTAL_SEARCH_IDS"
     echo "   - IDs uniques : $UNIQUE_SEARCH_COUNT"
     echo "   - Doublons potentiels : $DUPLICATES_SEARCH"
-    
+
     # VALIDATION : Analyse des doublons (normal qu'une interaction contienne plusieurs termes)
     if [ "$DUPLICATES_SEARCH" -ge 0 ]; then
         success "✅ Cohérence validée : Analyse des résultats multi-termes effectuée"
         info "   Note : Les doublons sont normaux (une interaction peut contenir plusieurs termes)"
     fi
-    
+
     # VALIDATION COMPLÈTE
     validate_complete \
         "TEST 7 : Cohérence Multi-Termes" \
@@ -700,11 +700,11 @@ SUCCESSFUL_QUERIES_SEARCH=0
 SAMPLE8_ALL=""
 
 for TERM_LOAD in "${TERMS_LOAD[@]}"; do
-    QUERY_LOAD_SEARCH="SELECT COUNT(*) FROM $KEYSPACE.$TABLE 
-    WHERE code_efs = '$CODE_EFS' 
+    QUERY_LOAD_SEARCH="SELECT COUNT(*) FROM $KEYSPACE.$TABLE
+    WHERE code_efs = '$CODE_EFS'
       AND numero_client = '$NUMERO_CLIENT'
       AND json_data : '$TERM_LOAD';"
-    
+
     START_TIME_LOAD_SEARCH=$(date +%s.%N)
     RESULT_LOAD_SEARCH=$(timeout 10 $CQLSH -e "$QUERY_LOAD_SEARCH" 2>&1) || true
     EXIT_CODE_LOAD_SEARCH=${PIPESTATUS[0]}
@@ -713,13 +713,13 @@ for TERM_LOAD in "${TERMS_LOAD[@]}"; do
     if echo "$RESULT_LOAD_SEARCH" | grep -qi "does not support LIKE\|LIKE.*not supported"; then
         EXIT_CODE_LOAD_SEARCH=1
     fi
-    
+
     if command -v bc &> /dev/null; then
         DURATION_LOAD_SEARCH=$(echo "$END_TIME_LOAD_SEARCH - $START_TIME_LOAD_SEARCH" | bc)
     else
         DURATION_LOAD_SEARCH=$(python3 -c "print($END_TIME_LOAD_SEARCH - $START_TIME_LOAD_SEARCH)")
     fi
-    
+
     if [ $EXIT_CODE_LOAD_SEARCH -eq 0 ]; then
         SUCCESSFUL_QUERIES_SEARCH=$((SUCCESSFUL_QUERIES_SEARCH + 1))
         LOAD_TIMES_SEARCH+=("$DURATION_LOAD_SEARCH")
@@ -732,19 +732,19 @@ done
 
 if [ "$SUCCESSFUL_QUERIES_SEARCH" -gt 0 ]; then
     AVG_LOAD_TIME_SEARCH=$(echo "scale=4; $TOTAL_LOAD_TIME_SEARCH / $SUCCESSFUL_QUERIES_SEARCH" | bc 2>/dev/null || python3 -c "print($TOTAL_LOAD_TIME_SEARCH / $SUCCESSFUL_QUERIES_SEARCH)")
-    
+
     result "📊 Résultats test de charge multi-termes :"
     echo "   - Requêtes réussies : $SUCCESSFUL_QUERIES_SEARCH / ${#TERMS_LOAD[@]}"
     echo "   - Temps moyen par requête : ${AVG_LOAD_TIME_SEARCH}s"
     echo "   - Temps total : ${TOTAL_LOAD_TIME_SEARCH}s"
-    
+
     # VALIDATION : Performance sous charge
     if (( $(echo "$AVG_LOAD_TIME_SEARCH < 0.3" | bc -l 2>/dev/null || echo "0") )); then
         success "✅ Performance sous charge validée : Temps moyen acceptable (< 0.3s)"
     else
         warn "⚠️  Performance sous charge : Temps moyen ${AVG_LOAD_TIME_SEARCH}s (peut être améliorée)"
     fi
-    
+
     # VALIDATION COMPLÈTE
     validate_complete \
         "TEST 8 : Test de Charge Multi-Termes" \
@@ -775,8 +775,8 @@ SEARCH_TERM_COMB="reclamation"
 CANAL_COMB="email"
 RESULTAT_COMB="succès"
 
-QUERY_COMB="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY_COMB="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND canal = '$CANAL_COMB'
   AND resultat = '$RESULTAT_COMB'
@@ -803,16 +803,16 @@ for i in {1..10}; do
     START_TIME_COMB=$(date +%s.%N)
     timeout 10 $CQLSH -e "$QUERY_COMB" > /dev/null 2>&1 || true
     END_TIME_COMB=$(date +%s.%N)
-    
+
     if command -v bc &> /dev/null; then
         DURATION_COMB=$(echo "$END_TIME_COMB - $START_TIME_COMB" | bc)
     else
         DURATION_COMB=$(python3 -c "print($END_TIME_COMB - $START_TIME_COMB)")
     fi
-    
+
     TIMES_COMB+=("$DURATION_COMB")
     TOTAL_TIME_COMB=$(echo "$TOTAL_TIME_COMB + $DURATION_COMB" | bc 2>/dev/null || python3 -c "print($TOTAL_TIME_COMB + $DURATION_COMB)")
-    
+
     # Min/Max
     if (( $(echo "$DURATION_COMB < $MIN_TIME_COMB" | bc -l 2>/dev/null || echo "0") )); then
         MIN_TIME_COMB=$DURATION_COMB
@@ -836,7 +836,7 @@ STD_DEV_COMB=$(echo "scale=4; sqrt($VARIANCE_COMB / 10)" | bc 2>/dev/null || pyt
 # Exécuter la requête pour obtenir le résultat
     RESULT_COMB=$(timeout 30 $CQLSH -e "$QUERY_COMB" 2>&1) || true
     COUNT_COMB=$(echo "$RESULT_COMB" | grep -c "^[[:space:]]*EFS001" || echo "0")
-    
+
     # Extraire un échantillon représentatif pour le rapport
     SAMPLE9=$(echo "$RESULT_COMB" | grep -E "^[[:space:]]*EFS001" | head -5 | awk -F'|' '{
         for (i=1; i<=NF; i++) {
@@ -1263,7 +1263,7 @@ $([ -n "$SAMPLE9" ] && echo "$SAMPLE9" || echo "| *Aucune donnée à afficher* |
 
 ---
 
-**Date** : 2025-12-01  
+**Date** : 2025-12-01
 **Script** : \`16_test_fulltext_search.sh\`
 EOF
 
@@ -1273,4 +1273,3 @@ success "✅ Tests terminés avec succès"
 echo ""
 result "📄 Rapport généré : $REPORT_FILE"
 echo ""
-

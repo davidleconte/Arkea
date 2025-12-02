@@ -69,10 +69,10 @@ JENV_AVAILABLE=false
 if command -v jenv &> /dev/null; then
     JENV_AVAILABLE=true
     info "jenv détecté. Configuration Java 11 via jenv..."
-    
+
     # Initialiser jenv si nécessaire
     eval "$(jenv init -)" 2>/dev/null || true
-    
+
     # Vérifier si Java 11 est disponible dans jenv
     if jenv versions | grep -q "11"; then
         info "Java 11 trouvé dans jenv. Activation..."
@@ -119,7 +119,7 @@ if [ "$JENV_AVAILABLE" = false ]; then
             export PATH="$JAVA_HOME/bin:$PATH"
         fi
     fi
-    
+
     # Vérifier la version Java actuelle
     if [ -z "${JAVA_HOME:-}" ] || ! java -version 2>&1 | grep -q "11"; then
         if command -v java &> /dev/null; then
@@ -129,7 +129,7 @@ if [ "$JENV_AVAILABLE" = false ]; then
             else
                 warn "Java 11 non détecté. Version actuelle : Java $JAVA_VERSION"
                 warn "Installation de Java 11 requise..."
-                
+
                 # macOS : Installer via Homebrew
                 if [[ "$OSTYPE" == "darwin"* ]] && command -v brew &> /dev/null; then
                     info "Installation de Java 11 via Homebrew..."
@@ -165,11 +165,11 @@ info "Vérification de Python..."
 if command -v python3 &> /dev/null; then
     PYTHON_VERSION=$(python3 --version | cut -d' ' -f2 | cut -d'.' -f1,2)
     info "Python détecté : $(python3 --version)"
-    
+
     # Vérifier version Python (3.8-3.11)
     PYTHON_MAJOR=$(echo $PYTHON_VERSION | cut -d'.' -f1)
     PYTHON_MINOR=$(echo $PYTHON_VERSION | cut -d'.' -f2)
-    
+
     if [ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" -ge 8 ] && [ "$PYTHON_MINOR" -le 11 ]; then
         info "Version Python compatible (3.8-3.11)"
     else
@@ -208,10 +208,10 @@ info "Répertoires créés dans : ${DATA_DIR}"
 CASSANDRA_YAML="${BINAIRE_DIR}/${HCD_DIR}/resources/cassandra/conf/cassandra.yaml"
 if [ -f "$CASSANDRA_YAML" ]; then
     info "Configuration cassandra.yaml pour utiliser les répertoires personnalisés..."
-    
+
     # Backup de la configuration originale
     cp "$CASSANDRA_YAML" "${CASSANDRA_YAML}.backup"
-    
+
     # Mettre à jour les chemins (si l'utilisateur le souhaite)
     # Note: Cette partie nécessite une édition manuelle ou sed
     info "Configuration par défaut conservée. Vous pouvez modifier cassandra.yaml si nécessaire."

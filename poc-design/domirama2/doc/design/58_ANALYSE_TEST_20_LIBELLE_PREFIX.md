@@ -25,6 +25,7 @@ LIMIT 10;
 ### Résultats actuels
 
 ✅ **Le test 20 fonctionne déjà** : 2 résultats trouvés
+
 - `VIREMENT PERMANENT VERS LIVRET A`
 - `VIREMENT PERMANENT VERS ASSURANCE VIE`
 
@@ -53,15 +54,17 @@ LIMIT 10;
 ### ✅ **Quand utiliser `libelle_prefix` ?**
 
 `libelle_prefix` est utile pour :
+
 - ✅ Recherche partielle : `libelle_prefix : 'carref'` → trouve "CARREFOUR"
 - ✅ Tolérance aux typos : `libelle_prefix : 'loyr'` → trouve "LOYER"
 - ✅ Autocomplétion : `libelle_prefix : 'vire'` → trouve "VIREMENT"
 
 **Exemple de test qui utiliserait `libelle_prefix`** :
+
 ```cql
 -- Test 4 : Recherche partielle N-Gram
 SELECT * FROM operations_by_account
-WHERE code_si = '1' 
+WHERE code_si = '1'
   AND contrat = '5913101072'
   AND libelle_prefix : 'carref'  -- Recherche partielle
 LIMIT 5;
@@ -74,6 +77,7 @@ LIMIT 5;
 ### Vérification de `libelle_prefix`
 
 Sur 80 lignes pour le compte de test :
+
 - ✅ **66 lignes** ont `libelle_prefix` rempli
 - ⚠️ **14 lignes** n'ont **PAS** `libelle_prefix` (NULL)
 
@@ -95,6 +99,7 @@ Le test 20 fonctionne déjà avec les données existantes. Il utilise `libelle` 
 Si d'autres tests (comme le test 4) échouent à cause de `libelle_prefix` NULL, il faut :
 
 1. **Option 1 : Mettre à jour les données existantes** (recommandé)
+
    ```bash
    # Utiliser le script Spark existant
    ./examples/scala/update_libelle_prefix.scala
@@ -134,7 +139,3 @@ spark-shell -i examples/scala/update_libelle_prefix.scala
 1. ❌ **Test 20** : Ne pas utiliser `libelle_prefix` (pas de sens, le test fonctionne déjà)
 2. ✅ **Test 4** : Utiliser `libelle_prefix` pour la recherche partielle
 3. ⚠️ **Données** : Mettre à jour les 14 lignes avec `libelle_prefix = NULL` pour améliorer la couverture
-
-
-
-

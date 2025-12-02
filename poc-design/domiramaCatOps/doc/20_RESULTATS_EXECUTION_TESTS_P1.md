@@ -28,6 +28,7 @@
 **Statut** : ✅ **Réussi** (après correction)
 
 **Résultats** :
+
 - ✅ Export par plages précises : **3 plages testées**
   - Plage 1 (2024-06-01 → 2024-06-15) : 5 opérations ✅
   - Plage 2 (2024-06-15 → 2024-06-30) : 10 opérations ✅
@@ -38,6 +39,7 @@
 - ✅ Validation multi-tables : **Cohérence vérifiée**
 
 **Correction appliquée** :
+
 - Gestion du cas où `parquet_file` est `None` (0 opérations)
 
 **Rapport** : `doc/demonstrations/20_MIGRATION_COMPLEXE_DEMONSTRATION.md`
@@ -49,6 +51,7 @@
 **Statut** : ⚠️ **Partiel** (écriture OK, lecture avec erreurs)
 
 **Résultats** :
+
 - ✅ **Charge écriture** : **100 insertions réussies**
   - Throughput : **7643.38 inserts/s**
   - Latence moyenne : **1.19ms**
@@ -62,10 +65,12 @@
 - ⚠️ **Charge mixte** : **Même problème que lecture**
 
 **Problème identifié** :
+
 - Le modèle ByteT5 est chargé plusieurs fois dans des threads différents
 - Conflit entre device 'meta' et device 'cpu'
 
 **Recommandation** :
+
 - Utiliser un modèle partagé entre threads (singleton)
 - Ou charger le modèle sur CPU explicitement
 
@@ -78,6 +83,7 @@
 **Statut** : ✅ **Réussi** (avec avertissements)
 
 **Résultats** :
+
 - ✅ **Recherche multi-modèles** : **3 requêtes testées**
   - "LOYER IMPAYE" : 10 résultats fusionnés (byt5 + e5)
   - "PAIEMENT CARTE" : 10 résultats fusionnés (byt5 + e5)
@@ -91,6 +97,7 @@
   - Impact : Modèle Facturation non utilisé (0 résultats)
 
 **Correction nécessaire** :
+
 - Convertir le ndarray en liste dans `encode_text_invoice`
 
 **Rapport** : `doc/demonstrations/20_RECHERCHE_MULTI_MODELES_FUSION_DEMONSTRATION.md`
@@ -102,6 +109,7 @@
 **Statut** : ⚠️ **Partiel** (1/5 tests réussis)
 
 **Résultats** :
+
 - ✅ **Cohérence temporelle** : **10 opérations vérifiées**
 - ⚠️ **Cohérence référentielle** : **Erreur schéma**
   - Erreur : `Undefined column name code_si in table acceptation_client`
@@ -117,6 +125,7 @@
   - Cause : HCD ne supporte pas `IS NOT NULL` dans WHERE
 
 **Corrections nécessaires** :
+
 1. Adapter les requêtes au schéma réel des tables
 2. Remplacer `IS NOT NULL` par une autre approche (ex: filtrer côté client)
 
@@ -180,4 +189,3 @@
 
 **Date de génération** : 2025-11-30  
 **Version** : 1.0
-

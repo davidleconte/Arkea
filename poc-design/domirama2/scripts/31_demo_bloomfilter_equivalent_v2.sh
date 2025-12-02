@@ -7,7 +7,7 @@
 #   Ce script démontre l'équivalent BLOOMFILTER HBase avec SAI (Storage-Attached
 #   Index) sur les clés de clustering, permettant d'optimiser les requêtes en
 #   évitant de lire des partitions qui ne contiennent pas les données recherchées.
-#   
+#
 #   Fonctionnalités :
 #   - Index SAI sur les clés de clustering (équivalent BLOOMFILTER HBase)
 #   - Mesures de performance (latence, throughput)
@@ -114,43 +114,43 @@ success "HCD est démarré"
 measure_query_performance() {
     local query_file=$1
     local description=$2
-    
+
     echo ""
     info "📊 Mesure de performance : $description"
-    
+
     # Exécuter avec tracing
     $CQLSH -f "$query_file" > /tmp/query_result.txt 2>&1 || true
-    
+
     # Extraire les métriques du tracing (compatible macOS)
     local trace_output=$(cat /tmp/query_result.txt 2>/dev/null || echo "")
-    
+
     # Extraire coordinator time (format: coordinator | 127.0.0.1 | 5811 | 127.0.0.1)
     local coordinator_time=$(echo "$trace_output" | grep "coordinator" | awk -F'|' '{print $4}' | tr -d ' ' | head -1 || echo "")
-    
+
     # Extraire total time
     local total_time=$(echo "$trace_output" | grep "total" | awk -F'|' '{print $4}' | tr -d ' ' | head -1 || echo "")
-    
+
     # Compter les lignes retournées (format: code_si | contrat | ...)
     local row_count=$(echo "$trace_output" | grep -E "^[A-Z_]+ \|" | grep -v "^code_si " | wc -l | tr -d ' ')
-    
+
     # Si pas de lignes, essayer d'extraire depuis "(X rows)"
     if [ "$row_count" -eq 0 ] || [ -z "$row_count" ]; then
         row_count=$(echo "$trace_output" | grep -E "\([0-9]+ rows\)" | grep -oE "[0-9]+" | head -1 || echo "0")
     fi
-    
+
     # Extraire le plan d'exécution
     local execution_plan=$(echo "$trace_output" | grep -E "(Executing|single-partition|Read|Scanned|Merging)" | head -3)
-    
+
     echo "   Résultats :"
     echo "   - Lignes retournées : ${row_count:-0}"
-    
+
     if [ -n "$coordinator_time" ] && [ "$coordinator_time" != "" ]; then
         echo "   - Temps coordinateur : ${coordinator_time}μs"
     fi
     if [ -n "$total_time" ] && [ "$total_time" != "" ]; then
         echo "   - Temps total : ${total_time}μs"
     fi
-    
+
     # Afficher le plan d'exécution
     if [ -n "$execution_plan" ]; then
         echo ""
@@ -160,7 +160,7 @@ measure_query_performance() {
         echo ""
         echo "   Plan d'exécution : (non disponible)"
     fi
-    
+
     rm -f /tmp/query_result.txt
     return 0
 }
@@ -495,4 +495,3 @@ code "  ✅ Tests de charge (requêtes multiples)"
 code "  ✅ Analyse du plan d'exécution (tracing détaillé)"
 code "  ✅ Visualisation des gains"
 echo ""
-

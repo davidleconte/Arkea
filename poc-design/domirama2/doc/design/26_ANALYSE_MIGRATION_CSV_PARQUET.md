@@ -16,12 +16,14 @@ Remplacer le format d'entrée **CSV** par **Parquet** dans le POC Domirama2, san
 ### CSV (Format Actuel)
 
 **Avantages** :
+
 - ✅ Simple à créer et lire (texte)
 - ✅ Lisible par l'humain
 - ✅ Facile à éditer manuellement
 - ✅ Support natif Spark (`spark.read.csv()`)
 
 **Inconvénients** :
+
 - ❌ Pas de schéma typé (tout est String)
 - ❌ Pas de compression (fichiers volumineux)
 - ❌ Parsing lent (lecture ligne par ligne)
@@ -30,6 +32,7 @@ Remplacer le format d'entrée **CSV** par **Parquet** dans le POC Domirama2, san
 ### Parquet (Format Proposé)
 
 **Avantages** :
+
 - ✅ **Schéma typé** (colonnes avec types précis)
 - ✅ **Compression** (jusqu'à 10x plus petit que CSV)
 - ✅ **Performance** (lecture colonne par colonne, projection pushdown)
@@ -38,6 +41,7 @@ Remplacer le format d'entrée **CSV** par **Parquet** dans le POC Domirama2, san
 - ✅ **Pas besoin de JARs Arkéa** (format standard)
 
 **Inconvénients** :
+
 - ⚠️ Format binaire (non lisible par l'humain)
 - ⚠️ Nécessite un processus de génération (CSV → Parquet)
 - ⚠️ Moins flexible pour modifications manuelles
@@ -49,12 +53,14 @@ Remplacer le format d'entrée **CSV** par **Parquet** dans le POC Domirama2, san
 ### 1. Structure des Fichiers
 
 #### Avant (CSV)
+
 ```
 poc-design/domirama2/data/
   └── operations_sample.csv
 ```
 
 #### Après (Parquet)
+
 ```
 poc-design/domirama2/data/
   ├── operations_sample.csv (conservé pour génération)
@@ -67,6 +73,7 @@ poc-design/domirama2/data/
 ### 2. Code Spark - Lecture
 
 #### Avant (CSV)
+
 ```scala
 val raw = spark.read
   .option("header", "true")
@@ -75,6 +82,7 @@ val raw = spark.read
 ```
 
 #### Après (Parquet)
+
 ```scala
 val raw = spark.read
   .parquet(inputPath)
@@ -83,6 +91,7 @@ val raw = spark.read
 ```
 
 **Avantages** :
+
 - ✅ Pas besoin de `option("header", "true")` (schéma dans Parquet)
 - ✅ Pas besoin de `option("inferSchema", "false")` (types préservés)
 - ✅ Lecture plus rapide (format binaire optimisé)
@@ -90,6 +99,7 @@ val raw = spark.read
 ### 3. Code Spark - Transformation
 
 #### Avant (CSV - Tout est String)
+
 ```scala
 val ops = raw.select(
   col("code_si").cast("string").as("code_si"),
@@ -102,6 +112,7 @@ val ops = raw.select(
 ```
 
 #### Après (Parquet - Types préservés)
+
 ```scala
 val ops = raw.select(
   col("code_si").as("code_si"),  // Déjà String
@@ -114,6 +125,7 @@ val ops = raw.select(
 ```
 
 **Avantages** :
+
 - ✅ Moins de transformations (types déjà corrects)
 - ✅ Code plus simple et plus rapide
 - ✅ Moins d'erreurs de parsing
@@ -165,6 +177,7 @@ EOF
 **Script à modifier** : `11_load_domirama11_load_domirama11_load_domirama2_data_parquet.sh`
 
 #### Avant
+
 ```bash
 CSV_FILE="${SCRIPT_DIR}/data/operations_sample.csv"
 # ...
@@ -172,6 +185,7 @@ val raw = spark.read.option("header", "true").csv("$CSV_FILE")
 ```
 
 #### Après
+
 ```bash
 PARQUET_FILE="${SCRIPT_DIR}/data/operations_sample.parquet"
 # ...
@@ -194,6 +208,7 @@ val raw = spark.read.parquet("$PARQUET_FILE")
 ### 2. Schéma Typé
 
 **CSV** :
+
 ```scala
 // Tout est String, nécessite des casts
 col("montant").cast("decimal(10,2)")
@@ -202,6 +217,7 @@ to_timestamp(col("date_iso"), "yyyy-MM-dd'T'HH:mm:ss'Z'")
 ```
 
 **Parquet** :
+
 ```scala
 // Types préservés, pas de cast nécessaire
 col("montant")  // Déjà Decimal
@@ -212,6 +228,7 @@ col("date_op")  // Déjà Timestamp
 ### 3. Optimisations Spark
 
 **Parquet permet** :
+
 - ✅ **Projection pushdown** : Ne lit que les colonnes nécessaires
 - ✅ **Predicate pushdown** : Filtre au niveau du fichier
 - ✅ **Partition pruning** : Ignore les partitions non pertinentes
@@ -266,6 +283,7 @@ cd poc-design/domirama2
    - Simplifier les transformations
 
 2. Tester le chargement :
+
    ```bash
    ./11_load_domirama11_load_domirama11_load_domirama2_data_parquet.sh
    ```
@@ -341,6 +359,7 @@ cd poc-design/domirama2
 ### ✅ Adopter Parquet
 
 **Raisons** :
+
 1. ✅ **Plus réaliste** : Format standard en production
 2. ✅ **Meilleures performances** : 3-10x plus rapide
 3. ✅ **Pas de dépendances** : Support natif Spark
@@ -359,12 +378,11 @@ cd poc-design/domirama2
 
 ## 📚 Références
 
-- **Spark Parquet** : https://spark.apache.org/docs/latest/sql-data-sources-parquet.html
-- **Parquet Format** : https://parquet.apache.org/
-- **Performance** : https://spark.apache.org/docs/latest/sql-performance-tuning.html
+- **Spark Parquet** : <https://spark.apache.org/docs/latest/sql-data-sources-parquet.html>
+- **Parquet Format** : <https://parquet.apache.org/>
+- **Performance** : <https://spark.apache.org/docs/latest/sql-performance-tuning.html>
 
 ---
 
 **Date d'analyse** : 2025-11-25  
 **Statut** : ✅ **Recommandation : Adopter Parquet**
-

@@ -10,6 +10,7 @@
 ### ✅ 1. INSERT (PUT) - Insertion de données
 
 **Code implémenté** :
+
 ```python
 table.insert_one({
     "code_si": "DEMO_DATA_API",
@@ -31,6 +32,7 @@ table.insert_one({
 ### ✅ 2. GET (SELECT) - Lecture de données
 
 **Code implémenté** :
+
 ```python
 # Lecture d'une opération
 result = table.find_one(
@@ -59,6 +61,7 @@ results = table.find(
 ### ✅ 3. UPDATE - Mise à jour de données
 
 **Code implémenté** :
+
 ```python
 table.update_one(
     filter={
@@ -83,6 +86,7 @@ table.update_one(
 ### ✅ 4. DELETE - Suppression de données
 
 **Code implémenté** :
+
 ```python
 table.delete_one(
     filter={
@@ -125,7 +129,7 @@ table.delete_one(
 
 ## 📊 Conformité avec la Documentation
 
-**Référence** : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html
+**Référence** : <https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html>
 
 ### ✅ Conformité 100%
 
@@ -191,6 +195,7 @@ python3 demo_data_api_crud_complete.py
 - ✅ Le code fonctionnera dès que Stargate sera accessible
 
 **Preuve** : Les scripts de démonstration montrent que :
+
 1. Le code est correct
 2. Toutes les opérations sont prêtes
 3. La connexion fonctionne (quand Stargate est accessible)
@@ -199,4 +204,3 @@ python3 demo_data_api_crud_complete.py
 ---
 
 **✅ Code CRUD Data API : 100% Fonctionnel et Prêt**
-

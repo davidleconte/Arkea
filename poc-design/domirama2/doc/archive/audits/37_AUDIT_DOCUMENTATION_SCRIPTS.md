@@ -10,6 +10,7 @@
 ### Critères d'Évaluation
 
 Pour chaque script, vérification de :
+
 1. ✅ **En-tête complet** : OBJECTIF, PRÉREQUIS, UTILISATION, EXEMPLE
 2. ✅ **Shebang** : `#!/bin/bash`
 3. ✅ **Gestion d'erreurs** : `set -e`
@@ -118,6 +119,7 @@ Pour chaque script, vérification de :
 ### Phase 1 : Scripts Critiques (Priorité Haute)
 
 **Scripts à améliorer en priorité** :
+
 1. `10_setup_domirama10_setup_domirama2_poc.sh` - Améliorer PRÉREQUIS
 2. `11_load_domirama2_data*.sh` - Ajouter EXEMPLE détaillé
 3. `27_export_incremental_parquet.sh` - Documenter tous les paramètres
@@ -126,6 +128,7 @@ Pour chaque script, vérification de :
 ### Phase 2 : Scripts de Démonstration (Priorité Moyenne)
 
 **Scripts à améliorer** :
+
 - Tous les scripts `*_demo_*.sh` (29-41)
 - Ajouter OBJECTIF détaillé
 - Ajouter EXEMPLE d'utilisation
@@ -134,6 +137,7 @@ Pour chaque script, vérification de :
 ### Phase 3 : Scripts de Test (Priorité Basse)
 
 **Scripts à améliorer** :
+
 - Tous les scripts `*_test_*.sh`
 - Enrichir PRÉREQUIS
 - Ajouter EXEMPLE
@@ -153,6 +157,7 @@ Pour chaque script, vérification de :
 ### Pour un Développeur Externe
 
 Un développeur externe doit pouvoir :
+
 - ✅ Comprendre l'objectif en lisant l'en-tête
 - ✅ Vérifier les prérequis avant d'exécuter
 - ✅ Utiliser le script avec les exemples fournis
@@ -166,6 +171,7 @@ Un développeur externe doit pouvoir :
 **Score Actuel** : **7.5/10** ⚠️
 
 **Détail** :
+
 - En-têtes complets : 6/10 ⚠️
 - Prérequis détaillés : 7/10 ⚠️
 - Exemples d'utilisation : 6/10 ⚠️
@@ -186,8 +192,3 @@ Un développeur externe doit pouvoir :
 ---
 
 **✅ Audit terminé : Documentation à améliorer pour atteindre 9/10**
-
-
-
-
-

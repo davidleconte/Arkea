@@ -7,7 +7,7 @@
 #   Ce script démontre la fenêtre glissante pour les exports incrémentaux en
 #   utilisant spark-submit (recommandé pour la production), équivalent au
 #   TIMERANGE HBase.
-#   
+#
 #   Cette version spark-submit est recommandée car elle :
 #   - Permet un meilleur contrôle des ressources
 #   - Facilite le monitoring et le logging
@@ -165,7 +165,7 @@ export_window() {
     local year=$1
     local month=$2
     local start_date="${year}-$(printf "%02d" $month)-01"
-    
+
     # Calculer la date de fin (mois suivant)
     local next_month=$((month + 1))
     local next_year=$year
@@ -174,12 +174,12 @@ export_window() {
         next_year=$((year + 1))
     fi
     local end_date="${next_year}-$(printf "%02d" $next_month)-01"
-    
+
     local output_path="${OUTPUT_BASE}/${year}-$(printf "%02d" $month)"
-    
+
     info "📅 Export fenêtre : $start_date → $end_date"
     code "   Output : $output_path"
-    
+
     # Créer un script Scala temporaire avec les paramètres
     TEMP_SCRIPT=$(mktemp)
     cat > "$TEMP_SCRIPT" <<EOFSCRIPT
@@ -269,7 +269,7 @@ try {
   val dfRead = spark.read.parquet(outputPath)
   val countRead = dfRead.count()
   println(s"✅ Vérification OK : \$countRead opérations lues depuis Parquet")
-  
+
   if (count != countRead) {
     println(s"⚠️  ATTENTION : Incohérence (\$count exportées vs \$countRead lues)")
   }
@@ -294,10 +294,10 @@ EOFSCRIPT
       --executor-memory 2g \
       -i "$TEMP_SCRIPT" \
       2>&1 | grep -v "^scala>" | grep -v "^     |" | grep -v "^Welcome to" | grep -v "WARN NativeCodeLoader" | grep -E "(✅|⚠️|📥|📊|💾|🔍|opérations|Export|Terminé|count|Statistiques|Vérification)" | head -15
-    
+
     # Nettoyer
     rm -f "$TEMP_SCRIPT"
-    
+
     echo ""
 }
 
@@ -345,4 +345,3 @@ code "  ✅ Partitionnement par date_op (performance)"
 code "  ✅ Format Parquet (cohérent avec ingestion)"
 code "  ✅ Utilisation de spark-submit (recommandé)"
 echo ""
-

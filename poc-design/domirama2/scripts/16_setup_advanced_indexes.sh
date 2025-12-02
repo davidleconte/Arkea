@@ -8,7 +8,7 @@
 #   Ce script configure des index SAI (Storage-Attached Index) avancés pour
 #   la table 'operations_by_account' avec différents analyzers Lucene pour
 #   améliorer la pertinence des recherches full-text.
-#   
+#
 #   Index créés :
 #   - idx_libelle_fulltext_advanced : Avec analyzers (lowercase, asciifolding, frenchLightStem, stop words)
 #   - idx_cat_auto : Index standard sur cat_auto
@@ -123,4 +123,3 @@ echo ""
 
 success "✅ Configuration des index avancés terminée !"
 info "📝 Prochaine étape: Exécuter ./17_test_advanced_search.sh"
-

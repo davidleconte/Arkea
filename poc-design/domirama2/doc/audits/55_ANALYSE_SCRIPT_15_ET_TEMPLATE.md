@@ -45,37 +45,45 @@ Le script `15_test_fulltext_complex.sh` est un **script de test/recherche** qui 
 ### Fonctionnalités Actuelles
 
 ✅ **Vérifications** :
+
 - HCD démarré
 - Keyspace existe
 
 ✅ **Sélection dynamique** :
+
 - Sélection automatique d'un compte avec des données
 - Remplacement des placeholders dans le fichier CQL
 
 ✅ **Exécution** :
+
 - Exécution du fichier CQL de test via `cqlsh -f`
 - Filtrage des warnings
 
 ✅ **Messages** :
+
 - Messages informatifs sur les types de recherches testées
 - Explications sur les capacités des analyzers
 
 ### Limitations Actuelles
 
 ❌ **Pas d'affichage des requêtes CQL** :
+
 - Les requêtes ne sont pas affichées avant exécution
 - Pas d'explication de chaque requête
 
 ❌ **Pas de capture des résultats** :
+
 - Les résultats ne sont pas capturés et formatés
 - Pas de validation automatique des résultats
 
 ❌ **Pas d'explications détaillées** :
+
 - Pas d'explications sur les analyzers (lowercase, asciifolding, stemming)
 - Pas d'explications sur les recherches multi-termes
 - Pas d'explications sur les équivalences HBase → HCD
 
 ❌ **Pas de documentation générée** :
+
 - Pas de rapport markdown généré automatiquement
 - Pas de structure didactique
 
@@ -179,11 +187,13 @@ Le script `12_test_domirama2_search_v2_didactique.sh` est un script de test dida
 - ✅ Structure didactique (6 parties)
 
 **Similarités avec Script 15** :
+
 - Type : Test de recherche full-text
 - Format : CQL queries
 - Objectif : Valider des fonctionnalités de recherche
 
 **Différences** :
+
 - Script 12 : Tests basiques (opérateurs SAI)
 - Script 15 : Tests complexes (analyzers, multi-termes)
 
@@ -202,11 +212,13 @@ Le script `25_test_hybrid_search_v2_didactique.sh` traite également de recherch
 ### Option 1 : Utiliser le Template Didactique Général avec Enrichissements (Recommandé) ⭐
 
 **Avantages** :
+
 - Réutilise le template existant
 - Cohérence avec les autres scripts de test didactiques
 - Adaptations mineures nécessaires
 
 **Adaptations nécessaires** :
+
 - Ajouter section "Analyzers SAI" (explication lowercase, asciifolding, stemming)
 - Ajouter section "Recherches Multi-Termes" (explication AND implicite)
 - Adapter la capture des résultats pour les recherches complexes
@@ -217,10 +229,12 @@ Le script `25_test_hybrid_search_v2_didactique.sh` traite également de recherch
 ### Option 2 : Créer un Template Spécifique pour Tests Complexes
 
 **Avantages** :
+
 - Template dédié aux tests complexes
 - Sections spécifiques (analyzers, multi-termes)
 
 **Inconvénients** :
+
 - Duplication avec template didactique général
 - Maintenance de deux templates similaires
 - Pas de valeur ajoutée significative
@@ -230,10 +244,12 @@ Le script `25_test_hybrid_search_v2_didactique.sh` traite également de recherch
 ### Option 3 : Enrichir le Template Didactique Général
 
 **Avantages** :
+
 - Un seul template pour tous les tests
 - Sections conditionnelles selon le type de test
 
 **Inconvénients** :
+
 - Template plus complexe
 - Sections conditionnelles à gérer
 - Risque de confusion
@@ -301,6 +317,7 @@ Le script `25_test_hybrid_search_v2_didactique.sh` traite également de recherch
 ### 1. Analyzers SAI
 
 **À expliquer** :
+
 - **lowercase** : Insensible à la casse ('Loyer' → 'LOYER')
 - **asciifolding** : Accents ignorés ('impayé' → 'IMPAYE')
 - **frenchLightStem** : Racinisation française ('loyers' → 'loyer')
@@ -309,6 +326,7 @@ Le script `25_test_hybrid_search_v2_didactique.sh` traite également de recherch
 ### 2. Recherches Multi-Termes
 
 **À expliquer** :
+
 - **AND implicite** : 'loyer paris' = 'loyer' AND 'paris'
 - **Ordre des termes** : Peu importe l'ordre
 - **Pertinence** : Résultats contenant tous les termes
@@ -316,6 +334,7 @@ Le script `25_test_hybrid_search_v2_didactique.sh` traite également de recherch
 ### 3. Capture des Résultats
 
 **À adapter** :
+
 - Capturer le nombre de résultats pour chaque requête
 - Afficher un échantillon des résultats
 - Valider la pertinence avec analyzers
@@ -323,8 +342,3 @@ Le script `25_test_hybrid_search_v2_didactique.sh` traite également de recherch
 ---
 
 **✅ Conclusion : Le template didactique général est applicable avec des enrichissements spécifiques pour les tests de recherche complexes et les analyzers SAI !**
-
-
-
-
-

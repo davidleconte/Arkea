@@ -23,6 +23,7 @@ La table `domirama-meta-categories` est une table HBase dédiée aux métadonné
 **Table** : `B997X04:domirama-meta-categories`
 
 **Column Families** :
+
 - `config` : Configurations générales (REPLICATION_SCOPE => '1')
 - `cpt_customer` : Compteurs clients (VERSIONS => '50', REPLICATION_SCOPE => '1')
 - `cpt_engine` : Compteurs moteur (VERSIONS => '50', REPLICATION_SCOPE => '1')
@@ -36,19 +37,23 @@ La table `domirama-meta-categories` est une table HBase dédiée aux métadonné
 ### 1. ACCEPT - Acceptation de l'affichage par le client
 
 **RowKey Pattern** :
+
 ```
 ACCEPT:{code_efs}:{no_contrat}:{no_pse}
 ```
 
 **Colonnes** :
+
 - Valeurs textuelles, numériques ou booléennes
 - Indique si le client a accepté l'affichage/catégorisation
 
 **Usage** :
+
 - Vérification avant affichage des catégories
 - Contrôle d'accès fonctionnel
 
 **Accès** :
+
 - GET direct par RowKey
 - PUT pour mise à jour
 
@@ -57,19 +62,23 @@ ACCEPT:{code_efs}:{no_contrat}:{no_pse}
 ### 2. OPPOSITION - Opposition à la catégorisation
 
 **RowKey Pattern** :
+
 ```
 OPPOSITION:{code_efs}:{no_pse}
 ```
 
 **Colonnes** :
+
 - Valeurs booléennes ou textuelles
 - Indique qu'un client s'oppose à la catégorisation automatique
 
 **Usage** :
+
 - Désactivation de la catégorisation pour un client
 - Respect du consentement client
 
 **Accès** :
+
 - GET direct par RowKey
 - PUT pour activation/désactivation
 
@@ -78,19 +87,23 @@ OPPOSITION:{code_efs}:{no_pse}
 ### 3. HISTO_OPPOSITION - Historique des oppositions
 
 **RowKey Pattern** :
+
 ```
 HISTO_OPPOSITION:{code_efs}:{no_pse}:{timestamp}
 ```
 
 **Colonnes** :
+
 - Valeurs textuelles (statut, raison, etc.)
 - Historique des changements d'opposition
 
 **Usage** :
+
 - Traçabilité des changements d'opposition
 - Audit et conformité
 
 **Accès** :
+
 - GET par RowKey (dernière opposition)
 - SCAN pour historique complet
 - PUT pour ajout d'événement
@@ -102,11 +115,13 @@ HISTO_OPPOSITION:{code_efs}:{no_pse}:{timestamp}
 ### 4. ANALYZE_LABEL - Feedbacks moteur/clients par libellé
 
 **RowKey Pattern** :
+
 ```
 ANALYZE_LABEL:{type_operation}:{sens_operation}:{libellé_simplifié}
 ```
 
 **Colonnes Dynamiques** :
+
 - Colonnes dynamiques par catégorie (ex: `cat_ALIMENTATION`, `cat_RESTAURANT`)
 - Compteurs HBase (INCREMENT/DECREMENT) pour chaque catégorie
 - Deux compteurs par catégorie :
@@ -114,16 +129,19 @@ ANALYZE_LABEL:{type_operation}:{sens_operation}:{libellé_simplifié}
   - `cpt_engine.{catégorie}` : Compteur moteur (Column Family `cpt_engine`)
 
 **Usage** :
+
 - Distribution des catégories affectées à un libellé
 - Statistiques de catégorisation (moteur vs client)
 - Feedback pour amélioration du modèle
 
 **Accès** :
+
 - GET par RowKey pour un libellé spécifique
 - INCREMENT atomique sur compteurs
 - PUT pour mise à jour
 
 **Exemple** :
+
 ```
 RowKey: ANALYZE_LABEL:CB:DEBIT:CARREFOUR
 Colonnes dynamiques:
@@ -138,19 +156,23 @@ Colonnes dynamiques:
 ### 5. ICS_DECISION - Feedbacks moteur/clients par ICS
 
 **RowKey Pattern** :
+
 ```
 ICS_DECISION:{type_operation}:{sens_operation}:{no_ICS}
 ```
 
 **Colonnes Dynamiques** :
+
 - Même structure que ANALYZE_LABEL
 - Compteurs par catégorie (cpt_customer et cpt_engine)
 
 **Usage** :
+
 - Distribution des catégories par code ICS
 - Statistiques de catégorisation par ICS
 
 **Accès** :
+
 - GET par RowKey
 - INCREMENT atomique sur compteurs
 
@@ -159,19 +181,23 @@ ICS_DECISION:{type_operation}:{sens_operation}:{no_ICS}
 ### 6. CUSTOM_RULE - Règles catégorisation spécifiques client
 
 **RowKey Pattern** :
+
 ```
 CUSTOM_RULE:{code_efs}:{type_operation}:{sens_operation}:{libellé_simplifié}
 ```
 
 **Colonnes** :
+
 - Valeurs textuelles (catégorie cible, priorité, etc.)
 - Règles de catégorisation personnalisées par client
 
 **Usage** :
+
 - Surcharge de catégorisation pour un client spécifique
 - Règles métier personnalisées
 
 **Accès** :
+
 - GET par RowKey
 - PUT pour création/modification
 - DELETE pour suppression
@@ -181,19 +207,23 @@ CUSTOM_RULE:{code_efs}:{type_operation}:{sens_operation}:{libellé_simplifié}
 ### 7. SALARY_DECISION - Méthode de catégorisation sur libellés taggés salaires
 
 **RowKey Pattern** :
+
 ```
 SALARY_DECISION:{libellé_simplifié}
 ```
 
 **Colonnes** :
+
 - Valeurs textuelles (méthode utilisée, modèle, etc.)
 - Configuration pour libellés de type "salaire"
 
 **Usage** :
+
 - Traitement spécial pour opérations de salaire
 - Méthode de catégorisation spécifique
 
 **Accès** :
+
 - GET par RowKey
 - PUT pour mise à jour
 
@@ -206,11 +236,13 @@ SALARY_DECISION:{libellé_simplifié}
 **Column Families** : `cpt_customer`, `cpt_engine`
 
 **Usage** :
+
 - Historique des 50 dernières versions de chaque compteur
 - Traçabilité des changements de feedbacks
 - Utilisé notamment pour HISTO_OPPOSITION
 
 **Impact Migration HCD** :
+
 - HCD n'a pas de versions automatiques
 - Solution : Table d'historique dédiée ou colonnes timestamp
 
@@ -219,16 +251,19 @@ SALARY_DECISION:{libellé_simplifié}
 ### 2. INCREMENT Atomique
 
 **Usage** :
+
 - Incrément/décrément atomique des compteurs de feedback
 - Opérations concurrentes sécurisées
 - Utilisé pour ANALYZE_LABEL et ICS_DECISION
 
 **Exemple** :
+
 ```hbase
 INCREMENT 'domirama-meta-categories', 'ANALYZE_LABEL:CB:DEBIT:CARREFOUR', 'cpt_customer:cat_ALIMENTATION', 1
 ```
 
 **Impact Migration HCD** :
+
 - HCD supporte les compteurs (type `counter`)
 - Tables de compteurs dédiées nécessaires
 
@@ -237,16 +272,19 @@ INCREMENT 'domirama-meta-categories', 'ANALYZE_LABEL:CB:DEBIT:CARREFOUR', 'cpt_c
 ### 3. Colonnes Dynamiques
 
 **Usage** :
+
 - Colonnes créées dynamiquement par catégorie
 - Pas de schéma fixe
 - Flexibilité maximale
 
 **Exemple** :
+
 - `cpt_customer:cat_ALIMENTATION`
 - `cpt_customer:cat_RESTAURANT`
 - `cpt_engine:cat_ALIMENTATION`
 
 **Impact Migration HCD** :
+
 - HCD nécessite un schéma fixe
 - Solution : Table avec clustering key sur catégorie
 
@@ -255,10 +293,12 @@ INCREMENT 'domirama-meta-categories', 'ANALYZE_LABEL:CB:DEBIT:CARREFOUR', 'cpt_c
 ### 4. REPLICATION_SCOPE => '1'
 
 **Toutes les Column Families** :
+
 - Réplication vers autres clusters
 - Haute disponibilité
 
 **Impact Migration HCD** :
+
 - NetworkTopologyStrategy
 - Configuration par datacenter
 
@@ -324,6 +364,7 @@ INCREMENT 'domirama-meta-categories', 'ANALYZE_LABEL:CB:DEBIT:CARREFOUR', 'cpt_c
 **HCD** : 7 tables distinctes (bonnes pratiques CQL)
 
 **Tables à créer** :
+
 1. `acceptation_client`
 2. `opposition_categorisation`
 3. `historique_opposition`
@@ -338,6 +379,7 @@ INCREMENT 'domirama-meta-categories', 'ANALYZE_LABEL:CB:DEBIT:CARREFOUR', 'cpt_c
 **HCD** : Tables de compteurs dédiées (type `counter`)
 
 **Tables de compteurs** :
+
 - `feedback_par_libelle` : Table avec colonnes `counter`
 - `feedback_par_ics` : Table avec colonnes `counter`
 
@@ -359,7 +401,7 @@ INCREMENT 'domirama-meta-categories', 'ANALYZE_LABEL:CB:DEBIT:CARREFOUR', 'cpt_c
 
 ## 📋 Résumé des Besoins à Démontrer
 
-### Pour chaque "KeySpace" :
+### Pour chaque "KeySpace"
 
 1. ✅ **Création de la table HCD correspondante**
 2. ✅ **Migration des données depuis HBase**
@@ -367,7 +409,7 @@ INCREMENT 'domirama-meta-categories', 'ANALYZE_LABEL:CB:DEBIT:CARREFOUR', 'cpt_c
 4. ✅ **Opérations de lecture (GET/SCAN)**
 5. ✅ **Fonctionnalités spécifiques (compteurs, historique)**
 
-### Fonctionnalités Globales :
+### Fonctionnalités Globales
 
 1. ✅ **Compteurs atomiques** (INCREMENT équivalent)
 2. ✅ **Historique** (VERSIONS équivalent)
@@ -378,5 +420,3 @@ INCREMENT 'domirama-meta-categories', 'ANALYZE_LABEL:CB:DEBIT:CARREFOUR', 'cpt_c
 
 **Date** : 2024-11-27  
 **Version** : 1.0
-
-

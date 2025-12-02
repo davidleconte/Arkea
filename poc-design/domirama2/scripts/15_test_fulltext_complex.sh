@@ -8,7 +8,7 @@
 #   Ce script exécute des tests de recherche full-text complexes sur la table
 #   'operations_by_account' en utilisant les index SAI avancés avec différents
 #   analyzers (lowercase, asciifolding, frenchLightStem, stop words).
-#   
+#
 #   Les tests couvrent :
 #   - Recherches multi-termes (plusieurs mots simultanément)
 #   - Gestion des accents (asciifolding)
@@ -139,4 +139,3 @@ echo "   ✅ Recherche multi-termes (AND implicite)"
 echo "   ✅ Asciifolding (accents ignorés)"
 echo "   ✅ Stemming français (singulier/pluriel)"
 echo "   ✅ Insensible à la casse"
-

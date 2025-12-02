@@ -47,12 +47,14 @@ cd binaire/hcd-1.2.3
 **Objectif** : Créer le keyspace `domiramacatops_poc`
 
 **Exécution** :
+
 ```bash
 cd scripts
 ./01_setup_domiramaCatOps_keyspace.sh
 ```
 
 **DDL Exécuté** :
+
 ```cql
 CREATE KEYSPACE IF NOT EXISTS domiramacatops_poc
 WITH REPLICATION = {
@@ -62,6 +64,7 @@ WITH REPLICATION = {
 ```
 
 **Explication** :
+
 - **Keyspace** : `domiramacatops_poc` (nouveau keyspace dédié)
 - **SimpleStrategy** : Pour POC local (1 nœud)
 - **NetworkTopologyStrategy** : Pour production (multi-datacenter)
@@ -77,6 +80,7 @@ WITH REPLICATION = {
 **Objectif** : Créer la table `operations_by_account` avec toutes les colonnes nécessaires
 
 **Exécution** :
+
 ```bash
 ./02_setup_operations_by_account.sh
 ```
@@ -88,29 +92,29 @@ CREATE TABLE IF NOT EXISTS operations_by_account (
     -- Partition Keys
     code_si           TEXT,
     contrat           TEXT,
-    
+
     -- Clustering Keys
     date_op           TIMESTAMP,
     numero_op         INT,
-    
+
     -- Colonnes principales
     libelle           TEXT,
     montant           DECIMAL,
     type_operation    TEXT,
     operation_data    BLOB,
-    
+
     -- Colonnes de recherche avancée
     libelle_prefix    TEXT,
     libelle_tokens    SET<TEXT>,
     libelle_embedding VECTOR<FLOAT, 1472>,
-    
+
     -- Colonnes de catégorisation
     cat_auto          TEXT,
     cat_confidence    DECIMAL,
     cat_user          TEXT,
     cat_date_user     TIMESTAMP,
     cat_validee       BOOLEAN,
-    
+
     PRIMARY KEY ((code_si, contrat), date_op, numero_op)
 ) WITH CLUSTERING ORDER BY (date_op DESC, numero_op ASC)
   AND default_time_to_live = 315619200;
@@ -137,6 +141,7 @@ CREATE TABLE IF NOT EXISTS operations_by_account (
 **Objectif** : Créer les 7 tables meta-categories (explosion du schéma HBase)
 
 **Exécution** :
+
 ```bash
 ./03_setup_meta_categories_tables.sh
 ```
@@ -174,6 +179,7 @@ CREATE TABLE IF NOT EXISTS feedback_par_libelle (
 **Objectif** : Créer tous les index SAI pour la recherche avancée
 
 **Exécution** :
+
 ```bash
 ./04_create_indexes.sh
 ```
@@ -181,6 +187,7 @@ CREATE TABLE IF NOT EXISTS feedback_par_libelle (
 **Index Créés** :
 
 1. **`idx_libelle_fulltext`** : Recherche full-text sur libellé
+
    ```cql
    CREATE CUSTOM INDEX IF NOT EXISTS idx_libelle_fulltext
    ON operations_by_account(libelle)
@@ -249,16 +256,19 @@ cd binaire/hcd-1.2.3
 Une fois la configuration terminée :
 
 1. **Générer les données** :
+
    ```bash
    ./04_generate_operations_parquet.sh
    ```
 
 2. **Charger les données** :
+
    ```bash
    ./05_load_operations_data_parquet.sh
    ```
 
 3. **Générer les embeddings** :
+
    ```bash
    ./05_generate_libelle_embedding.sh
    ```
@@ -279,4 +289,3 @@ Une fois la configuration terminée :
 
 **Date de création** : 2025-12-01  
 **Dernière mise à jour** : 2025-12-01
-

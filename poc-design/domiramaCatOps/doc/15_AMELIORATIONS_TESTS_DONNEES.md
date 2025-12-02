@@ -5,6 +5,7 @@
 **Version** : 1.0  
 **Script** : `15_prepare_test_data.sh`  
 **Scripts liés** :
+
 - `15_test_coherence_multi_tables.sh` - Tests de cohérence multi-tables
 - `15_ANALYSE_TESTS_DONNEES_MANQUANTS.md` - Analyse des tests manquants  
 **Objectif** : Ajouter tous les tests manquants et améliorer ceux qui le nécessitent
@@ -90,11 +91,13 @@
 **Objectif** : S'assurer que les données sont en quantité suffisante pour des tests pertinents
 
 **Validations** :
+
 - ✅ Nombre minimum d'opérations par compte (10+ recommandé)
 - ✅ Diversité des types d'opérations (2+ recommandé)
 - ✅ Diversité des sens d'opérations (DEBIT/CREDIT)
 
 **Seuils** :
+
 - Minimum : 5 opérations (bloquant)
 - Recommandé : 10+ opérations (avertissement)
 
@@ -105,12 +108,14 @@
 **Objectif** : S'assurer que les données sont fonctionnellement pertinentes
 
 **Validations** :
+
 - ✅ Libellés non vides
 - ✅ Montants valides (positifs)
 - ✅ Dates cohérentes (pas de dates futures)
 - ✅ Catégories auto correspondent à des règles existantes
 
 **Critères de Qualité** :
+
 - Aucun libellé vide ou NULL
 - Tous les montants > 0
 - Aucune date future
@@ -123,12 +128,14 @@
 **Objectif** : S'assurer que tous les cas d'usage sont couverts par les données
 
 **Validations** :
+
 - ✅ Présence de données avec cat_user (multi-version)
 - ✅ Diversité des catégories (2+ recommandé)
 - ✅ Couverture acceptation (true et false)
 - ✅ Couverture opposition (true et false)
 
 **Insertion Automatique** :
+
 - Acceptation false si manquante
 - Opposition true si manquante
 
@@ -139,11 +146,13 @@
 **Objectif** : S'assurer que les données permettent des tests de performance réalistes
 
 **Validations** :
+
 - ✅ Volume total d'opérations (100+ recommandé)
 - ✅ Distribution équilibrée (ratio max/min < 10)
 - ✅ Présence de données récentes (30 derniers jours)
 
 **Métriques** :
+
 - Volume minimum : 100 opérations
 - Ratio de distribution : < 10 (équilibré)
 - Données récentes : 30 derniers jours
@@ -155,10 +164,12 @@
 **Objectif** : S'assurer de la cohérence temporelle entre les tables
 
 **Validations** :
+
 - ✅ Dates d'acceptation cohérentes avec dates d'opérations
 - ✅ Cohérence temporelle entre tables
 
 **Règle** :
+
 - Les acceptations doivent être antérieures ou égales aux premières opérations
 
 ---
@@ -168,6 +179,7 @@
 ### Format du Résumé
 
 Le script génère un résumé avec :
+
 - **Taux de réussite global** : X/14 tests réussis (Y%)
 - **Détail par catégorie** :
   - Présence des données : ✅/⚠️
@@ -256,4 +268,3 @@ Le script `15_test_coherence_multi_tables.sh` appelle automatiquement `15_prepar
 ---
 
 **Date de génération** : 2025-11-30
-

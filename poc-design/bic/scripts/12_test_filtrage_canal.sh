@@ -81,8 +81,8 @@ success "HCD est démarré"
 cat > "$REPORT_FILE" << 'EOF'
 # 🧪 Démonstration : Filtrage par Canal et Résultat
 
-**Date** : 2025-12-01  
-**Script** : `12_test_filtrage_canal.sh`  
+**Date** : 2025-12-01
+**Script** : `12_test_filtrage_canal.sh`
 **Use Cases** : BIC-04 (Filtrage par canal), BIC-11 (Filtrage par résultat)
 
 ---
@@ -143,8 +143,8 @@ CODE_EFS="EFS001"
 NUMERO_CLIENT="CLIENT123"
 CANAL="email"
 
-QUERY1="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY1="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND canal = '$CANAL'
 LIMIT 50;"
@@ -184,7 +184,7 @@ if [ $EXIT_CODE1 -eq 0 ]; then
     COUNT1=$(echo "$RESULT1" | grep -c "^[[:space:]]*EFS001" || echo "0")
     echo ""
     result "Nombre d'interactions email : $COUNT1"
-    
+
     # Extraire un échantillon représentatif pour le rapport (5 premières lignes de données)
     # Format: code_efs | numero_client | date_interaction | canal | type_interaction | idt_tech
     SAMPLE1=$(echo "$RESULT1" | grep -E "^[[:space:]]*EFS001" | head -5 | awk -F'|' '{
@@ -197,7 +197,7 @@ if [ $EXIT_CODE1 -eq 0 ]; then
             printf "| %s | %s | %s | %s | %s | %s |\n", $1, $2, $3, $4, $5, $6
         }
     }' || echo "")
-    
+
     # VALIDATION : Comparaison attendus vs obtenus
     EXPECTED_COUNT1=">= 0"
     compare_expected_vs_actual \
@@ -205,7 +205,7 @@ if [ $EXIT_CODE1 -eq 0 ]; then
         "$EXPECTED_COUNT1 interactions email" \
         "$COUNT1 interactions email" \
         "0" || true  # Ne pas arrêter le script si comparaison partielle
-    
+
     # VALIDATION COMPLÈTE
     validate_complete \
         "TEST 1 : Filtrage Canal Email" \
@@ -232,8 +232,8 @@ demo "Objectif : Récupérer toutes les interactions par SMS"
 
 CANAL="SMS"
 
-QUERY2="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY2="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND canal = '$CANAL'
 LIMIT 50;"
@@ -258,7 +258,7 @@ if [ $EXIT_CODE2 -eq 0 ]; then
     success "✅ Requête exécutée avec succès en ${EXEC_TIME2}s"
     COUNT2=$(echo "$RESULT2" | grep -c "^[[:space:]]*EFS001" || echo "0")
     result "Nombre d'interactions SMS : $COUNT2"
-    
+
     # Extraire un échantillon représentatif pour le rapport
     SAMPLE2=$(echo "$RESULT2" | grep -E "^[[:space:]]*EFS001" | head -5 | awk -F'|' '{
         for (i=1; i<=NF; i++) {
@@ -268,7 +268,7 @@ if [ $EXIT_CODE2 -eq 0 ]; then
             printf "| %s | %s | %s | %s | %s | %s |\n", $1, $2, $3, $4, $5, $6
         }
     }' || echo "")
-    
+
     # VALIDATION COMPLÈTE
     validate_complete \
         "TEST 2 : Filtrage Canal SMS" \
@@ -295,8 +295,8 @@ demo "Objectif : Récupérer toutes les interactions avec résultat 'succès'"
 RESULTAT="succès"
 
 # Note : Si la colonne resultat n'existe pas encore, on peut utiliser colonnes_dynamiques
-QUERY3="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY3="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND resultat = '$RESULTAT'
 LIMIT 50;"
@@ -336,7 +336,7 @@ if [ $EXIT_CODE3 -eq 0 ]; then
     COUNT3=$(echo "$RESULT3" | grep -c "^ " || echo "0")
     echo ""
     result "Nombre d'interactions avec résultat 'succès' : $COUNT3"
-    
+
     # Extraire un échantillon représentatif pour le rapport
     SAMPLE3=$(echo "$RESULT3" | grep -E "^[[:space:]]*EFS001" | head -5 | awk -F'|' '{
         for (i=1; i<=NF; i++) {
@@ -346,7 +346,7 @@ if [ $EXIT_CODE3 -eq 0 ]; then
             printf "| %s | %s | %s | %s | %s | %s |\n", $1, $2, $3, $4, $5, $6
         }
     }' || echo "")
-    
+
     # VALIDATION : Comparaison attendus vs obtenus (BIC-11)
     EXPECTED_COUNT3=">= 0"
     compare_expected_vs_actual \
@@ -354,12 +354,12 @@ if [ $EXIT_CODE3 -eq 0 ]; then
         "$EXPECTED_COUNT3 interactions avec résultat 'succès'" \
         "$COUNT3 interactions avec résultat 'succès'" \
         "0"
-    
+
     # VALIDATION : Justesse (vérifier que toutes ont bien résultat='succès')
     if [ "$COUNT3" -gt 0 ]; then
         success "✅ Justesse validée : Toutes les interactions ont résultat='succès'"
     fi
-    
+
     # VALIDATION COMPLÈTE
     validate_complete \
         "TEST 3 : Filtrage Résultat Succès" \
@@ -369,7 +369,7 @@ if [ $EXIT_CODE3 -eq 0 ]; then
         "$EXEC_TIME3" \
         "0" \
         "0.1"
-    
+
     # EXPLICATIONS
     echo ""
     info "📚 Explications détaillées :"
@@ -395,8 +395,8 @@ demo "Objectif : Récupérer toutes les interactions avec résultat 'échec'"
 
 RESULTAT="échec"
 
-QUERY4="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY4="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND resultat = '$RESULTAT'
 LIMIT 50;"
@@ -421,11 +421,11 @@ if [ $EXIT_CODE4 -eq 0 ]; then
     COUNT4=$(echo "$RESULT4" | grep -c "^[[:space:]]*EFS001" 2>/dev/null || echo "0")
     COUNT4=$(echo "$COUNT4" | tr -d '\n\r' | head -1)
     COUNT4=${COUNT4:-0}  # Valeur par défaut si vide
-    
+
     if [ "$COUNT4" -gt 0 ]; then
         success "✅ Requête exécutée avec succès en ${EXEC_TIME4}s"
         result "Nombre d'interactions avec résultat 'échec' : $COUNT4"
-        
+
         # Extraire un échantillon représentatif pour le rapport
         SAMPLE4=$(echo "$RESULT4" | grep -E "^[[:space:]]*EFS001" | head -5 | awk -F'|' '{
             for (i=1; i<=NF; i++) {
@@ -445,7 +445,7 @@ if [ $EXIT_CODE4 -eq 0 ]; then
         result "Nombre d'interactions avec résultat 'échec' : $COUNT4 (normal si données de test ne contiennent que des succès)"
         SAMPLE4=""
     fi
-    
+
     # VALIDATION COMPLÈTE (tolérance plus élevée pour performance si 0 résultat)
     if [ "$COUNT4" -eq 0 ]; then
         # Si 0 résultat, la performance peut être plus lente (scan complet)
@@ -485,8 +485,8 @@ demo "Objectif : Récupérer toutes les interactions en agence"
 
 CANAL="agence"
 
-QUERY5="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY5="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND canal = '$CANAL'
 LIMIT 50;"
@@ -511,7 +511,7 @@ if [ $EXIT_CODE5 -eq 0 ]; then
     success "✅ Requête exécutée avec succès en ${EXEC_TIME5}s"
     COUNT5=$(echo "$RESULT5" | grep -c "^[[:space:]]*EFS001" || echo "0")
     result "Nombre d'interactions en agence : $COUNT5"
-    
+
     # Extraire un échantillon représentatif pour le rapport
     SAMPLE5=$(echo "$RESULT5" | grep -E "^[[:space:]]*EFS001" | head -5 | awk -F'|' '{
         for (i=1; i<=NF; i++) {
@@ -521,7 +521,7 @@ if [ $EXIT_CODE5 -eq 0 ]; then
             printf "| %s | %s | %s | %s | %s | %s |\n", $1, $2, $3, $4, $5, $6
         }
     }' || echo "")
-    
+
     # VALIDATION COMPLÈTE
     validate_complete \
         "TEST 5 : Filtrage Canal Agence" \
@@ -554,17 +554,17 @@ ALL_CANAL_IDS=()
 SAMPLE6_ALL=""  # Échantillon global pour TEST 6
 
 for CANAL_TEST in "${CANAUX[@]}"; do
-    QUERY_CANAL="SELECT * FROM $KEYSPACE.$TABLE 
-    WHERE code_efs = '$CODE_EFS' 
+    QUERY_CANAL="SELECT * FROM $KEYSPACE.$TABLE
+    WHERE code_efs = '$CODE_EFS'
       AND numero_client = '$NUMERO_CLIENT'
       AND canal = '$CANAL_TEST'
     LIMIT 50;"
-    
+
     RESULT_CANAL=$($CQLSH -e "$QUERY_CANAL" 2>&1)
     COUNT_CANAL=$(echo "$RESULT_CANAL" | grep -c "^[[:space:]]*EFS001" || echo "0")
     CANAL_COUNTS+=("$COUNT_CANAL")
     TOTAL_CANAUX=$((TOTAL_CANAUX + COUNT_CANAL))
-    
+
     # Collecter les IDs pour vérification de cohérence
     if [ "$COUNT_CANAL" -gt 0 ]; then
         # Extraire idt_tech (colonne 6 dans la sortie cqlsh)
@@ -581,7 +581,7 @@ for CANAL_TEST in "${CANAUX[@]}"; do
                 ALL_CANAL_IDS+=("$id")
             fi
         done
-        
+
         # Collecter un échantillon représentatif (1 ligne par canal)
         SAMPLE_CANAL=$(echo "$RESULT_CANAL" | grep -E "^[[:space:]]*EFS001" | head -1 | awk -F'|' '{
             for (i=1; i<=NF; i++) {
@@ -600,7 +600,7 @@ $SAMPLE_CANAL"
             fi
         fi
     fi
-    
+
     success "✅ Canal '$CANAL_TEST' : $COUNT_CANAL interaction(s)"
 done
 
@@ -610,7 +610,7 @@ echo "   - Canaux testés : ${#CANAUX[@]}"
 echo "   - Interactions par canal : $(printf '%s, ' "${CANAL_COUNTS[@]}" | sed 's/, $//')"
 
 # VALIDATION : Cohérence (TOTAL_CANAUX devrait être <= total interactions du client)
-TOTAL_CLIENT_QUERY="SELECT COUNT(*) FROM $KEYSPACE.$TABLE 
+TOTAL_CLIENT_QUERY="SELECT COUNT(*) FROM $KEYSPACE.$TABLE
 WHERE code_efs = '$CODE_EFS' AND numero_client = '$NUMERO_CLIENT';"
 TOTAL_CLIENT_RESULT=$($CQLSH -e "$TOTAL_CLIENT_QUERY" 2>&1)
 TOTAL_CLIENT=$(echo "$TOTAL_CLIENT_RESULT" | (grep -E "^\s+[0-9]+" || true) | tr -d ' ' || echo "0")
@@ -648,17 +648,17 @@ RESULTAT_COUNTS=()
 SAMPLE7_ALL=""  # Échantillon global pour TEST 7
 
 for RESULTAT_TEST in "${RESULTATS[@]}"; do
-    QUERY_RESULTAT="SELECT * FROM $KEYSPACE.$TABLE 
-    WHERE code_efs = '$CODE_EFS' 
+    QUERY_RESULTAT="SELECT * FROM $KEYSPACE.$TABLE
+    WHERE code_efs = '$CODE_EFS'
       AND numero_client = '$NUMERO_CLIENT'
       AND resultat = '$RESULTAT_TEST'
     LIMIT 50;"
-    
+
     RESULT_RESULTAT=$($CQLSH -e "$QUERY_RESULTAT" 2>&1)
     COUNT_RESULTAT=$(echo "$RESULT_RESULTAT" | grep -c "^[[:space:]]*EFS001" || echo "0")
     RESULTAT_COUNTS+=("$COUNT_RESULTAT")
     TOTAL_RESULTATS=$((TOTAL_RESULTATS + COUNT_RESULTAT))
-    
+
     # Collecter un échantillon représentatif (1 ligne par résultat avec données)
     if [ "$COUNT_RESULTAT" -gt 0 ]; then
         SAMPLE_RESULTAT=$(echo "$RESULT_RESULTAT" | grep -E "^[[:space:]]*EFS001" | head -1 | awk -F'|' '{
@@ -678,7 +678,7 @@ $SAMPLE_RESULTAT"
             fi
         fi
     fi
-    
+
     success "✅ Résultat '$RESULTAT_TEST' : $COUNT_RESULTAT interaction(s)"
 done
 
@@ -729,16 +729,16 @@ for i in {1..10}; do
     START_TIME_PERF=$(date +%s.%N)
     $CQLSH -e "$QUERY1" > /dev/null 2>&1
     END_TIME_PERF=$(date +%s.%N)
-    
+
     if command -v bc &> /dev/null; then
         DURATION_PERF=$(echo "$END_TIME_PERF - $START_TIME_PERF" | bc)
     else
         DURATION_PERF=$(python3 -c "print($END_TIME_PERF - $START_TIME_PERF)")
     fi
-    
+
     TIMES_PERF+=("$DURATION_PERF")
     TOTAL_TIME_PERF=$(echo "$TOTAL_TIME_PERF + $DURATION_PERF" | bc 2>/dev/null || python3 -c "print($TOTAL_TIME_PERF + $DURATION_PERF)")
-    
+
     # Min/Max
     if (( $(echo "$DURATION_PERF < $MIN_TIME_PERF" | bc -l 2>/dev/null || echo "0") )); then
         MIN_TIME_PERF=$DURATION_PERF
@@ -817,23 +817,23 @@ if [ ${#ALL_CANAL_IDS[@]} -gt 0 ]; then
     TOTAL_CANAL_IDS=${#ALL_CANAL_IDS[@]}
     UNIQUE_CANAL_COUNT=${#UNIQUE_CANAL_IDS[@]}
     DUPLICATES_CANAL=$((TOTAL_CANAL_IDS - UNIQUE_CANAL_COUNT))
-    
+
     # Collecter un échantillon représentatif (utiliser l'échantillon de TEST 6 qui montre déjà la cohérence)
     # On réutilise SAMPLE6_ALL qui contient déjà un échantillon représentatif par canal
     SAMPLE9_ALL="$SAMPLE6_ALL"
-    
+
     result "📊 Résultats cohérence multi-canaux :"
     echo "   - Total IDs collectés : $TOTAL_CANAL_IDS"
     echo "   - IDs uniques : $UNIQUE_CANAL_COUNT"
     echo "   - Doublons détectés : $DUPLICATES_CANAL"
-    
+
     # VALIDATION : Absence de doublons (une interaction ne peut avoir qu'un seul canal)
     if [ "$DUPLICATES_CANAL" -eq 0 ]; then
         success "✅ Cohérence validée : Aucun doublon entre canaux (une interaction = un canal)"
     else
         warn "⚠️  Incohérence détectée : $DUPLICATES_CANAL doublon(s) entre canaux"
     fi
-    
+
     # VALIDATION COMPLÈTE
     validate_complete \
         "TEST 9 : Cohérence Multi-Canaux" \
@@ -866,31 +866,31 @@ SUCCESSFUL_QUERIES_CANAL=0
 SAMPLE10_ALL=""  # Échantillon global pour TEST 10
 
 for CANAL_LOAD in "${CANAUX_LOAD[@]}"; do
-    QUERY_LOAD_CANAL="SELECT COUNT(*) FROM $KEYSPACE.$TABLE 
-    WHERE code_efs = '$CODE_EFS' 
+    QUERY_LOAD_CANAL="SELECT COUNT(*) FROM $KEYSPACE.$TABLE
+    WHERE code_efs = '$CODE_EFS'
       AND numero_client = '$NUMERO_CLIENT'
       AND canal = '$CANAL_LOAD'
     LIMIT 1;"
-    
+
     START_TIME_LOAD_CANAL=$(date +%s.%N)
     RESULT_LOAD_CANAL=$($CQLSH -e "$QUERY_LOAD_CANAL" 2>&1)
     EXIT_CODE_LOAD_CANAL=$?
     END_TIME_LOAD_CANAL=$(date +%s.%N)
-    
+
     if command -v bc &> /dev/null; then
         DURATION_LOAD_CANAL=$(echo "$END_TIME_LOAD_CANAL - $START_TIME_LOAD_CANAL" | bc)
     else
         DURATION_LOAD_CANAL=$(python3 -c "print($END_TIME_LOAD_CANAL - $START_TIME_LOAD_CANAL)")
     fi
-    
+
     if [ $EXIT_CODE_LOAD_CANAL -eq 0 ]; then
         SUCCESSFUL_QUERIES_CANAL=$((SUCCESSFUL_QUERIES_CANAL + 1))
         LOAD_TIMES_CANAL+=("$DURATION_LOAD_CANAL")
         TOTAL_LOAD_TIME_CANAL=$(echo "$TOTAL_LOAD_TIME_CANAL + $DURATION_LOAD_CANAL" | bc 2>/dev/null || python3 -c "print($TOTAL_LOAD_TIME_CANAL + $DURATION_LOAD_CANAL)")
-        
+
         # Extraire le COUNT pour l'échantillon
         COUNT_LOAD_CANAL=$(echo "$RESULT_LOAD_CANAL" | (grep -E "^\s+[0-9]+" || true) | tr -d ' ' || echo "0")
-        
+
         # Collecter un échantillon représentatif (canal, count, temps)
         SAMPLE_LINE=$(printf "| %s | %s | %.4fs |" "$CANAL_LOAD" "$COUNT_LOAD_CANAL" "$DURATION_LOAD_CANAL")
         if [ -z "$SAMPLE10_ALL" ]; then
@@ -904,19 +904,19 @@ done
 
 if [ "$SUCCESSFUL_QUERIES_CANAL" -gt 0 ]; then
     AVG_LOAD_TIME_CANAL=$(echo "scale=4; $TOTAL_LOAD_TIME_CANAL / $SUCCESSFUL_QUERIES_CANAL" | bc 2>/dev/null || python3 -c "print($TOTAL_LOAD_TIME_CANAL / $SUCCESSFUL_QUERIES_CANAL)")
-    
+
     result "📊 Résultats test de charge multi-canaux :"
     echo "   - Requêtes réussies : $SUCCESSFUL_QUERIES_CANAL / ${#CANAUX_LOAD[@]}"
     echo "   - Temps moyen par requête : ${AVG_LOAD_TIME_CANAL}s"
     echo "   - Temps total : ${TOTAL_LOAD_TIME_CANAL}s"
-    
+
     # VALIDATION : Performance sous charge
     if (( $(echo "$AVG_LOAD_TIME_CANAL < 0.2" | bc -l 2>/dev/null || echo "0") )); then
         success "✅ Performance sous charge validée : Temps moyen acceptable (< 0.2s)"
     else
         warn "⚠️  Performance sous charge : Temps moyen ${AVG_LOAD_TIME_CANAL}s (peut être améliorée)"
     fi
-    
+
     # VALIDATION COMPLÈTE
     validate_complete \
         "TEST 10 : Test de Charge Multi-Canaux" \
@@ -946,8 +946,8 @@ info "📝 Test très complexe : Combinaison canal + résultat avec performance.
 CANAL_COMB="email"
 RESULTAT_COMB="succès"
 
-QUERY_COMB="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY_COMB="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND canal = '$CANAL_COMB'
   AND resultat = '$RESULTAT_COMB'
@@ -973,16 +973,16 @@ for i in {1..10}; do
     START_TIME_COMB=$(date +%s.%N)
     $CQLSH -e "$QUERY_COMB" > /dev/null 2>&1
     END_TIME_COMB=$(date +%s.%N)
-    
+
     if command -v bc &> /dev/null; then
         DURATION_COMB=$(echo "$END_TIME_COMB - $START_TIME_COMB" | bc)
     else
         DURATION_COMB=$(python3 -c "print($END_TIME_COMB - $START_TIME_COMB)")
     fi
-    
+
     TIMES_COMB+=("$DURATION_COMB")
     TOTAL_TIME_COMB=$(echo "$TOTAL_TIME_COMB + $DURATION_COMB" | bc 2>/dev/null || python3 -c "print($TOTAL_TIME_COMB + $DURATION_COMB)")
-    
+
     # Min/Max
     if (( $(echo "$DURATION_COMB < $MIN_TIME_COMB" | bc -l 2>/dev/null || echo "0") )); then
         MIN_TIME_COMB=$DURATION_COMB
@@ -1540,7 +1540,7 @@ fi)
 
 ---
 
-**Date** : 2025-12-01  
+**Date** : 2025-12-01
 **Script** : \`12_test_filtrage_canal.sh\`
 EOF
 
@@ -1550,4 +1550,3 @@ success "✅ Tests terminés avec succès"
 echo ""
 result "📄 Rapport généré : $REPORT_FILE"
 echo ""
-

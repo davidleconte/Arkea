@@ -25,6 +25,7 @@ Le script 18 est organisé en **5 étapes principales** :
 ### Contenu Détaillé
 
 #### Partie 1-4 : Orchestration
+
 - ✅ Vérifications d'environnement
 - ✅ Appels à d'autres scripts (setup, chargement)
 - ✅ Attente de l'indexation
@@ -32,7 +33,9 @@ Le script 18 est organisé en **5 étapes principales** :
 - ✅ Pas d'ingestion directe (délègue aux scripts appelés)
 
 #### Partie 5 : Démonstrations (10 démonstrations)
+
 Chaque démonstration suit le même pattern :
+
 1. **Définition** : Explication du concept (full-text, stemming, asciifolding, etc.)
 2. **Requête CQL** : Affichage de la requête avant exécution
 3. **Explication** : Ce que la démonstration prouve
@@ -40,6 +43,7 @@ Chaque démonstration suit le même pattern :
 5. **Résultats** : Affichage des résultats
 
 **Démonstrations incluses** :
+
 1. Recherche Full-Text Simple
 2. Stemming Français
 3. Asciifolding (Gestion des Accents)
@@ -77,11 +81,13 @@ Chaque démonstration suit le même pattern :
 ### Option 1 : Adapter le Template 43 (Didactique Général)
 
 **Avantages** :
+
 - ✅ Structure similaire (définition, requête, explication, résultats)
 - ✅ Déjà conçu pour les démonstrations
 - ✅ Supporte l'affichage de DML
 
 **Inconvénients** :
+
 - ⚠️ Conçu pour un seul test, pas pour plusieurs démonstrations
 - ⚠️ Pas de section orchestration (appels à d'autres scripts)
 - ⚠️ Pas de structure pour multiples démonstrations
@@ -89,6 +95,7 @@ Chaque démonstration suit le même pattern :
 ### Option 2 : Créer un Nouveau Template (Orchestration/Démonstration Complète)
 
 **Avantages** :
+
 - ✅ Spécialement conçu pour scripts d'orchestration
 - ✅ Supporte multiples démonstrations avec structure claire
 - ✅ Section orchestration (vérifications, appels à scripts)
@@ -96,6 +103,7 @@ Chaque démonstration suit le même pattern :
 - ✅ Génération de rapport structuré pour toutes les démonstrations
 
 **Inconvénients** :
+
 - ⚠️ Nouveau template à créer et maintenir
 
 ---
@@ -105,6 +113,7 @@ Chaque démonstration suit le même pattern :
 ### **Créer un Nouveau Template : Template 63 - Script d'Orchestration/Démonstration Complète**
 
 **Raisons** :
+
 1. ✅ Le script 18 est fondamentalement différent des autres scripts
 2. ✅ Il combine orchestration + multiples démonstrations
 3. ✅ Structure spécifique nécessaire (étapes + démonstrations)
@@ -159,13 +168,16 @@ Chaque démonstration suit le même pattern :
 ## 📝 Sections du Nouveau Template
 
 ### 1. **Section Orchestration**
+
 - Vérifications d'environnement
 - Appels à scripts dépendants
 - Gestion des erreurs
 - Attente de l'indexation
 
 ### 2. **Section Démonstrations (Boucle)**
+
 Pour chaque démonstration :
+
 - **Définition** : Explication du concept
 - **Requête CQL** : Affichage avant exécution
 - **Explication** : Ce que la démonstration prouve
@@ -174,11 +186,13 @@ Pour chaque démonstration :
 - **Validation** : Vérification des résultats attendus
 
 ### 3. **Section Résumé**
+
 - Statistiques globales
 - Résumé des démonstrations réussies/échouées
 - Points clés démontrés
 
 ### 4. **Section Documentation**
+
 - Génération d'un rapport markdown structuré
 - Toutes les démonstrations documentées
 - Résultats capturés pour chaque démonstration
@@ -202,16 +216,14 @@ Pour chaque démonstration :
 **Recommandation** : **Créer un nouveau Template 63** pour les scripts d'orchestration/démonstration complète.
 
 **Raisons** :
+
 1. ✅ Le script 18 a une structure unique (orchestration + multiples démonstrations)
 2. ✅ Aucun template existant ne couvre ce cas d'usage
 3. ✅ Le template peut être réutilisé pour d'autres scripts d'orchestration
 4. ✅ Structure claire et maintenable
 
 **Prochaines étapes** :
+
 1. Créer le Template 63 : `63_TEMPLATE_SCRIPT_ORCHESTRATION_DIDACTIQUE.md`
 2. Appliquer le template au script 18
 3. Générer la version didactique : `18_demonstration_complete_v2_didactique.sh`
-
-
-
-

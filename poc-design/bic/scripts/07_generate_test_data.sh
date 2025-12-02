@@ -79,8 +79,8 @@ success "Schéma vérifié"
 cat > "$REPORT_FILE" << EOF
 # 📥 Démonstration : Génération des Données de Test Ciblées
 
-**Date** : $(date +'%Y-%m-%d %H:%M:%S')  
-**Script** : \`07_generate_test_data.sh\`  
+**Date** : $(date +'%Y-%m-%d %H:%M:%S')
+**Script** : \`07_generate_test_data.sh\`
 **Scénario** : $SCENARIO
 
 ---
@@ -106,7 +106,7 @@ insert_interaction() {
     local resultat="$7"
     local json_data="$8"
     local colonnes_dynamiques="$9"
-    
+
     local query="INSERT INTO $KEYSPACE.$TABLE (
         code_efs, numero_client, date_interaction, canal, type_interaction, idt_tech,
         resultat, json_data, colonnes_dynamiques, created_at, updated_at, version
@@ -114,7 +114,7 @@ insert_interaction() {
         '$code_efs', '$numero_client', '$date_interaction', '$canal', '$type_interaction', '$idt_tech',
         '$resultat', '$json_data', $colonnes_dynamiques, '$date_interaction', '$date_interaction', 1
     );"
-    
+
     $CQLSH -e "$query" > /dev/null 2>&1
 }
 
@@ -125,31 +125,31 @@ if [ "$SCENARIO" = "all" ] || [ "$SCENARIO" = "timeline" ]; then
     section "  SCÉNARIO : Timeline (Script 11)"
     section "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-    
+
     demo "Objectif : Générer des données pour test timeline avec pagination"
-    
+
     info "Génération de 50 interactions pour CLIENT123 sur 2 ans..."
-    
+
     CODE_EFS="EFS001"
     NUMERO_CLIENT="CLIENT123"
-    
+
     for i in {1..50}; do
         # Date sur 2 ans
         DAYS_AGO=$((730 - i * 14))  # Espacement de 14 jours
         DATE_INTERACTION=$(date -u -v-${DAYS_AGO}d +"%Y-%m-%d %H:%M:%S+0000" 2>/dev/null || date -u -d "${DAYS_AGO} days ago" +"%Y-%m-%d %H:%M:%S+0000" 2>/dev/null || echo "2024-01-01 00:00:00+0000")
-        
+
         CANAL=$(echo -e "email\nSMS\nagence\ntelephone\nweb" | shuf -n 1)
         TYPE=$(echo -e "consultation\nconseil\ntransaction\nreclamation" | shuf -n 1)
         IDT_TECH="INT-2024-$(printf "%06d" $i)"
         RESULTAT="succès"
-        
+
         JSON_DATA="{\"id_interaction\":\"$IDT_TECH\",\"code_efs\":\"$CODE_EFS\",\"numero_client\":\"$NUMERO_CLIENT\",\"date_interaction\":\"${DATE_INTERACTION}Z\",\"canal\":\"$CANAL\",\"type_interaction\":\"$TYPE\",\"resultat\":\"$RESULTAT\",\"details\":\"Interaction $i pour test timeline\",\"sujet\":\"Test Timeline\",\"contenu\":\"Contenu test\",\"id_conseiller\":\"CONS001\",\"nom_conseiller\":\"Dupont\",\"prenom_conseiller\":\"Jean\",\"duree_interaction\":180,\"tags\":[\"test\",\"timeline\"],\"categorie\":\"service_client\"}"
-        
+
         COLONNES_DYN="{ 'resultat_detail': 'succès - résolu', 'priorite': 'moyenne', 'categorie': 'service_client', 'duree_secondes': '180' }"
-        
+
         insert_interaction "$CODE_EFS" "$NUMERO_CLIENT" "$DATE_INTERACTION" "$CANAL" "$TYPE" "$IDT_TECH" "$RESULTAT" "$JSON_DATA" "$COLONNES_DYN"
     done
-    
+
     success "✅ 50 interactions générées pour CLIENT123"
 fi
 
@@ -160,35 +160,35 @@ if [ "$SCENARIO" = "all" ] || [ "$SCENARIO" = "filtrage" ]; then
     section "  SCÉNARIO : Filtrage (Script 12)"
     section "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-    
+
     demo "Objectif : Générer des données pour test filtrage par canal et résultat"
-    
+
     info "Génération de données pour tous les canaux et résultats..."
-    
+
     CODE_EFS="EFS001"
     NUMERO_CLIENT="CLIENT456"
     DATE_BASE=$(date -u +"%Y-%m-%d %H:%M:%S+0000" 2>/dev/null || echo "2024-12-01 00:00:00+0000")
-    
+
     CANAUX=("email" "SMS" "agence" "telephone" "web" "RDV" "agenda" "mail")
     RESULTATS=("succès" "échec" "en_cours" "annule")
-    
+
     i=1
     for canal in "${CANAUX[@]}"; do
         for resultat in "${RESULTATS[@]}"; do
             DATE_INTERACTION=$(date -u -v-${i}d +"%Y-%m-%d %H:%M:%S+0000" 2>/dev/null || date -u -d "${i} days ago" +"%Y-%m-%d %H:%M:%S+0000" 2>/dev/null || echo "$DATE_BASE")
             TYPE="consultation"
             IDT_TECH="INT-FILTRE-$(printf "%03d" $i)"
-            
+
             JSON_DATA="{\"id_interaction\":\"$IDT_TECH\",\"code_efs\":\"$CODE_EFS\",\"numero_client\":\"$NUMERO_CLIENT\",\"date_interaction\":\"${DATE_INTERACTION}Z\",\"canal\":\"$canal\",\"type_interaction\":\"$TYPE\",\"resultat\":\"$resultat\",\"details\":\"Test filtrage canal=$canal resultat=$resultat\",\"sujet\":\"Test Filtrage\",\"contenu\":\"Contenu test\",\"id_conseiller\":\"CONS001\",\"nom_conseiller\":\"Dupont\",\"prenom_conseiller\":\"Jean\",\"duree_interaction\":180,\"tags\":[\"test\",\"filtrage\"],\"categorie\":\"service_client\"}"
-            
+
             COLONNES_DYN="{ 'resultat_detail': '$resultat - test', 'priorite': 'moyenne', 'categorie': 'service_client', 'duree_secondes': '180' }"
-            
+
             insert_interaction "$CODE_EFS" "$NUMERO_CLIENT" "$DATE_INTERACTION" "$canal" "$TYPE" "$IDT_TECH" "$resultat" "$JSON_DATA" "$COLONNES_DYN"
-            
+
             ((i++))
         done
     done
-    
+
     success "✅ Données de filtrage générées (8 canaux × 4 résultats = 32 interactions)"
 fi
 
@@ -199,17 +199,17 @@ if [ "$SCENARIO" = "all" ] || [ "$SCENARIO" = "fulltext" ]; then
     section "  SCÉNARIO : Full-Text Search (Script 16)"
     section "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-    
+
     demo "Objectif : Générer des données pour test recherche full-text"
-    
+
     info "Génération de données avec termes recherchables..."
-    
+
     CODE_EFS="EFS001"
     NUMERO_CLIENT="CLIENT789"
     DATE_BASE=$(date -u +"%Y-%m-%d %H:%M:%S+0000" 2>/dev/null || echo "2024-12-01 00:00:00+0000")
-    
+
     TERMES=("réclamation" "problème" "virement" "conseil" "investissement" "épargne")
-    
+
     i=1
     for terme in "${TERMES[@]}"; do
         DATE_INTERACTION=$(date -u -v-${i}d +"%Y-%m-%d %H:%M:%S+0000" 2>/dev/null || date -u -d "${i} days ago" +"%Y-%m-%d %H:%M:%S+0000" 2>/dev/null || echo "$DATE_BASE")
@@ -217,16 +217,16 @@ if [ "$SCENARIO" = "all" ] || [ "$SCENARIO" = "fulltext" ]; then
         TYPE="reclamation"
         IDT_TECH="INT-FULLTEXT-$(printf "%03d" $i)"
         RESULTAT="succès"
-        
+
         JSON_DATA="{\"id_interaction\":\"$IDT_TECH\",\"code_efs\":\"$CODE_EFS\",\"numero_client\":\"$NUMERO_CLIENT\",\"date_interaction\":\"${DATE_INTERACTION}Z\",\"canal\":\"$CANAL\",\"type_interaction\":\"$TYPE\",\"resultat\":\"$RESULTAT\",\"details\":\"Le client a signalé une $terme concernant son compte. La $terme a été traitée avec succès.\",\"sujet\":\"Test Full-Text - $terme\",\"contenu\":\"Contenu contenant le terme $terme pour test recherche full-text.\",\"id_conseiller\":\"CONS001\",\"nom_conseiller\":\"Dupont\",\"prenom_conseiller\":\"Jean\",\"duree_interaction\":180,\"tags\":[\"test\",\"fulltext\",\"$terme\"],\"categorie\":\"service_client\"}"
-        
+
         COLONNES_DYN="{ 'resultat_detail': 'succès - résolu', 'priorite': 'moyenne', 'categorie': 'service_client', 'duree_secondes': '180' }"
-        
+
         insert_interaction "$CODE_EFS" "$NUMERO_CLIENT" "$DATE_INTERACTION" "$CANAL" "$TYPE" "$IDT_TECH" "$RESULTAT" "$JSON_DATA" "$COLONNES_DYN"
-        
+
         ((i++))
     done
-    
+
     success "✅ Données full-text générées (${#TERMES[@]} interactions avec termes recherchables)"
 fi
 
@@ -289,7 +289,7 @@ cat >> "$REPORT_FILE" << EOF
 
 ## ✅ Résultats
 
-**Scénario exécuté** : $SCENARIO  
+**Scénario exécuté** : $SCENARIO
 **Total interactions** : $TOTAL_COUNT
 
 **Scénarios couverts** :
@@ -304,7 +304,7 @@ cat >> "$REPORT_FILE" << EOF
 
 ---
 
-**Date** : $(date +'%Y-%m-%d %H:%M:%S')  
+**Date** : $(date +'%Y-%m-%d %H:%M:%S')
 **Script** : \`07_generate_test_data.sh\`
 EOF
 
@@ -315,4 +315,3 @@ echo ""
 result "📊 Total interactions : $TOTAL_COUNT"
 result "📄 Rapport : $REPORT_FILE"
 echo ""
-

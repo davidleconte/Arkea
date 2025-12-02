@@ -17,6 +17,7 @@
 ### Solution Alternative
 
 **Script Python** qui :
+
 - ✅ Utilise le driver Cassandra Python (`cassandra-driver`)
 - ✅ Itère sur les partitions (code_si, contrat)
 - ✅ Exporte directement vers Parquet avec PyArrow
@@ -70,8 +71,8 @@ Chaque requête utilise les partition keys correctement :
 ```python
 query = f"""
 SELECT ...
-FROM domiramacatops_poc.operations_by_account 
-WHERE code_si = '{code_si}' AND contrat = '{contrat}' 
+FROM domiramacatops_poc.operations_by_account
+WHERE code_si = '{code_si}' AND contrat = '{contrat}'
   AND date_op >= {start_ts} AND date_op < {end_ts}
 """
 ```
@@ -172,5 +173,3 @@ pip3 install cassandra-driver pyarrow pandas
 ---
 
 **Date de génération** : 2025-11-30
-
-

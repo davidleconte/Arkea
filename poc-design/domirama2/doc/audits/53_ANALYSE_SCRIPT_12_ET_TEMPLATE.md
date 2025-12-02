@@ -44,32 +44,39 @@ Le script `12_test_domirama2_search.sh` est un **script de test/recherche** qui 
 ### Fonctionnalités Actuelles
 
 ✅ **Vérifications** :
+
 - HCD démarré
 - Keyspace existe
 
 ✅ **Exécution** :
+
 - Exécution du fichier CQL de test via `cqlsh -f`
 - Filtrage des warnings
 
 ✅ **Messages** :
+
 - Messages informatifs sur les tests
 - Explications sur les opérateurs SAI
 
 ### Limitations Actuelles
 
 ❌ **Pas d'affichage des requêtes CQL** :
+
 - Les requêtes CQL ne sont pas affichées avant exécution
 - Pas d'explication de chaque requête
 
 ❌ **Pas de capture des résultats** :
+
 - Les résultats ne sont pas capturés et formatés
 - Pas de validation automatique des résultats
 
 ❌ **Pas d'explications détaillées** :
+
 - Pas d'explications sur les opérateurs SAI (`:` vs `=`)
 - Pas d'explications sur les équivalences HBase → HCD
 
 ❌ **Pas de documentation générée** :
+
 - Pas de rapport markdown généré automatiquement
 - Pas de structure didactique
 
@@ -168,11 +175,13 @@ Le script `25_test_hybrid_search_v2_didactique.sh` est un script de test didacti
 - ✅ Structure didactique (4-6 parties)
 
 **Similarités avec Script 12** :
+
 - Type : Test de recherche
 - Format : CQL queries
 - Objectif : Valider des fonctionnalités de recherche
 
 **Différences** :
+
 - Script 25 : Hybrid Search (Full-Text + Vector)
 - Script 12 : Full-Text Search uniquement (SAI)
 
@@ -191,11 +200,13 @@ Le script `23_test_fuzzy_search_v2_didactique.sh` est également un script de te
 ### Option 1 : Utiliser le Template Didactique Général avec Enrichissements (Recommandé) ⭐
 
 **Avantages** :
+
 - Réutilise le template existant
 - Cohérence avec les autres scripts de test didactiques
 - Adaptations mineures nécessaires
 
 **Adaptations nécessaires** :
+
 - Ajouter section "Opérateurs SAI" (explication `:` vs `=`)
 - Ajouter section "Équivalences HBase → HCD" (Solr → SAI)
 - Adapter la capture des résultats pour les requêtes de recherche
@@ -206,10 +217,12 @@ Le script `23_test_fuzzy_search_v2_didactique.sh` est également un script de te
 ### Option 2 : Créer un Template Spécifique pour Tests de Recherche
 
 **Avantages** :
+
 - Template dédié aux tests de recherche
 - Sections spécifiques (opérateurs SAI, équivalences HBase)
 
 **Inconvénients** :
+
 - Duplication avec template didactique général
 - Maintenance de deux templates similaires
 - Pas de valeur ajoutée significative
@@ -219,10 +232,12 @@ Le script `23_test_fuzzy_search_v2_didactique.sh` est également un script de te
 ### Option 3 : Enrichir le Template Didactique Général
 
 **Avantages** :
+
 - Un seul template pour tous les tests
 - Sections conditionnelles selon le type de test
 
 **Inconvénients** :
+
 - Template plus complexe
 - Sections conditionnelles à gérer
 - Risque de confusion
@@ -290,18 +305,21 @@ Le script `23_test_fuzzy_search_v2_didactique.sh` est également un script de te
 ### 1. Opérateurs SAI
 
 **À expliquer** :
+
 - `:` : Opérateur full-text (utilise l'index SAI full-text avec analyse)
 - `=` : Opérateur exact match (utilise l'index SAI standard, pas d'analyse)
 
 ### 2. Équivalences HBase → HCD
 
 **À expliquer** :
+
 - **HBase** : SCAN → Solr → MultiGet
 - **HCD** : Requête CQL directe avec SAI (pas de Solr nécessaire)
 
 ### 3. Capture des Résultats
 
 **À adapter** :
+
 - Capturer le nombre de résultats pour chaque requête
 - Afficher un échantillon des résultats
 - Valider la pertinence des résultats
@@ -309,8 +327,3 @@ Le script `23_test_fuzzy_search_v2_didactique.sh` est également un script de te
 ---
 
 **✅ Conclusion : Le template didactique général est applicable avec des enrichissements spécifiques pour les tests de recherche SAI !**
-
-
-
-
-

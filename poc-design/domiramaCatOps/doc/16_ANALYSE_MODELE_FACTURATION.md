@@ -13,6 +13,7 @@
 D'après l'analyse du codebase, les libellés bancaires incluent :
 
 **Facturation / Paiements** :
+
 - LOYER, LOYER IMPAYE, CHARGES COPROPRIETE
 - TAXE FONCIERE, ASSURANCE HABITATION
 - PRÉLÈVEMENT, VIREMENT, VIREMENT SALAIRE
@@ -20,10 +21,12 @@ D'après l'analyse du codebase, les libellés bancaires incluent :
 - FRAIS BANCAIRES, AGIOS, COMMISSION
 
 **Commerces** :
+
 - CB CARREFOUR, CB SUPERMARCHE, CB RESTAURANT
 - CB PHARMACIE, CB STATION SERVICE
 
 **Caractéristiques** :
+
 - ✅ Terminologie financière/bancaire spécifique
 - ✅ Abréviations courantes (CB, PRLV, etc.)
 - ✅ Contexte français (accents, formatage)
@@ -76,6 +79,7 @@ D'après l'analyse du codebase, les libellés bancaires incluent :
 ### Pour le Domaine Bancaire
 
 **Libellés typiques** :
+
 - "LOYER IMPAYE LOCATION"
 - "VIREMENT SALAIRE MENSUEL"
 - "CB CARREFOUR PARIS"
@@ -83,6 +87,7 @@ D'après l'analyse du codebase, les libellés bancaires incluent :
 - "FRAIS BANCAIRES"
 
 **Caractéristiques** :
+
 - ✅ Format structuré (type + détails)
 - ✅ Terminologie financière
 - ✅ Contexte français
@@ -91,11 +96,13 @@ D'après l'analyse du codebase, les libellés bancaires incluent :
 ### Pertinence du Modèle Facturation
 
 **Avantages** :
+
 - ✅ Comprend mieux la terminologie financière
 - ✅ Optimisé pour documents structurés
 - ✅ Meilleure compréhension des factures/paiements
 
 **Inconvénients** :
+
 - ⚠️ Peut être moins performant sur libellés courts
 - ⚠️ Moins généraliste (peut manquer certains contextes)
 - ⚠️ Peu de modèles disponibles/testés
@@ -103,12 +110,14 @@ D'après l'analyse du codebase, les libellés bancaires incluent :
 ### Pertinence d'e5-base
 
 **Avantages** :
+
 - ✅ Bon compromis performance/pertinence
 - ✅ Support multilingue excellent
 - ✅ Modèle bien testé et documenté
 - ✅ Performances stables
 
 **Inconvénients** :
+
 - ⚠️ Moins spécialisé facturation
 - ⚠️ Peut manquer certaines nuances financières
 
@@ -121,12 +130,14 @@ D'après l'analyse du codebase, les libellés bancaires incluent :
 **Recommandation** : **Oui, si le modèle est disponible et performant**
 
 **Conditions** :
+
 - ✅ Modèle disponible sur HuggingFace
 - ✅ Dimensions compatibles (768-1024)
 - ✅ Performance validée sur libellés bancaires
 - ✅ Support français
 
 **Avantages** :
+
 - ✅ Meilleure compréhension terminologie financière
 - ✅ Optimisé pour facturation/paiement
 - ✅ Pertinence potentiellement supérieure pour libellés bancaires
@@ -138,6 +149,7 @@ D'après l'analyse du codebase, les libellés bancaires incluent :
 **Recommandation** : **e5-base reste un bon choix**
 
 **Justification** :
+
 - ✅ Bon compromis performance/pertinence
 - ✅ Support multilingue
 - ✅ Modèle bien testé
@@ -167,11 +179,13 @@ D'après l'analyse du codebase, les libellés bancaires incluent :
 ### Critères de Décision
 
 **Choisir modèle facturation si** :
+
 - ✅ Pertinence > e5-base sur libellés facturation
 - ✅ Latence acceptable (< 200ms)
 - ✅ Disponibilité et stabilité
 
 **Choisir e5-base si** :
+
 - ✅ Modèle facturation non disponible
 - ✅ e5-base plus performant globalement
 - ✅ Meilleure stabilité
@@ -205,6 +219,7 @@ D'après l'analyse du codebase, les libellés bancaires incluent :
 **Recommandation** : **Tester d'abord le modèle facturation** si disponible, sinon utiliser e5-base.
 
 **Justification** :
+
 - ✅ Le domaine bancaire est effectivement spécialisé facturation/paiement
 - ✅ Un modèle spécialisé peut être plus pertinent
 - ✅ Mais nécessite validation par tests
@@ -215,4 +230,3 @@ D'après l'analyse du codebase, les libellés bancaires incluent :
 
 **Date de génération** : 2025-11-30  
 **Version** : 1.0
-

@@ -7,7 +7,7 @@
 #   Ce script démontre l'export incrémental de données depuis HCD vers
 #   des fichiers Parquet, équivalent aux exports HBase avec FullScan,
 #   STARTROW, STOPROW et TIMERANGE.
-#   
+#
 #   Fonctionnalités :
 #   - Export par fenêtre de dates (équivalent TIMERANGE HBase)
 #   - Export avec filtrage STARTROW/STOPROW (équivalent HBase)
@@ -258,7 +258,7 @@ try {
   val dfRead = spark.read.parquet(outputPath)
   val countRead = dfRead.count()
   println(s"✅ Vérification OK : \$countRead opérations lues depuis Parquet")
-  
+
   if (count != countRead) {
     println(s"⚠️  ATTENTION : Incohérence (\$count exportées vs \$countRead lues)")
   }
@@ -294,4 +294,3 @@ code "   spark-shell --jars $SPARK_CASSANDRA_CONNECTOR_JAR"
 code "   val df = spark.read.parquet(\"$OUTPUT_PATH\")"
 code "   df.show()"
 echo ""
-

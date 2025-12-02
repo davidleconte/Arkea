@@ -49,17 +49,17 @@ has_hardcoded_install_dir() {
 add_setup_paths() {
     local file="$1"
     local temp_file="${file}.tmp"
-    
+
     # Lire le contenu
     local content
     content=$(cat "$file")
-    
+
     # Vérifier si set -euo pipefail existe
     if ! echo "$content" | grep -q "^set -euo pipefail"; then
         warn "  ⚠️  Pas de 'set -euo pipefail' dans $file"
         return 1
     fi
-    
+
     # Créer le bloc setup_paths
     local setup_block='# Configuration - Utiliser setup_paths si disponible
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -74,12 +74,12 @@ else
     HCD_HOST="${HCD_HOST:-localhost}"
     HCD_PORT="${HCD_PORT:-9042}"
 fi'
-    
+
     # Insérer après set -euo pipefail
     local new_content
     new_content=$(echo "$content" | sed "/^set -euo pipefail/a\\
 $setup_block")
-    
+
     # Écrire le nouveau contenu
     echo "$new_content" > "$temp_file"
     mv "$temp_file" "$file"
@@ -89,34 +89,34 @@ $setup_block")
 replace_hardcoded_paths() {
     local file="$1"
     local temp_file="${file}.tmp"
-    
+
     # Lire le fichier
     local content
     content=$(cat "$file")
-    
+
     # Vérifier si le fichier contient le pattern
     if ! has_hardcoded_install_dir "$file"; then
         return 0  # Pas de remplacement nécessaire
     fi
-    
+
     # Si setup_paths n'existe pas, l'ajouter
     if ! has_setup_paths "$file"; then
         info "  ➕ Ajout de setup_paths() dans $file"
         add_setup_paths "$file"
         content=$(cat "$file")  # Relire après modification
     fi
-    
+
     # Supprimer les lignes INSTALL_DIR hardcodées
     local new_content
     new_content=$(echo "$content" | sed -E "
         /INSTALL_DIR=.*\"\/Users\/david\.leconte\/Documents\/Arkea\"/d
         /INSTALL_DIR=.*\"\/Users\/david\.leconte/d
     ")
-    
+
     # Écrire le nouveau contenu
     echo "$new_content" > "$temp_file"
     mv "$temp_file" "$file"
-    
+
     success "  ✅ Migré: $(basename "$file")"
     return 0
 }
@@ -125,24 +125,24 @@ replace_hardcoded_paths() {
 process_file() {
     local file="$1"
     local relative_path="${file#$ARKEA_HOME/}"
-    
+
     # Ignorer les fichiers de backup
     if [[ "$file" == *.bak ]] || [[ "$file" == *.tmp ]] || [[ "$file" == *archive* ]]; then
         return 0
     fi
-    
+
     # Ignorer les fichiers non-shell
     if [[ "$file" != *.sh ]]; then
         return 0
     fi
-    
+
     # Vérifier si le fichier a des chemins hardcodés
     if has_hardcoded_install_dir "$file"; then
         info "  📝 Traitement: $relative_path"
         replace_hardcoded_paths "$file"
         return 0
     fi
-    
+
     return 0
 }
 
@@ -151,20 +151,20 @@ main() {
     info "🚀 Démarrage de la migration des chemins hardcodés"
     info "   ARKEA_HOME: $ARKEA_HOME"
     echo ""
-    
+
     local total_files=0
     local migrated_files=0
     local skipped_files=0
-    
+
     # Traiter tous les fichiers
     for dir in "${DIRS[@]}"; do
         if [ ! -d "$dir" ]; then
             warn "  ⚠️  Répertoire non trouvé: $dir"
             continue
         fi
-        
+
         info "📁 Traitement de: ${dir#$ARKEA_HOME/}"
-        
+
         while IFS= read -r -d '' file; do
             total_files=$((total_files + 1))
             if process_file "$file"; then
@@ -173,10 +173,10 @@ main() {
                 skipped_files=$((skipped_files + 1))
             fi
         done < <(find "$dir" -type f -name "*.sh" -print0 2>/dev/null || true)
-        
+
         echo ""
     done
-    
+
     # Résumé
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     success "✅ Migration terminée"

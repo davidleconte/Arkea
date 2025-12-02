@@ -26,6 +26,7 @@ Démontrer la capacité d'**export incrémental** depuis HCD vers HDFS au format
 **Alternative** : `27_export_incremental_parquet_spark_shell.sh` (spark-shell)
 
 **Fonctionnalités** :
+
 - Export depuis HCD vers HDFS (format Parquet)
 - Fenêtre glissante avec `WHERE date_op BETWEEN start AND end`
 - Partitionnement par `date_op` (performance)
@@ -33,6 +34,7 @@ Démontrer la capacité d'**export incrémental** depuis HCD vers HDFS au format
 - Vérification post-export
 
 **Usage** :
+
 ```bash
 # Export par défaut (Janvier 2024)
 ./27_export_incremental_parquet.sh
@@ -42,6 +44,7 @@ Démontrer la capacité d'**export incrémental** depuis HCD vers HDFS au format
 ```
 
 **Équivalent HBase** :
+
 ```java
 // HBase
 Scan scan = new Scan();
@@ -52,6 +55,7 @@ scan.setStopRow(stopRow);
 ```
 
 **HCD/Spark** :
+
 ```scala
 val df = spark.read
   .format("org.apache.spark.sql.cassandra")
@@ -76,17 +80,20 @@ df.write
 **Alternative** : `28_demo_fenetre_glissante.sh` (spark-shell)
 
 **Fonctionnalités** :
+
 - Export mensuel automatique (fenêtre glissante)
 - Idempotence (mode overwrite pour rejeux)
 - Gestion des périodes (janvier, février, mars, etc.)
 - Vérification des exports créés
 
 **Usage** :
+
 ```bash
 ./28_demo_fenetre_glissante.sh
 ```
 
 **Équivalent HBase** :
+
 ```java
 // HBase : TIMERANGE pour fenêtre glissante
 for (int month = 1; month <= 12; month++) {
@@ -98,12 +105,13 @@ for (int month = 1; month <= 12; month++) {
 ```
 
 **HCD/Spark** :
+
 ```scala
 // Fenêtre glissante mensuelle
 for (month <- 1 to 12) {
   val startDate = s"2024-${month:02d}-01"
   val endDate = s"2024-${(month + 1):02d}-01"
-  
+
   val df = spark.read
     .format("org.apache.spark.sql.cassandra")
     .load()
@@ -111,7 +119,7 @@ for (month <- 1 to 12) {
       col("date_op") >= startDate &&
       col("date_op") < endDate
     )
-  
+
   df.write
     .mode("overwrite")  // Idempotence
     .partitionBy("date_op")
@@ -124,6 +132,7 @@ for (month <- 1 to 12) {
 **Fonctionnalité** : Ciblage précis avec WHERE sur clustering keys
 
 **Exemple CQL** :
+
 ```cql
 -- Équivalent STARTROW/STOPROW HBase
 SELECT * FROM operations_by_account
@@ -135,6 +144,7 @@ WHERE code_si = '01' AND contrat = '1234567890'
 ```
 
 **Exemple Spark** :
+
 ```scala
 val df = spark.read
   .format("org.apache.spark.sql.cassandra")
@@ -195,6 +205,7 @@ val df = spark.read
 ```
 
 **Résultat** :
+
 - Fichiers Parquet créés dans `/tmp/exports/domirama/incremental/2024-01/`
 - Partitionnés par `date_op`
 - Compression Snappy
@@ -207,6 +218,7 @@ val df = spark.read
 ```
 
 **Résultat** :
+
 - Exports créés pour chaque mois (2024-01, 2024-02, 2024-03, etc.)
 - Chaque export est idempotent (rejeux possibles)
 
@@ -289,4 +301,3 @@ df.select(
 ---
 
 **✅ Export incrémental Parquet démontré et validé !**
-

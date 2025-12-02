@@ -37,6 +37,7 @@
 **Principe** : Certains termes sont corrects, d'autres ont des typos. La recherche hybride doit combiner Full-Text (pour les termes corrects) et Vector (pour les typos).
 
 #### Test 1 : Un terme correct, un avec typo
+
 ```python
 {
     "query": "LOYER impay",
@@ -48,6 +49,7 @@
 ```
 
 #### Test 2 : Deux termes corrects, un avec typo
+
 ```python
 {
     "query": "VIREMENT IMPAYE paris",
@@ -65,6 +67,7 @@
 **Principe** : Plusieurs termes (3, 4, 5) avec différentes combinaisons de typos.
 
 #### Test 3 : Trois termes avec typos partiels
+
 ```python
 {
     "query": "loyr impay paris",
@@ -76,6 +79,7 @@
 ```
 
 #### Test 4 : Quatre termes mixtes
+
 ```python
 {
     "query": "VIREMENT PERMANENT MENSUEL livret",
@@ -93,6 +97,7 @@
 **Principe** : Combinaison de variations linguistiques (pluriel, conjugaison) avec typos.
 
 #### Test 5 : Pluriel + typo
+
 ```python
 {
     "query": "loyrs impay",
@@ -104,6 +109,7 @@
 ```
 
 #### Test 6 : Conjugaison + typo
+
 ```python
 {
     "query": "virements impayes",
@@ -121,6 +127,7 @@
 **Principe** : Plusieurs mots formant un contexte, avec typos sur certains mots.
 
 #### Test 7 : Contexte complet avec typos
+
 ```python
 {
     "query": "loyr impay regularisation paris",
@@ -132,6 +139,7 @@
 ```
 
 #### Test 8 : Contexte partiel (mots-clés importants)
+
 ```python
 {
     "query": "loyr paris maison",
@@ -149,6 +157,7 @@
 **Principe** : Mots différents mais sémantiquement proches (synonymes).
 
 #### Test 9 : Synonyme sémantique
+
 ```python
 {
     "query": "paiement carte",
@@ -160,6 +169,7 @@
 ```
 
 #### Test 10 : Synonyme avec typo
+
 ```python
 {
     "query": "paiemnt carte",
@@ -177,6 +187,7 @@
 **Principe** : Recherches avec noms propres, codes, abréviations avec typos.
 
 #### Test 11 : Nom propre avec typo
+
 ```python
 {
     "query": "ratp navigo",
@@ -188,6 +199,7 @@
 ```
 
 #### Test 12 : Code avec typo
+
 ```python
 {
     "query": "sepa viremnt",
@@ -205,6 +217,7 @@
 **Principe** : Recherches avec noms de lieux, adresses avec typos.
 
 #### Test 13 : Localisation avec typo
+
 ```python
 {
     "query": "carrefour paris",
@@ -216,6 +229,7 @@
 ```
 
 #### Test 14 : Localisation avec typos
+
 ```python
 {
     "query": "carrefur parsi",
@@ -233,6 +247,7 @@
 **Principe** : Recherches combinant libellé + catégorie/type avec typos.
 
 #### Test 15 : Catégorie + libellé avec typo
+
 ```python
 {
     "query": "loyr habitation",
@@ -250,6 +265,7 @@
 **Principe** : Recherches avec contexte temporel ou montant.
 
 #### Test 16 : Contexte temporel
+
 ```python
 {
     "query": "virement permanent mensuel",
@@ -267,6 +283,7 @@
 **Principe** : Typos avec inversions de caractères (plus complexes).
 
 #### Test 17 : Inversion de caractères
+
 ```python
 {
     "query": "paris loyre",
@@ -316,11 +333,13 @@
 ### Option 2 : Ajouter Tous les Tests (17 nouveaux)
 
 **Avantages** :
+
 - ✅ Couverture complète de tous les cas complexes
 - ✅ Démonstration exhaustive des capacités
 - ✅ Documentation très complète
 
 **Inconvénients** :
+
 - ⚠️ Temps d'exécution plus long
 - ⚠️ Rapport très volumineux
 
@@ -352,7 +371,7 @@ complex_test_cases = [
         "complexity": "Moyenne",
         "category": "Typos Partielles"
     },
-    
+
     # Catégorie 2 : Multi-Termes (3+)
     {
         "query": "loyr impay paris",
@@ -372,7 +391,7 @@ complex_test_cases = [
         "complexity": "Élevée",
         "category": "Multi-Termes"
     },
-    
+
     # Catégorie 3 : Variations Linguistiques
     {
         "query": "loyrs impay",
@@ -383,7 +402,7 @@ complex_test_cases = [
         "complexity": "Élevée",
         "category": "Variations Linguistiques"
     },
-    
+
     # Catégorie 4 : Recherches Contextuelles
     {
         "query": "loyr impay regularisation paris",
@@ -394,7 +413,7 @@ complex_test_cases = [
         "complexity": "Élevée",
         "category": "Recherches Contextuelles"
     },
-    
+
     # Catégorie 5 : Synonymes Sémantiques
     {
         "query": "paiement carte",
@@ -405,7 +424,7 @@ complex_test_cases = [
         "complexity": "Très Élevée",
         "category": "Synonymes Sémantiques"
     },
-    
+
     # Catégorie 6 : Noms Propres
     {
         "query": "ratp navigo",
@@ -416,7 +435,7 @@ complex_test_cases = [
         "complexity": "Moyenne",
         "category": "Noms Propres"
     },
-    
+
     # Catégorie 7 : Localisation
     {
         "query": "carrefur parsi",
@@ -445,7 +464,7 @@ complex_test_cases = [
 def execute_hybrid_search(query_text, terms, query_embedding):
     # Essayer Full-Text avec tous les termes
     results = try_fulltext_vector(terms, query_embedding)
-    
+
     if not results:
         # Fallback : Essayer Full-Text avec seulement les termes corrects
         correct_terms = [t for t in terms if is_correct_term(t)]
@@ -453,11 +472,11 @@ def execute_hybrid_search(query_text, terms, query_embedding):
             results = try_fulltext_vector(correct_terms, query_embedding)
             # Ensuite, filtrer avec Vector pour les typos
             results = filter_with_vector(results, query_embedding, typo_terms)
-    
+
     if not results:
         # Fallback complet : Vector seul
         results = try_vector_only(query_embedding)
-    
+
     return results
 ```
 
@@ -491,7 +510,7 @@ def intelligent_filter(results, terms, query_embedding):
     for result in results:
         score = calculate_relevance_score(result, terms, query_embedding)
         scored_results.append((score, result))
-    
+
     # Trier par score décroissant
     scored_results.sort(key=lambda x: x[0], reverse=True)
     return [r[1] for r in scored_results[:5]]
@@ -517,12 +536,14 @@ def intelligent_filter(results, terms, query_embedding):
 ### **Ajouter 7 Tests Complexes Prioritaires**
 
 **Raisons** :
+
 1. ✅ Couvre les cas les plus importants
 2. ✅ Temps d'exécution raisonnable (~60s)
 3. ✅ Rapport de taille acceptable
 4. ✅ Valeur démonstrative élevée
 
 **Tests à ajouter** :
+
 1. `LOYER impay` - Typos partielles
 2. `loyr impay paris` - Multi-termes (3)
 3. `loyrs impay` - Variations linguistiques
@@ -546,7 +567,3 @@ def intelligent_filter(results, terms, query_embedding):
 ---
 
 **✅ Proposition terminée**
-
-
-
-

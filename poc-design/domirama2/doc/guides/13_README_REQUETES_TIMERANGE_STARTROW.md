@@ -43,11 +43,13 @@ ORDER BY date_op DESC, numero_op ASC;
 ### Valeur Ajoutée SAI
 
 **Sans SAI (HBase)** :
+
 - ⚠️ SCAN complet de la partition
 - ⚠️ Filtrage côté client
 - ⚠️ Performance : O(n) où n = nombre d'opérations
 
 **Avec SAI (HCD)** :
+
 - ✅ Index sur `date_op` (clustering key)
 - ✅ Recherche rapide sans scan complet
 - ✅ Performance : O(log n) avec index
@@ -68,6 +70,7 @@ LIMIT 10;
 ```
 
 **Valeur ajoutée SAI** :
+
 - ✅ Index sur `date_op` optimise la recherche
 - ✅ Pas de scan complet nécessaire
 - ✅ Performance rapide même sur grandes plages
@@ -85,6 +88,7 @@ LIMIT 10;
 ```
 
 **Valeur ajoutée SAI** :
+
 - ✅ Index sur `date_op` optimise la recherche temporelle
 - ✅ Requête rapide même sur grandes plages
 
@@ -102,6 +106,7 @@ LIMIT 10;
 ```
 
 **Valeur ajoutée SAI** :
+
 - ✅ Combine index `date_op` (clustering) + `libelle` (full-text)
 - ✅ Performance : Pas de scan complet, recherche indexée
 - ✅ **Valeur ajoutée majeure** : Recherche combinée optimisée
@@ -135,11 +140,13 @@ ORDER BY date_op DESC, numero_op ASC;
 ### Valeur Ajoutée SAI
 
 **Sans SAI (HBase)** :
+
 - ⚠️ SCAN avec STARTROW/STOPROW
 - ⚠️ Filtrage côté client
 - ⚠️ Performance : O(n) où n = nombre d'opérations dans la plage
 
 **Avec SAI (HCD)** :
+
 - ✅ Index sur clustering keys (`date_op`, `numero_op`)
 - ✅ Recherche précise sans scan complet
 - ✅ Performance : O(log n) avec index
@@ -161,6 +168,7 @@ LIMIT 10;
 ```
 
 **Valeur ajoutée SAI** :
+
 - ✅ Index sur `date_op` (clustering key) optimise la recherche
 - ✅ Pas de scan complet nécessaire
 
@@ -178,6 +186,7 @@ LIMIT 10;
 ```
 
 **Valeur ajoutée SAI** :
+
 - ✅ Index sur clustering keys (`date_op`, `numero_op`)
 - ✅ Performance : Recherche précise sans scan complet
 
@@ -196,6 +205,7 @@ LIMIT 10;
 ```
 
 **Valeur ajoutée SAI** :
+
 - ✅ Combine index clustering keys + `libelle` (full-text)
 - ✅ Performance : Recherche précise et rapide
 - ✅ **Valeur ajoutée majeure** : Recherche combinée optimisée
@@ -229,11 +239,13 @@ LIMIT 10;
 ### 1. Performance
 
 **Sans SAI** :
+
 - ⚠️ SCAN complet de la partition
 - ⚠️ Filtrage côté client
 - ⚠️ Performance : O(n)
 
 **Avec SAI** :
+
 - ✅ Index sur clustering keys (`date_op`, `numero_op`)
 - ✅ Recherche indexée
 - ✅ Performance : O(log n)
@@ -242,10 +254,12 @@ LIMIT 10;
 ### 2. Recherche Combinée
 
 **Sans SAI** :
+
 - ❌ Pas de recherche full-text
 - ❌ Filtrage manuel côté client
 
 **Avec SAI** :
+
 - ✅ Index full-text sur `libelle`
 - ✅ Recherche combinée (date + full-text)
 - ✅ **Valeur ajoutée majeure**
@@ -253,9 +267,11 @@ LIMIT 10;
 ### 3. Flexibilité
 
 **Sans SAI** :
+
 - ⚠️ Requêtes limitées aux filtres de base
 
 **Avec SAI** :
+
 - ✅ Requêtes complexes (date + full-text + autres filtres)
 - ✅ Recherche sémantique possible (vector search)
 - ✅ **Valeur ajoutée majeure**
@@ -269,12 +285,14 @@ LIMIT 10;
 **Fichier** : `29_demo_requetes_fenetre_glissante.sh`
 
 **Fonctionnalités** :
+
 - ✅ Requêtes mensuelles (fenêtre glissante)
 - ✅ Requêtes 30 derniers jours
 - ✅ Requêtes avec SAI (date + full-text)
 - ✅ Comparaison performance
 
 **Usage** :
+
 ```bash
 ./29_demo_requetes_fenetre_glissante.sh
 ```
@@ -284,12 +302,14 @@ LIMIT 10;
 **Fichier** : `30_demo_requetes_startrow_stoprow.sh`
 
 **Fonctionnalités** :
+
 - ✅ Ciblage par date précise
 - ✅ Ciblage par date + numéro opération
 - ✅ Ciblage avec SAI (précis + full-text)
 - ✅ Comparaison performance
 
 **Usage** :
+
 ```bash
 ./30_demo_requetes_startrow_stoprow.sh
 ```
@@ -315,4 +335,3 @@ LIMIT 10;
 ---
 
 **✅ Les requêtes avec fenêtre glissante et STARTROW/STOPROW sont démontrées, avec la valeur ajoutée SAI !**
-

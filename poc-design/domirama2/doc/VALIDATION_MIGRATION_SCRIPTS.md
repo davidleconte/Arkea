@@ -37,10 +37,12 @@ grep -l "set -euo pipefail" *.sh | wc -l
 ### 2. Détection Automatique des Chemins
 
 **Scripts avec `setup_paths()`** : 42 scripts
+
 - ✅ Utilisent la fonction commune
 - ✅ Chargent `utils/didactique_functions.sh`
 
 **Scripts avec fallback** : 18 scripts
+
 - ✅ Utilisent la détection automatique inline
 - ✅ Compatibles avec variables d'environnement
 - ✅ Fonctionnent sans dépendre de `utils/didactique_functions.sh`
@@ -127,4 +129,3 @@ done
 ---
 
 **✅ Migration validée le 2025-01-XX**
-

@@ -10,7 +10,8 @@
 ## 📊 Résumé Exécutif
 
 **Total Exigences Identifiées** : **45+ exigences**  
-**Sources** : 
+**Sources** :
+
 - `inputs-clients/` : Documents clients (ANALYSE_INPUTS_CLIENTS_COMPLETE.md, ANALYSE_ETAT_ART_HBASE.md)
 - `inputs-ibm/` : Proposition IBM MECE (PROPOSITION_MECE_MIGRATION_HBASE_HCD.md)
 
@@ -55,10 +56,12 @@
 **Clé de ligne** : `code_efs + numero_client + date (yyyyMMdd) + cd_canal + idt_tech`
 
 **Column Families** :
+
 - `A`, `C`, `E`, `M` : Attributs extraits de l'événement
 - `VERSIONS=2` : Pour certaines CF (conservation dernière modification)
 
 **Format de stockage** :
+
 - JSON dans une colonne principale
 - Colonnes dynamiques "normalisées" extraites du JSON
 - Permet filtres via SCAN + Bloomfilter (ROWCOL)
@@ -68,6 +71,7 @@
 **Table** : `bic.client_interaction` ou `bic_poc.interactions_by_client`
 
 **Colonnes Principales** :
+
 - `client_id` (text) - Identifiant du client (clé de partition)
 - `interaction_id` (timeuuid) - Identifiant unique, encodé temporellement
 - `type_interaction` (text) - Type d'interaction
@@ -79,6 +83,7 @@
 - `idt_tech` (text) - Identifiant technique
 
 **Clé Primaire** :
+
 - Partition Key : `(client_id)` ou `(code_efs, numero_client)`
 - Clustering Key : `interaction_id` (timeuuid) ou `(date_interaction, canal, type_interaction, idt_tech)`
 - Clustering Order : `DESC` (plus récent en premier)
@@ -86,6 +91,7 @@
 **TTL** : `default_time_to_live = 63072000` (2 ans en secondes)
 
 **Colonnes Supplémentaires** (notre schéma actuel) :
+
 - `json_data` (text) - Données JSON complètes
 - `colonnes_dynamiques` (map<text, text>) - Colonnes dynamiques
 - `created_at` (timestamp) - Date de création
@@ -95,6 +101,7 @@
 ### 2.2 Index SAI
 
 **Index Requis** (inputs-ibm) :
+
 - Index sur `canal` - Filtrage par canal
 - Index sur `type_interaction` - Filtrage par type
 - Index sur `resultat` - Filtrage par résultat
@@ -102,6 +109,7 @@
 - Index sur `date_interaction` - Requêtes de période
 
 **Options Index** :
+
 - `case_sensitive: false` - Recherche insensible à la casse
 - `normalize: true` - Normalisation
 - Analyseurs linguistiques (français) - Pour recherche full-text
@@ -109,6 +117,7 @@
 ### 2.3 Canaux Supportés
 
 **Canaux Identifiés** (inputs-clients + inputs-ibm) :
+
 - `email` - Email
 - `SMS` - SMS
 - `agence` - Agence physique
@@ -121,6 +130,7 @@
 ### 2.4 Types d'Interactions
 
 **Types Identifiés** (inputs-ibm) :
+
 - `consultation` - Consultation
 - `conseil` - Conseil
 - `transaction` - Transaction
@@ -137,6 +147,7 @@
 **Composant** : `bic-event-main.tar.gz` (inputs-clients)
 
 **Exigences** :
+
 - Consumer Kafka pour événements temps réel
 - Écriture embarquée dans Tomcat
 - Topic Kafka : `bic-event`
@@ -147,6 +158,7 @@
 - Performance : Débit élevé, latence basse (quelques millisecondes)
 
 **Flux** :
+
 ```
 Kafka Topic (bic-event)
     ↓
@@ -160,12 +172,14 @@ HCD (interactions_by_client)
 **Composant** : `bic-batch-main.tar.gz` (inputs-clients)
 
 **Exigences** :
+
 - Traitement batch
 - MapReduce en bulkLoad
 - Chargement massif des données
 - Performance : Débit élevé pour gros volumes
 
 **Flux** :
+
 ```
 Données Batch (Parquet, JSON, etc.)
     ↓
@@ -177,6 +191,7 @@ HCD (interactions_by_client)
 ### 3.3 Format des Données
 
 **Formats Supportés** :
+
 - JSON (temps réel Kafka)
 - Parquet (batch)
 - Avro (optionnel, Kafka)
@@ -190,6 +205,7 @@ HCD (interactions_by_client)
 **Composant** : `bic-backend-main.tar.gz` (inputs-clients)
 
 **Exigences** :
+
 - API REST/GraphQL (Data API)
 - Lecture temps réel
 - SCAN + value filter (équivalent HBase)
@@ -197,6 +213,7 @@ HCD (interactions_by_client)
 - Format de réponse : JSON structuré
 
 **Endpoints Requis** :
+
 - `GET /clients/{id}/interactions` - Timeline complète
 - `GET /clients/{id}/interactions?canal=Email` - Filtrage par canal
 - `GET /clients/{id}/interactions?type=reclamation` - Filtrage par type
@@ -207,6 +224,7 @@ HCD (interactions_by_client)
 **Composant** : `bic-unload-main.tar.gz` (inputs-clients)
 
 **Exigences** :
+
 - FullScan + STARTROW + STOPROW + TIMERANGE (équivalent HBase)
 - Export incrémental
 - Format ORC
@@ -214,6 +232,7 @@ HCD (interactions_by_client)
 - Filtrage par période
 
 **Patterns HBase à Remplacer** :
+
 - `STARTROW/STOPROW` → Filtrage par `client_id` ou `interaction_id`
 - `TIMERANGE` → Filtrage par `date_interaction` ou `interaction_id` (timeuuid)
 
@@ -226,6 +245,7 @@ HCD (interactions_by_client)
 **Composant** : `bic-unload-main.tar.gz` (inputs-clients)
 
 **Exigences** :
+
 - Export incrémental ORC
 - Format ORC (Optimized Row Columnar)
 - Destination HDFS
@@ -233,12 +253,14 @@ HCD (interactions_by_client)
 - Filtrage par plage de clients (STARTROW/STOPROW équivalent)
 
 **Approches Possibles** (inputs-ibm) :
+
 1. **Via Cassandra en lecture** : Job Spark connecté à Cassandra, extraction par intervalle temporel
 2. **Via Kafka** : Kafka Connect HDFS Sink, consommation du topic `bic-event`
 
 ### 5.2 Export Incrémental
 
 **Exigences** :
+
 - Se souvenir du dernier timestamp exporté
 - Requête : `WHERE interaction_id > dernier_timestamp_export`
 - Utilisation de `minTimeuuid`/`maxTimeuuid` pour filtrage
@@ -251,6 +273,7 @@ HCD (interactions_by_client)
 ### 6.1 Recherche Full-Text
 
 **Exigences** (inputs-ibm) :
+
 - Indexation textuelle avec analyseurs Lucene
 - Recherche dans `details` (contenu JSON)
 - Recherche par mots-clés
@@ -263,6 +286,7 @@ HCD (interactions_by_client)
 ### 6.2 Recherche Vectorielle (Optionnel)
 
 **Exigences** (inputs-ibm) :
+
 - Vector Search (optionnel, extension)
 - Embeddings vectoriels pour chaque interaction
 - Recherche par similarité (k-nearest neighbors)
@@ -275,6 +299,7 @@ HCD (interactions_by_client)
 ### 7.1 Performance Lecture
 
 **Exigences** (inputs-ibm) :
+
 - Timeline complète : Temps quasi-réel (quelques millisecondes)
 - SLA de lecture : < 100ms pour conseiller
 - Accès direct aux données partitionnées (pas de scan global)
@@ -283,6 +308,7 @@ HCD (interactions_by_client)
 ### 7.2 Performance Écriture
 
 **Exigences** (inputs-ibm) :
+
 - Latence d'écriture : Basse (quelques millisecondes)
 - Haute concurrence
 - Grande échelle horizontale
@@ -291,6 +317,7 @@ HCD (interactions_by_client)
 ### 7.3 Performance Export
 
 **Exigences** :
+
 - Export incrémental efficace
 - Pas de scan complet de table
 - Requêtes ciblées plutôt que scan complet
@@ -302,6 +329,7 @@ HCD (interactions_by_client)
 ### 8.1 Data API
 
 **Exigences** (inputs-ibm) :
+
 - Contrôle des accès
 - Filtrage des champs retournés
 - Application de quotas
@@ -310,6 +338,7 @@ HCD (interactions_by_client)
 ### 8.2 Sécurité
 
 **Exigences** :
+
 - API sécurisée (REST/GraphQL)
 - Contrôle d'accès par client
 - Audit des accès
@@ -321,6 +350,7 @@ HCD (interactions_by_client)
 ### 9.1 Volume et Distribution
 
 **Exigences** :
+
 - Support de millions d'interactions
 - Distribution temporelle sur 2 ans
 - Volume par client : Quelques dizaines à centaines d'interactions (2 ans)
@@ -328,6 +358,7 @@ HCD (interactions_by_client)
 ### 9.2 Qualité des Données
 
 **Exigences** :
+
 - Pas de perte de données
 - Pas de doublons
 - Cohérence des données
@@ -336,6 +367,7 @@ HCD (interactions_by_client)
 ### 9.3 Métadonnées
 
 **Exigences** :
+
 - Horodatage des interactions
 - Version des enregistrements
 - Traçabilité (created_at, updated_at)
@@ -347,6 +379,7 @@ HCD (interactions_by_client)
 ### 10.1 Migration HBase → HCD
 
 **Exigences** :
+
 - Transformation de schéma (HBase → Cassandra)
 - Conversion des clés (rowkey HBase → partition + clustering)
 - Conversion des colonnes dynamiques
@@ -357,6 +390,7 @@ HCD (interactions_by_client)
 ### 10.2 Compatibilité
 
 **Exigences** :
+
 - Compatibilité avec applications existantes
 - Migration progressive possible
 - Double écriture (période de transition)
@@ -381,6 +415,7 @@ HCD (interactions_by_client)
 ### 11.2 Fonctionnalités HBase Utilisées
 
 **Fonctionnalités Identifiées** (inputs-clients) :
+
 - TTL pour purge automatique (2 ans)
 - SCAN + value filter pour lecture temps réel
 - FullScan + STARTROW + STOPROW + TIMERANGE pour unload incrémentaux ORC
@@ -483,12 +518,14 @@ HCD (interactions_by_client)
 **Score de Couverture** : **~90%** ✅
 
 **Points Forts** :
+
 - ✅ Tous les use cases critiques couverts
 - ✅ Schéma conforme aux exigences IBM
 - ✅ Ingestion temps réel et batch couvertes
 - ✅ Export batch couvert
 
 **Points à Améliorer** :
+
 - ⚠️ Filtrage par résultat à ajouter
 - ⚠️ Recherche full-text avec analyseurs Lucene à compléter
 - ⚠️ Pagination à tester explicitement
@@ -499,4 +536,3 @@ HCD (interactions_by_client)
 **Date** : 2025-12-01  
 **Version** : 1.0.0  
 **Statut** : ✅ Analyse exhaustive complète - 90% de couverture
-

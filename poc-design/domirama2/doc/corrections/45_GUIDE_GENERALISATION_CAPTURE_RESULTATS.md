@@ -8,6 +8,7 @@
 ## 🎯 Objectif
 
 Toutes les démonstrations doivent maintenant :
+
 1. ✅ **Capturer les résultats réels** des requêtes CQL
 2. ✅ **Afficher les résultats dans le terminal** pendant l'exécution
 3. ✅ **Générer automatiquement la documentation** avec les résultats réels
@@ -49,14 +50,14 @@ for i, test_case in enumerate(test_cases, 1):
         "query_time": None,
         "validation": None
     }
-    
+
     # Exécuter la requête
     start_time = time.time()
     try:
         results = list(session.execute(statement))
         query_time = time.time() - start_time
         test_result["query_time"] = query_time
-        
+
         # Capturer chaque résultat
         for j, row in enumerate(results, 1):
             test_result["results"].append({
@@ -65,14 +66,14 @@ for i, test_case in enumerate(test_cases, 1):
                 "montant": float(row.montant) if row.montant else None,
                 # ... autres colonnes
             })
-        
+
         test_result["success"] = True
         test_result["validation"] = "Pertinents"  # ou autre validation
-        
+
     except Exception as e:
         test_result["success"] = False
         test_result["error"] = str(e)
-    
+
     # Ajouter à la liste
     all_results.append(test_result)
 
@@ -125,7 +126,7 @@ try:
     # Lire directement depuis le fichier
     with open('$TEMP_RESULTS', 'r', encoding='utf-8') as f:
         results = json.load(f)
-    
+
     for i, test in enumerate(results, 1):
         query = test.get("query", "N/A")
         description = test.get("description", "N/A")
@@ -136,7 +137,7 @@ try:
         validation = test.get("validation", "N/A")
         test_results = test.get("results", [])
         cql_query = test.get("cql_query", "N/A")
-        
+
         print(f"#### TEST {i} : '{query}'")
         print()
         print(f"**Description** : {description}")
@@ -149,7 +150,7 @@ try:
         if validation:
             print(f"**Validation** : {validation}")
         print()
-        
+
         if cql_query and cql_query != "N/A":
             print("**Requête CQL exécutée :**")
             print()
@@ -159,7 +160,7 @@ try:
             print(cql_query_short)
             print("\\\`\\\`\\\`")
             print()
-        
+
         if test_results:
             print(f"**Résultats obtenus ({len(test_results)} résultat(s)) :**")
             print()
@@ -168,12 +169,12 @@ try:
             for result in test_results:
                 columns.update(result.keys())
             columns.discard("rank")
-            
+
             # Créer le tableau
             header_cols = ["Rang"] + sorted([c for c in columns if c != "rank"])
             print("| " + " | ".join(header_cols) + " |")
             print("|" + "|".join(["------"] * len(header_cols)) + "|")
-            
+
             for result in test_results:
                 row = [str(result.get("rank", "N/A"))]
                 for col in sorted([c for c in columns if c != "rank"]):
@@ -188,10 +189,10 @@ try:
         else:
             print("**Aucun résultat trouvé**")
             print()
-        
+
         print("---")
         print()
-        
+
 except Exception as e:
     print("Erreur lors de la génération des résultats détaillés")
     print(f"Erreur : {str(e)}")
@@ -322,6 +323,7 @@ EOF
 ## 💡 Exemple Complet
 
 Voir les scripts suivants comme exemples complets :
+
 - `25_test_hybrid_search_v2_didactique.sh` (Recherche hybride)
 - `23_test_fuzzy_search_v2_didactique.sh` (Fuzzy search)
 
@@ -338,8 +340,3 @@ Voir les scripts suivants comme exemples complets :
 ---
 
 **✅ Avec ce guide, vous pouvez généraliser la capture de résultats à toutes les démonstrations !**
-
-
-
-
-

@@ -219,6 +219,7 @@ source ../../.poc-profile
 ### Puis-je utiliser plusieurs POCs en même temps ?
 
 **Oui**, chaque POC utilise son propre keyspace :
+
 - BIC : `bic_poc`
 - domirama2 : `domirama2_poc`
 - domiramaCatOps : `domiramacatops_poc`
@@ -226,12 +227,14 @@ source ../../.poc-profile
 ### Quel POC pour la recherche vector ?
 
 **domirama2** ou **domiramaCatOps** :
+
 - domirama2 : Recherche hybride (full-text + vector)
 - domiramaCatOps : Recherche vector avec 3 modèles (ByteT5, e5-large, invoice)
 
 ### Quel POC pour l'ingestion Kafka ?
 
 **BIC** uniquement :
+
 - Ingestion temps réel depuis Kafka
 - Topic `bic-event`
 - Spark Structured Streaming
@@ -239,12 +242,13 @@ source ../../.poc-profile
 ### Quel POC pour l'export batch ?
 
 **BIC** ou **domirama2** :
+
 - BIC : Export HDFS/ORC
 - domirama2 : Export Parquet incrémental (fenêtre glissante)
 
 ---
 
 **Pour plus d'informations, voir** :
+
 - `docs/GUIDE_COMPARAISON_POCS.md` - Comparaison technique détaillée
 - `poc-design/*/README.md` - Documentation de chaque POC
-

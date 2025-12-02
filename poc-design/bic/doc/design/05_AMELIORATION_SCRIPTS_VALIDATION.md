@@ -34,6 +34,7 @@
 **Fichier** : `utils/validation_functions.sh` ✅ **CRÉÉ**
 
 **Fonctions disponibles** :
+
 - `validate_pertinence()` - Valide que le test répond aux exigences BIC
 - `validate_coherence()` - Valide la cohérence du schéma
 - `validate_integrity()` - Valide l'intégrité des résultats (comptage, etc.)
@@ -47,6 +48,7 @@
 ### 2. Intégration dans les Scripts
 
 **Chaque script doit** :
+
 1. Sourcer `utils/validation_functions.sh`
 2. Pour chaque test :
    - Définir les résultats attendus
@@ -58,6 +60,7 @@
 ### 3. Tests Complexes/Très Complexes
 
 **Exemples de tests complexes à ajouter** :
+
 - Tests multi-tables (cohérence entre tables)
 - Tests de migration incrémentale
 - Tests de gestion des doublons
@@ -69,6 +72,7 @@
 ### 4. Comparaison Attendus vs Obtenus
 
 **Chaque test doit** :
+
 - Afficher clairement les résultats attendus
 - Afficher les résultats obtenus
 - Comparer et expliquer les différences
@@ -77,6 +81,7 @@
 ### 5. Explications Détaillées
 
 **Chaque validation doit expliquer** :
+
 - Pourquoi cette validation est nécessaire
 - Comment elle est effectuée
 - Quels sont les critères de réussite
@@ -165,16 +170,19 @@ echo "   - Conformité : Conforme aux exigences clients (timeline 2 ans)"
 Pour chaque script, vérifier :
 
 ### Structure
+
 - [ ] `set -euo pipefail` présent
 - [ ] `source utils/validation_functions.sh` présent
 - [ ] Documentation inline complète
 
 ### Tests
+
 - [ ] Tests basiques présents
 - [ ] Tests complexes présents
 - [ ] Tests très complexes présents (si applicable)
 
 ### Validations
+
 - [ ] Validation pertinence pour chaque test
 - [ ] Validation cohérence pour chaque test
 - [ ] Validation intégrité pour chaque test
@@ -182,12 +190,14 @@ Pour chaque script, vérifier :
 - [ ] Validation conformité pour chaque test
 
 ### Comparaisons
+
 - [ ] Résultats attendus définis
 - [ ] Résultats obtenus capturés
 - [ ] Comparaison explicite effectuée
 - [ ] Différences expliquées
 
 ### Explications
+
 - [ ] Explication de chaque validation
 - [ ] Explication des critères de réussite
 - [ ] Explication des implications en cas d'échec
@@ -197,4 +207,3 @@ Pour chaque script, vérifier :
 **Date** : 2025-12-01  
 **Version** : 1.0.0  
 **Statut** : 📋 Plan d'amélioration défini
-

@@ -156,6 +156,7 @@ Arkea/
 **Recherche** : Aucun script externe ne référence `poc-design/domirama/`
 
 **Scripts analysés** :
+
 - ✅ `scripts/setup/*.sh` : Aucune référence
 - ✅ `scripts/utils/*.sh` : Aucune référence
 - ✅ `poc-design/domirama2/scripts/*.sh` : Aucune référence
@@ -167,9 +168,11 @@ Arkea/
 **Recherche** : Seulement 2 références mineures
 
 1. **`docs/ARCHITECTURE.md`** (ligne 180) :
+
    ```markdown
    │   ├── domirama/         # POC initial
    ```
+
    - **Impact** : Mineur (simple mention dans la structure)
 
 2. **`docs/POC_TABLE_DOMIRAMA.md`** :
@@ -231,9 +234,11 @@ Arkea/
 #### Phase 3 : Mise à Jour Documentation (5 min)
 
 1. ✅ Mettre à jour `docs/ARCHITECTURE.md` :
+
    ```markdown
    │   ├── domirama2/        # POC Domirama v2 (remplace domirama/)
    ```
+
 2. ✅ Vérifier `docs/POC_TABLE_DOMIRAMA.md` et mettre à jour si nécessaire
 3. ✅ Mettre à jour `poc-design/README.md` si nécessaire
 
@@ -259,6 +264,7 @@ Arkea/
 **Le répertoire `poc-design/domirama/` est OBSOLÈTE et peut être supprimé en toute sécurité.**
 
 **Justification** :
+
 - ✅ **Aucune utilisation active** : Aucun script externe ne le référence
 - ✅ **Remplacé par domirama2** : `domirama2/` est une version complète et améliorée
 - ✅ **Risque minimal** : Seulement 2 références mineures dans la documentation
@@ -269,6 +275,7 @@ Arkea/
 **✅ RECOMMANDATION : SUPPRESSION SÉCURISÉE**
 
 **Actions Requises** :
+
 1. ✅ **Archiver** le répertoire avant suppression
 2. ✅ **Mettre à jour** `docs/ARCHITECTURE.md`
 3. ✅ **Vérifier** `docs/POC_TABLE_DOMIRAMA.md`
@@ -319,4 +326,3 @@ poc-design/
 **Date** : 2025-12-01  
 **Version** : 1.0.0  
 **Statut** : ✅ Audit complet terminé
-

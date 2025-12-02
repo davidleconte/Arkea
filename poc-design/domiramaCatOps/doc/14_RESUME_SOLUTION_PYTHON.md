@@ -31,17 +31,20 @@
 ## ✅ Résultats des Tests
 
 ### TEST 1 : Export TIMERANGE
+
 - ✅ **360 opérations exportées**
 - ✅ **31 fichiers Parquet créés**
 - ✅ **31 partitions créées** (par date)
 - ✅ **VECTOR préservé**
 
 ### TEST 2 : Export STARTROW/STOPROW équivalent
+
 - ✅ **360 opérations exportées**
 - ✅ **31 fichiers Parquet créés**
 - ✅ **Filtrage par partition fonctionnel**
 
 ### TEST 3 : Fenêtre glissante
+
 - ✅ **Script créé et fonctionnel**
 - ✅ **Calcul automatique des fenêtres**
 
@@ -112,5 +115,3 @@ pip3 install cassandra-driver pyarrow pandas
 ---
 
 **Date de génération** : 2025-11-30
-
-

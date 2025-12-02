@@ -8,7 +8,7 @@
 #   Ce script démontre la recherche floue (fuzzy search) en utilisant les
 #   embeddings ByteT5 stockés dans la colonne 'libelle_embedding' pour
 #   trouver des opérations par similarité sémantique, même avec des typos.
-#   
+#
 #   Les tests couvrent :
 #   - Recherches avec typos (caractères manquants, inversés, remplacés)
 #   - Recherches par similarité cosinus
@@ -156,7 +156,7 @@ def encode_text(text):
     """Encode un texte en vecteur d'embedding."""
     if not text or text.strip() == "":
         return [0.0] * VECTOR_DIMENSION
-    
+
     inputs = tokenizer(
         text,
         return_tensors="pt",
@@ -164,11 +164,11 @@ def encode_text(text):
         padding=True,
         max_length=512
     )
-    
+
     with torch.no_grad():
         encoder_outputs = model.encoder(**inputs)
         embeddings = encoder_outputs.last_hidden_state.mean(dim=1)
-    
+
     return embeddings[0].tolist()
 
 # Connexion à HCD
@@ -188,16 +188,16 @@ print("\n=== Tests Fuzzy Search avec Vector Search ===\n")
 for query_text, description in test_queries:
     print(f"🔍 Requête: '{query_text}'")
     print(f"   Description: {description}")
-    
+
     # Générer l'embedding de la requête
     query_embedding = encode_text(query_text)
-    
+
     # Construire la requête CQL avec ANN
     # Note: CQL nécessite le vecteur sous forme de liste
     vector_str = "[" + ",".join([str(x) for x in query_embedding[:10]]) + ",...]"  # Afficher seulement les 10 premiers
-    
+
     print(f"   Vecteur (premiers éléments): {vector_str}")
-    
+
     # Requête CQL avec ANN (Approximate Nearest Neighbor)
     cql_query = f"""
     SELECT libelle, montant
@@ -207,22 +207,22 @@ for query_text, description in test_queries:
     ORDER BY libelle_embedding ANN OF {json.dumps(query_embedding)}
     LIMIT 5
     """
-    
+
     try:
         statement = SimpleStatement(cql_query, fetch_size=5)
         results = session.execute(statement)
-        
+
         print("   📊 Résultats:")
         count = 0
         for row in results:
             count += 1
             print(f"      {count}. {row.libelle} | {row.montant}")
-        
+
         if count == 0:
             print("      Aucun résultat trouvé")
     except Exception as e:
         print(f"   ❌ Erreur: {str(e)}")
-    
+
     print()
 
 session.shutdown()
@@ -240,4 +240,3 @@ HF_API_KEY="$HF_API_KEY" python3 "$TEMP_SCRIPT"
 rm -f "$TEMP_SCRIPT"
 
 success "✅ Tests de recherche floue terminés !"
-

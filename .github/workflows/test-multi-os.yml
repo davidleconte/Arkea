@@ -14,33 +14,33 @@ jobs:
   test-linux:
     name: Test Linux (Ubuntu)
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Java 11
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '11'
-      
+
       - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-      
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
+
       - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y curl wget tar gzip
-      
+
       - name: Test .poc-config.sh
         run: |
           source .poc-config.sh
@@ -48,7 +48,7 @@ jobs:
           echo "JAVA_HOME: $JAVA_HOME"
           echo "SPARK_HOME: ${SPARK_HOME:-not set}"
           echo "KAFKA_HOME: ${KAFKA_HOME:-not set}"
-      
+
       - name: Test portable functions
         run: |
           source scripts/utils/portable_functions.sh
@@ -59,7 +59,7 @@ jobs:
             exit 1
           fi
           echo "✅ OS detection OK"
-      
+
       - name: Test script syntax
         run: |
           find scripts/ -name "*.sh" -type f | while read -r script; do
@@ -67,13 +67,13 @@ jobs:
             bash -n "$script" || exit 1
           done
           echo "✅ All scripts syntax OK"
-      
+
       - name: Check consistency
         run: |
           chmod +x scripts/utils/91_check_consistency.sh
           ./scripts/utils/91_check_consistency.sh --check-scripts || true
           echo "✅ Consistency check completed"
-      
+
       - name: Check hardcoded paths
         run: |
           ./scripts/utils/91_check_consistency.sh --check-hardcoded-paths || true
@@ -85,34 +85,34 @@ jobs:
   test-macos:
     name: Test macOS
     runs-on: macos-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Java 11
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '11'
-      
+
       - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-      
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
+
       - name: Install Homebrew (if needed)
         run: |
           if ! command -v brew &> /dev/null; then
             /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           fi
-      
+
       - name: Test .poc-config.sh
         run: |
           source .poc-config.sh
@@ -120,7 +120,7 @@ jobs:
           echo "JAVA_HOME: $JAVA_HOME"
           echo "SPARK_HOME: ${SPARK_HOME:-not set}"
           echo "KAFKA_HOME: ${KAFKA_HOME:-not set}"
-      
+
       - name: Test portable functions
         run: |
           source scripts/utils/portable_functions.sh
@@ -131,7 +131,7 @@ jobs:
             exit 1
           fi
           echo "✅ OS detection OK"
-      
+
       - name: Test readlink compatibility
         run: |
           source scripts/utils/portable_functions.sh
@@ -143,7 +143,7 @@ jobs:
             exit 1
           fi
           echo "✅ get_realpath OK"
-      
+
       - name: Test script syntax
         run: |
           find scripts/ -name "*.sh" -type f | while read -r script; do
@@ -151,13 +151,13 @@ jobs:
             bash -n "$script" || exit 1
           done
           echo "✅ All scripts syntax OK"
-      
+
       - name: Check consistency
         run: |
           chmod +x scripts/utils/91_check_consistency.sh
           ./scripts/utils/91_check_consistency.sh --check-scripts || true
           echo "✅ Consistency check completed"
-      
+
       - name: Check hardcoded paths
         run: |
           ./scripts/utils/91_check_consistency.sh --check-hardcoded-paths || true
@@ -169,42 +169,42 @@ jobs:
   test-windows:
     name: Test Windows (WSL2)
     runs-on: windows-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup WSL2
         run: |
           wsl --install -d Ubuntu
           wsl --set-default-version 2
-      
+
       - name: Setup Java in WSL2
         run: |
           wsl sudo apt-get update
           wsl sudo apt-get install -y openjdk-11-jdk openjdk-17-jdk
           wsl bash -c 'export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 && echo "JAVA_HOME=$JAVA_HOME" >> ~/.bashrc'
-      
+
       - name: Setup Python in WSL2
         run: |
           wsl sudo apt-get install -y python3.11 python3-pip
-      
+
       - name: Test .poc-config.sh in WSL2
         run: |
           wsl bash -c "cd /mnt/c/Users/runneradmin/actions-runner/_work/Arkea/Arkea && source .poc-config.sh && echo 'ARKEA_HOME: $ARKEA_HOME'"
-      
+
       - name: Test portable functions in WSL2
         run: |
           wsl bash -c "cd /mnt/c/Users/runneradmin/actions-runner/_work/Arkea/Arkea && source scripts/utils/portable_functions.sh && OS=\$(detect_os) && echo 'Detected OS: '\$OS && if [ \"\$OS\" != \"linux\" ]; then exit 1; fi"
-      
+
       - name: Test script syntax in WSL2
         run: |
           wsl bash -c "cd /mnt/c/Users/runneradmin/actions-runner/_work/Arkea/Arkea && find scripts/ -name '*.sh' -type f | while read -r script; do echo 'Checking: '\$script; bash -n \"\$script\" || exit 1; done"
-      
+
       - name: Check consistency in WSL2
         run: |
           wsl bash -c "cd /mnt/c/Users/runneradmin/actions-runner/_work/Arkea/Arkea && chmod +x scripts/utils/91_check_consistency.sh && ./scripts/utils/91_check_consistency.sh --check-scripts || true"
-      
+
       - name: Check hardcoded paths in WSL2
         run: |
           wsl bash -c "cd /mnt/c/Users/runneradmin/actions-runner/_work/Arkea/Arkea && ./scripts/utils/91_check_consistency.sh --check-hardcoded-paths || true"
@@ -216,49 +216,49 @@ jobs:
     name: Test Cross-Platform Compatibility
     runs-on: ubuntu-latest
     needs: [test-linux, test-macos, test-windows]
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Test portable functions on all platforms
         run: |
           echo "✅ All platform-specific tests passed"
           echo "✅ Cross-platform compatibility verified"
-      
+
       - name: Check consistency (final)
         run: |
           chmod +x scripts/utils/91_check_consistency.sh
           ./scripts/utils/91_check_consistency.sh --report || true
           echo "✅ Final consistency check completed"
-      
+
       - name: Generate compatibility report
         run: |
           cat > compatibility-report.md << EOF
           # Cross-Platform Compatibility Report
-          
+
           **Date**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
-          
+
           ## Test Results
-          
+
           - ✅ Linux (Ubuntu): PASSED
           - ✅ macOS: PASSED
           - ✅ Windows (WSL2): PASSED
-          
+
           ## Supported Platforms
-          
+
           | Platform | Status | Notes |
           |----------|--------|-------|
           | Linux (Ubuntu 20.04+) | ✅ Fully Supported | Tested in CI |
           | macOS 12+ | ✅ Fully Supported | Tested in CI |
           | Windows (WSL2) | ✅ Supported | Requires WSL2 |
-          
+
           ## Portability Score
-          
+
           **Score**: ~90% (up from ~75%)
-          
+
           ### Improvements
-          
+
           - ✅ Eliminated hardcoded paths
           - ✅ Portable readlink function
           - ✅ Portable port checking
@@ -267,7 +267,6 @@ jobs:
           - ✅ Windows (WSL2) installation guide
           - ✅ Consistency checks in CI
           - ✅ Hardcoded paths detection in CI
-          
+
           EOF
           cat compatibility-report.md
-

@@ -18,6 +18,7 @@
 ### 1. En-tête du Fichier
 
 **Format standard** :
+
 ```cql
 -- ============================================
 -- Fichier : XX_nom_fichier.cql
@@ -56,6 +57,7 @@
 ### 2. Commentaires Inline
 
 **Pour chaque section importante** :
+
 ```cql
 -- ============================================
 -- SECTION : Nom de la Section
@@ -67,6 +69,7 @@
 ```
 
 **Pour chaque commande importante** :
+
 ```cql
 -- Création du keyspace avec réplication
 -- Équivalent HBase : Namespace
@@ -79,6 +82,7 @@ WITH replication = {
 ```
 
 **Pour chaque colonne importante** :
+
 ```cql
 -- Colonne de catégorisation automatique (batch)
 -- Équivalent HBase : Colonne dans CF 'categorisation'
@@ -91,6 +95,7 @@ cat_auto TEXT,
 ### 3. Explications Techniques
 
 **Pour les index SAI** :
+
 ```cql
 -- Index SAI (Storage-Attached Index) pour recherche full-text
 -- Équivalent HBase : Index Elasticsearch (dans l'architecture existante)
@@ -114,6 +119,7 @@ WITH OPTIONS = {
 ```
 
 **Pour les types de données** :
+
 ```cql
 -- Colonne vectorielle pour recherche floue (fuzzy search)
 -- Type : VECTOR<FLOAT, 1472> (1472 dimensions pour ByteT5)
@@ -142,6 +148,7 @@ Pour chaque fichier CQL, vérifier :
 ### Pour un Développeur Externe
 
 Un développeur externe doit pouvoir :
+
 1. **Comprendre l'objectif** : Lire l'en-tête et savoir ce que fait le fichier
 2. **Comprendre le contexte** : Savoir comment cela s'inscrit dans la migration HBase → HCD
 3. **Comprendre les équivalences** : Savoir ce qui correspond à HBase
@@ -220,27 +227,27 @@ CREATE TABLE IF NOT EXISTS domirama2_poc.operations_by_account (
     -- Clés de partition (équivalent partie fixe du RowKey HBase)
     code_si TEXT,           -- Code système source (ex: "DEMO_OFFICIAL")
     contrat TEXT,           -- Numéro de compte/contrat
-    
+
     -- Clés de clustering (équivalent partie variable du RowKey HBase)
     date_op TIMESTAMP,      -- Date de l'opération (tri chronologique)
     numero_op INT,          -- Numéro séquentiel de l'opération (tri par ordre)
-    
+
     -- Identifiant unique de l'opération
     op_id TEXT,             -- UUID de l'opération (généré par Spark)
-    
+
     -- Données de l'opération
     libelle TEXT,           -- Libellé de l'opération (recherche full-text)
     montant DECIMAL,        -- Montant de l'opération
     devise TEXT,            -- Devise (EUR, USD, etc.)
-    
+
     -- Métadonnées
     type_operation TEXT,    -- Type d'opération (DEBIT, CREDIT, etc.)
     sens_operation TEXT,    -- Sens de l'opération
-    
+
     -- Données COBOL (format BLOB conforme IBM)
     -- Équivalent HBase : Colonne dans CF 'cobol' avec format BLOB
     operation_data BLOB,    -- Données COBOL brutes (format BLOB)
-    
+
     -- Colonnes de catégorisation (stratégie multi-version)
     -- IMPORTANT : Batch écrit UNIQUEMENT cat_auto et cat_confidence
     -- IMPORTANT : Client écrit dans cat_user, cat_date_user, cat_validee
@@ -250,7 +257,7 @@ CREATE TABLE IF NOT EXISTS domirama2_poc.operations_by_account (
     cat_user TEXT,          -- Catégorie client (correction manuelle)
     cat_date_user TIMESTAMP, -- Date de la correction client
     cat_validee BOOLEAN,    -- Indicateur de validation client
-    
+
     -- Clé primaire composite
     PRIMARY KEY ((code_si, contrat), date_op, numero_op)
 ) WITH CLUSTERING ORDER BY (date_op DESC, numero_op DESC);
@@ -305,8 +312,3 @@ USING 'org.apache.cassandra.index.sai.StorageAttachedIndex';
 ---
 
 **✅ Standards définis pour une documentation complète et compréhensible des fichiers CQL !**
-
-
-
-
-

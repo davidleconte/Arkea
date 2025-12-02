@@ -54,10 +54,12 @@ Le POC BIC supporte trois modes d'ingestion :
 ```
 
 **Options** :
+
 - Premier argument : Chemin vers le fichier Parquet (optionnel)
 - Par défaut : `data/parquet/interactions_10000.parquet`
 
 **Résultat attendu** :
+
 - Données chargées dans `bic_poc.interactions_by_client`
 - Rapport généré : `doc/demonstrations/08_INGESTION_BATCH_DEMONSTRATION.md`
 
@@ -101,10 +103,12 @@ kafka-topics.sh --create \
 ```
 
 **Options** :
+
 - Premier argument : Nombre d'événements à traiter (défaut: 10)
 - Deuxième argument : Mode démo (true/false, défaut: true)
 
 **Résultat attendu** :
+
 - Événements Kafka traités et chargés dans HCD
 - Rapport généré : `doc/demonstrations/09_INGESTION_KAFKA_DEMONSTRATION.md`
 
@@ -146,10 +150,12 @@ kafka-console-consumer.sh \
 ```
 
 **Options** :
+
 - Premier argument : Chemin vers le fichier JSON (optionnel)
 - Par défaut : `data/json/interactions_1000.json`
 
 **Résultat attendu** :
+
 - Données chargées dans HCD
 - Rapport généré : `doc/demonstrations/10_INGESTION_JSON_DEMONSTRATION.md`
 
@@ -188,6 +194,7 @@ kafka-console-consumer.sh \
 **Symptôme** : `Couldn't find bic_poc or any similarly named keyspaces`
 
 **Solution** :
+
 ```bash
 # Vérifier que HCD est démarré
 nc -z "$HCD_HOST" "$HCD_PORT"
@@ -204,6 +211,7 @@ nc -z "$HCD_HOST" "$HCD_PORT"
 **Symptôme** : `Kafka n'est pas accessible`
 
 **Solution** :
+
 ```bash
 # Vérifier que Kafka est démarré
 nc -z localhost 9092
@@ -217,6 +225,7 @@ kafka-topics.sh --list --bootstrap-server localhost:9092
 **Symptôme** : `COUNT(*) = 0`
 
 **Solution** :
+
 ```bash
 # Vérifier les logs Spark
 tail -f "$SPARK_HOME/logs/spark-*.log"

@@ -10,6 +10,7 @@
 ### Situation Initiale
 
 Les scripts de test (`09_test_acceptation_opposition.sh` et `10_test_regles_personnalisees.sh`) utilisaient des valeurs de test qui n'existaient pas dans les données chargées, ce qui entraînait :
+
 - 0 lignes retournées pour la plupart des tests
 - Rapports vides ou incomplets
 - Impossibilité de valider les fonctionnalités
@@ -21,10 +22,12 @@ Les scripts de test (`09_test_acceptation_opposition.sh` et `10_test_regles_pers
 ### 1. Scripts de Préparation des Données
 
 **Création de 2 scripts dédiés** :
+
 - `09_prepare_test_data.sh` : Prépare les données pour les tests acceptation/opposition
 - `10_prepare_test_data.sh` : Prépare les données pour les tests règles personnalisées
 
 **Fonctionnalités** :
+
 - Vérification de l'existence des données avant insertion
 - Insertion de données de test cohérentes si nécessaire
 - Support de plusieurs cas de test (acceptation true/false, règles actives/inactives, etc.)
@@ -32,6 +35,7 @@ Les scripts de test (`09_test_acceptation_opposition.sh` et `10_test_regles_pers
 ### 2. Intégration dans les Scripts de Test
 
 **Modification des scripts 09 et 10** :
+
 - Appel automatique des scripts de préparation avant les tests
 - Utilisation de valeurs de test cohérentes avec les données insérées
 - Fallback manuel si les scripts de préparation ne sont pas disponibles
@@ -41,6 +45,7 @@ Les scripts de test (`09_test_acceptation_opposition.sh` et `10_test_regles_pers
 **Problème** : Les filtres excluaient les lignes de données réelles
 
 **Solution** :
+
 - Filtre amélioré pour capturer les en-têtes ET les lignes de données
 - Exclusion des lignes de tracing et des séparateurs vides
 - Conservation des lignes qui commencent par un nombre (données réelles)
@@ -52,6 +57,7 @@ Les scripts de test (`09_test_acceptation_opposition.sh` et `10_test_regles_pers
 ### Script 09 : Acceptation/Opposition
 
 **Avant** :
+
 - Test 1 : 0 lignes
 - Test 2 : 0 lignes
 - Test 3 : 1 ligne (opposition existait déjà)
@@ -60,6 +66,7 @@ Les scripts de test (`09_test_acceptation_opposition.sh` et `10_test_regles_pers
 - Test 6 : 0 lignes (UPDATE)
 
 **Après** :
+
 - Test 1 : 1 ligne ✅ (acceptation true)
 - Test 2 : 1 ligne ✅ (acceptation true)
 - Test 3 : 1 ligne ✅ (opposition)
@@ -70,6 +77,7 @@ Les scripts de test (`09_test_acceptation_opposition.sh` et `10_test_regles_pers
 ### Script 10 : Règles Personnalisées
 
 **Avant** :
+
 - Test 1 : 0 lignes (règle n'existait pas)
 - Test 2 : 64 lignes ✅
 - Test 3 : 52 lignes ✅
@@ -80,6 +88,7 @@ Les scripts de test (`09_test_acceptation_opposition.sh` et `10_test_regles_pers
 - Test 8 : 0 lignes (UPDATE - normal)
 
 **Après** :
+
 - Test 1 : 1 ligne ✅ (règle CARREFOUR MARKET insérée)
 - Test 2 : 64 lignes ✅
 - Test 3 : 52 lignes ✅
@@ -104,6 +113,7 @@ Les scripts de test (`09_test_acceptation_opposition.sh` et `10_test_regles_pers
 **Problème** : LIKE nécessite ALLOW FILTERING (non recommandé)
 
 **Solution** : Remplacement par une recherche exacte avec toutes les clés primaires :
+
 - `code_efs = '1'`
 - `type_operation = 'CB'`
 - `sens_operation = 'CREDIT'`
@@ -116,6 +126,7 @@ Les scripts de test (`09_test_acceptation_opposition.sh` et `10_test_regles_pers
 **Problème** : Les lignes de données n'étaient pas capturées correctement
 
 **Solution** : Filtre amélioré qui :
+
 - Garde les en-têtes (`code_efs`)
 - Garde les séparateurs (`---`)
 - Garde les lignes de données (commencent par un nombre)
@@ -176,5 +187,3 @@ Les scripts de test (`09_test_acceptation_opposition.sh` et `10_test_regles_pers
 ---
 
 **Date de génération** : 2025-11-28
-
-

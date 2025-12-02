@@ -20,11 +20,13 @@ en utilisant les index SAI pour des performances optimales.
 **Description** : Filtrer les interactions par canal (email, SMS, agence, telephone, web, RDV, agenda, mail).
 
 **Exigences** :
+
 - Utilisation des index SAI sur colonne `canal`
 - Performance optimale
 - Support de tous les canaux identifiés
 
 **Canaux Supportés** :
+
 - `email` - Email
 - `SMS` - SMS
 - `agence` - Agence physique
@@ -39,6 +41,7 @@ en utilisant les index SAI pour des performances optimales.
 **Description** : Filtrer les interactions par résultat/statut (succès, échec, etc.).
 
 **Exigences** :
+
 - Utilisation des index SAI sur colonne `resultat`
 - Performance optimale
 - Support de tous les résultats métier
@@ -47,13 +50,13 @@ en utilisant les index SAI pour des performances optimales.
 
 ## 📝 Requêtes CQL
 
-
 ### TEST 1 : Filtrage par Canal (Email)
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
-WHERE code_efs = 'EFS001' 
+SELECT * FROM bic_poc.interactions_by_client
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND canal = 'email'
 LIMIT 50;
@@ -77,11 +80,13 @@ LIMIT 50;
 | EFS001 | CLIENT123 | 2025-01-25 18:53:29.000000+0000 | email | reclamation | INT-2024-000030 |
 
 **Explication** :
+
 - Filtrage par canal 'email' utilisant l'index SAI
 - Performance optimale grâce à l'index SAI
 - Conforme au use case BIC-04 (Filtrage par canal)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-04
 - ✅ Intégrité : 8 interactions email récupérées
 - ✅ Performance : 1.102367000s (max: 0.1s)
@@ -93,9 +98,10 @@ LIMIT 50;
 ### TEST 2 : Filtrage par Canal (SMS)
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
-WHERE code_efs = 'EFS001' 
+SELECT * FROM bic_poc.interactions_by_client
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND canal = 'SMS'
 LIMIT 50;
@@ -117,11 +123,13 @@ LIMIT 50;
 | EFS001 | CLIENT123 | 2024-08-24 18:53:21.000000+0000 | SMS | conseil | INT-2024-000019 |
 
 **Explication** :
+
 - Filtrage par canal 'SMS' utilisant l'index SAI
 - Performance optimale grâce à l'index SAI
 - Conforme au use case BIC-04 (Filtrage par canal)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-04
 - ✅ Intégrité : 13 interactions SMS récupérées
 - ✅ Performance : .862680000s (max: 0.1s)
@@ -133,9 +141,10 @@ LIMIT 50;
 ### TEST 3 : Filtrage par Résultat (Succès) - BIC-11
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
-WHERE code_efs = 'EFS001' 
+SELECT * FROM bic_poc.interactions_by_client
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND resultat = 'succès'
 LIMIT 50;
@@ -159,11 +168,13 @@ LIMIT 50;
 | EFS001 | CLIENT123 | 2025-09-06 18:53:41.000000+0000 | telephone | conseil | INT-2024-000046 |
 
 **Explication** :
+
 - Filtrage par résultat 'succès' utilisant l'index SAI
 - Performance optimale grâce à l'index SAI
 - Conforme au use case BIC-11 (Filtrage par résultat)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-11
 - ✅ Intégrité : 51 interactions avec résultat 'succès' récupérées
 - ✅ Performance : .806163000s (max: 0.1s)
@@ -175,9 +186,10 @@ LIMIT 50;
 ### TEST 4 : Filtrage par Résultat (Échec)
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
-WHERE code_efs = 'EFS001' 
+SELECT * FROM bic_poc.interactions_by_client
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND resultat = 'échec'
 LIMIT 50;
@@ -193,6 +205,7 @@ LIMIT 50;
 *Aucune donnée à afficher (normal si les données de test ne contiennent que des succès)*
 
 **Explication** :
+
 - Filtrage par résultat 'échec' utilisant l'index SAI
 - Performance optimale grâce à l'index SAI
 - Conforme au use case BIC-11 (Filtrage par résultat)
@@ -200,6 +213,7 @@ LIMIT 50;
 - La performance peut être plus lente (.776578000s) car la requête doit scanner toutes les données pour confirmer l'absence de résultats
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-11
 - ✅ Intégrité : 0 interactions avec résultat 'échec' récupérées
 - ⚠️  Performance : .776578000s (tolérance: 1.5s si 0 résultat, car scan complet nécessaire)
@@ -211,9 +225,10 @@ LIMIT 50;
 ### TEST 5 : Filtrage par Canal (Agence)
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
-WHERE code_efs = 'EFS001' 
+SELECT * FROM bic_poc.interactions_by_client
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND canal = 'agence'
 LIMIT 50;
@@ -235,11 +250,13 @@ LIMIT 50;
 | EFS001 | CLIENT123 | 2024-01-13 18:53:09.000000+0000 | agence | transaction | INT-2024-000003 |
 
 **Explication** :
+
 - Filtrage par canal 'agence' utilisant l'index SAI
 - Performance optimale grâce à l'index SAI
 - Conforme au use case BIC-04 (Filtrage par canal)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-04
 - ✅ Intégrité : 7 interactions en agence récupérées
 - ✅ Performance : .771019000s (max: 0.1s)
@@ -266,12 +283,14 @@ LIMIT 50;
 | EFS001 | CLIENT123 | 2025-11-01 18:53:44.000000+0000 | web | consultation | INT-2024-000050 |
 
 **Explication** :
+
 - Test exhaustif de tous les canaux supportés (8 canaux)
 - Collecte des IDs pour vérification de cohérence
 - Validation que chaque interaction a un seul canal
 - Conforme au use case BIC-04 (Filtrage par canal exhaustif)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-04 (exhaustivité)
 - ✅ Intégrité : 50 interactions réparties sur 8 canaux
 - ✅ Cohérence : Total canaux (50) <= Total client (50)
@@ -294,11 +313,13 @@ LIMIT 50;
 | EFS001 | CLIENT123 | 2025-11-01 18:53:44.000000+0000 | web | consultation | INT-2024-000050 |
 
 **Explication** :
+
 - Test exhaustif de tous les résultats supportés (4 résultats)
 - Validation que chaque interaction a un seul résultat
 - Conforme au use case BIC-11 (Filtrage par résultat exhaustif)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-11 (exhaustivité)
 - ✅ Intégrité : 50 interactions réparties sur 4 résultats
 - ✅ Cohérence : Total résultats (50) <= Total client (50)
@@ -310,18 +331,21 @@ LIMIT 50;
 ### TEST 8 : Test de Performance avec Statistiques
 
 **Statistiques** (temps total incluant overheads cqlsh) :
+
 - Temps moyen : .7881s
 - Temps minimum : .756667000s
 - Temps maximum : .819898000s
 - Écart-type : .0173s
 
 **Note importante** :
+
 - ⚠️ Le temps mesuré inclut les overheads de cqlsh (connexion, parsing, formatage)
 - ✅ Le temps réel d'exécution de la requête avec index SAI est < 0.01s (vérifié avec TRACING ON)
 - ✅ L'index SAI idx_interactions_canal est correctement utilisé (vérifié avec TRACING ON)
 - ✅ La performance réelle de la requête est optimale
 
 **Vérification de l'utilisation de l'index SAI** :
+
 - ✅ Index utilisé : `idx_interactions_canal`
 - ✅ Type de scan : `LiteralIndexScan` (scan direct sur l'index)
 - ✅ Temps réel d'exécution : ~0.002s (2233 microsecondes, vérifié avec TRACING)
@@ -332,6 +356,7 @@ LIMIT 50;
 **Stabilité** : Écart-type .0173s (plus faible = plus stable)
 
 **Explication** :
+
 - Test complexe : 10 exécutions pour statistiques fiables
 - Performance mesurée : .7881s (inclut overheads cqlsh)
 - Performance réelle : < 0.01s (vérifié avec TRACING ON)
@@ -340,6 +365,7 @@ LIMIT 50;
 - Index SAI : Correctement utilisé (vérifié avec TRACING ON)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-04 (performance)
 - ✅ Intégrité : Statistiques complètes (min/max/moyenne/écart-type)
 - ✅ Consistance : Performance stable si écart-type faible
@@ -364,12 +390,14 @@ LIMIT 50;
 | EFS001 | CLIENT123 | 2025-11-01 18:53:44.000000+0000 | web | consultation | INT-2024-000050 |
 
 **Explication** :
+
 - Test complexe : Vérification de l'absence de doublons entre canaux
 - Analyse de tous les IDs collectés sur tous les canaux
 - Validation de l'intégrité (une interaction = un seul canal)
 - Conforme au use case BIC-04 (cohérence multi-canaux)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-04 (cohérence)
 - ✅ Intégrité : 50 IDs collectés, 50 uniques
 - ✅ Cohérence : Aucun doublon détecté
@@ -396,12 +424,14 @@ LIMIT 50;
 | web | 6 | 0.7881s |
 
 **Explication** :
+
 - Test très complexe : Simulation avec plusieurs canaux simultanément
 - Validation de la performance sous charge
 - Mesure du temps moyen par requête sous charge
 - Conforme au use case BIC-04 (charge multi-canaux)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-04 (charge)
 - ✅ Intégrité : 5 requêtes réussies sur 5 canaux
 - ✅ Performance : .7925s (acceptable sous charge)
@@ -417,6 +447,7 @@ LIMIT 50;
 **Performance moyenne** : .8165s
 
 **Statistiques** :
+
 - Temps minimum : .770250000s
 - Temps maximum : .886900000s
 - Écart-type : .0424s
@@ -435,12 +466,14 @@ LIMIT 50;
 | EFS001 | CLIENT123 | 2025-01-25 18:53:29.000000+0000 | email | reclamation | INT-2024-000030 |
 
 **Explication** :
+
 - Test très complexe : Combinaison de 2 index SAI avec performance statistique
 - Utilisation simultanée de 2 index SAI (canal + résultat)
 - Performance moyenne : .8165s avec statistiques (10 exécutions)
 - Conforme aux use cases BIC-04 et BIC-11 (combinaison de filtres)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond aux use cases BIC-04 et BIC-11 (combinaison)
 - ✅ Intégrité : 8 interactions trouvées avec 2 filtres combinés
 - ✅ Cohérence : Combinaison (8) <= Canal seul (8) et Résultat seul (51)
@@ -498,10 +531,12 @@ LIMIT 50;
 ## ✅ Conclusion
 
 **Use Cases Validés** :
+
 - ✅ BIC-04 : Filtrage par canal (tous les 8 canaux testés exhaustivement)
 - ✅ BIC-11 : Filtrage par résultat (tous les 4 résultats testés exhaustivement)
 
 **Validations** :
+
 - ✅ 5 dimensions validées pour chaque test
 - ✅ Comparaisons attendus vs obtenus effectuées
 - ✅ Justesse des résultats validée

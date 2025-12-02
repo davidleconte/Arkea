@@ -55,4 +55,3 @@ else
     echo -e "${RED}❌ $TOTAL_FAILED suite(s) de tests ont échoué${NC}"
     exit 1
 fi
-

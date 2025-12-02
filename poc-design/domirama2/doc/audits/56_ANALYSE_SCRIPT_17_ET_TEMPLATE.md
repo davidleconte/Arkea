@@ -46,35 +46,42 @@ Le script `17_test_advanced_search.sh` est un **script de test/recherche avancé
 ### Fonctionnalités Actuelles
 
 ✅ **Vérifications** :
+
 - HCD démarré
 - Keyspace existe
 - Index avancés existent (vérification optionnelle)
 
 ✅ **Sélection de compte** :
+
 - Sélection automatique d'un compte avec des données
 - Utilisation d'un compte connu (code_si=1, contrat=5913101072)
 - Remplacement des placeholders dans le fichier CQL
 
 ✅ **Exécution** :
+
 - Exécution du fichier CQL de test via `cqlsh -f`
 - Filtrage des warnings
 
 ✅ **Messages** :
+
 - Messages informatifs sur les types de recherches testées
 - Explications sur les différents types d'index SAI
 
 ### Limitations Actuelles
 
 ❌ **Pas d'affichage didactique** :
+
 - Pas d'affichage des requêtes CQL avant exécution
 - Pas d'explication des différents types d'index SAI
 - Pas de capture des résultats
 
 ❌ **Pas de documentation** :
+
 - Pas de génération de rapport markdown
 - Pas de validation de la pertinence des résultats
 
 ❌ **Pas d'explications** :
+
 - Pas d'explication des différences entre les types d'index
 - Pas d'explication des cas d'usage pour chaque index
 
@@ -164,16 +171,19 @@ Le script `17_test_advanced_search.sh` est un **script de test/recherche avancé
 ### Similarités
 
 ✅ **Structure similaire** :
+
 - Même format de script shell
 - Même logique de sélection de compte
 - Même exécution via `cqlsh -f`
 
 ✅ **Type de script** :
+
 - Script de test/recherche
 - Tests de recherche full-text avec SAI
 - 20 tests dans le fichier CQL
 
 ✅ **Objectif similaire** :
+
 - Démontrer les capacités de recherche full-text
 - Valider la pertinence des résultats
 
@@ -189,6 +199,7 @@ Le script `17_test_advanced_search.sh` est un **script de test/recherche avancé
 ### Conclusion
 
 Le script 17 est **complémentaire** au script 15 :
+
 - Script 15 : Démontre les **analyzers** d'un index
 - Script 17 : Démontre les **différents types d'index** SAI
 
@@ -201,12 +212,14 @@ Le script 17 est **complémentaire** au script 15 :
 **Applicabilité** : ✅ **Applicable avec enrichissements**
 
 **Structure** :
+
 - 4-6 parties didactiques
 - Affichage DDL/DML
 - Capture des résultats
 - Génération de documentation
 
 **Adaptations nécessaires** :
+
 - Ajouter section "Types d'Index SAI" (explication de chaque type)
 - Ajouter section "Cas d'Usage par Type d'Index"
 - Adapter la capture des résultats pour les différents types d'index
@@ -217,11 +230,13 @@ Le script 17 est **complémentaire** au script 15 :
 **Applicabilité** : ⚠️ **Partiellement applicable**
 
 **Similarités** :
+
 - Tests de recherche full-text
 - 20 tests dans le fichier CQL
 - Structure didactique similaire
 
 **Différences** :
+
 - Script 15 : Focus sur analyzers
 - Script 17 : Focus sur types d'index
 
@@ -246,17 +261,20 @@ Le script 17 est **complémentaire** au script 15 :
 ### Option 1 : Utiliser le Template Didactique Général avec Enrichissements (Recommandé) ⭐
 
 **Avantages** :
+
 - Réutilise le template existant
 - Cohérence avec les autres scripts de test didactiques
 - Adaptations mineures nécessaires
 
 **Adaptations nécessaires** :
+
 - Ajouter section "Types d'Index SAI" (explication de chaque type)
 - Ajouter section "Cas d'Usage par Type d'Index"
 - Adapter la capture des résultats pour les différents types d'index
 - Ajouter validation de la pertinence avec différents types d'index
 
 **Structure proposée** :
+
 1. **PARTIE 1** : CONTEXTE - Types d'Index SAI
    - Explication de chaque type d'index (fulltext, exact, keyword, ngram, french, whitespace)
    - Cas d'usage pour chaque type
@@ -289,10 +307,12 @@ Le script 17 est **complémentaire** au script 15 :
 ### Option 2 : Créer un Template Spécifique pour Tests Avancés
 
 **Avantages** :
+
 - Template dédié aux tests avancés
 - Sections spécifiques (types d'index, cas d'usage)
 
 **Inconvénients** :
+
 - Duplication avec template didactique général
 - Maintenance de deux templates similaires
 - Pas de valeur ajoutée significative
@@ -302,10 +322,12 @@ Le script 17 est **complémentaire** au script 15 :
 ### Option 3 : Réutiliser le Template du Script 15 avec Adaptations
 
 **Avantages** :
+
 - Template déjà adapté pour les tests de recherche
 - Structure similaire
 
 **Inconvénients** :
+
 - Focus sur analyzers plutôt que types d'index
 - Adaptations importantes nécessaires
 - Risque de confusion
@@ -333,6 +355,7 @@ Le script 17 est **complémentaire** au script 15 :
 ### 1. Types d'Index SAI
 
 **À expliquer** :
+
 - **idx_libelle_fulltext** : Recherches générales avec stemming
 - **idx_libelle_exact** : Noms propres et codes exacts
 - **idx_libelle_keyword** : Phrases complètes
@@ -343,6 +366,7 @@ Le script 17 est **complémentaire** au script 15 :
 ### 2. Cas d'Usage par Type d'Index
 
 **À expliquer** :
+
 - **Quand utiliser fulltext** : Recherches générales avec variations
 - **Quand utiliser exact** : Noms propres, codes, numéros
 - **Quand utiliser keyword** : Phrases exactes
@@ -353,6 +377,7 @@ Le script 17 est **complémentaire** au script 15 :
 ### 3. Capture des Résultats
 
 **À adapter** :
+
 - Capturer le nombre de résultats pour chaque requête
 - Afficher un échantillon des résultats
 - Valider la pertinence avec différents types d'index
@@ -376,12 +401,8 @@ Le script 17 est **complémentaire** au script 15 :
 ---
 
 **📝 Prochaines étapes** :
+
 1. Créer le script didactique `17_test_advanced_search_v2_didactique.sh`
 2. Appliquer le template didactique général avec enrichissements
 3. Tester le script et valider les résultats
 4. Générer la documentation markdown
-
-
-
-
-

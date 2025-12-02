@@ -23,6 +23,7 @@ Le projet **ARKEA** est un Proof of Concept (POC) démontrant la faisabilité de
 ### Objectif Principal
 
 **Migrer** l'architecture HBase → HCD en conservant :
+
 - ✅ Fonctionnalités existantes
 - ✅ Performance équivalente ou supérieure
 - ✅ Compatibilité avec les applications existantes
@@ -36,12 +37,14 @@ Le projet **ARKEA** est un Proof of Concept (POC) démontrant la faisabilité de
 **Rôle** : Base de données cible (basée sur Cassandra 4.0.11)
 
 **Caractéristiques** :
+
 - ✅ Stockage distribué
 - ✅ SAI (Storage-Attached Index) pour recherche avancée
 - ✅ Support full-text, fuzzy, vector search
 - ✅ Data API (REST/GraphQL)
 
 **Configuration** :
+
 - Host : `localhost` (configurable via `HCD_HOST`)
 - Port : `9042` (configurable via `HCD_PORT`)
 - Keyspace : `poc_hbase_migration` (configurable via `POC_KEYSPACE`)
@@ -55,12 +58,14 @@ Le projet **ARKEA** est un Proof of Concept (POC) démontrant la faisabilité de
 **Rôle** : Traitement distribué et streaming
 
 **Caractéristiques** :
+
 - ✅ Batch processing (chargement de données)
 - ✅ Streaming (Kafka → HCD)
 - ✅ Spark SQL pour requêtes
 - ✅ Intégration avec HCD via `spark-cassandra-connector`
 
 **Configuration** :
+
 - Version : 3.5.1
 - Connector : `spark-cassandra-connector_2.12-3.5.0`
 - Packages : `spark-sql-kafka-0-10_2.12:3.5.1`
@@ -74,11 +79,13 @@ Le projet **ARKEA** est un Proof of Concept (POC) démontrant la faisabilité de
 **Rôle** : Streaming de données en temps réel
 
 **Caractéristiques** :
+
 - ✅ Topics pour événements
 - ✅ Intégration Spark Streaming
 - ✅ Persistence des messages
 
 **Configuration** :
+
 - Bootstrap Servers : `localhost:9092` (configurable via `KAFKA_BOOTSTRAP_SERVERS`)
 - Zookeeper : `localhost:2181` (configurable via `KAFKA_ZOOKEEPER_CONNECT`)
 
@@ -91,6 +98,7 @@ Le projet **ARKEA** est un Proof of Concept (POC) démontrant la faisabilité de
 **Rôle** : Chargement de données en masse
 
 **Caractéristiques** :
+
 - ✅ Import/Export CSV, JSON
 - ✅ Optimisé pour Cassandra/HCD
 - ✅ Support parallélisme
@@ -189,11 +197,13 @@ Arkea/
 ### Configuration Centralisée
 
 **`.poc-config.sh`** :
+
 - Variables d'environnement centralisées
 - Détection automatique de l'OS (macOS/Linux)
 - Priorité : Variables d'env > Fichier > Détection auto
 
 **`.poc-profile`** :
+
 - Source `.poc-config.sh`
 - Fonctions utilitaires
 - Initialisation de l'environnement
@@ -207,6 +217,7 @@ Arkea/
 **Objectif** : Gérer différentes versions de données (batch vs. client)
 
 **Implémentation** :
+
 - Colonne `version` dans les tables
 - Timestamps pour traçabilité
 - Requêtes avec filtrage par version
@@ -216,6 +227,7 @@ Arkea/
 **Objectif** : Recherche avancée (full-text, fuzzy, vector)
 
 **Types d'index** :
+
 - **Full-text** : Recherche textuelle classique
 - **Fuzzy** : Tolérance aux fautes de frappe
 - **Vector** : Recherche sémantique (embeddings)
@@ -225,6 +237,7 @@ Arkea/
 **Objectif** : Combiner full-text et vector search
 
 **Implémentation** :
+
 - Requêtes combinant SAI full-text et vector
 - Scoring unifié
 - Optimisation de la pertinence
@@ -288,12 +301,14 @@ Arkea/
 **Décision** : Utiliser HCD 1.2.3 (basé sur Cassandra 4.0.11)
 
 **Justification** :
+
 - ✅ Compatibilité avec écosystème Cassandra
 - ✅ SAI pour recherche avancée
 - ✅ Data API pour modernisation
 - ✅ Support DataStax
 
 **Conséquences** :
+
 - Nécessite adaptation des schémas HBase → CQL
 - Migration des données via Spark
 
@@ -306,12 +321,14 @@ Arkea/
 **Décision** : Utiliser Parquet au lieu de CSV
 
 **Justification** :
+
 - ✅ Performance supérieure (columnar)
 - ✅ Compression efficace
 - ✅ Support natif Spark
 - ✅ Schéma préservé
 
 **Conséquences** :
+
 - Nécessite conversion CSV → Parquet
 - Outils compatibles Parquet requis
 
@@ -324,11 +341,13 @@ Arkea/
 **Décision** : `.poc-config.sh` avec détection automatique
 
 **Justification** :
+
 - ✅ Portabilité (macOS/Linux)
 - ✅ Maintenance facilitée
 - ✅ Priorité claire (env > config > auto)
 
 **Conséquences** :
+
 - Migration des scripts existants
 - Documentation à jour
 
@@ -368,4 +387,3 @@ Arkea/
 **Date** : 2025-12-01  
 **Version** : 1.0  
 **Statut** : ✅ **Documentation complète**
-

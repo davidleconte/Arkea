@@ -40,7 +40,7 @@ else
         medium) NUM_LIGNES=10000 ;;
         large) NUM_LIGNES=100000 ;;
         huge) NUM_LIGNES=1000000 ;;
-        *) 
+        *)
             warn "Volume '$VOLUME' non reconnu, utilisation de 'medium' (10000)"
             NUM_LIGNES=10000
             VOLUME="medium"
@@ -100,8 +100,8 @@ success "Spark disponible : $SPARK_HOME"
 cat > "$REPORT_FILE" << EOF
 # 📥 Démonstration : Génération des Données Interactions (Parquet)
 
-**Date** : $(date +'%Y-%m-%d %H:%M:%S')  
-**Script** : \`05_generate_interactions_parquet.sh\`  
+**Date** : $(date +'%Y-%m-%d %H:%M:%S')
+**Script** : \`05_generate_interactions_parquet.sh\`
 **Use Cases** : BIC-07 (Format JSON + colonnes dynamiques), BIC-09 (Écriture batch)
 
 ---
@@ -277,7 +277,7 @@ def generer_json_data(code_efs, numero_client, date_interaction, canal, type_int
     """Génère les données JSON complètes pour une interaction"""
     conseiller = random.choice(CONSEILLERS)
     details = random.choice(TEXTES_DETAILS.get(type_interaction, ["Interaction standard."]))
-    
+
     json_obj = {
         "id_interaction": idt_tech,
         "code_efs": code_efs,
@@ -296,13 +296,13 @@ def generer_json_data(code_efs, numero_client, date_interaction, canal, type_int
         "tags": [type_interaction, canal],
         "categorie": "service_client" if type_interaction in ["reclamation", "consultation"] else "conseil"
     }
-    
+
     return json.dumps(json_obj, ensure_ascii=False)
 
 def generer_colonnes_dynamiques(type_interaction, resultat):
     """Génère les colonnes dynamiques (MAP)"""
     colonnes = {}
-    
+
     # Résultat détaillé
     if resultat == "succès":
         colonnes["resultat_detail"] = f"succès - résolu en {random.randint(1, 48)}h"
@@ -310,42 +310,42 @@ def generer_colonnes_dynamiques(type_interaction, resultat):
         colonnes["resultat_detail"] = "échec - nécessite intervention"
     else:
         colonnes["resultat_detail"] = resultat
-    
+
     # Priorité
     if type_interaction == "reclamation":
         colonnes["priorite"] = random.choice(["haute", "moyenne"])
     else:
         colonnes["priorite"] = random.choice(["moyenne", "basse"])
-    
+
     # Catégorie
     colonnes["categorie"] = "service_client" if type_interaction in ["reclamation", "consultation"] else "conseil"
-    
+
     # Durée
     colonnes["duree_secondes"] = str(random.randint(60, 600))
-    
+
     # Satisfaction (si succès)
     if resultat == "succès":
         colonnes["satisfaction"] = str(random.randint(3, 5))
-    
+
     # Montant (si transaction)
     if type_interaction == "transaction":
         colonnes["montant"] = f"{random.randint(10, 10000)}.00"
         colonnes["devise"] = "EUR"
         colonnes["reference"] = f"VIR-2024-{random.randint(1000, 9999)}"
-    
+
     return colonnes
 
 # Génération des données
 print(f"Génération de {NUM_LIGNES} interactions...")
 with open(OUTPUT_CSV, "w", newline="", encoding="utf-8") as f:
     writer = csv.writer(f, delimiter="|")
-    
+
     # En-tête
     writer.writerow([
         "code_efs", "numero_client", "date_interaction", "canal", "type_interaction",
         "idt_tech", "resultat", "json_data", "colonnes_dynamiques"
     ])
-    
+
     for i in range(NUM_LIGNES):
         # Sélection aléatoire avec poids
         code_efs = random.choice(CODES_EFS)
@@ -353,27 +353,27 @@ with open(OUTPUT_CSV, "w", newline="", encoding="utf-8") as f:
         canal = random.choices(CANAUX, weights=CANAUX_WEIGHTS)[0]
         type_interaction = random.choices(TYPES, weights=TYPES_WEIGHTS)[0]
         resultat = random.choices(RESULTATS, weights=RESULTATS_WEIGHTS)[0]
-        
+
         # Date aléatoire sur 2 ans
         random_seconds = random.randint(0, TOTAL_SECONDS)
         date_interaction = START_DATE + timedelta(seconds=random_seconds)
-        
+
         # ID technique unique
         year_str = date_interaction.strftime("%Y")
         idt_tech = f"INT-{year_str}-{uuid4().hex[:6].upper()}"
-        
+
         # JSON data
         json_data = generer_json_data(code_efs, numero_client, date_interaction, canal, type_interaction, resultat, idt_tech)
-        
+
         # Colonnes dynamiques (format MAP pour CQL)
         colonnes_dyn = generer_colonnes_dynamiques(type_interaction, resultat)
         colonnes_dyn_str = json.dumps(colonnes_dyn, ensure_ascii=False)
-        
+
         writer.writerow([
             code_efs, numero_client, date_interaction.isoformat(), canal, type_interaction,
             idt_tech, resultat, json_data, colonnes_dyn_str
         ])
-        
+
         if (i + 1) % 1000 == 0:
             print(f"  {i + 1}/{NUM_LIGNES} interactions générées...")
 
@@ -566,8 +566,8 @@ cat >> "$REPORT_FILE" << EOF
 
 ## ✅ Résultats
 
-**Fichier généré** : \`$OUTPUT_FILE\`  
-**Nombre d'interactions** : $CSV_LINES  
+**Fichier généré** : \`$OUTPUT_FILE\`
+**Nombre d'interactions** : $CSV_LINES
 **Taille** : ${PARQUET_SIZE:-N/A}
 
 **Distribution** :
@@ -583,7 +583,7 @@ cat >> "$REPORT_FILE" << EOF
 
 ---
 
-**Date** : $(date +'%Y-%m-%d %H:%M:%S')  
+**Date** : $(date +'%Y-%m-%d %H:%M:%S')
 **Script** : \`05_generate_interactions_parquet.sh\`
 EOF
 
@@ -594,4 +594,3 @@ echo ""
 result "📄 Fichier Parquet : $OUTPUT_FILE"
 result "📄 Rapport : $REPORT_FILE"
 echo ""
-

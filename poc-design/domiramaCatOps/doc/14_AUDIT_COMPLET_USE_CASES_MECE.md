@@ -306,11 +306,13 @@
 **1. Métadonnées Ingestion (Checkpointing)**
 
 **Justification** :
+
 - État Spark Streaming (offsets Kafka, watermarks, state) = Structure JSON complexe
 - Métadonnées ingestion (config, erreurs) = Structure variable
 - **Recommandation** : ✅ **Colonne `TEXT` avec JSON** ou **Colonne dédiée `JSON`** (si supporté HCD)
 
 **Schéma Proposé** :
+
 ```cql
 CREATE TABLE domiramacatops_poc.spark_checkpoints (
     checkpoint_id        TEXT,
@@ -334,16 +336,19 @@ CREATE TABLE domiramacatops_poc.spark_checkpoints (
 **2. Métadonnées Opération (Extension `meta_flags`)**
 
 **Justification** :
+
 - `meta_flags MAP<TEXT, TEXT>` couvre déjà les besoins simples
 - Pour métadonnées complexes (nested, arrays) : **JSON plus adapté**
 - **Recommandation** : ⚠️ **Évaluer si `MAP` suffit ou si `JSON` nécessaire**
 
 **Schéma Actuel** :
+
 ```cql
 meta_flags MAP<TEXT, TEXT>  -- Couvre déjà la plupart des cas
 ```
 
 **Schéma Proposé (si besoin)** :
+
 ```cql
 meta_flags        MAP<TEXT, TEXT>,  -- Métadonnées simples
 meta_flags_json   TEXT,              -- Métadonnées complexes (JSON)
@@ -356,10 +361,12 @@ meta_flags_json   TEXT,              -- Métadonnées complexes (JSON)
 **3. Configuration Règles Personnalisées (Complexes)**
 
 **Justification** :
+
 - Règles avec conditions multiples, expressions complexes
 - **Recommandation** : ⚠️ **Évaluer si colonnes normales suffisent**
 
 **Schéma Actuel** :
+
 ```cql
 regles_personnalisees (
     code_efs          TEXT,
@@ -374,6 +381,7 @@ regles_personnalisees (
 ```
 
 **Schéma Proposé (si besoin)** :
+
 ```cql
 regles_personnalisees (
     ...
@@ -391,6 +399,7 @@ regles_personnalisees (
 **1. Données Thrift Binaires**
 
 **Justification** :
+
 - Déjà stockées en `BLOB` (préservation intégrité)
 - Pas besoin de JSON (données binaires)
 - **Recommandation** : ❌ **Pas de JSON nécessaire**
@@ -400,6 +409,7 @@ regles_personnalisees (
 **2. Compteurs Feedbacks**
 
 **Justification** :
+
 - Structure simple (compteurs atomiques)
 - Pas besoin de JSON
 - **Recommandation** : ❌ **Pas de JSON nécessaire**
@@ -409,6 +419,7 @@ regles_personnalisees (
 **3. Acceptation/Opposition**
 
 **Justification** :
+
 - Structure simple (booléen + timestamp)
 - Pas besoin de JSON
 - **Recommandation** : ❌ **Pas de JSON nécessaire**
@@ -600,7 +611,7 @@ CREATE TABLE domiramacatops_poc.spark_checkpoints (
     config_snapshot     TEXT,   -- JSON: Configuration Spark (options, etc.)
     created_at           TIMESTAMP,
     updated_at           TIMESTAMP,
-    
+
     PRIMARY KEY (checkpoint_id)
 ) WITH default_time_to_live = 2592000;  -- TTL 30 jours
 ```
@@ -628,7 +639,7 @@ CREATE TABLE domiramacatops_poc.ingestion_metadata (
     error_details        TEXT,   -- JSON: Détails erreurs (stack trace, etc.)
     created_at           TIMESTAMP,
     updated_at           TIMESTAMP,
-    
+
     PRIMARY KEY (ingestion_id)
 ) WITH CLUSTERING ORDER BY (start_time DESC);
 ```
@@ -699,14 +710,17 @@ ALTER TABLE operations_by_account ADD meta_flags_json TEXT;  -- JSON pour struct
 ### 9.3 Recommandations Semi-Structuré/JSON
 
 **✅ JSON PERTINENT** :
+
 - Checkpointing Spark/Kafka : Colonnes `TEXT` avec JSON
 - Métadonnées ingestion : Colonnes `TEXT` avec JSON
 
 **⚠️ JSON PARTIELLEMENT PERTINENT** :
+
 - Métadonnées opération : `MAP<TEXT, TEXT>` suffit, JSON uniquement si nested
 - Configuration règles : Colonnes normales suffisent pour POC
 
 **❌ JSON NON PERTINENT** :
+
 - Données Thrift binaires : `BLOB` suffit
 - Compteurs : Type `counter` suffit
 - Acceptation/Opposition : Colonnes simples suffisent
@@ -757,4 +771,3 @@ ALTER TABLE operations_by_account ADD meta_flags_json TEXT;  -- JSON pour struct
 **Date** : 2025-01-XX (Mise à jour complète)  
 **Version** : 2.0  
 **Statut** : ✅ **Audit complet MECE terminé - Tous les use cases couverts**
-

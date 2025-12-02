@@ -43,6 +43,7 @@
 | `scripts/utils/portable_functions.sh` | Fonctions portables cross-platform | ✅ Nouveau | Toutes |
 
 **Nouvelles Fonctions Portables** :
+
 - `get_realpath()` - Chemin réel portable (macOS/Linux/Windows)
 - `check_port()` - Vérification de port portable
 - `kill_process()` - Arrêt de processus portable
@@ -55,6 +56,7 @@
 ### 1. `install_spark_kafka.sh` ✅ Mis à jour
 
 **Changements** :
+
 - ✅ Installation manuelle de Spark 3.5.1 (au lieu de Homebrew qui installe Spark 4.x)
 - ✅ Désinstallation automatique de Spark 4.x si présent
 - ✅ Téléchargement et extraction de Spark 3.5.1 depuis archive.apache.org
@@ -65,6 +67,7 @@
 ### 2. `verify_all.sh` ✅ Nouveau
 
 **Fonctionnalités** :
+
 - ✅ Vérifie Java (version et configuration)
 - ✅ Vérifie HCD (installation et état)
 - ✅ Vérifie Spark (installation et version)
@@ -76,6 +79,7 @@
 ### 3. `list_scripts.sh` ✅ Nouveau
 
 **Fonctionnalités** :
+
 - ✅ Liste tous les scripts avec leur description
 - ✅ Organisé par catégorie (Installation, Démarrage, Configuration, Tests, Utilitaires)
 - ✅ Affiche les fichiers Scala de test
@@ -134,6 +138,7 @@ source .poc-profile
 ### Chemins
 
 Tous les scripts utilisent le chemin correct :
+
 - `INSTALL_DIR="/Users/david.leconte/Documents/Arkea"`
 - `HCD_DIR="$INSTALL_DIR/hcd-1.2.3"`
 - `SPARK_HOME="$INSTALL_DIR/spark-3.5.1"`
@@ -223,4 +228,3 @@ Tous les scripts sont à jour et prêts à l'emploi. Pour continuer le POC :
 ---
 
 **Tous les scripts sont à jour et cohérents ! ✅**
-

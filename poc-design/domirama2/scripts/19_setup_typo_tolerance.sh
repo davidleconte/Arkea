@@ -8,7 +8,7 @@
 #   Ce script configure la tolérance aux typos en ajoutant une colonne
 #   'libelle_prefix' qui contient les premiers caractères du libellé,
 #   permettant des recherches partielles pour tolérer les erreurs de saisie.
-#   
+#
 #   Fonctionnalités :
 #   - Ajout de la colonne 'libelle_prefix' (TEXT)
 #   - Création d'un index SAI sur 'libelle_prefix'
@@ -145,4 +145,3 @@ echo ""
 
 success "✅ Configuration de la tolérance aux typos terminée !"
 info "📝 Prochaine étape: Exécuter ./20_test_typo_tolerance.sh"
-

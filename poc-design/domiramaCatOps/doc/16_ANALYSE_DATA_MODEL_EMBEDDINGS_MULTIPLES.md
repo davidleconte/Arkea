@@ -15,6 +15,7 @@
 ### Table `operations_by_account`
 
 **Colonnes vectorielles actuelles** :
+
 - `libelle_embedding VECTOR<FLOAT, 1472>` - Embeddings ByteT5-small
 
 **Index SAI actuels sur `operations_by_account`** :
@@ -41,6 +42,7 @@
 **Limite SAI** : **10 index par table** (par défaut dans HCD/Cassandra)
 
 **Configuration actuelle** :
+
 - ✅ **8 index** utilisés sur `operations_by_account`
 - ✅ **2 index** disponibles pour extensions
 
@@ -48,8 +50,8 @@
 
 ```cql
 -- Vérifier la limite SAI configurée
-SELECT * FROM system_schema.indexes 
-WHERE keyspace_name = 'domiramacatops_poc' 
+SELECT * FROM system_schema.indexes
+WHERE keyspace_name = 'domiramacatops_poc'
   AND table_name = 'operations_by_account';
 ```
 
@@ -62,12 +64,14 @@ WHERE keyspace_name = 'domiramacatops_poc'
 ### Option 1 : Ajouter `libelle_embedding_e5` (RECOMMANDÉ)
 
 **Nouvelle colonne** :
+
 ```cql
-ALTER TABLE operations_by_account 
+ALTER TABLE operations_by_account
 ADD libelle_embedding_e5 VECTOR<FLOAT, 1024>;
 ```
 
 **Nouvel index SAI** :
+
 ```cql
 CREATE CUSTOM INDEX IF NOT EXISTS idx_libelle_embedding_e5_vector
 ON operations_by_account(libelle_embedding_e5)
@@ -75,6 +79,7 @@ USING 'StorageAttachedIndex';
 ```
 
 **Impact** :
+
 - ✅ **1 nouvelle colonne** : `libelle_embedding_e5`
 - ✅ **1 nouvel index SAI** : Total = 9/10 index
 - ✅ **1 index disponible** pour futures extensions
@@ -83,11 +88,13 @@ USING 'StorageAttachedIndex';
 ### Option 2 : Remplacer `libelle_embedding` (NON RECOMMANDÉ)
 
 **Migration complète** :
+
 - Supprimer `libelle_embedding` (ByteT5)
 - Ajouter `libelle_embedding_e5` (multilingual-e5-large)
 - Régénérer tous les embeddings
 
 **Inconvénients** :
+
 - ❌ Perte de compatibilité avec code existant
 - ❌ Migration complète nécessaire
 - ❌ Pas de comparaison possible entre modèles
@@ -102,7 +109,7 @@ USING 'StorageAttachedIndex';
 -- ============================================
 -- Ajout de la colonne vectorielle supplémentaire
 -- ============================================
-ALTER TABLE operations_by_account 
+ALTER TABLE operations_by_account
 ADD libelle_embedding_e5 VECTOR<FLOAT, 1024>;
 
 -- ============================================
@@ -120,11 +127,11 @@ CREATE TABLE domiramacatops_poc.operations_by_account (
     -- Partition Key
     code_si           TEXT,
     contrat           TEXT,
-    
+
     -- Clustering Keys
     date_op           TIMESTAMP,
     numero_op         INT,
-    
+
     -- Données de l'opération
     libelle           TEXT,
     montant           DECIMAL,
@@ -135,20 +142,20 @@ CREATE TABLE domiramacatops_poc.operations_by_account (
     operation_data    BLOB,
     cobol_data_base64 TEXT,
     meta_flags        MAP<TEXT, TEXT>,
-    
+
     -- Colonnes de Recherche Avancée
     libelle_prefix    TEXT,
     libelle_tokens    SET<TEXT>,
     libelle_embedding VECTOR<FLOAT, 1472>,      -- ByteT5-small (existant)
     libelle_embedding_e5 VECTOR<FLOAT, 1024>,   -- multilingual-e5-large (NOUVEAU)
-    
+
     -- Colonnes de Catégorisation
     cat_auto          TEXT,
     cat_confidence    DECIMAL,
     cat_user          TEXT,
     cat_date_user     TIMESTAMP,
     cat_validee       BOOLEAN,
-    
+
     PRIMARY KEY ((code_si, contrat), date_op, numero_op)
 ) WITH CLUSTERING ORDER BY (date_op DESC, numero_op ASC)
   AND default_time_to_live = 315619200;
@@ -204,7 +211,7 @@ CREATE TABLE domiramacatops_poc.operations_by_account (
 
 ```cql
 -- Ajouter la colonne (NULL par défaut, pas d'impact sur données existantes)
-ALTER TABLE operations_by_account 
+ALTER TABLE operations_by_account
 ADD libelle_embedding_e5 VECTOR<FLOAT, 1024>;
 
 -- Créer l'index (vide au début, pas d'impact)
@@ -218,11 +225,13 @@ USING 'StorageAttachedIndex';
 ### Phase 2 : Génération Progressive des Embeddings
 
 **Stratégie** :
+
 1. Générer les embeddings e5-large progressivement
 2. Commencer par les données récentes
 3. Étendre progressivement aux données historiques
 
 **Script de migration** :
+
 ```python
 # Migration progressive des embeddings
 for batch in batches:
@@ -235,6 +244,7 @@ for batch in batches:
 ### Phase 3 : Comparaison et Validation
 
 **Tests** :
+
 1. Comparer les résultats ByteT5 vs e5-large
 2. Mesurer la pertinence
 3. Décider de la stratégie (hybrid, e5 seul, ou les deux)
@@ -248,11 +258,13 @@ for batch in batches:
 #### Problème Actuel
 
 **Données de test limitées** :
+
 - Seulement 49 libellés dans le compte de test
 - Peu de variété dans les libellés
 - Libellés non pertinents pour certaines requêtes
 
 **Exemples de problèmes** :
+
 - Requête "LOYER IMPAYE" → Résultats non pertinents
 - Requête "VIREMENT SALAIRE" → Peu de résultats pertinents
 - Requête "CARREFOUR" → 1 seul résultat pertinent
@@ -262,6 +274,7 @@ for batch in batches:
 ### 1. Analyse des Requêtes de Test
 
 **Requêtes identifiées dans les tests** :
+
 - "LOYER IMPAYE"
 - "VIREMENT SALAIRE"
 - "PAIEMENT CARTE BANCAIRE"
@@ -291,12 +304,14 @@ for batch in batches:
 **Script à créer** : `scripts/16_generate_relevant_test_data.sh`
 
 **Fonctionnalités** :
+
 1. Générer des libellés pertinents pour chaque requête de test
 2. Créer des opérations avec ces libellés
 3. Générer les embeddings (ByteT5 + e5-large)
 4. Insérer dans HCD
 
 **Volume recommandé** :
+
 - **100-200 opérations** avec libellés pertinents
 - **Répartition** : 10-20 libellés par requête de test
 - **Dates variées** : Sur 3-6 mois
@@ -304,6 +319,7 @@ for batch in batches:
 ### 4. Structure des Données de Test
 
 **Format** :
+
 ```python
 test_data = [
     {
@@ -320,6 +336,7 @@ test_data = [
 ```
 
 **Catégories à couvrir** :
+
 - HABITATION (loyers, charges, assurances)
 - ALIMENTATION (supermarchés, restaurants)
 - TRANSPORT (parking, essence)
@@ -333,6 +350,7 @@ test_data = [
 ### Étape 1 : Modification du Schéma (1 jour)
 
 1. **Créer le script de migration** :
+
    ```bash
    scripts/17_add_e5_embedding_column.sh
    ```
@@ -345,6 +363,7 @@ test_data = [
 ### Étape 2 : Génération de Données de Test (1-2 jours)
 
 1. **Créer le script de génération** :
+
    ```bash
    scripts/16_generate_relevant_test_data.sh
    ```
@@ -358,6 +377,7 @@ test_data = [
 ### Étape 3 : Migration des Embeddings Existants (Optionnel, 2-3 jours)
 
 1. **Script de migration progressive** :
+
    ```bash
    scripts/18_migrate_embeddings_to_e5.sh
    ```
@@ -388,6 +408,7 @@ test_data = [
 ✅ **FAISABLE** : Ajout d'une colonne vectorielle supplémentaire
 
 **Raisons** :
+
 1. ✅ Limite SAI : 9/10 index utilisés (1 disponible)
 2. ✅ Pas de limite atteinte
 3. ✅ Impact minimal sur données existantes
@@ -414,4 +435,3 @@ test_data = [
 
 **Date de génération** : 2025-11-30  
 **Version** : 1.0
-

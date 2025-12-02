@@ -8,7 +8,7 @@
 # OBJECTIF :
 #   Ce script charge les données d'opérations depuis un fichier CSV
 #   dans la table HCD 'operations_by_account' via Spark.
-#   
+#
 #   IMPORTANT - Stratégie Multi-Version (conforme IBM) :
 #   - Le batch écrit UNIQUEMENT cat_auto et cat_confidence
 #   - Le batch NE TOUCHE JAMAIS cat_user, cat_date_user, cat_validee
@@ -558,8 +558,8 @@ info "📝 Génération du rapport de démonstration..."
 cat > "$REPORT_FILE" << EOF
 # 📥 Démonstration : Chargement des Données Domirama2
 
-**Date** : $(date +"%Y-%m-%d %H:%M:%S")  
-**Script** : $(basename "$0")  
+**Date** : $(date +"%Y-%m-%d %H:%M:%S")
+**Script** : $(basename "$0")
 **Objectif** : Démontrer le chargement de données dans HCD via Spark
 
 ---
@@ -736,9 +736,9 @@ spark.stop()
 
 Le chargement des données a été effectué avec succès :
 
-✅ **Fichier source** : $CSV_FILE  
-✅ **Opérations chargées** : $COUNT  
-✅ **Stratégie batch validée** : cat_user est null  
+✅ **Fichier source** : $CSV_FILE
+✅ **Opérations chargées** : $COUNT
+✅ **Stratégie batch validée** : cat_user est null
 ✅ **Stratégie multi-version** : Conforme IBM
 
 ### Prochaines Étapes
@@ -753,4 +753,3 @@ EOF
 
 success "✅ Rapport généré : $REPORT_FILE"
 echo ""
-

@@ -69,7 +69,7 @@ if [ -d "$HCD_DIR" ]; then
     else
         error "Binaire hcd non trouvé"
     fi
-    
+
     # Vérifier si HCD est démarré
     if lsof -Pi :9042 -sTCP:LISTEN -t >/dev/null 2>&1; then
         info "HCD est démarré (port 9042)"
@@ -89,7 +89,7 @@ if [ -d "$SPARK_DIR" ]; then
         info "Binaire spark-shell trouvé"
         export SPARK_HOME="$SPARK_DIR"
         export PATH=$SPARK_HOME/bin:$PATH
-        
+
         # Vérifier la version
         if command -v spark-submit &> /dev/null; then
             SPARK_VERSION=$(spark-submit --version 2>&1 | head -1)
@@ -112,7 +112,7 @@ if [ -d "$KAFKA_HOME" ]; then
     else
         error "Binaire kafka-server-start.sh non trouvé"
     fi
-    
+
     # Vérifier si Kafka est démarré
     if lsof -Pi :9092 -sTCP:LISTEN -t >/dev/null 2>&1; then
         info "Kafka est démarré (port 9092)"
@@ -138,11 +138,11 @@ if lsof -Pi :9042 -sTCP:LISTEN -t >/dev/null 2>&1; then
     cd "$HCD_DIR"
     jenv local 11 2>/dev/null || true
     eval "$(jenv init -)" 2>/dev/null || true
-    
+
     # Vérifier le keyspace poc_hbase_migration
     if ./bin/cqlsh localhost 9042 -e "DESCRIBE KEYSPACE poc_hbase_migration;" 2>&1 | grep -q "CREATE KEYSPACE"; then
         info "Keyspace poc_hbase_migration existe"
-        
+
         # Vérifier la table kafka_events
         if ./bin/cqlsh localhost 9042 -e "USE poc_hbase_migration; DESCRIBE TABLE kafka_events;" 2>&1 | grep -q "CREATE TABLE"; then
             info "Table kafka_events existe"

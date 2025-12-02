@@ -9,6 +9,7 @@
 ## 🔍 Problème Identifié
 
 ### Erreur
+
 ```
 ❌ Incohérence détectée : Schéma attendu vs obtenu différent
 ```
@@ -20,6 +21,7 @@
 La fonction `validate_coherence` est conçue pour comparer des **schémas** (noms de tables/schémas), mais elle était utilisée pour valider une **condition logique**.
 
 **Code problématique** :
+
 ```bash
 validate_coherence \
     "Export Incrémental" \
@@ -28,6 +30,7 @@ validate_coherence \
 ```
 
 **Problème** :
+
 - `validate_coherence` attend : `expected_schema` et `actual_schema` (noms de schémas/tables)
 - On lui passe : des descriptions de conditions logiques
 - Ces deux chaînes sont toujours différentes → incohérence toujours détectée
@@ -39,6 +42,7 @@ validate_coherence \
 ### Correction
 
 **Avant** :
+
 ```bash
 validate_coherence \
     "Export Incrémental" \
@@ -47,6 +51,7 @@ validate_coherence \
 ```
 
 **Après** :
+
 ```bash
 # Validation de cohérence logique (condition COUNT_PERIOD <= TOTAL_IN_HCD)
 if [ "$COUNT_PERIOD" -le "$TOTAL_IN_HCD" ] || [ "$TOTAL_IN_HCD" -eq 0 ]; then
@@ -76,25 +81,33 @@ fi
 ## 📋 Fonctions de Validation - Usage Correct
 
 ### `validate_coherence`
+
 **Usage** : Comparer des schémas/tables
+
 ```bash
 validate_coherence "Test" "expected_table" "actual_table"
 ```
 
 ### `validate_integrity`
+
 **Usage** : Comparer des comptages avec tolérance
+
 ```bash
 validate_integrity "Test" "expected_count" "actual_count" "tolerance"
 ```
 
 ### `validate_consistency`
+
 **Usage** : Comparer des résultats entre deux exécutions
+
 ```bash
 validate_consistency "Test" "result1" "result2"
 ```
 
 ### Conditions Logiques
+
 **Usage** : Utiliser des `if` simples pour les conditions logiques
+
 ```bash
 if [ "$value1" -le "$value2" ]; then
     success "✅ Condition logique validée"
@@ -106,10 +119,12 @@ fi
 ## ✅ Résultat
 
 **Avant** :
+
 - ❌ Incohérence toujours détectée (faux positif)
 - ❌ Utilisation incorrecte de `validate_coherence`
 
 **Après** :
+
 - ✅ Validation logique correcte (condition COUNT_PERIOD <= TOTAL_IN_HCD)
 - ✅ Validation schéma correcte (table existe)
 - ✅ Pas de faux positif
@@ -141,6 +156,7 @@ fi
 ### Warning "Comparaison partielle : Résultats différents"
 
 **Problème** : Après correction de `validate_coherence`, un warning persiste :
+
 ```
 ⚠️ Comparaison partielle : Résultats différents
 ```
@@ -148,6 +164,7 @@ fi
 **Cause** : Utilisation incorrecte de `compare_expected_vs_actual()`
 
 **Code problématique** :
+
 ```bash
 compare_expected_vs_actual \
     "TEST COMPLEXE : Export Incrémental" \
@@ -157,6 +174,7 @@ compare_expected_vs_actual \
 ```
 
 **Problème** :
+
 - `Expected` : Chaîne textuelle "Interactions période <= Total (88)"
 - `Actual` : Chaîne textuelle "Interactions période = 26 (Total = 88)"
 - Ces deux chaînes sont **toujours différentes** par construction
@@ -167,6 +185,7 @@ compare_expected_vs_actual \
 **Correction** : Comparer directement les valeurs numériques
 
 **Avant** :
+
 ```bash
 compare_expected_vs_actual \
     "TEST COMPLEXE : Export Incrémental" \
@@ -176,6 +195,7 @@ compare_expected_vs_actual \
 ```
 
 **Après** :
+
 ```bash
 # Comparaison du total HCD
 compare_expected_vs_actual \
@@ -193,6 +213,7 @@ compare_expected_vs_actual \
 ```
 
 **Résultat** :
+
 - ✅ Comparaison réussie : Écart de 0 (tolérance: 0)
 - ✅ Plus de warning
 
@@ -200,4 +221,3 @@ compare_expected_vs_actual \
 
 **Date** : 2025-12-01  
 **Statut** : Correction appliquée, problème résolu (validate_coherence + compare_expected_vs_actual)
-

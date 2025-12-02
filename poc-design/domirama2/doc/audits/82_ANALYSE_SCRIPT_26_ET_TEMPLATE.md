@@ -89,6 +89,7 @@ Le script `test_multi_version_time_travel.py` contient :
 | **Affichage didactique** | ✅ (structuré) | ⚠️ (minimal) |
 
 **Verdict** : ⚠️ **Partiellement adapté**
+
 - ✅ Structure similaire (test/démo)
 - ❌ Logique dans Python, pas dans shell
 - ❌ Pas de génération de rapport
@@ -103,6 +104,7 @@ Le script `test_multi_version_time_travel.py` contient :
 | **DDL** | ✅ (principal) | ❌ |
 
 **Verdict** : ❌ **Non adapté**
+
 - Template 47 est pour la création de schéma, pas pour les tests
 
 ### Template 50 : Script Ingestion Didactique
@@ -113,6 +115,7 @@ Le script `test_multi_version_time_travel.py` contient :
 | **Focus** | Chargement données | Logique métier |
 
 **Verdict** : ❌ **Non adapté**
+
 - Template 50 est pour l'ingestion, pas pour les tests
 
 ### Template 63 : Script Orchestration Didactique
@@ -124,6 +127,7 @@ Le script `test_multi_version_time_travel.py` contient :
 | **Logique** | Shell (boucle) | **Python externe** |
 
 **Verdict** : ❌ **Non adapté**
+
 - Template 63 orchestre des scripts shell, pas des scripts Python
 
 ### Template 64 : Script Test Multiples avec Embeddings
@@ -138,6 +142,7 @@ Le script `test_multi_version_time_travel.py` contient :
 | **Tests multiples** | ✅ (boucle Python) | ✅ (10 étapes) |
 
 **Verdict** : ⚠️ **Partiellement adapté**
+
 - ✅ Tests multiples
 - ✅ Logique Python
 - ❌ Python externe vs Python inline
@@ -151,6 +156,7 @@ Le script `test_multi_version_time_travel.py` contient :
 ### Type de Script : **Test/Démo avec Délégation Python**
 
 **Caractéristiques** :
+
 - ✅ Appelle un script Python externe
 - ✅ Le script Python fait toute la logique de démonstration
 - ✅ Le script shell fait seulement :
@@ -163,6 +169,7 @@ Le script `test_multi_version_time_travel.py` contient :
 - ❌ Pas de capture structurée des résultats
 
 **Comparaison avec les types existants** :
+
 - ❌ **Pas un script de setup** : Ne crée pas de schéma
 - ❌ **Pas un script d'ingestion** : Ne charge pas de données
 - ❌ **Pas un script d'orchestration** : N'orchestre pas plusieurs scripts shell
@@ -176,11 +183,13 @@ Le script `test_multi_version_time_travel.py` contient :
 ### Option 1 : Adapter le Template 43 (Didactique Général)
 
 **Avantages** :
+
 - ✅ Structure similaire (test/démo)
 - ✅ Supporte l'affichage de DML
 - ✅ Génération de rapport
 
 **Adaptations nécessaires** :
+
 1. ✅ Capturer les résultats du script Python (stdout/stderr)
 2. ✅ Parser les résultats pour extraire les informations clés
 3. ✅ Afficher les requêtes CQL avant exécution (dans le shell)
@@ -188,6 +197,7 @@ Le script `test_multi_version_time_travel.py` contient :
 5. ✅ Ajouter des sections didactiques dans le shell
 
 **Inconvénients** :
+
 - ⚠️ Nécessite de modifier le script Python pour capturer les résultats
 - ⚠️ Ou parser la sortie du script Python (fragile)
 
@@ -196,6 +206,7 @@ Le script `test_multi_version_time_travel.py` contient :
 ### Option 2 : Créer un Nouveau Template (Template 65 - Script Test avec Délégation Python)
 
 **Avantages** :
+
 - ✅ Spécialement conçu pour scripts qui délèguent à Python
 - ✅ Structure claire pour :
   - Vérifications préalables
@@ -207,6 +218,7 @@ Le script `test_multi_version_time_travel.py` contient :
 - ✅ Génération de rapport markdown structuré
 
 **Structure proposée** :
+
 1. **PARTIE 0** : Vérifications (HCD, dépendances, schéma)
 2. **PARTIE 1** : Objectif et Stratégie (affichage didactique)
 3. **PARTIE 2** : DDL (si nécessaire) ou Vérification Schéma
@@ -216,6 +228,7 @@ Le script `test_multi_version_time_travel.py` contient :
 7. **PARTIE 6** : Résumé et Conclusion
 
 **Inconvénients** :
+
 - ⚠️ Nouveau template à créer et maintenir
 
 ---
@@ -225,6 +238,7 @@ Le script `test_multi_version_time_travel.py` contient :
 ### **Créer un Nouveau Template : Template 65 - Script Test avec Délégation Python**
 
 **Justification** :
+
 1. ✅ Le script 26 a un pattern unique (délégation Python)
 2. ✅ Aucun template existant ne couvre ce cas
 3. ✅ Plusieurs scripts pourraient utiliser ce pattern (22, 26, etc.)
@@ -310,6 +324,7 @@ Le script `test_multi_version_time_travel.py` contient :
 ## 💡 Exemples d'Utilisation
 
 ### Script 26 : Test Multi-Version avec Time Travel
+
 - PARTIE 0 : Vérifications (HCD, schéma, script Python)
 - PARTIE 1 : Objectif et Stratégie Multi-Version
 - PARTIE 2 : Vérification Schéma (colonnes cat_auto, cat_user, cat_date_user)
@@ -319,6 +334,7 @@ Le script `test_multi_version_time_travel.py` contient :
 - PARTIE 6 : Résumé et validation de la stratégie
 
 ### Script Futur : Test avec Script Python Externe
+
 - Même structure adaptée au contexte spécifique
 
 ---
@@ -334,7 +350,3 @@ Le script `test_multi_version_time_travel.py` contient :
 ---
 
 **✅ Analyse terminée - Recommandation : Créer Template 65**
-
-
-
-

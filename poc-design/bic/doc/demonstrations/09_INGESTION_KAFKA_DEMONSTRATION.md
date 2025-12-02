@@ -8,7 +8,7 @@
 
 ## 📋 Objectif
 
-Ingérer les interactions client en temps réel depuis Kafka (topic `bic-event`) 
+Ingérer les interactions client en temps réel depuis Kafka (topic `bic-event`)
 vers HCD via Spark Structured Streaming.
 
 ---
@@ -71,7 +71,6 @@ vers HCD via Spark Structured Streaming.
 ---
 
 ## 🔧 Configuration Spark Streaming
-
 
 ### Code Spark Streaming
 
@@ -165,7 +164,7 @@ val query = eventsDF.writeStream
         ))
         .mode("append")
         .save()
-      
+
       println(s"✅ Batch $batchId : $count événement(s) écrit(s)")
     }
   }
@@ -179,6 +178,7 @@ query.awaitTermination()
 ```
 
 **Explication** :
+
 - Lecture depuis Kafka avec `readStream.format("kafka")`
 - Parsing JSON avec schéma défini
 - Transformation vers format HCD

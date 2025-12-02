@@ -45,32 +45,39 @@ Le script `13_test_domirama2_api_client.sh` est un **script de test/API** qui :
 ### Fonctionnalités Actuelles
 
 ✅ **Vérifications** :
+
 - HCD démarré
 - Keyspace existe
 
 ✅ **Exécution** :
+
 - Exécution du fichier CQL de test via `cqlsh -f`
 - Filtrage des warnings
 
 ✅ **Vérifications Post-Exécution** :
+
 - Vérification que cat_user est mis à jour
 - Vérification que cat_auto est préservé
 
 ### Limitations Actuelles
 
 ❌ **Pas d'affichage des requêtes CQL** :
+
 - Les requêtes UPDATE ne sont pas affichées avant exécution
 - Pas d'explication de chaque UPDATE
 
 ❌ **Pas de capture des résultats** :
+
 - Les résultats ne sont pas capturés et formatés
 - Pas de validation automatique des résultats
 
 ❌ **Pas d'explications détaillées** :
+
 - Pas d'explications sur la stratégie multi-version
 - Pas d'explications sur les équivalences HBase → HCD
 
 ❌ **Pas de documentation générée** :
+
 - Pas de rapport markdown généré automatiquement
 - Pas de structure didactique
 
@@ -172,11 +179,13 @@ Le script `12_test_domirama2_search_v2_didactique.sh` est un script de test dida
 - ✅ Structure didactique (6 parties)
 
 **Similarités avec Script 13** :
+
 - Type : Test de fonctionnalité
 - Format : CQL queries
 - Objectif : Valider des fonctionnalités
 
 **Différences** :
+
 - Script 12 : Tests de recherche (SELECT)
 - Script 13 : Tests d'API correction (UPDATE)
 
@@ -195,11 +204,13 @@ Le script `26_test_multi_version_time_travel.sh` traite également de la straté
 ### Option 1 : Utiliser le Template Didactique Général avec Enrichissements (Recommandé) ⭐
 
 **Avantages** :
+
 - Réutilise le template existant
 - Cohérence avec les autres scripts de test didactiques
 - Adaptations mineures nécessaires
 
 **Adaptations nécessaires** :
+
 - Ajouter section "Stratégie Multi-Version" (explication batch vs client)
 - Ajouter section "Équivalences HBase → HCD" (temporalité → colonnes séparées)
 - Adapter la capture des résultats pour les UPDATE
@@ -210,10 +221,12 @@ Le script `26_test_multi_version_time_travel.sh` traite également de la straté
 ### Option 2 : Créer un Template Spécifique pour Tests API
 
 **Avantages** :
+
 - Template dédié aux tests API
 - Sections spécifiques (stratégie multi-version, équivalences HBase)
 
 **Inconvénients** :
+
 - Duplication avec template didactique général
 - Maintenance de deux templates similaires
 - Pas de valeur ajoutée significative
@@ -223,10 +236,12 @@ Le script `26_test_multi_version_time_travel.sh` traite également de la straté
 ### Option 3 : Enrichir le Template Didactique Général
 
 **Avantages** :
+
 - Un seul template pour tous les tests
 - Sections conditionnelles selon le type de test
 
 **Inconvénients** :
+
 - Template plus complexe
 - Sections conditionnelles à gérer
 - Risque de confusion
@@ -294,6 +309,7 @@ Le script `26_test_multi_version_time_travel.sh` traite également de la straté
 ### 1. Stratégie Multi-Version
 
 **À expliquer** :
+
 - **BATCH** : Écrit UNIQUEMENT cat_auto et cat_confidence
 - **CLIENT** : Écrit dans cat_user, cat_date_user, cat_validee
 - **APPLICATION** : Priorise cat_user si non nul, sinon cat_auto
@@ -302,6 +318,7 @@ Le script `26_test_multi_version_time_travel.sh` traite également de la straté
 ### 2. Équivalences HBase → HCD
 
 **À expliquer** :
+
 - **HBase** : Temporalité via versions multiples dans une même colonne
 - **HCD** : Colonnes séparées (cat_auto vs cat_user) avec logique applicative
 - **Avantage** : Séparation explicite, traçabilité complète
@@ -309,6 +326,7 @@ Le script `26_test_multi_version_time_travel.sh` traite également de la straté
 ### 3. Capture des Résultats
 
 **À adapter** :
+
 - Capturer les valeurs avant/après UPDATE
 - Vérifier que cat_auto n'est pas modifié
 - Vérifier que cat_user est mis à jour
@@ -317,8 +335,3 @@ Le script `26_test_multi_version_time_travel.sh` traite également de la straté
 ---
 
 **✅ Conclusion : Le template didactique général est applicable avec des enrichissements spécifiques pour les tests API et la stratégie multi-version !**
-
-
-
-
-

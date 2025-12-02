@@ -3,7 +3,8 @@
 **Date** : 2025-12-01  
 **Version** : 1.0.0  
 **Objectif** : Vérification exhaustive de la couverture des exigences BIC issues des inputs-clients et inputs-ibm  
-**Sources** : 
+**Sources** :
+
 - `inputs-clients/` : Documents clients (ANALYSE_INPUTS_CLIENTS_COMPLETE.md, ANALYSE_ETAT_ART_HBASE.md)
 - `inputs-ibm/` : Proposition IBM MECE (PROPOSITION_MECE_MIGRATION_HBASE_HCD.md)
 
@@ -39,6 +40,7 @@ D'après `docs/ANALYSE_INPUTS_CLIENTS_COMPLETE.md`, les composants BIC sont :
 ### 1.2 Fonctionnalités HBase Utilisées (inputs-clients)
 
 **Fonctionnalités Identifiées** :
+
 - ✅ **TTL pour purge automatique** (2 ans d'historique) → **Couvert** (Script 02, 15)
 - ✅ **SCAN + value filter** pour lecture temps réel → **Couvert** (Scripts 11, 12, 13, 17, 18)
 - ✅ **FullScan + STARTROW + STOPROW + TIMERANGE** pour unload incrémentaux ORC → **Couvert** (Script 14)
@@ -50,15 +52,18 @@ D'après `docs/ANALYSE_INPUTS_CLIENTS_COMPLETE.md`, les composants BIC sont :
 **Clé de ligne** : `code_efs + numero_client + date (yyyyMMdd) + cd_canal + idt_tech`
 
 **Column Families** :
+
 - `A`, `C`, `E`, `M` : Attributs extraits de l'événement
 - `VERSIONS=2` : Pour certaines CF
 
 **Format de stockage** :
+
 - JSON dans une colonne principale
 - Colonnes dynamiques "normalisées" extraites du JSON
 - Permet filtres via SCAN + Bloomfilter (ROWCOL)
 
 **Équivalence HCD** : ✅ **Couvert** (Script 02)
+
 - Table `interactions_by_client` avec colonnes JSON et MAP pour colonnes dynamiques
 - Partition key : `(code_efs, numero_client)`
 - Clustering key : `(date_interaction, canal, type_interaction, idt_tech)`
@@ -74,10 +79,12 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 #### 2.1.1 Table `interactions_by_client` (BIC)
 
 **Clé primaire proposée** :
+
 - Partition : `(entite_id, client_id)` ou `(code_efs, numero_client)`
 - Clustering : `(date_interaction, id_interaction)` ou `(date_interaction, canal, type_interaction, idt_tech)`
 
 **Équivalence Implémentée** : ✅ **Couvert** (Script 02)
+
 - Partition key : `(code_efs, numero_client)` ✅
 - Clustering key : `(date_interaction, canal, type_interaction, idt_tech)` ✅
 - TTL : `default_time_to_live = 63072000` (2 ans) ✅
@@ -85,23 +92,27 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 #### 2.1.2 Colonnes Proposées
 
 **Colonnes Principales** :
+
 - `canal` (ex: WEB/AGENCE) → ✅ **Couvert**
 - `type_interaction` (login, prise RDV, envoi mail…) → ✅ **Couvert**
 - `details` (JSON complet) → ✅ **Couvert** (colonne `json_data`)
 - Autres champs pertinents → ✅ **Couvert**
 
 **Équivalence Implémentée** : ✅ **Couvert** (Script 02)
+
 - Toutes les colonnes proposées sont présentes
 - Colonnes supplémentaires : `resultat`, `colonnes_dynamiques` (MAP), métadonnées
 
 #### 2.1.3 Indexation SAI
 
 **Proposition IBM** :
+
 - Index sur `canal` pour filtrage → ✅ **Couvert** (Script 03)
 - Index sur `type_interaction` pour filtrage → ✅ **Couvert** (Script 03)
 - Index full-text sur `details` (JSON) avec analyseurs Lucene → ✅ **Couvert** (Script 03)
 
 **Équivalence Implémentée** : ✅ **Couvert** (Script 03)
+
 - `idx_interactions_canal` ✅
 - `idx_interactions_type` ✅
 - `idx_interactions_json_data_fulltext` avec analyseurs Lucene (lowercase, asciifolding, frenchLightStem) ✅
@@ -111,10 +122,12 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 #### 2.1.4 Ingestion Kafka
 
 **Proposition IBM** :
+
 - Kafka Connector pour ingestion temps réel → ✅ **Couvert** (Script 09)
 - Alternative : Micro-service consumer Kafka sur mesure → ✅ **Couvert** (Script 09 avec Spark Streaming)
 
 **Équivalence Implémentée** : ✅ **Couvert** (Script 09)
+
 - Spark Structured Streaming depuis Kafka topic `bic-event`
 - Écriture dans HCD via Spark Cassandra Connector
 - Gestion des erreurs et reprise
@@ -122,10 +135,12 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 #### 2.1.5 Export Batch
 
 **Proposition IBM** :
+
 - Job Spark pour export ORC → ✅ **Couvert** (Script 14)
 - Export incrémental par période → ✅ **Couvert** (Script 14)
 
 **Équivalence Implémentée** : ✅ **Couvert** (Script 14)
+
 - Export ORC via Spark
 - Filtrage par période (TIMERANGE équivalent)
 - Filtrage par plage de clients (STARTROW/STOPROW équivalent)
@@ -133,10 +148,12 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 #### 2.1.6 Backend API
 
 **Proposition IBM** :
+
 - Data API REST/GraphQL pour lecture temps réel → ⚠️ **Partiel** (CQL fonctionnel, Data API non démontré)
 - Performance < 100ms → ✅ **Couvert** (Scripts 11, 17, 19)
 
 **Équivalence Implémentée** : ⚠️ **Partiel**
+
 - CQL direct fonctionnel (Scripts 11, 17)
 - Performance < 100ms validée (Script 19)
 - Data API REST/GraphQL non démontré (nécessite Stargate)
@@ -199,16 +216,19 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 ### 4.1 bic-event-main.tar.gz (Ingestion Kafka)
 
 **Exigences inputs-clients** :
+
 - ✅ Consumer Kafka pour événements temps réel
 - ✅ Écriture embarquée dans Tomcat
 - ✅ Traitement des interactions client ⇔ banque
 
 **Exigences inputs-ibm** :
+
 - ✅ Kafka Connector ou micro-service consumer
 - ✅ Ingestion streaming depuis topic `bic-event`
 - ✅ Gestion des erreurs et reprise
 
 **Couverture Scripts BIC** :
+
 - ✅ **Script 09** : `09_load_interactions_realtime.sh`
   - Spark Structured Streaming depuis Kafka
   - Topic `bic-event` ✅
@@ -223,16 +243,19 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 ### 4.2 bic-unload-main.tar.gz (Export Batch ORC)
 
 **Exigences inputs-clients** :
+
 - ✅ Unload HDFS ORC
 - ✅ Export des données pour analyse
 - ✅ FullScan + STARTROW + STOPROW + TIMERANGE
 
 **Exigences inputs-ibm** :
+
 - ✅ Job Spark pour export ORC
 - ✅ Export incrémental par période
 - ✅ Format ORC (Optimized Row Columnar)
 
 **Couverture Scripts BIC** :
+
 - ✅ **Script 14** : `14_test_export_batch.sh`
   - Export ORC via Spark ✅
   - Filtrage par période (TIMERANGE) ✅
@@ -247,16 +270,19 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 ### 4.3 bic-batch-main.tar.gz (Écriture Batch)
 
 **Exigences inputs-clients** :
+
 - ✅ Traitement batch
 - ✅ MapReduce en bulkLoad
 - ✅ Chargement massif des données
 
 **Exigences inputs-ibm** :
+
 - ✅ Spark batch write (remplacement MapReduce)
 - ✅ Chargement massif via Spark Cassandra Connector
 - ✅ Performance optimale
 
 **Couverture Scripts BIC** :
+
 - ✅ **Script 08** : `08_load_interactions_batch.sh`
   - Spark batch write ✅
   - Équivalent bulkLoad HBase ✅
@@ -270,16 +296,19 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 ### 4.4 bic-backend-main.tar.gz (Backend API)
 
 **Exigences inputs-clients** :
+
 - ✅ Backend API
 - ✅ Lecture temps réel avec SCAN + value filter
 - ✅ Timeline conseiller
 
 **Exigences inputs-ibm** :
+
 - ✅ Data API REST/GraphQL (Stargate)
 - ✅ Performance < 100ms
 - ✅ Lecture temps réel optimisée
 
 **Couverture Scripts BIC** :
+
 - ✅ **Scripts 11, 17** : Timeline conseiller
   - CQL direct fonctionnel ✅
   - Performance < 100ms validée ✅
@@ -288,6 +317,7 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 - ⚠️ **Data API REST/GraphQL** : Non démontré (nécessite Stargate)
 
 **Statut** : ⚠️ **Partiel** (90%)
+
 - Fonctionnel via CQL (équivalent fonctionnel)
 - Data API REST/GraphQL non démontré (couche supplémentaire)
 
@@ -341,11 +371,13 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 **Exigence** : Backend API conseiller avec Data API REST/GraphQL (inputs-ibm)
 
 **Couverture Actuelle** :
+
 - ✅ CQL direct fonctionnel (Scripts 11, 17)
 - ✅ Performance < 100ms validée (Script 19)
 - ❌ Data API REST/GraphQL non démontré
 
 **Justification** :
+
 - CQL est l'équivalent fonctionnel de l'API backend
 - Data API REST/GraphQL nécessite Stargate (non déployé dans le POC)
 - La fonctionnalité backend est opérationnelle via CQL
@@ -361,9 +393,11 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 **Exigence** : Vector Search pour recherche sémantique (inputs-ibm, extension optionnelle)
 
 **Couverture Actuelle** :
+
 - ❌ Non implémenté (explicitement optionnel)
 
 **Justification** :
+
 - Explicitement optionnel dans les exigences
 - Extension future pour IA générative/RAG
 - Non prioritaire pour POC de migration
@@ -406,6 +440,7 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 **Score** : ⭐⭐⭐⭐⭐ (5/5)
 
 **Justification** :
+
 - ✅ **96.4% de couverture globale** (excellent)
 - ✅ **100% des exigences critiques couvertes**
 - ✅ **100% des exigences haute priorité couvertes**
@@ -413,6 +448,7 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 - ✅ **100% des patterns HBase → HCD documentés**
 
 **Points Forts** :
+
 - Couverture exhaustive des composants inputs-clients (bic-event, bic-unload, bic-batch, bic-backend)
 - Toutes les fonctionnalités HBase identifiées sont migrées
 - Tous les patterns HBase → HCD sont documentés et implémentés
@@ -424,6 +460,7 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 **Score** : ⭐⭐⭐⭐⭐ (5/5)
 
 **Justification** :
+
 - ✅ **20 scripts créés** (18 essentiels + 2 optionnels)
 - ✅ **13 145 lignes de code** bien structurées
 - ✅ **Tous les scripts avec `set -euo pipefail`** (robustesse)
@@ -434,6 +471,7 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 - ✅ **Vérifications préalables** (Spark, Kafka, HCD)
 
 **Points Forts** :
+
 - Code robuste et maintenable
 - Architecture cohérente et bien structurée
 - Tests exhaustifs avec validations complètes
@@ -446,6 +484,7 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 **Score** : ⭐⭐⭐⭐⭐ (5/5)
 
 **Justification** :
+
 - ✅ **Schéma HCD conforme** à la proposition IBM MECE
 - ✅ **Équivalences HBase → HCD** toutes documentées
 - ✅ **Composants inputs-clients** tous couverts
@@ -453,6 +492,7 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 - ✅ **Performance** conforme (< 100ms validée)
 
 **Points Forts** :
+
 - Respect strict des exigences inputs-clients
 - Conformité totale à la proposition IBM MECE
 - Équivalences HBase documentées et validées
@@ -464,6 +504,7 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 **Score** : ⭐⭐⭐⭐⭐ (5/5)
 
 **Justification** :
+
 - ✅ **31 fichiers de documentation** (9 design, 5 audits, 14 démonstrations, 3 corrections)
 - ✅ **Guides utilisateur complets** (Setup, Ingestion, Recherche, Troubleshooting)
 - ✅ **Guide de migration HBase** exhaustif
@@ -471,6 +512,7 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 - ✅ **Rapports de démonstration** auto-générés pour chaque script
 
 **Points Forts** :
+
 - Documentation exhaustive et structurée
 - Traçabilité complète des exigences → scripts
 - Guides pratiques pour utilisateurs
@@ -482,6 +524,7 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 **Score** : ⭐⭐⭐⭐⭐ (5/5)
 
 **Justification** :
+
 - ✅ **Tests complexes** dans tous les scripts (11-18)
 - ✅ **Tests très complexes** (charge, exhaustivité, cohérence)
 - ✅ **Validations systématiques** (5 dimensions : Pertinence, Cohérence, Intégrité, Consistance, Conformité)
@@ -490,6 +533,7 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 - ✅ **Tests de charge et scalabilité** (Script 20)
 
 **Points Forts** :
+
 - Tests exhaustifs et pertinents
 - Validations complètes et systématiques
 - Performance validée avec métriques détaillées
@@ -501,6 +545,7 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 **Score** : ⭐⭐⭐⭐⭐ (5/5)
 
 **Justification** :
+
 - ✅ **Architecture propre** : Séparation setup/génération/ingestion/tests
 - ✅ **Code maintenable** : Fonctions réutilisables, configuration centralisée
 - ✅ **Gestion d'erreurs robuste** : Messages explicites, actions correctives
@@ -509,6 +554,7 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 - ✅ **Standards** : `set -euo pipefail`, validation systématique
 
 **Points Forts** :
+
 - Code professionnel et maintenable
 - Bonnes pratiques respectées
 - Architecture évolutive
@@ -520,6 +566,7 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 **Score Global** : **⭐⭐⭐⭐⭐ (5/5) - Excellent**
 
 **Détail** :
+
 - Exhaustivité : ⭐⭐⭐⭐⭐ (5/5)
 - Qualité Implémentation : ⭐⭐⭐⭐⭐ (5/5)
 - Conformité Exigences : ⭐⭐⭐⭐⭐ (5/5)
@@ -540,6 +587,7 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 **Score de Couverture** : **96.4%** ✅
 
 **Détail** :
+
 - ✅ **100% des exigences critiques** (BIC-01, BIC-02, BIC-06, BIC-08 partiel)
 - ✅ **100% des exigences haute priorité** (BIC-03, BIC-04, BIC-05, BIC-07, BIC-09, BIC-10, BIC-12, BIC-14, BIC-15)
 - ✅ **100% des fonctionnalités HBase** migrées
@@ -552,6 +600,7 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 **Le niveau professionnel de la réponse est EXCELLENT** (⭐⭐⭐⭐⭐ 5/5).
 
 **Justification** :
+
 - ✅ **Exhaustivité** : 96.4% de couverture, 100% des exigences critiques
 - ✅ **Qualité** : Code robuste, architecture propre, tests exhaustifs
 - ✅ **Conformité** : Respect strict des exigences sources
@@ -564,6 +613,7 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 **Le POC BIC est prêt pour démonstration et validation client.**
 
 **Actions Optionnelles** (non bloquantes) :
+
 1. 🟡 **BIC-08** : Créer script de démonstration Data API REST/GraphQL (si Stargate disponible)
 2. 🟢 **BIC-13** : Documenter recherche vectorielle comme extension future
 
@@ -574,4 +624,3 @@ D'après `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md`, la proposition IB
 **Date** : 2025-12-01  
 **Version** : 1.0.0  
 **Statut** : ✅ Audit exhaustif terminé - 96.4% de couverture, Niveau Professionnel ⭐⭐⭐⭐⭐ (5/5)
-

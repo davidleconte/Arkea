@@ -5,6 +5,7 @@
 **Version** : 1.0  
 **Statut** : ✅ Tous les tests critiques implémentés  
 **Scripts liés** :
+
 - `15_prepare_test_data.sh` - Script de préparation et validation des données
 - `15_test_coherence_multi_tables.sh` - Tests de cohérence multi-tables
 - `15_AMELIORATIONS_TESTS_DONNEES.md` - Améliorations apportées aux tests  
@@ -41,6 +42,7 @@ Création d'un script de validation/préparation des données (`15_prepare_test_
 **Problème** : Aucune vérification avant l'exécution des tests → ✅ **RÉSOLU**
 
 **Tests Implémentés** (TEST 1-9) :
+
 - ✅ Vérification du nombre minimum d'opérations dans `operations_by_account` (TEST 1)
 - ✅ Vérification de la présence de données dans chaque table concernée (TEST 2-8)
 - ✅ Vérification de la cohérence des clés (code_si, contrat, code_efs, etc.) (TEST 9)
@@ -55,6 +57,7 @@ Création d'un script de validation/préparation des données (`15_prepare_test_
 **Problème** : Les tests actuels ne vérifiaient pas si les données sont suffisantes → ✅ **RÉSOLU**
 
 **Tests Implémentés** (TEST 10) :
+
 - ✅ Vérification du nombre minimum d'opérations par compte (10+ recommandé, 5 minimum)
 - ✅ Vérification du nombre minimum d'acceptations par compte (TEST 2)
 - ✅ Vérification du nombre minimum de règles actives (TEST 4)
@@ -70,6 +73,7 @@ Création d'un script de validation/préparation des données (`15_prepare_test_
 **Problème** : Les tests ne vérifiaient pas si les données sont fonctionnellement pertinentes → ✅ **RÉSOLU**
 
 **Tests Implémentés** (TEST 11) :
+
 - ✅ Vérification que les opérations ont des libellés pertinents (non vides)
 - ✅ Vérification que les catégories auto correspondent à des règles existantes
 - ✅ Vérification que les acceptations correspondent à des comptes existants (TEST 2, TEST 9)
@@ -86,6 +90,7 @@ Création d'un script de validation/préparation des données (`15_prepare_test_
 **Problème** : Pas de vérification systématique de la cohérence des clés entre tables → ✅ **PARTIELLEMENT RÉSOLU**
 
 **Tests Implémentés** (TEST 9) :
+
 - ✅ Vérification que code_si utilisé existe dans operations_by_account
 - ✅ Vérification de la cohérence des clés entre tables (code_si/contrat vs code_efs/no_contrat)
 - ✅ Vérification que les PSE utilisés existent dans les tables de référence
@@ -105,6 +110,7 @@ Création d'un script de validation/préparation des données (`15_prepare_test_
 **Problème** : Les tests ne vérifiaient pas si tous les cas d'usage sont couverts → ✅ **RÉSOLU**
 
 **Tests Implémentés** (TEST 12) :
+
 - ✅ Vérification de la présence de données pour chaque type d'opération testé (diversité des types - TEST 10)
 - ✅ Vérification de la présence de données pour chaque sens d'opération (DEBIT, CREDIT - TEST 10)
 - ✅ Vérification de la présence de données avec cat_user (pour tests multi-version)
@@ -120,6 +126,7 @@ Création d'un script de validation/préparation des données (`15_prepare_test_
 **Problème** : Pas de vérification que les données permettent des tests de performance réalistes → ✅ **RÉSOLU**
 
 **Tests Implémentés** (TEST 13) :
+
 - ✅ Vérification du volume de données (suffisant pour tests de performance - 100+ recommandé)
 - ✅ Vérification de la distribution des données (pas de skew important - ratio max/min < 10)
 - ✅ Vérification de la présence de données récentes (pour tests temporels - 30 derniers jours)
@@ -131,53 +138,65 @@ Création d'un script de validation/préparation des données (`15_prepare_test_
 ## ✅ Tests Implémentés dans `15_prepare_test_data.sh`
 
 ### Test 1 : Vérification operations_by_account
+
 - ✅ Vérifie qu'il y a au moins 5 opérations pour le compte de test
 - ✅ Vérifie qu'il y a des opérations avec cat_auto
 
 ### Test 2 : Vérification acceptation_client
+
 - ✅ Vérifie la présence d'acceptations
 - ✅ Insère automatiquement une acceptation de test si manquante
 
 ### Test 3 : Vérification opposition_categorisation
+
 - ✅ Vérifie la présence d'oppositions
 - ✅ Insère automatiquement une opposition de test si manquante
 
 ### Test 4 : Vérification regles_personnalisees
+
 - ✅ Vérifie la présence de règles actives
 - ✅ Insère automatiquement une règle de test si manquante
 
 ### Test 5 : Vérification feedback_par_libelle
+
 - ✅ Vérifie la présence de feedbacks par libellé
 - ⚠️  Avertit si manquant (création automatique non possible)
 
 ### Test 6 : Vérification feedback_par_ics
+
 - ✅ Vérifie la présence de feedbacks par ICS
 - ⚠️  Avertit si manquant (création automatique non possible)
 
 ### Test 7 : Vérification historique_opposition
+
 - ✅ Vérifie la présence d'historique
 - ✅ Insère automatiquement un historique de test si manquant
 
 ### Test 8 : Vérification decisions_salaires
+
 - ✅ Vérifie la présence de décisions salaires
 - ⚠️  Avertit si manquant (création automatique non possible)
 
 ### Test 9 : Vérification Cohérence des Clés
+
 - ✅ Vérifie que code_si utilisé existe dans operations_by_account
 - ✅ Valide la cohérence des clés entre tables
 
 ### Test 10 : Vérification Suffisance des Données ⭐ NOUVEAU
+
 - ✅ Vérifie le nombre minimum d'opérations par compte (10+ recommandé)
 - ✅ Vérifie la diversité des types d'opérations (2+ recommandé)
 - ✅ Vérifie la diversité des sens d'opérations (DEBIT/CREDIT)
 
 ### Test 11 : Vérification Pertinence Fonctionnelle ⭐ NOUVEAU
+
 - ✅ Vérifie que les libellés ne sont pas vides
 - ✅ Vérifie que les montants sont valides (positifs)
 - ✅ Vérifie que les dates sont cohérentes (pas de dates futures)
 - ✅ Vérifie que les catégories auto correspondent à des règles existantes
 
 ### Test 12 : Vérification Couverture des Cas d'Usage ⭐ NOUVEAU
+
 - ✅ Vérifie la présence de données avec cat_user (multi-version)
 - ✅ Vérifie la diversité des catégories (2+ recommandé)
 - ✅ Vérifie la couverture acceptation (true et false)
@@ -185,11 +204,13 @@ Création d'un script de validation/préparation des données (`15_prepare_test_
 - ✅ Insère automatiquement des données manquantes pour améliorer la couverture
 
 ### Test 13 : Vérification Performance des Données ⭐ NOUVEAU
+
 - ✅ Vérifie le volume total d'opérations (100+ recommandé)
 - ✅ Vérifie la distribution des données (pas de skew important)
 - ✅ Vérifie la présence de données récentes (30 derniers jours)
 
 ### Test 14 : Vérification Cohérence Temporelle ⭐ NOUVEAU
+
 - ✅ Vérifie que les dates d'acceptation sont cohérentes avec les dates d'opérations
 - ✅ Valide la cohérence temporelle entre tables
 
@@ -297,4 +318,3 @@ Le script `15_test_coherence_multi_tables.sh` appelle automatiquement `15_prepar
 ---
 
 **Date de génération** : 2025-11-30
-

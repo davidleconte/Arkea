@@ -60,11 +60,13 @@ Arkea/
 ### 1. Scripts Dispersés à la Racine
 
 **Problème** :
+
 - 9 scripts shell à la racine (01-06, 70, 80, 90)
 - Pas de répertoire `scripts/` dédié pour les scripts racine
 - Mélange avec les scripts des sous-projets (`poc-design/*/scripts/`)
 
 **Impact** :
+
 - ❌ Navigation difficile
 - ❌ Structure incohérente
 - ❌ Difficile de distinguer scripts racine vs sous-projets
@@ -76,10 +78,12 @@ Arkea/
 ### 2. Fichiers Scala à la Racine
 
 **Problème** :
+
 - 3 fichiers `.scala` à la racine (`test_spark_*.scala`)
 - Pas de répertoire dédié pour les scripts/test Scala
 
 **Impact** :
+
 - ❌ Pollution de la racine
 - ❌ Difficile de trouver les tests Scala
 
@@ -90,10 +94,12 @@ Arkea/
 ### 3. Fichiers CQL à la Racine
 
 **Problème** :
+
 - 1 fichier `.cql` à la racine (`create_kafka_schema.cql`)
 - Pas de répertoire `schemas/` à la racine (existe dans `poc-design/*/schemas/`)
 
 **Impact** :
+
 - ❌ Incohérence avec la structure des sous-projets
 - ❌ Difficile de trouver les schémas
 
@@ -104,10 +110,12 @@ Arkea/
 ### 4. Répertoire `hcd-1.2.3/` à la Racine
 
 **Problème** :
+
 - Répertoire `hcd-1.2.3/` à la racine
 - Dupliqué avec `binaire/hcd-1.2.3/` ?
 
 **Impact** :
+
 - ❌ Confusion sur quel répertoire utiliser
 - ❌ Duplication potentielle
 
@@ -118,10 +126,12 @@ Arkea/
 ### 5. Répertoire `ehB /` (Vide ou Inutile)
 
 **Problème** :
+
 - Répertoire `ehB /` avec espace dans le nom
 - Probablement vide ou inutile
 
 **Impact** :
+
 - ❌ Pollution de la structure
 - ❌ Nom avec espace (problématique)
 
@@ -132,10 +142,12 @@ Arkea/
 ### 6. Fichier `date_requête` (Sans Extension)
 
 **Problème** :
+
 - Fichier `date_requête` sans extension
 - Nature du fichier inconnue
 
 **Impact** :
+
 - ❌ Confusion sur le type de fichier
 - ❌ Difficile de savoir à quoi il sert
 
@@ -146,10 +158,12 @@ Arkea/
 ### 7. Répertoire `logs/` Non Organisé
 
 **Problème** :
+
 - Beaucoup de répertoires `UNLOAD_*` dans `logs/`
 - Pas d'organisation par date/projet
 
 **Impact** :
+
 - ❌ Difficile de trouver les logs pertinents
 - ❌ Accumulation de logs anciens
 
@@ -160,10 +174,12 @@ Arkea/
 ### 8. Répertoire `data/` Vide ou Peu Utilisé
 
 **Problème** :
+
 - Répertoire `data/` à la racine
 - Probablement vide ou peu utilisé
 
 **Impact** :
+
 - ❌ Confusion sur son usage
 - ❌ Structure non claire
 
@@ -174,10 +190,12 @@ Arkea/
 ### 9. Absence de `.gitignore`
 
 **Problème** :
+
 - Pas de `.gitignore` visible à la racine
 - Risque de commiter des fichiers temporaires/logs
 
 **Impact** :
+
 - ❌ Fichiers temporaires dans le repo
 - ❌ Logs et données dans le repo
 
@@ -188,11 +206,13 @@ Arkea/
 ### 10. Structure des Scripts Incohérente
 
 **Problème** :
+
 - Scripts numérotés (01-06, 70-90) à la racine
 - Scripts nommés dans `poc-design/*/scripts/`
 - Pas de convention claire
 
 **Impact** :
+
 - ❌ Difficile de comprendre l'ordre d'exécution
 - ❌ Pas de standardisation
 
@@ -232,6 +252,7 @@ scripts/
 ```
 
 **Avantages** :
+
 - ✅ Structure claire et organisée
 - ✅ Séparation setup vs utils
 - ✅ Facilite la navigation
@@ -249,6 +270,7 @@ schemas/
 ```
 
 **Avantages** :
+
 - ✅ Cohérence avec `poc-design/*/schemas/`
 - ✅ Centralisation des schémas
 
@@ -257,6 +279,7 @@ schemas/
 #### 1.3 Nettoyer les Répertoires Inutiles
 
 **Actions** :
+
 1. Vérifier et supprimer `hcd-1.2.3/` si doublon de `binaire/hcd-1.2.3/`
 2. Supprimer `ehB /` si inutile
 3. Identifier et renommer/supprimer `date_requête`
@@ -283,6 +306,7 @@ logs/
 ```
 
 **Avantages** :
+
 - ✅ Logs organisés par date
 - ✅ Facilite le nettoyage
 - ✅ Archive des anciens logs
@@ -328,6 +352,7 @@ Thumbs.db
 #### 3.2 Mettre à Jour README.md
 
 **Action** : Mettre à jour README.md avec :
+
 - Structure complète et à jour
 - Référence à `.poc-config.sh` (nouveau)
 - Guide de démarrage amélioré
@@ -338,6 +363,7 @@ Thumbs.db
 #### 3.3 Créer Guide de Structure
 
 **Action** : Créer `docs/GUIDE_STRUCTURE.md` expliquant :
+
 - Organisation complète du projet
 - Rôle de chaque répertoire
 - Conventions de nommage
@@ -350,6 +376,7 @@ Thumbs.db
 #### 4.1 Créer Scripts d'Aide
 
 **Actions** :
+
 1. Créer `scripts/utils/list_all_scripts.sh` - Liste tous les scripts du projet
 2. Créer `scripts/utils/clean_logs.sh` - Nettoie les anciens logs
 3. Créer `scripts/utils/verify_structure.sh` - Vérifie la structure du projet
@@ -359,6 +386,7 @@ Thumbs.db
 #### 4.2 Standardiser les Noms de Scripts
 
 **Action** : Créer convention de nommage :
+
 - `setup_*.sh` - Scripts d'installation/setup
 - `start_*.sh` - Scripts de démarrage
 - `test_*.sh` - Scripts de test
@@ -483,4 +511,3 @@ Arkea/
 **Date** : 2025-12-01  
 **Version** : 1.0  
 **Statut** : ✅ **Plan d'amélioration complet**
-

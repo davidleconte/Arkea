@@ -33,7 +33,7 @@ success "Répertoires créés"
 get_category() {
     local file="$1"
     local basename=$(basename "$file" .md)
-    
+
     # Audits (priorité haute - vérifier d'abord)
     if [[ "$basename" =~ ^(13|15|17|23|24|25|26)_AUDIT ]] || [[ "$basename" =~ _AUDIT ]]; then
         echo "audits"
@@ -63,14 +63,14 @@ update_links_in_file() {
     local file="$1"
     local old_path="$2"
     local new_path="$3"
-    
+
     # Mettre à jour les liens markdown [texte](chemin)
     sed -i.bak \
         -e "s|(\\([^)]*\\)\\(${old_path//\//\\/}\\))|(\\1${new_path//\//\\/})|g" \
         -e "s|(\\([^)]*\\)\\.\\./doc/${old_path//\//\\/})|(\\1../doc/${new_path//\//\\/})|g" \
         -e "s|(\\([^)]*\\)doc/${old_path//\//\\/})|(\\1doc/${new_path//\//\\/})|g" \
         "$file" 2>/dev/null || true
-    
+
     # Nettoyer les fichiers .bak
     rm -f "${file}.bak" 2>/dev/null || true
 }
@@ -83,13 +83,13 @@ for file in *.md; do
     if [[ "$file" == "demonstrations" ]] || [[ "$file" == "templates" ]]; then
         continue
     fi
-    
+
     if [ ! -f "$file" ]; then
         continue
     fi
-    
+
     category=$(get_category "$file")
-    
+
     if [ -n "$category" ]; then
         mv "$file" "$category/"
         success "Déplacé : $file → $category/"
@@ -121,14 +121,14 @@ update_file_links() {
     local file="$1"
     local old_name="$2"
     local new_path="$3"
-    
+
     if [ ! -f "$file" ]; then
         return
     fi
-    
+
     local current_dir=$(dirname "$file")
     local relative_path
-    
+
     # Calculer le chemin relatif
     if [[ "$current_dir" == "." ]]; then
         relative_path="$new_path"
@@ -138,7 +138,7 @@ update_file_links() {
         # Calculer depuis la catégorie
         relative_path="../$new_path"
     fi
-    
+
     # Mettre à jour les liens markdown [texte](chemin)
     if grep -q "$old_name" "$file" 2>/dev/null; then
         # Pattern 1: [texte](fichier.md)
@@ -182,7 +182,7 @@ info "📋 Phase 4 : Création de INDEX.md..."
 cat > INDEX.md << 'EOF'
 # 📑 Index de la Documentation - DomiramaCatOps
 
-**Date** : 2025-01-XX  
+**Date** : 2025-01-XX
 **Structure** : Organisation par catégories
 
 ---
@@ -303,7 +303,7 @@ Les fichiers sont toujours numérotés (00_, 01_, etc.) pour préserver l'ordre 
 
 ---
 
-**Date de création** : 2025-01-XX  
+**Date de création** : 2025-01-XX
 **Version** : 1.0
 EOF
 
@@ -321,4 +321,3 @@ fi
 echo ""
 success "✅ Réorganisation terminée avec succès !"
 info "📋 Consultez INDEX.md pour la navigation"
-

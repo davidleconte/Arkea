@@ -24,6 +24,7 @@ en démontrant l'équivalence avec le bulkLoad HBase.
 **Description** : Chargement massif des données via Spark (équivalent MapReduce bulkLoad HBase).
 
 **Composant HBase** : `bic-batch-main.tar.gz` (inputs-clients)
+
 - Traitement batch
 - MapReduce en bulkLoad
 - Chargement massif des données
@@ -43,6 +44,7 @@ en démontrant l'équivalence avec le bulkLoad HBase.
 | **Scalabilité** | Parallélisation via MapReduce | Parallélisation native Spark |
 
 **Avantages HCD** :
+
 - ✅ Plus simple : Pas besoin de générer HFiles
 - ✅ Plus rapide : Écriture directe via connecteur
 - ✅ Plus flexible : Support de multiples formats (Parquet, JSON, CSV)
@@ -50,7 +52,6 @@ en démontrant l'équivalence avec le bulkLoad HBase.
 ---
 
 ## 📝 Code Spark Complet
-
 
 ### Code Spark - Lecture
 
@@ -72,6 +73,7 @@ raw.printSchema()
 ```
 
 **Explication** :
+
 - Lecture Parquet avec schéma préservé
 - Types déjà présents (pas de parsing nécessaire)
 - Performance optimale (format columnar)
@@ -99,6 +101,7 @@ val interactions = raw.select(
 ```
 
 **Explication** :
+
 - Mapping direct colonnes Parquet → HCD
 - Colonnes JSON et dynamiques préservées
 - Métadonnées ajoutées
@@ -128,6 +131,7 @@ spark.stop()
 ```
 
 **Explication** :
+
 - Écriture directe via Spark Cassandra Connector
 - Mode append (ajout des données)
 - Équivalent HBase bulkLoad mais plus simple
@@ -139,11 +143,13 @@ spark.stop()
 ### HBase BulkLoad (inputs-clients)
 
 **Processus HBase** :
+
 1. Génération des HFiles via MapReduce
 2. Chargement des HFiles dans HBase (bulkLoad)
 3. Compaction des HFiles
 
 **Composant** : `bic-batch-main.tar.gz`
+
 - Traitement batch
 - MapReduce en bulkLoad
 - Chargement massif
@@ -151,11 +157,13 @@ spark.stop()
 ### HCD Spark Batch Write
 
 **Processus HCD** :
+
 1. Lecture Parquet via Spark
 2. Transformation des données
 3. Écriture directe dans HCD via Spark Cassandra Connector
 
 **Avantages** :
+
 - ✅ Plus simple : Pas de génération HFiles
 - ✅ Plus rapide : Écriture directe
 - ✅ Plus flexible : Support de multiples formats
@@ -165,6 +173,7 @@ spark.stop()
 ## ✅ Conclusion
 
 **Use Cases Validés** :
+
 - ✅ BIC-07 : Format JSON + colonnes dynamiques
 - ✅ BIC-09 : Écriture batch (bulkLoad équivalent)
 

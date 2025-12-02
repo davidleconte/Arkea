@@ -8,7 +8,7 @@
 #   Ce script génère les embeddings ByteT5 pour tous les libellés existants
 #   dans la table 'operations_by_account' et les met à jour dans la colonne
 #   'libelle_embedding'.
-#   
+#
 #   Le modèle ByteT5 (google/byt5-small) :
 #   - Génère des embeddings de 1472 dimensions
 #   - Tolère les typos et variations linguistiques
@@ -144,28 +144,28 @@ if [ -f "$EMBEDDINGS_SCRIPT" ]; then
         info "   Script: generate_embeddings_batch.py (Version standard)"
     fi
     info ""
-    
+
     # Paramètres optionnels
     BATCH_SIZE="${1:-100}"
     FORCE="${2:-}"
-    
+
     # Construire la commande
     CMD="python3 \"$EMBEDDINGS_SCRIPT\""
     if [ "$FORCE" = "--force" ]; then
         CMD="$CMD --force"
         info "⚠️  Mode régénération forcée activé"
     fi
-    
+
     eval "$CMD" 2>&1 | grep -v "^$" | tail -50
-    
+
     # Vérifier le nombre d'embeddings générés
     cd "$HCD_DIR"
     jenv local 11
     eval "$(jenv init -)"
-    
+
     sleep 2
     EMBEDDED_COUNT=$(./bin/cqlsh "$HCD_HOST" "$HCD_PORT" -e "USE domirama2_poc; SELECT COUNT(*) FROM operations_by_account WHERE libelle_embedding IS NOT NULL ALLOW FILTERING;" 2>&1 | grep -v "Warnings" | grep -E "^[[:space:]]*[0-9]+" | head -1 | tr -d ' ' || echo "0")
-    
+
     if [ -n "$EMBEDDED_COUNT" ] && [ "$EMBEDDED_COUNT" -gt 0 ]; then
         success "✅ $EMBEDDED_COUNT opération(s) avec embeddings générés"
     else
@@ -179,4 +179,3 @@ fi
 
 success "✅ Génération des embeddings terminée !"
 info "📝 Prochaine étape: Exécuter ./23_test_fuzzy_search.sh"
-

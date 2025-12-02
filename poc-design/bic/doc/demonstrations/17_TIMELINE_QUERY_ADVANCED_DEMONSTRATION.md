@@ -20,6 +20,7 @@ pagination complexe, et plages de dates.
 **Description** : Requêtes timeline complexes avec filtres combinés et pagination avancée.
 
 **Exigences** :
+
 - Timeline avec filtres par canal/type/résultat
 - Timeline avec plages de dates complexes
 - Pagination avancée (curseurs, pages multiples)
@@ -29,13 +30,13 @@ pagination complexe, et plages de dates.
 
 ## 📝 Requêtes CQL Avancées
 
-
 ### TEST 1 : Timeline avec Filtre par Canal
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
-WHERE code_efs = 'EFS001' 
+SELECT * FROM bic_poc.interactions_by_client
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND canal = 'email'
 LIMIT 20;
@@ -61,9 +62,10 @@ LIMIT 20;
 ### TEST 2 : Timeline avec Filtre par Période (6 Mois)
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
-WHERE code_efs = 'EFS001' 
+SELECT * FROM bic_poc.interactions_by_client
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND date_interaction >= '2025-06-02 11:21:28+0000'
 LIMIT 20;
@@ -91,9 +93,10 @@ LIMIT 20;
 ### TEST 3 : Timeline avec Filtres Combinés (Canal + Période)
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
-WHERE code_efs = 'EFS001' 
+SELECT * FROM bic_poc.interactions_by_client
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND canal = 'email'
   AND date_interaction >= '2025-06-02 11:21:28+0000'
@@ -119,9 +122,10 @@ LIMIT 20;
 ### TEST 4 : Timeline avec Filtres (Type + Résultat)
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
-WHERE code_efs = 'EFS001' 
+SELECT * FROM bic_poc.interactions_by_client
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND type_interaction = 'reclamation'
   AND resultat = 'succès'
@@ -148,9 +152,10 @@ LIMIT 20;
 ### TEST 5 : Timeline avec Plage de Dates Précise
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
-WHERE code_efs = 'EFS001' 
+SELECT * FROM bic_poc.interactions_by_client
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND date_interaction >= '2025-01-01 00:00:00+0000'
   AND date_interaction <= '2025-01-31 23:59:59+0000'
@@ -176,9 +181,10 @@ LIMIT 20;
 ### TEST COMPLEXE : Timeline avec Tous les Filtres Combinés
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
-WHERE code_efs = 'EFS001' 
+SELECT * FROM bic_poc.interactions_by_client
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND canal = 'email'
   AND type_interaction = 'reclamation'
@@ -205,6 +211,7 @@ LIMIT 20;
 ### TEST 6 : Test de Performance avec Statistiques
 
 **Statistiques** :
+
 - Temps moyen : .7230s
 - Temps minimum : .679244000s
 - Temps maximum : .778788000s
@@ -240,6 +247,7 @@ LIMIT 20;
 **Cohérence** : ✅ Total canaux <= Total client
 
 **Détails** :
+
 - Interactions email : 8
 - Interactions SMS : 13
 - Interactions réclamation : 14
@@ -337,9 +345,11 @@ LIMIT 20;
 ## ✅ Conclusion
 
 **Use Cases Validés** :
+
 - ✅ BIC-01 : Timeline conseiller avancée (requêtes complexes avec filtres combinés)
 
 **Validations** :
+
 - ✅ 5 dimensions validées pour chaque test
 - ✅ Comparaisons attendus vs obtenus effectuées
 - ✅ Justesse des résultats validée

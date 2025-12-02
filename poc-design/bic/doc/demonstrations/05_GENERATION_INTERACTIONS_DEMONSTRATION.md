@@ -98,7 +98,6 @@ Générer un fichier Parquet contenant **100 interactions** avec une diversité 
 
 ## 🚀 Génération
 
-
 ---
 
 ## ✅ Résultats
@@ -108,12 +107,14 @@ Générer un fichier Parquet contenant **100 interactions** avec une diversité 
 **Taille** : N/A
 
 **Distribution** :
+
 - Canaux : Tous les 8 canaux couverts
 - Types : Tous les 7 types couverts
 - Résultats : Tous les 4 résultats couverts
 - Période : 2 ans (2023-2024)
 
 **Structure** :
+
 - ✅ JSON complet avec détails pour recherche full-text
 - ✅ Colonnes dynamiques (MAP) standardisées
 - ✅ Toutes les colonnes requises présentes

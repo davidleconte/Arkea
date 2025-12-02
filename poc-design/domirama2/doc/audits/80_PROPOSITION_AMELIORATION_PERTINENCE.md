@@ -53,10 +53,10 @@ def levenshtein_distance(s1, s2):
     """Calcule la distance de Levenshtein entre deux chaînes."""
     if len(s1) < len(s2):
         return levenshtein_distance(s2, s1)
-    
+
     if len(s2) == 0:
         return len(s1)
-    
+
     previous_row = range(len(s2) + 1)
     for i, c1 in enumerate(s1):
         current_row = [i + 1]
@@ -66,35 +66,36 @@ def levenshtein_distance(s1, s2):
             substitutions = previous_row[j] + (c1 != c2)
             current_row.append(min(insertions, deletions, substitutions))
         previous_row = current_row
-    
+
     return previous_row[-1]
 
 def fuzzy_match_levenshtein(term, text, max_distance=None):
     """Calcule un score basé sur la distance de Levenshtein."""
     if max_distance is None:
         max_distance = max(1, len(term) // 3)  # Seuil adaptatif
-    
+
     # Chercher la meilleure correspondance dans le texte
     best_score = float('inf')
     term_lower = term.lower()
     text_lower = text.lower()
-    
+
     # Essayer toutes les sous-chaînes de la longueur du terme
     for i in range(len(text_lower) - len(term_lower) + 1):
         substring = text_lower[i:i+len(term_lower)]
         distance = levenshtein_distance(term_lower, substring)
         if distance < best_score:
             best_score = distance
-    
+
     if best_score <= max_distance:
         # Score inversement proportionnel à la distance
         # Distance 0 → score 10, distance 1 → score 8, distance 2 → score 6, etc.
         return max(0, 10 - (best_score * 2))
-    
+
     return 0
 ```
 
 **Avantages** :
+
 - ✅ Gère les typos avec plusieurs caractères différents
 - ✅ Seuil adaptatif selon la longueur du terme
 - ✅ Score proportionnel à la distance
@@ -113,10 +114,10 @@ def position_score(term, text, match_position):
     text_length = len(text)
     if text_length == 0:
         return 0
-    
+
     # Position normalisée (0 = début, 1 = fin)
     normalized_position = match_position / text_length
-    
+
     # Bonus décroissant : début = +3, milieu = +1, fin = +0
     if normalized_position < 0.2:  # Premier 20%
         return 3
@@ -127,6 +128,7 @@ def position_score(term, text, match_position):
 ```
 
 **Avantages** :
+
 - ✅ Favorise les résultats où les termes importants sont au début
 - ✅ Améliore la pertinence pour les recherches de noms propres
 
@@ -146,25 +148,26 @@ def cosine_similarity(vec1, vec2):
     dot_product = np.dot(vec1, vec2)
     norm1 = np.linalg.norm(vec1)
     norm2 = np.linalg.norm(vec2)
-    
+
     if norm1 == 0 or norm2 == 0:
         return 0
-    
+
     return dot_product / (norm1 * norm2)
 
 def vector_similarity_score(query_embedding, libelle_embedding):
     """Calcule un score basé sur la similarité vectorielle."""
     if libelle_embedding is None:
         return 0
-    
+
     similarity = cosine_similarity(query_embedding, libelle_embedding)
-    
+
     # Convertir la similarité (-1 à 1) en score (0 à 10)
     # Similarité 1.0 → score 10, similarité 0.8 → score 8, etc.
     return max(0, similarity * 10)
 ```
 
 **Avantages** :
+
 - ✅ Utilise la similarité sémantique réelle
 - ✅ Capture les synonymes et variations
 - ✅ Complète le scoring lexical
@@ -184,20 +187,21 @@ def calculate_tfidf_score(term, text, all_texts):
     term_lower = term.lower()
     text_lower = text.lower()
     tf = text_lower.count(term_lower) / max(1, len(text_lower.split()))
-    
+
     # IDF (Inverse Document Frequency) : Rareté du terme
     # Compter dans combien de textes le terme apparaît
     docs_with_term = sum(1 for t in all_texts if term_lower in t.lower())
     idf = np.log(len(all_texts) / max(1, docs_with_term))
-    
+
     # Score TF-IDF
     tfidf = tf * idf
-    
+
     # Normaliser en score 0-5
     return min(5, tfidf * 10)
 ```
 
 **Avantages** :
+
 - ✅ Favorise les termes rares (plus informatifs)
 - ✅ Réduit l'importance des mots courants
 - ✅ Améliore la pertinence pour les recherches spécialisées
@@ -215,11 +219,11 @@ def length_score(libelle, query_terms):
     """Calcule un bonus basé sur la longueur du libellé."""
     libelle_length = len(libelle.split())
     query_length = len(query_terms)
-    
+
     # Longueur idéale : 1.5x à 3x la longueur de la requête
     ideal_min = query_length * 1.5
     ideal_max = query_length * 3
-    
+
     if ideal_min <= libelle_length <= ideal_max:
         return 2  # Bonus pour longueur idéale
     elif libelle_length < ideal_min:
@@ -229,6 +233,7 @@ def length_score(libelle, query_terms):
 ```
 
 **Avantages** :
+
 - ✅ Favorise les résultats concis et pertinents
 - ✅ Évite les libellés trop longs (moins pertinents)
 
@@ -244,10 +249,10 @@ def calculate_combined_relevance_score(
     all_libelles, query_terms
 ):
     """Calcule un score de pertinence combiné multi-facteurs."""
-    
+
     total_score = 0
     libelle_lower = libelle.lower()
-    
+
     # 1. Score lexical (fuzzy_match amélioré) : 40%
     lexical_score = 0
     for term in query_terms:
@@ -258,35 +263,36 @@ def calculate_combined_relevance_score(
         lexical_score += term_score
     lexical_score = min(10, lexical_score / len(query_terms))  # Normaliser
     total_score += lexical_score * 0.4
-    
+
     # 2. Score vectoriel (similarité cosinus) : 40%
     vector_score = vector_similarity_score(query_embedding, libelle_embedding)
     total_score += vector_score * 0.4
-    
+
     # 3. Score TF-IDF : 10%
     tfidf_score = 0
     for term in query_terms:
         tfidf_score += calculate_tfidf_score(term, libelle, all_libelles)
     tfidf_score = min(10, tfidf_score / len(query_terms))  # Normaliser
     total_score += tfidf_score * 0.1
-    
+
     # 4. Score de longueur : 10%
     length_bonus = length_score(libelle, query_terms)
     total_score += length_bonus * 0.1
-    
+
     # 5. Bonus multi-termes (conservé)
-    matched_terms = sum(1 for term in query_terms 
+    matched_terms = sum(1 for term in query_terms
                        if fuzzy_match_levenshtein(term, libelle_lower) > 0)
     if len(query_terms) > 1:
         if matched_terms == len(query_terms):
             total_score += 20  # Tous les termes matchent
         elif matched_terms > 1:
             total_score += 5   # Plusieurs termes matchent
-    
+
     return total_score
 ```
 
 **Avantages** :
+
 - ✅ Combine plusieurs facteurs de pertinence
 - ✅ Poids adaptatifs selon l'importance
 - ✅ Meilleure pertinence globale
@@ -306,14 +312,15 @@ def filter_by_relevance_threshold(results, scores, min_score=3.0):
     for result, score in zip(results, scores):
         if score >= min_score:
             filtered.append((result, score))
-    
+
     # Trier par score décroissant
     filtered.sort(key=lambda x: x[1], reverse=True)
-    
+
     return [r for r, s in filtered]
 ```
 
 **Avantages** :
+
 - ✅ Élimine les résultats peu pertinents
 - ✅ Améliore la qualité des résultats retournés
 
@@ -384,7 +391,3 @@ Ajuster les poids des différents facteurs selon les résultats des tests.
 ---
 
 **✅ Proposition terminée**
-
-
-
-

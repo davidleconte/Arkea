@@ -146,6 +146,7 @@ Après création de l'index, attendre **30-60 secondes** pour que l'indexation s
 ### Pourquoi un seul index ?
 
 SAI stocke les index directement dans les SSTables. Un seul index par colonne permet :
+
 - **Performance optimale** : Pas de duplication d'index
 - **Cohérence** : Un seul analyzer pour toutes les recherches
 - **Simplicité** : Pas de choix d'index à faire dans les requêtes
@@ -153,6 +154,7 @@ SAI stocke les index directement dans les SSTables. Un seul index par colonne pe
 ### Alternatives pour recherches spécialisées
 
 Si des recherches très spécialisées sont nécessaires (ex: recherche exacte sans stemming), on peut :
+
 1. Créer une **colonne dérivée** (ex: `libelle_exact`) avec un index dédié
 2. Utiliser des **filtres dans les requêtes** pour affiner les résultats
 3. Combiner plusieurs **colonnes** avec des index différents
@@ -162,4 +164,3 @@ Si des recherches très spécialisées sont nécessaires (ex: recherche exacte s
 - [SAI Quickstart](https://docs.datastax.com/en/hyper-converged-database/1.2/tutorials/sai-quickstart.html)
 - [Use Analyzers with CQL](https://docs.datastax.com/en/hyper-converged-database/1.2/tutorials/use-analyzers-with-cql.html)
 - [CQL SAI Documentation](https://docs.datastax.com/en/cql/hcd/develop/indexing/sai/sai-faq.html)
-

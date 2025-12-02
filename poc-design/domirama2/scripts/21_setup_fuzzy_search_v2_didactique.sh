@@ -8,7 +8,7 @@
 #   Ce script configure la recherche floue (fuzzy search) en ajoutant une
 #   colonne vectorielle 'libelle_embedding' de type VECTOR pour stocker
 #   les embeddings ByteT5, permettant des recherches par similarité sémantique.
-#   
+#
 #   Cette version didactique affiche :
 #   - Le contexte et le problème des typos complexes
 #   - Le DDL complet (ALTER TABLE, CREATE INDEX) avec explications
@@ -267,7 +267,7 @@ if [ "$COLUMN_EXISTS" -eq 0 ]; then
     demo "🚀 Exécution du DDL..."
     ./bin/cqlsh "$HCD_HOST" "$HCD_PORT" -e "USE domirama2_poc; ALTER TABLE operations_by_account ADD libelle_embedding VECTOR<FLOAT, 1472>;" 2>&1 | grep -v "Warnings" || true
     echo ""
-    
+
     if [ $? -eq 0 ]; then
         success "✅ Colonne libelle_embedding ajoutée"
     else
@@ -484,8 +484,8 @@ script_dir = os.environ.get('SCRIPT_DIR_ENV', '.')
 # Générer le rapport
 report = f"""# 🔍 Démonstration : Configuration Fuzzy Search avec ByteT5 - POC Domirama2
 
-**Date** : {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}  
-**Script** : `21_setup_fuzzy_search_v2_didactique.sh`  
+**Date** : {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+**Script** : `21_setup_fuzzy_search_v2_didactique.sh`
 **Objectif** : Configurer la recherche floue avec colonne vectorielle et index SAI vectoriel
 
 ---
@@ -553,10 +553,10 @@ LIMIT 5;
 
 ### Améliorations HCD
 
-✅ **Type VECTOR natif** (vs système ML externe)  
-✅ **Index SAI vectoriel intégré** (vs Elasticsearch externe)  
-✅ **Pas de synchronisation** (vs HBase + Elasticsearch + ML)  
-✅ **Performance optimale** (index co-localisé avec données)  
+✅ **Type VECTOR natif** (vs système ML externe)
+✅ **Index SAI vectoriel intégré** (vs Elasticsearch externe)
+✅ **Pas de synchronisation** (vs HBase + Elasticsearch + ML)
+✅ **Performance optimale** (index co-localisé avec données)
 ✅ **Support ANN natif** (Approximate Nearest Neighbor)
 
 ---
@@ -677,17 +677,17 @@ USING 'StorageAttachedIndex';
 
 ### Résumé de la Configuration
 
-✅ Colonne 'libelle_embedding' (VECTOR<FLOAT, 1472>) ajoutée  
-✅ Index 'idx_libelle_embedding_vector' créé  
-✅ Support de la recherche par similarité (ANN)  
+✅ Colonne 'libelle_embedding' (VECTOR<FLOAT, 1472>) ajoutée
+✅ Index 'idx_libelle_embedding_vector' créé
+✅ Support de la recherche par similarité (ANN)
 ✅ Tolérance aux typos complexes et variations linguistiques
 
 ### Avantages de la Recherche Vectorielle
 
-✅ Tolère les typos complexes (faute, inversion, caractères manquants)  
-✅ Capture la similarité sémantique (synonymes, variations)  
-✅ Multilingue (ByteT5 supporte plusieurs langues)  
-✅ Robuste aux variations linguistiques  
+✅ Tolère les typos complexes (faute, inversion, caractères manquants)
+✅ Capture la similarité sémantique (synonymes, variations)
+✅ Multilingue (ByteT5 supporte plusieurs langues)
+✅ Robuste aux variations linguistiques
 ✅ Performance optimale (index co-localisé avec données)
 
 ### Prochaines Étapes
@@ -732,4 +732,3 @@ echo ""
 success "✅ Configuration de la recherche floue terminée !"
 info "📝 Documentation générée : $REPORT_FILE"
 echo ""
-

@@ -93,7 +93,7 @@ create_backup() {
     local file="$1"
     local backup_file="${BACKUP_DIR}${file#$ARKEA_HOME}"
     local backup_dir="$(dirname "$backup_file")"
-    
+
     if [ "$DRY_RUN" = false ]; then
         mkdir -p "$backup_dir"
         cp "$file" "$backup_file"
@@ -109,7 +109,7 @@ fix_file() {
     local rel_path="${file#$ARKEA_HOME/}"
     local modified=false
     local changes=()
-    
+
     # Vérifier si le fichier contient des chemins hardcodés
     local has_hardcoded=false
     for pattern in "${!HARDCODED_PATTERNS[@]}"; do
@@ -118,26 +118,26 @@ fix_file() {
             break
         fi
     done
-    
+
     if [ "$has_hardcoded" = false ]; then
         return 0
     fi
-    
+
     # Créer une sauvegarde
     create_backup "$file"
-    
+
     # Créer un fichier temporaire pour les modifications
     local temp_file="${file}.tmp"
     cp "$file" "$temp_file"
-    
+
     # Appliquer les corrections
     for pattern in "${!HARDCODED_PATTERNS[@]}"; do
         local replacement="${HARDCODED_PATTERNS[$pattern]}"
-        
+
         # Échapper les caractères spéciaux pour sed
         local escaped_pattern=$(printf '%s\n' "$pattern" | sed 's/[[\.*^$()+?{|]/\\&/g')
         local escaped_replacement=$(printf '%s\n' "$replacement" | sed 's/[[\.*^$()+?{|]/\\&/g')
-        
+
         if grep -q "$pattern" "$temp_file" 2>/dev/null; then
             # Utiliser sed pour remplacer (compatible macOS et Linux)
             if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -145,12 +145,12 @@ fix_file() {
             else
                 sed -i "s|$escaped_pattern|$escaped_replacement|g" "$temp_file"
             fi
-            
+
             changes+=("$pattern → $replacement")
             modified=true
         fi
     done
-    
+
     if [ "$modified" = true ]; then
         if [ "$DRY_RUN" = true ]; then
             info "[DRY-RUN] Corrigerait: $rel_path"
@@ -175,7 +175,7 @@ fix_file() {
 
 find_files_to_fix() {
     local files=()
-    
+
     if [ -n "$TARGET_FILE" ]; then
         # Fichier spécifique
         if [ -f "$TARGET_FILE" ]; then
@@ -204,7 +204,7 @@ find_files_to_fix() {
             ! -path "*/archive/*" \
             \( -name "*.sh" -o -name "*.md" -o -name "*.py" \) 2>/dev/null)
     fi
-    
+
     printf '%s\n' "${files[@]}" | sort -u
 }
 
@@ -248,4 +248,3 @@ else
     info "$fixed_count fichier(s) corrigé(s)"
     info "Sauvegarde disponible dans: $BACKUP_DIR"
 fi
-

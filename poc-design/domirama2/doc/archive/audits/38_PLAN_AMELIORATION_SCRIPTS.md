@@ -79,6 +79,7 @@
 Voir `doc/36_STANDARDS_SCRIPTS_SHELL.md` pour le template complet.
 
 **Éléments obligatoires** :
+
 1. ✅ **OBJECTIF** : 3-5 lignes expliquant ce que fait le script
 2. ✅ **PRÉREQUIS** : Liste exhaustive des prérequis (HCD, schéma, données, dépendances)
 3. ✅ **UTILISATION** : Syntaxe d'utilisation avec paramètres
@@ -94,6 +95,7 @@ Voir `doc/36_STANDARDS_SCRIPTS_SHELL.md` pour le template complet.
 **Score cible** : **9/10** pour tous les scripts
 
 **Critères** :
+
 - ✅ En-tête complet avec tous les éléments
 - ✅ Prérequis détaillés et vérifiables
 - ✅ Exemples concrets d'utilisation
@@ -111,8 +113,3 @@ Voir `doc/36_STANDARDS_SCRIPTS_SHELL.md` pour le template complet.
 ---
 
 **✅ Plan d'amélioration établi : 30 scripts restants à améliorer**
-
-
-
-
-

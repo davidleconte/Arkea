@@ -3,6 +3,7 @@
 **Date** : 2024-11-27  
 **Objectif** : Analyser les impacts de la deuxième table HBase sur le POC de la première table  
 **Tables** :
+
 - Table 1 : `B997X04:domirama` (Column Family `category`)
 - Table 2 : `B997X04:domirama-meta-categories`
 
@@ -11,6 +12,7 @@
 ## 🎯 Vue d'Ensemble
 
 La table `domirama-meta-categories` complète la table `domirama.category` en fournissant :
+
 - **Configurations** : Acceptations, oppositions, règles personnalisées
 - **Feedbacks** : Statistiques de catégorisation (moteur vs client)
 - **Historiques** : Traçabilité des changements
@@ -24,15 +26,18 @@ La table `domirama-meta-categories` complète la table `domirama.category` en fo
 ### 1.1 Vérification Acceptation/Opposition
 
 **Avant catégorisation** :
+
 - Vérifier `acceptation_client` (si accepté)
 - Vérifier `opposition_categorisation` (si non opposé)
 
 **Impact sur le POC** :
+
 - ✅ Scripts de démonstration doivent inclure ces vérifications
 - ✅ Tests de non-catégorisation si opposition
 - ✅ Démonstration du flux complet : vérification → catégorisation → affichage
 
 **Scripts à modifier/créer** :
+
 - `07_load_category_data_realtime.sh` : Ajouter vérification acceptation/opposition
 - `09_test_acceptation_opposition.sh` : Nouveau script de test
 
@@ -41,15 +46,18 @@ La table `domirama-meta-categories` complète la table `domirama.category` en fo
 ### 1.2 Application des Règles Personnalisées
 
 **Avant catégorisation automatique** :
+
 - Vérifier `regles_personnalisees` pour le client/libellé
 - Appliquer la règle si existe (priorité sur catégorisation automatique)
 
 **Impact sur le POC** :
+
 - ✅ Démonstration de l'application des règles
 - ✅ Tests de priorité (règle > catégorisation automatique)
 - ✅ Logique applicative : règle → cat_auto → cat_user
 
 **Scripts à modifier/créer** :
+
 - `05_load_operations_data_parquet.sh` : Appliquer règles lors du chargement
 - `10_test_regles_personnalisees.sh` : Nouveau script de test
 
@@ -58,16 +66,19 @@ La table `domirama-meta-categories` complète la table `domirama.category` en fo
 ### 1.3 Mise à Jour des Feedbacks
 
 **Après catégorisation** :
+
 - Incrémenter `feedback_par_libelle.count_engine` (batch)
 - Incrémenter `feedback_par_libelle.count_client` (correction client)
 - Même logique pour `feedback_par_ics`
 
 **Impact sur le POC** :
+
 - ✅ Démonstration des compteurs atomiques (INCREMENT équivalent)
 - ✅ Tests de cohérence (opération → feedback)
 - ✅ Validation que chaque catégorisation met à jour les feedbacks
 
 **Scripts à modifier/créer** :
+
 - `05_load_operations_data_parquet.sh` : Mettre à jour feedbacks après catégorisation
 - `07_load_category_data_realtime.sh` : Mettre à jour feedbacks après correction client
 - `11_test_feedbacks_counters.sh` : Nouveau script de test
@@ -145,6 +156,7 @@ La table `domirama-meta-categories` complète la table `domirama.category` en fo
 ```
 
 **Impact POC** :
+
 - ✅ Démonstration du flux complet
 - ✅ Tests de chaque étape
 - ✅ Validation de la cohérence
@@ -154,12 +166,14 @@ La table `domirama-meta-categories` complète la table `domirama.category` en fo
 ### 3.2 Contraintes Métier
 
 **Contraintes à respecter** :
+
 1. Si `opposition_categorisation.opposed = true` → pas de catégorisation
 2. Si `regles_personnalisees` existe → utiliser `categorie_cible`
 3. Chaque catégorisation → mettre à jour feedbacks
 4. Historique opposition → traçabilité complète
 
 **Impact POC** :
+
 - ✅ Tests de cohérence multi-tables
 - ✅ Validation des contraintes métier
 - ✅ Script de validation dédié (`15_test_coherence_multi_tables.sh`)
@@ -171,12 +185,14 @@ La table `domirama-meta-categories` complète la table `domirama.category` en fo
 ### 4.1 Migration des Données
 
 **HBase → HCD** :
+
 - 2 tables HBase → 8 tables HCD
 - Extraction depuis 2 tables HBase
 - Chargement dans 8 tables HCD
 - Validation de cohérence entre tables
 
 **Impact POC** :
+
 - ✅ Script de migration complet (`20_migrate_hbase_to_hcd.sh`)
 - ✅ Validation multi-tables (`21_validate_migration.sh`)
 
@@ -187,11 +203,13 @@ La table `domirama-meta-categories` complète la table `domirama.category` en fo
 **Spécification** : Parquet uniquement (pas de SequenceFile)
 
 **Implications** :
+
 - 8 fichiers Parquet (un par table HCD)
 - Structure Parquet doit correspondre aux schémas HCD
 - Chargement depuis Parquet dans HCD
 
 **Impact POC** :
+
 - ✅ Scripts de chargement depuis Parquet uniquement
 - ✅ Pas de conversion SequenceFile → Parquet
 
@@ -227,6 +245,7 @@ La table `domirama-meta-categories` complète la table `domirama.category` en fo
 **Scripts totaux** : **21 scripts** (au lieu de 12 initialement prévus)
 
 **Répartition** :
+
 - Setup : 4 scripts (au lieu de 2)
 - Ingestion : 3 scripts (au lieu de 2)
 - Tests : 8 scripts (au lieu de 3)
@@ -245,6 +264,7 @@ Les impacts de la deuxième table `domirama-meta-categories` sont **significatif
 4. ✅ **Tests de cohérence** : Validation multi-tables essentielle
 
 **Le POC doit démontrer** :
+
 - ✅ La migration complète des 2 tables HBase vers 8 tables HCD
 - ✅ La cohérence fonctionnelle entre toutes les tables
 - ✅ Les fonctionnalités spécifiques (compteurs, historique, règles)
@@ -254,5 +274,3 @@ Les impacts de la deuxième table `domirama-meta-categories` sont **significatif
 
 **Date** : 2024-11-27  
 **Version** : 1.0
-
-

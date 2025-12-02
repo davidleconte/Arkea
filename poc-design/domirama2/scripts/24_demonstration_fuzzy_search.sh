@@ -8,7 +8,7 @@
 #   Ce script orchestre une démonstration complète de la recherche floue
 #   (fuzzy search) en exécutant toutes les étapes nécessaires : configuration,
 #   génération des embeddings, et tests de recherche.
-#   
+#
 #   La démonstration couvre :
 #   - Configuration de la colonne vectorielle et de l'index
 #   - Génération des embeddings ByteT5 pour tous les libellés
@@ -143,4 +143,3 @@ echo "   - 21_setup_fuzzy_search.sh : Configuration du schéma"
 echo "   - 22_generate_embeddings.sh : Génération batch (à implémenter)"
 echo "   - 23_test_fuzzy_search.sh : Tests de recherche floue"
 echo "   - examples/python/embeddings/generate_embeddings_bytet5.py : Génération standalone"
-

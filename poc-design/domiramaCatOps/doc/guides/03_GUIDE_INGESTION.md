@@ -23,6 +23,7 @@
 ### Principe
 
 **Batch écrit UNIQUEMENT** :
+
 - ✅ `cat_auto` : Catégorie automatique
 - ✅ `cat_confidence` : Score de confiance
 - ❌ `cat_user` : NULL (batch ne touche jamais)
@@ -30,6 +31,7 @@
 - ❌ `cat_validee` : false (batch ne touche jamais)
 
 **Client écrit UNIQUEMENT** :
+
 - ✅ `cat_user` : Catégorie modifiée par client
 - ✅ `cat_date_user` : Date de modification
 - ✅ `cat_validee` : Acceptation par client
@@ -45,17 +47,20 @@
 **Script** : `04_generate_operations_parquet.sh`
 
 **Exécution** :
+
 ```bash
 cd scripts
 ./04_generate_operations_parquet.sh
 ```
 
 **Résultat** :
+
 - Fichier Parquet généré : `data/operations_20000.parquet/`
 - Format : Parquet (columnar binaire)
 - Nombre de lignes : 20 000 opérations
 
 **Avantages Parquet** :
+
 - ✅ Performance : Lecture 3-10x plus rapide que CSV
 - ✅ Schéma typé : Types préservés, pas de parsing
 - ✅ Compression : Jusqu'à 10x plus petit
@@ -68,6 +73,7 @@ cd scripts
 **Script** : `05_load_operations_data_parquet.sh`
 
 **Exécution** :
+
 ```bash
 ./05_load_operations_data_parquet.sh [chemin_parquet]
 ```
@@ -75,11 +81,13 @@ cd scripts
 **Processus** :
 
 1. **Lecture Parquet** :
+
    ```scala
    val ops = spark.read.parquet(parquetFile)
    ```
 
 2. **Transformation** :
+
    ```scala
    val opsTransformed = ops.select(
      col("code_si").as("code_si"),
@@ -98,6 +106,7 @@ cd scripts
    ```
 
 3. **Écriture HCD** :
+
    ```scala
    opsTransformed.write
      .format("org.apache.spark.sql.cassandra")
@@ -117,6 +126,7 @@ cd scripts
 **Objectif** : Générer les embeddings ByteT5 pour tous les libellés
 
 **Exécution** :
+
 ```bash
 ./05_generate_libelle_embedding.sh
 ```
@@ -143,6 +153,7 @@ cd scripts
 **Objectif** : Charger des corrections client en temps réel
 
 **Exécution** :
+
 ```bash
 ./07_load_category_data_realtime.sh
 ```
@@ -150,6 +161,7 @@ cd scripts
 **Processus** :
 
 1. **Correction client** : UPDATE avec `cat_user`, `cat_date_user`, `cat_validee`
+
    ```cql
    UPDATE operations_by_account
    SET cat_user = 'NOUVEAU_CATEGORIE',
@@ -173,11 +185,13 @@ cd scripts
 **Script** : `04_generate_meta_categories_parquet.sh`
 
 **Exécution** :
+
 ```bash
 ./04_generate_meta_categories_parquet.sh
 ```
 
 **Résultat** :
+
 - 7 fichiers Parquet générés (un par table meta-category)
 - Données cohérentes avec les opérations chargées
 
@@ -188,6 +202,7 @@ cd scripts
 **Script** : `06_load_meta_categories_data_parquet.sh`
 
 **Exécution** :
+
 ```bash
 ./06_load_meta_categories_data_parquet.sh
 ```
@@ -248,16 +263,19 @@ cd binaire/hcd-1.2.3
 Une fois l'ingestion terminée :
 
 1. **Tester la recherche** :
+
    ```bash
    ./08_test_category_search.sh
    ```
 
 2. **Tester la recherche floue** :
+
    ```bash
    ./16_test_fuzzy_search.sh
    ```
 
 3. **Tester la recherche hybride** :
+
    ```bash
    ./18_test_hybrid_search.sh
    ```
@@ -277,4 +295,3 @@ Une fois l'ingestion terminée :
 
 **Date de création** : 2025-12-01  
 **Dernière mise à jour** : 2025-12-01
-

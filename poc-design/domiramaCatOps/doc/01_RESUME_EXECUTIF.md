@@ -18,6 +18,7 @@ Démontrer que la migration de la table `B997X04:domirama` (Column Family `categ
 ### Table Cible
 
 **HBase** :
+
 - Table : `B997X04:domirama`
 - Column Family : `category`
 - Configuration :
@@ -26,6 +27,7 @@ Démontrer que la migration de la table `B997X04:domirama` (Column Family `categ
   - REPLICATION_SCOPE : `1`
 
 **HCD** :
+
 - Keyspace : `domiramacatops_poc`
 - Table : `operations_by_account` (extension de Domirama2 ou table séparée)
 - Colonnes de catégorisation : `cat_auto`, `cat_confidence`, `cat_user`, `cat_date_user`, `cat_validee`
@@ -180,5 +182,3 @@ Démontrer que la migration de la table `B997X04:domirama` (Column Family `categ
 
 **Date** : 2024-11-27  
 **Version** : 1.0
-
-

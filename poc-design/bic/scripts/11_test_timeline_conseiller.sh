@@ -92,15 +92,15 @@ success "Schéma vérifié"
 cat > "$REPORT_FILE" << 'EOF'
 # 🧪 Démonstration : Timeline Conseiller avec Pagination
 
-**Date** : 2025-12-01  
-**Script** : `11_test_timeline_conseiller.sh`  
+**Date** : 2025-12-01
+**Script** : `11_test_timeline_conseiller.sh`
 **Use Cases** : BIC-01 (Timeline conseiller), BIC-14 (Pagination)
 
 ---
 
 ## 📋 Objectif
 
-Démontrer la récupération de la timeline complète d'un client avec pagination, 
+Démontrer la récupération de la timeline complète d'un client avec pagination,
 conformément aux exigences BIC pour l'application conseiller.
 
 ---
@@ -142,7 +142,7 @@ echo ""
 
 demo "Objectif : Récupérer toutes les interactions d'un client (limité à 100 pour l'affichage)"
 
-QUERY1="SELECT * FROM $KEYSPACE.$TABLE 
+QUERY1="SELECT * FROM $KEYSPACE.$TABLE
 WHERE code_efs = '$CODE_EFS' AND numero_client = '$NUMERO_CLIENT'
 ORDER BY date_interaction DESC
 LIMIT 100;"
@@ -184,7 +184,7 @@ if [ $EXIT_CODE1 -eq 0 ]; then
     COUNT1=$(echo "$RESULT1" | grep -c "^ " || echo "0")
     echo ""
     result "Nombre d'interactions trouvées : $COUNT1"
-    
+
     # VALIDATION : Comparaison attendus vs obtenus
     EXPECTED_COUNT1=">= 0"  # Au moins 0 (peut être 0 si pas de données)
     compare_expected_vs_actual \
@@ -192,10 +192,10 @@ if [ $EXIT_CODE1 -eq 0 ]; then
         "$EXPECTED_COUNT1 interactions (peut être 0 si pas de données)" \
         "$COUNT1 interactions" \
         "0" || true  # Ne pas arrêter le script si comparaison partielle
-    
+
     # Debug : Vérifier que le script continue
     info "✅ Script continue après compare_expected_vs_actual"
-    
+
     # VALIDATION : Justesse des résultats (vérifier que les résultats sont triés DESC)
     if [ "$COUNT1" -gt 1 ]; then
         FIRST_DATE=$(echo "$RESULT1" | grep -E "^[[:space:]]*[0-9]{4}-[0-9]{2}-[0-9]{2}" | head -1 | awk '{print $1}' || echo "")
@@ -208,7 +208,7 @@ if [ $EXIT_CODE1 -eq 0 ]; then
             fi
         fi
     fi
-    
+
     # VALIDATION COMPLÈTE (5 dimensions)
     info "🔍 Début de validate_complete pour TEST 1..."
     validate_complete \
@@ -220,7 +220,7 @@ if [ $EXIT_CODE1 -eq 0 ]; then
         "100" \
         "0.1" || true  # Ne pas arrêter le script si validation partielle
     info "✅ Fin de validate_complete pour TEST 1..."
-    
+
     # EXPLICATIONS DÉTAILLÉES
     echo ""
     info "📚 Explications détaillées de la validation :"
@@ -296,7 +296,7 @@ echo ""
 demo "Objectif : Récupérer la première page de 20 interactions"
 
 PAGE_SIZE=20
-QUERY2="SELECT * FROM $KEYSPACE.$TABLE 
+QUERY2="SELECT * FROM $KEYSPACE.$TABLE
 WHERE code_efs = '$CODE_EFS' AND numero_client = '$NUMERO_CLIENT'
 ORDER BY date_interaction DESC
 LIMIT $PAGE_SIZE;"
@@ -335,7 +335,7 @@ if [ $EXIT_CODE2 -eq 0 ]; then
     COUNT2=$(echo "$RESULT2" | grep -c "^ " || echo "0")
     echo ""
     result "Nombre d'interactions (page 1) : $COUNT2"
-    
+
     # VALIDATION : Comparaison attendus vs obtenus
     EXPECTED_COUNT2="$PAGE_SIZE"  # Attendu : exactement PAGE_SIZE ou moins
     if [ "$COUNT2" -le "$PAGE_SIZE" ]; then
@@ -347,14 +347,14 @@ if [ $EXIT_CODE2 -eq 0 ]; then
     else
         error "❌ Erreur : Plus de $PAGE_SIZE résultats (attendu <= $PAGE_SIZE)"
     fi
-    
+
     # VALIDATION : Cohérence (COUNT2 <= COUNT1)
     if [ "$COUNT2" -le "$COUNT1" ]; then
         success "✅ Cohérence validée : Page 1 ($COUNT2) <= Total ($COUNT1)"
     else
         warn "⚠️  Incohérence : Page 1 ($COUNT2) > Total ($COUNT1)"
     fi
-    
+
     # VALIDATION COMPLÈTE
     validate_complete \
         "TEST 2 : Pagination LIMIT" \
@@ -364,7 +364,7 @@ if [ $EXIT_CODE2 -eq 0 ]; then
         "$EXEC_TIME2" \
         "$PAGE_SIZE" \
         "0.1"
-    
+
         "0.1" || true  # Ne pas arrêter le script si validation partielle
     # EXPLICATIONS
     echo ""
@@ -396,7 +396,7 @@ if [ "$COUNT2" -gt 0 ]; then
     # Utiliser directement RESULT2 pour extraire la dernière date (la plus ancienne de la page 1)
     # La dernière ligne de données de RESULT2 correspond à la date la plus ancienne
     LAST_DATE=$(echo "$RESULT2" | grep -E "^[[:space:]]*[0-9]{4}-[0-9]{2}-[0-9]{2}" | tail -1 | awk '{print $1" "$2" "$3}' | sed 's/[[:space:]]*$//' || echo "")
-    
+
     if [ -n "$LAST_DATE" ] && [ "$LAST_DATE" != "" ]; then
         # Convertir au format CQL (assurer le format timestamp)
         LAST_DATE_CQL=$(echo "$LAST_DATE" | sed 's/\([0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}\)[[:space:]]*\([0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}\)\(.*\)/\1 \2\3/' | sed 's/[[:space:]]\+/ /g' || echo "$LAST_DATE")
@@ -412,7 +412,7 @@ else
     warn "⚠️  Aucune donnée dans TEST 2, utilisation d'une date par défaut : $LAST_DATE_CQL"
 fi
 
-QUERY3="SELECT * FROM $KEYSPACE.$TABLE 
+QUERY3="SELECT * FROM $KEYSPACE.$TABLE
 WHERE code_efs = '$CODE_EFS' AND numero_client = '$NUMERO_CLIENT'
   AND date_interaction < '$LAST_DATE_CQL'
 ORDER BY date_interaction DESC
@@ -455,7 +455,7 @@ if [ $EXIT_CODE3 -eq 0 ]; then
     COUNT3=$(echo "$RESULT3" | grep -c "^[[:space:]]*EFS001" || echo "0")
     echo ""
     result "Nombre d'interactions (page 2) : $COUNT3"
-    
+
     # VALIDATION : Comparaison attendus vs obtenus
     EXPECTED_COUNT3="<= $PAGE_SIZE"
     compare_expected_vs_actual \
@@ -463,14 +463,14 @@ if [ $EXIT_CODE3 -eq 0 ]; then
         "$EXPECTED_COUNT3 interactions" \
         "$COUNT3 interactions" \
         "0" || true  # Ne pas arrêter le script si comparaison partielle
-    
+
     # VALIDATION : Cohérence (COUNT3 <= COUNT1 - COUNT2, approximativement)
     if [ "$COUNT3" -le "$PAGE_SIZE" ]; then
         success "✅ Cohérence validée : Page 2 ($COUNT3) <= PAGE_SIZE ($PAGE_SIZE)"
     else
         warn "⚠️  Incohérence : Page 2 ($COUNT3) > PAGE_SIZE ($PAGE_SIZE)"
     fi
-    
+
     # VALIDATION COMPLÈTE
     validate_complete \
         "TEST 3 : Pagination Curseur Dynamique" \
@@ -480,7 +480,7 @@ if [ $EXIT_CODE3 -eq 0 ]; then
         "$EXEC_TIME3" \
         "$PAGE_SIZE" \
         "0.1"
-    
+
         "0.1" || true  # Ne pas arrêter le script si validation partielle
     # EXPLICATIONS
     echo ""
@@ -507,7 +507,7 @@ demo "Objectif : Récupérer les interactions des 2 dernières années avec pagi
 
 TWO_YEARS_AGO=$(date -u -v-2y +"%Y-%m-%d %H:%M:%S+0000" 2>/dev/null || date -u -d "2 years ago" +"%Y-%m-%d %H:%M:%S+0000" 2>/dev/null || echo "2023-12-01 00:00:00+0000")
 
-QUERY4="SELECT * FROM $KEYSPACE.$TABLE 
+QUERY4="SELECT * FROM $KEYSPACE.$TABLE
 WHERE code_efs = '$CODE_EFS' AND numero_client = '$NUMERO_CLIENT'
   AND date_interaction >= '$TWO_YEARS_AGO'
 ORDER BY date_interaction DESC
@@ -575,16 +575,16 @@ for i in {1..10}; do
     START_TIME=$(date +%s.%N)
     $CQLSH -e "$QUERY2" > /dev/null 2>&1
     END_TIME=$(date +%s.%N)
-    
+
     if command -v bc &> /dev/null; then
         DURATION=$(echo "$END_TIME - $START_TIME" | bc)
     else
         DURATION=$(python3 -c "print($END_TIME - $START_TIME)")
     fi
-    
+
     TIMES+=("$DURATION")
     TOTAL_TIME=$(echo "$TOTAL_TIME + $DURATION" | bc 2>/dev/null || python3 -c "print($TOTAL_TIME + $DURATION)")
-    
+
     # Min/Max
     if (( $(echo "$DURATION < $MIN_TIME" | bc -l 2>/dev/null || echo "0") )); then
         MIN_TIME=$DURATION
@@ -655,42 +655,42 @@ ALL_IDS=()  # Initialiser le tableau pour collecter les IDs
 while true; do
     if [ -z "$CURRENT_CURSOR" ]; then
         # Première page
-        QUERY_PAGE="SELECT * FROM $KEYSPACE.$TABLE 
+        QUERY_PAGE="SELECT * FROM $KEYSPACE.$TABLE
         WHERE code_efs = '$CODE_EFS' AND numero_client = '$NUMERO_CLIENT'
         ORDER BY date_interaction DESC
         LIMIT $PAGE_SIZE;"
     else
         # Pages suivantes
-        QUERY_PAGE="SELECT * FROM $KEYSPACE.$TABLE 
+        QUERY_PAGE="SELECT * FROM $KEYSPACE.$TABLE
         WHERE code_efs = '$CODE_EFS' AND numero_client = '$NUMERO_CLIENT'
           AND date_interaction < '$CURRENT_CURSOR'
         ORDER BY date_interaction DESC
         LIMIT $PAGE_SIZE;"
     fi
-    
+
     RESULT_PAGE=$($CQLSH -e "$QUERY_PAGE" 2>&1)
     COUNT_PAGE=$(echo "$RESULT_PAGE" | grep -c "^[[:space:]]*EFS001" || echo "0")
-    
+
     if [ "$COUNT_PAGE" -eq 0 ]; then
         break  # Plus de données
     fi
-    
+
     TOTAL_PAGES=$((TOTAL_PAGES + 1))
     TOTAL_ITEMS=$((TOTAL_ITEMS + COUNT_PAGE))
-    
+
     # Extraire les IDs pour vérifier les doublons
     PAGE_IDS=$(echo "$RESULT_PAGE" | (grep -E "^[[:space:]]*EFS001" || true) | awk '{print $7}' | tr '\n' ' ')
     for id in $PAGE_IDS; do
         ALL_IDS+=("$id")
     done
-    
+
     # Extraire le curseur pour la page suivante (dernière date de la page)
     CURRENT_CURSOR=$(echo "$RESULT_PAGE" | (grep -E "^[[:space:]]*[0-9]{4}-[0-9]{2}-[0-9]{2}" || true) | tail -1 | awk '{print $1" "$2" "$3}' | tr -d '[:space:]' || echo "")
-    
+
     if [ -z "$CURRENT_CURSOR" ]; then
         break  # Plus de curseur
     fi
-    
+
     # Limiter à 10 pages pour éviter une boucle infinie
     if [ "$TOTAL_PAGES" -ge 10 ]; then
         warn "⚠️  Limite de 10 pages atteinte (test exhaustif partiel)"
@@ -733,20 +733,20 @@ info "📝 Test de volume élevé (simulation avec COUNT > 1000)..."
 # Vérifier si on a assez de données
 if [ "$COUNT1" -ge 100 ]; then
     # Test avec une requête qui simule un volume élevé
-    QUERY_VOLUME="SELECT COUNT(*) FROM $KEYSPACE.$TABLE 
+    QUERY_VOLUME="SELECT COUNT(*) FROM $KEYSPACE.$TABLE
     WHERE code_efs = '$CODE_EFS' AND numero_client = '$NUMERO_CLIENT';"
-    
+
     START_TIME_VOLUME=$(date +%s.%N)
     RESULT_VOLUME=$($CQLSH -e "$QUERY_VOLUME" 2>&1)
     EXIT_CODE_VOLUME=$?
     END_TIME_VOLUME=$(date +%s.%N)
-    
+
     if command -v bc &> /dev/null; then
         EXEC_TIME_VOLUME=$(echo "$END_TIME_VOLUME - $START_TIME_VOLUME" | bc)
     else
         EXEC_TIME_VOLUME=$(python3 -c "print($END_TIME_VOLUME - $START_TIME_VOLUME)")
     fi
-    
+
     if [ $EXIT_CODE_VOLUME -eq 0 ]; then
         COUNT_VOLUME=$(echo "$RESULT_VOLUME" | grep -E "^\s+[0-9]+" | tr -d ' ' || echo "0")
         success "✅ Test volume élevé exécuté avec succès en ${EXEC_TIME_VOLUME}s"
@@ -754,14 +754,14 @@ if [ "$COUNT1" -ge 100 ]; then
         result "📊 Résultats :"
         echo "   - Nombre d'interactions : $COUNT_VOLUME"
         echo "   - Performance : ${EXEC_TIME_VOLUME}s"
-        
+
         # VALIDATION : Performance avec volume élevé
         if (( $(echo "$EXEC_TIME_VOLUME < 0.5" | bc -l 2>/dev/null || echo "0") )); then
             success "✅ Performance validée : Acceptable même avec volume élevé (< 0.5s)"
         else
             warn "⚠️  Performance : ${EXEC_TIME_VOLUME}s (peut être améliorée)"
         fi
-        
+
         # VALIDATION COMPLÈTE
         validate_complete \
             "TEST 7 : Volume Élevé" \
@@ -801,19 +801,19 @@ if [ ${#ALL_IDS[@]} -gt 0 ]; then
     TOTAL_IDS=${#ALL_IDS[@]}
     UNIQUE_COUNT=${#UNIQUE_IDS[@]}
     DUPLICATES=$((TOTAL_IDS - UNIQUE_COUNT))
-    
+
     result "📊 Résultats cohérence multi-pages :"
     echo "   - Total IDs collectés : $TOTAL_IDS"
     echo "   - IDs uniques : $UNIQUE_COUNT"
     echo "   - Doublons détectés : $DUPLICATES"
-    
+
     # VALIDATION : Absence de doublons
     if [ "$DUPLICATES" -eq 0 ]; then
         success "✅ Cohérence validée : Aucun doublon entre les pages"
     else
         warn "⚠️  Incohérence détectée : $DUPLICATES doublon(s) entre les pages"
     fi
-    
+
     # VALIDATION COMPLÈTE
     validate_complete \
         "TEST 8 : Cohérence Multi-Pages" \
@@ -845,21 +845,21 @@ LOAD_TIMES=()
 SUCCESSFUL_QUERIES=0
 
 for CLIENT in "${CLIENTS[@]}"; do
-    QUERY_LOAD="SELECT COUNT(*) FROM $KEYSPACE.$TABLE 
+    QUERY_LOAD="SELECT COUNT(*) FROM $KEYSPACE.$TABLE
     WHERE code_efs = '$CODE_EFS' AND numero_client = '$CLIENT'
     LIMIT 1;"
-    
+
     START_TIME_LOAD=$(date +%s.%N)
     RESULT_LOAD=$($CQLSH -e "$QUERY_LOAD" 2>&1)
     EXIT_CODE_LOAD=$?
     END_TIME_LOAD=$(date +%s.%N)
-    
+
     if command -v bc &> /dev/null; then
         DURATION_LOAD=$(echo "$END_TIME_LOAD - $START_TIME_LOAD" | bc)
     else
         DURATION_LOAD=$(python3 -c "print($END_TIME_LOAD - $START_TIME_LOAD)")
     fi
-    
+
     if [ $EXIT_CODE_LOAD -eq 0 ]; then
         SUCCESSFUL_QUERIES=$((SUCCESSFUL_QUERIES + 1))
         LOAD_TIMES+=("$DURATION_LOAD")
@@ -869,19 +869,19 @@ done
 
 if [ "$SUCCESSFUL_QUERIES" -gt 0 ]; then
     AVG_LOAD_TIME=$(echo "scale=4; $TOTAL_LOAD_TIME / $SUCCESSFUL_QUERIES" | bc 2>/dev/null || python3 -c "print($TOTAL_LOAD_TIME / $SUCCESSFUL_QUERIES)")
-    
+
     result "📊 Résultats test de charge :"
     echo "   - Requêtes réussies : $SUCCESSFUL_QUERIES / ${#CLIENTS[@]}"
     echo "   - Temps moyen par requête : ${AVG_LOAD_TIME}s"
     echo "   - Temps total : ${TOTAL_LOAD_TIME}s"
-    
+
     # VALIDATION : Performance sous charge
     if (( $(echo "$AVG_LOAD_TIME < 0.2" | bc -l 2>/dev/null || echo "0") )); then
         success "✅ Performance sous charge validée : Temps moyen acceptable (< 0.2s)"
     else
         warn "⚠️  Performance sous charge : Temps moyen ${AVG_LOAD_TIME}s (peut être améliorée)"
     fi
-    
+
     # VALIDATION COMPLÈTE
     validate_complete \
         "TEST 9 : Test de Charge" \
@@ -914,34 +914,34 @@ info "📝 Test de pagination inversée (navigation vers page précédente)..."
 # Étape 1 : Récupérer une page (page 2 par exemple, si on a TEST 3)
 if [ "$COUNT3" -gt 0 ]; then
     # Récupérer la première date de la page 2 (la plus récente)
-    FIRST_DATE_PAGE2_QUERY="SELECT date_interaction FROM $KEYSPACE.$TABLE 
+    FIRST_DATE_PAGE2_QUERY="SELECT date_interaction FROM $KEYSPACE.$TABLE
     WHERE code_efs = '$CODE_EFS' AND numero_client = '$NUMERO_CLIENT'
       AND date_interaction < '$LAST_DATE_CQL'
     ORDER BY date_interaction DESC
     LIMIT 1;"
-    
+
     FIRST_DATE_PAGE2_RESULT=$($CQLSH -e "$FIRST_DATE_PAGE2_QUERY" 2>&1)
     FIRST_DATE_PAGE2=$(echo "$FIRST_DATE_PAGE2_RESULT" | (grep -E "^[[:space:]]*[0-9]{4}-[0-9]{2}-[0-9]{2}" || true) | head -1 | awk '{print $1" "$2" "$3}' | sed 's/[[:space:]]*$//' || echo "")
-    
+
     if [ -n "$FIRST_DATE_PAGE2" ] && [ "$FIRST_DATE_PAGE2" != "" ]; then
         # Pagination inversée : récupérer les interactions AVANT cette date (page précédente)
-        QUERY_REVERSE="SELECT * FROM $KEYSPACE.$TABLE 
+        QUERY_REVERSE="SELECT * FROM $KEYSPACE.$TABLE
         WHERE code_efs = '$CODE_EFS' AND numero_client = '$NUMERO_CLIENT'
           AND date_interaction > '$FIRST_DATE_PAGE2'
         ORDER BY date_interaction DESC
         LIMIT $PAGE_SIZE;"
-        
+
         START_TIME_REVERSE=$(date +%s.%N)
         RESULT_REVERSE=$($CQLSH -e "$QUERY_REVERSE" 2>&1)
         EXIT_CODE_REVERSE=$?
         END_TIME_REVERSE=$(date +%s.%N)
-        
+
         if command -v bc &> /dev/null; then
             EXEC_TIME_REVERSE=$(echo "$END_TIME_REVERSE - $START_TIME_REVERSE" | bc)
         else
             EXEC_TIME_REVERSE=$(python3 -c "print($END_TIME_REVERSE - $START_TIME_REVERSE)")
         fi
-        
+
         if [ $EXIT_CODE_REVERSE -eq 0 ]; then
             COUNT_REVERSE=$(echo "$RESULT_REVERSE" | grep -c "^[[:space:]]*EFS001" || echo "0")
             success "✅ Pagination inversée exécutée avec succès en ${EXEC_TIME_REVERSE}s"
@@ -949,14 +949,14 @@ if [ "$COUNT3" -gt 0 ]; then
             result "📊 Résultats pagination inversée :"
             echo "   - Interactions récupérées (page précédente) : $COUNT_REVERSE"
             echo "   - Performance : ${EXEC_TIME_REVERSE}s"
-            
+
             # VALIDATION : Cohérence (COUNT_REVERSE devrait être proche de COUNT2)
             if [ "$COUNT_REVERSE" -le "$PAGE_SIZE" ]; then
                 success "✅ Cohérence validée : Page précédente ($COUNT_REVERSE) <= PAGE_SIZE ($PAGE_SIZE)"
             else
                 warn "⚠️  Incohérence : Page précédente ($COUNT_REVERSE) > PAGE_SIZE ($PAGE_SIZE)"
             fi
-            
+
             # VALIDATION COMPLÈTE
             validate_complete \
                 "TEST 10 : Pagination Inversée" \
@@ -1268,7 +1268,7 @@ $QUERY4
 
 ---
 
-**Date** : 2025-12-01  
+**Date** : 2025-12-01
 **Script** : \`11_test_timeline_conseiller.sh\`
 EOF
 
@@ -1278,4 +1278,3 @@ success "✅ Tests terminés avec succès"
 echo ""
 result "📄 Rapport généré : $REPORT_FILE"
 echo ""
-

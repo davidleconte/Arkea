@@ -145,7 +145,7 @@ WHERE ...
 **Stratégie** : Prioriser `cat_user` si non nul, sinon `cat_auto`
 
 ```cql
-SELECT 
+SELECT
     cat_auto,
     cat_user,
     COALESCE(cat_user, cat_auto) as categorie_finale
@@ -165,11 +165,13 @@ WHERE ...
 **Clustering Keys** : `(date_op DESC, numero_op ASC)`
 
 **Colonnes principales** :
+
 - `libelle`, `montant`, `devise`, `type_operation`, `sens_operation`
 - `operation_data BLOB` (données COBOL, conforme IBM)
 - `date_valeur TIMESTAMP`
 
 **Catégorisation complète** :
+
 - `cat_auto TEXT` - Catégorie automatique (batch)
 - `cat_confidence DECIMAL` - Score du moteur (0.0 à 1.0)
 - `cat_user TEXT` - Catégorie client (corrigée)
@@ -177,6 +179,7 @@ WHERE ...
 - `cat_validée BOOLEAN` - Acceptation par client
 
 **Index SAI** :
+
 - `idx_libelle_fulltext` - Recherche full-text (analyzer français)
 - `idx_cat_auto` - Filtrage par catégorie automatique
 - `idx_cat_user` - Filtrage par catégorie client
@@ -279,9 +282,9 @@ cqlsh -e "SELECT cat_auto, cat_user, cat_date_user FROM domirama2_poc.operations
 **Score de conformité IBM** : **98%** ✅
 
 **Mise à jour** : 2024-11-27
+
 - ✅ 57 scripts créés (au lieu de 43)
 - ✅ 18 démonstrations .md générées automatiquement
 - ✅ Tous les gaps critiques comblés (BLOOMFILTER, colonnes dynamiques, REPLICATION_SCOPE)
 - ✅ Versions didactiques avec documentation automatique
 - ✅ 12 templates réutilisables créés
-

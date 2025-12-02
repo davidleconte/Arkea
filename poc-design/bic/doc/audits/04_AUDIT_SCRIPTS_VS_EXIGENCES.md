@@ -24,9 +24,11 @@
 ### Scripts de Setup (01-04)
 
 #### Script 01 : `01_setup_bic_keyspace.sh`
+
 **Objectif** : Création du keyspace BIC
 
 **Exigences Couvertes** :
+
 - ✅ **Schéma HCD** (Partie 2.1.2) : Création du keyspace `bic_poc`
 - ✅ **Architecture** (Partie 2) : Fondation du schéma de données
 
@@ -35,9 +37,11 @@
 ---
 
 #### Script 02 : `02_setup_bic_tables.sh`
+
 **Objectif** : Création des tables BIC
 
 **Exigences Couvertes** :
+
 - ✅ **Schéma HCD** (Partie 2.1.2) : Table `interactions_by_client`
 - ✅ **Clé Primaire** (Partie 2.1.2) : Partition Key `(code_efs, numero_client)`, Clustering Key `(date_interaction, canal, type_interaction, idt_tech)`
 - ✅ **Colonnes Principales** (Partie 2.1.2) : `code_efs`, `numero_client`, `date_interaction`, `canal`, `type_interaction`, `resultat`, `idt_tech`
@@ -52,9 +56,11 @@
 ---
 
 #### Script 03 : `03_setup_bic_indexes.sh`
+
 **Objectif** : Création des index SAI
 
 **Exigences Couvertes** :
+
 - ✅ **Index SAI** (Partie 2.2) : Index sur `canal` (BIC-04)
 - ✅ **Index SAI** (Partie 2.2) : Index sur `type_interaction` (BIC-05)
 - ✅ **Index SAI** (Partie 2.2) : Index sur `resultat` (BIC-11)
@@ -68,9 +74,11 @@
 ---
 
 #### Script 04 : `04_verify_setup.sh`
+
 **Objectif** : Vérification du setup complet
 
 **Exigences Couvertes** :
+
 - ✅ **Validation Schéma** (Partie 9.2) : Vérification cohérence des données
 - ✅ **Validation Qualité** (Partie 9.2) : Vérification absence de doublons
 
@@ -81,9 +89,11 @@
 ### Scripts de Génération de Données (05-07)
 
 #### Script 05 : `05_generate_interactions_parquet.sh`
+
 **Objectif** : Génération de données Parquet pour ingestion batch
 
 **Exigences Couvertes** :
+
 - ✅ **BIC-07** : Format JSON + colonnes dynamiques
 - ✅ **BIC-09** : Écriture batch (bulkLoad équivalent)
 - ✅ **Format Parquet** (Partie 3.3) : Support format Parquet
@@ -98,9 +108,11 @@
 ---
 
 #### Script 06 : `06_generate_interactions_json.sh`
+
 **Objectif** : Génération d'événements JSON pour Kafka
 
 **Exigences Couvertes** :
+
 - ✅ **BIC-02** : Ingestion Kafka temps réel (format événements)
 - ✅ **BIC-07** : Format JSON + colonnes dynamiques
 - ✅ **Format JSON** (Partie 3.3) : Support format JSON
@@ -112,9 +124,11 @@
 ---
 
 #### Script 07 : `07_generate_test_data.sh`
+
 **Objectif** : Génération de données de test ciblées
 
 **Exigences Couvertes** :
+
 - ✅ **BIC-01 à BIC-15** : Données de test pour tous les use cases
 - ✅ **Volume et Distribution** (Partie 9.1) : Données ciblées pour tests spécifiques
 - ✅ **Qualité des Données** (Partie 9.2) : Données cohérentes et validées
@@ -126,9 +140,11 @@
 ### Scripts d'Ingestion (08-10)
 
 #### Script 08 : `08_load_interactions_batch.sh`
+
 **Objectif** : Chargement batch Parquet dans HCD
 
 **Exigences Couvertes** :
+
 - ✅ **BIC-07** : Format JSON + colonnes dynamiques
 - ✅ **BIC-09** : Écriture batch (bulkLoad équivalent HBase)
 - ✅ **Ingestion Batch** (Partie 3.2) : Traitement batch
@@ -142,9 +158,11 @@
 ---
 
 #### Script 09 : `09_load_interactions_realtime.sh`
+
 **Objectif** : Ingestion temps réel depuis Kafka
 
 **Exigences Couvertes** :
+
 - ✅ **BIC-02** : Ingestion Kafka temps réel (topic bic-event)
 - ✅ **BIC-07** : Format JSON + colonnes dynamiques
 - ✅ **Ingestion Temps Réel** (Partie 3.1) : Consumer Kafka pour événements temps réel
@@ -159,9 +177,11 @@
 ---
 
 #### Script 10 : `10_load_interactions_json.sh`
+
 **Objectif** : Chargement batch JSON dans HCD
 
 **Exigences Couvertes** :
+
 - ✅ **BIC-07** : Format JSON + colonnes dynamiques
 - ✅ **Format JSON** (Partie 3.3) : Support format JSON
 - ✅ **Ingestion Batch** (Partie 3.2) : Traitement batch JSON
@@ -173,9 +193,11 @@
 ### Scripts de Test (11-18)
 
 #### Script 11 : `11_test_timeline_conseiller.sh`
+
 **Objectif** : Test timeline conseiller avec pagination
 
 **Exigences Couvertes** :
+
 - ✅ **BIC-01** : Timeline conseiller (2 ans d'historique)
 - ✅ **BIC-14** : Pagination des résultats
 - ✅ **Lecture Temps Réel** (Partie 4.1) : API REST/GraphQL (via CQL)
@@ -190,9 +212,11 @@
 ---
 
 #### Script 12 : `12_test_filtrage_canal.sh`
+
 **Objectif** : Test filtrage par canal et résultat
 
 **Exigences Couvertes** :
+
 - ✅ **BIC-04** : Filtrage par canal (email, SMS, agence, telephone, web, RDV, agenda, mail)
 - ✅ **BIC-11** : Filtrage par résultat (succès, échec, etc.)
 - ✅ **Index SAI** (Partie 2.2) : Utilisation index sur `canal`
@@ -206,9 +230,11 @@
 ---
 
 #### Script 13 : `13_test_filtrage_type.sh`
+
 **Objectif** : Test filtrage par type d'interaction
 
 **Exigences Couvertes** :
+
 - ✅ **BIC-05** : Filtrage par type d'interaction (consultation, conseil, transaction, reclamation)
 - ✅ **Index SAI** (Partie 2.2) : Utilisation index sur `type_interaction`
 - ✅ **Types d'Interactions** (Partie 2.4) : Tous les types testés
@@ -220,9 +246,11 @@
 ---
 
 #### Script 14 : `14_test_export_batch.sh`
+
 **Objectif** : Test export batch ORC avec équivalences HBase
 
 **Exigences Couvertes** :
+
 - ✅ **BIC-03** : Export batch ORC incrémental
 - ✅ **BIC-10** : Lecture batch (STARTROW/STOPROW/TIMERANGE équivalent)
 - ✅ **Export Batch ORC** (Partie 5.1) : Export incrémental ORC
@@ -244,9 +272,11 @@
 ---
 
 #### Script 15 : `15_test_ttl.sh`
+
 **Objectif** : Test TTL 2 ans
 
 **Exigences Couvertes** :
+
 - ✅ **BIC-06** : TTL 2 ans (expiration automatique après 2 ans)
 - ✅ **TTL 2 ans** (Partie 2.1.2) : `default_time_to_live = 63072000`
 - ✅ **Expiration Automatique** (Partie 2.1.2) : Purge automatique après 2 ans
@@ -258,9 +288,11 @@
 ---
 
 #### Script 16 : `16_test_fulltext_search.sh`
+
 **Objectif** : Test recherche full-text avec analyseurs Lucene
 
 **Exigences Couvertes** :
+
 - ✅ **BIC-07** : Format JSON + colonnes dynamiques
 - ✅ **BIC-12** : Recherche full-text avec analyseurs Lucene
 - ✅ **Recherche Full-Text** (Partie 6.1) : Indexation textuelle avec analyseurs Lucene
@@ -277,9 +309,11 @@
 ---
 
 #### Script 17 : `17_test_timeline_query.sh`
+
 **Objectif** : Test timeline query avancées
 
 **Exigences Couvertes** :
+
 - ✅ **BIC-01** : Timeline conseiller avancée (requêtes complexes)
 - ✅ **Filtres Combinés** (BIC-15) : Combinaison de filtres (canal + type + résultat + période)
 - ✅ **Lecture Temps Réel** (Partie 4.1) : API REST/GraphQL (via CQL)
@@ -296,9 +330,11 @@
 ---
 
 #### Script 18 : `18_test_filtering.sh`
+
 **Objectif** : Test filtrage avancé exhaustif
 
 **Exigences Couvertes** :
+
 - ✅ **BIC-04** : Filtrage par canal (tous les canaux testés)
 - ✅ **BIC-05** : Filtrage par type d'interaction
 - ✅ **BIC-11** : Filtrage par résultat
@@ -416,11 +452,13 @@
 **Exigence** : API REST/GraphQL (Data API) pour lecture temps réel
 
 **Couverture Actuelle** :
+
 - ✅ CQL direct (scripts 11, 17)
 - ✅ Performance < 100ms validée
 - ❌ Pas d'API REST/GraphQL Data API
 
 **Recommandation** :
+
 - 🟡 **Priorité Moyenne** : Créer un script de démonstration Data API REST/GraphQL
 - 📝 **Action** : Documenter que CQL est l'équivalent fonctionnel, Data API est une couche supplémentaire
 
@@ -435,9 +473,11 @@
 **Exigence** : Vector Search pour recherche sémantique (extension optionnelle)
 
 **Couverture Actuelle** :
+
 - ❌ Non implémenté (optionnel, non prioritaire)
 
 **Recommandation** :
+
 - 🟢 **Priorité Optionnelle** : Extension future si besoin
 - 📝 **Action** : Documenter comme extension future
 
@@ -525,6 +565,7 @@
 ### Conclusion
 
 **Le POC BIC couvre 96.4% des exigences identifiées**, avec **100% des exigences critiques et haute priorité couvertes**. Les seules exigences partielles ou optionnelles sont :
+
 - **BIC-08** : Partiel (CQL fonctionnel, Data API REST/GraphQL non démontré)
 - **BIC-13** : Optionnel (recherche vectorielle, extension future)
 
@@ -535,4 +576,3 @@
 **Date** : 2025-12-01  
 **Version** : 1.0.0  
 **Statut** : ✅ Audit complet terminé - 96.4% de couverture
-

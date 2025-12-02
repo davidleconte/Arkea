@@ -9,7 +9,7 @@
 #   Ce script exporte les données d'opérations depuis HCD vers des fichiers
 #   parquet via DSBulk, avec filtrage par dates (équivalent TIMERANGE HBase).
 #   DSBulk est utilisé au lieu de Spark pour éviter le problème du type VECTOR.
-#   
+#
 #   Cette version didactique affiche :
 #   - Le code Spark complet (lecture HCD, filtrage, export) avec explications
 #   - Les équivalences HBase → HCD détaillées
@@ -181,7 +181,7 @@ else
     echo "   3. Repair complet (recommandé, propagation tombstones)"
     echo "   4. Compaction de la table (purge tombstones expirés)"
     echo ""
-    
+
     # Vérification nodetool disponible
     if [ ! -f "$NODETOOL" ]; then
         warn "nodetool non trouvé : $NODETOOL"
@@ -200,7 +200,7 @@ else
         else
             warn "Impossible de vérifier l'état du cluster (mode standalone ?)"
         fi
-        
+
         # ÉTAPE 2 : Vérification gc_grace_seconds
         echo ""
         info "⏱️  ÉTAPE 2 : Vérification gc_grace_seconds"
@@ -219,7 +219,7 @@ else
         else
             warn "cqlsh non trouvé, impossible de vérifier gc_grace_seconds"
         fi
-        
+
         # ÉTAPE 3 : Repair Complet (Recommandé)
         echo ""
         info "🔧 ÉTAPE 3 : Repair Complet (Propagation des Tombstones)"
@@ -229,7 +229,7 @@ else
         echo "   - Éviter la réapparition de données supprimées (zombie data)"
         echo "   - Garantir la cohérence du cluster"
         echo ""
-        
+
         # Mode non-interactif : on fait le repair automatiquement si possible
         # En mode interactif, on demande confirmation
         if [ -t 0 ]; then
@@ -242,11 +242,11 @@ else
             DO_REPAIR="O"
             info "Mode non-interactif : repair sera effectué automatiquement"
         fi
-        
+
         if [[ "$DO_REPAIR" =~ ^[OoYy]$ ]] || [ -z "$DO_REPAIR" ]; then
             info "Lancement du repair complet pour $KEYSPACE.$TABLE..."
             warn "⚠️  Cette opération peut prendre du temps selon la taille des données"
-            
+
             if "$NODETOOL" repair -pr "$KEYSPACE" "$TABLE" 2>&1; then
                 success "Repair terminé avec succès"
             else
@@ -270,7 +270,7 @@ else
             warn "Repair ignoré"
             warn "⚠️  ATTENTION : Sans repair, les tombstones peuvent ne pas être propagés"
         fi
-        
+
         # ÉTAPE 4 : Vérification Espace Disque
         echo ""
         info "💾 ÉTAPE 4 : Vérification Espace Disque"
@@ -286,7 +286,7 @@ else
                 fi
             fi
         fi
-        
+
         # ÉTAPE 5 : Compaction
         echo ""
         info "🗜️  ÉTAPE 5 : Compaction de la Table"
@@ -298,7 +298,7 @@ else
         echo "   - Purger les tombstones expirés (> gc_grace_seconds)"
         echo "   - Optimiser l'utilisation de l'espace disque"
         echo ""
-        
+
         if [ -t 0 ]; then
             read -p "Confirmer la compaction ? (O/n) : " -n 1 -r
             echo ""
@@ -307,10 +307,10 @@ else
             DO_COMPACT="O"
             info "Mode non-interactif : compaction sera effectuée automatiquement"
         fi
-        
+
         if [[ "$DO_COMPACT" =~ ^[OoYy]$ ]] || [ -z "$DO_COMPACT" ]; then
             info "Compaction en cours..."
-            
+
             if "$NODETOOL" compact "$KEYSPACE" "$TABLE" 2>&1; then
                 success "Compaction lancée avec succès"
                 info "La compaction s'exécute en arrière-plan"
@@ -319,7 +319,7 @@ else
                 echo ""
                 info "⏳ Attente de 10 secondes pour laisser la compaction démarrer..."
                 sleep 10
-                
+
                 info "Statut de la compaction :"
                 "$NODETOOL" compactionstats 2>&1 | grep -E "pending|active|completed" | head -5 || echo "Aucune compaction active visible"
             else
@@ -340,7 +340,7 @@ else
             warn "Compaction ignorée"
             warn "⚠️  ATTENTION : Des tombstones peuvent être présents dans l'export"
         fi
-        
+
         success "✅ Préparation compaction terminée"
     fi
 fi
@@ -405,8 +405,8 @@ TEMP_JSON_DIR=$(mktemp -d "/tmp/dsbulk_export_$(date +%s)_XXXXXX")
 TEMP_CQL_QUERY=$(mktemp "/tmp/dsbulk_query_$(date +%s)_XXXXXX.cql")
 cat > "$TEMP_CQL_QUERY" <<EOFCQL
 SELECT code_si, contrat, date_op, numero_op, op_id, libelle, montant, devise, date_valeur, type_operation, sens_operation, operation_data, cobol_data_base64, copy_type, meta_flags, cat_auto, cat_confidence, cat_user, cat_date_user, cat_validee, libelle_tokens, libelle_prefix, metadata, libelle_embedding
-FROM domirama2_poc.operations_by_account 
-WHERE date_op >= '$START_DATE' AND date_op < '$END_DATE' 
+FROM domirama2_poc.operations_by_account
+WHERE date_op >= '$START_DATE' AND date_op < '$END_DATE'
 ALLOW FILTERING
 EOFCQL
 
@@ -664,7 +664,7 @@ fi
 if [ -f "$TEMP_OUTPUT" ]; then
     EXPORT_COUNT=$(grep -oE '[0-9]+ opérations trouvées' "$TEMP_OUTPUT" | head -1 | grep -oE '[0-9]+' || echo "0")
     READ_COUNT=$(grep -oE '[0-9]+ opérations lues' "$TEMP_OUTPUT" | head -1 | grep -oE '[0-9]+' || echo "0")
-    
+
     # Détecter les avertissements tombstone
     TOMBSTONE_WARNINGS=$(grep -c "tombstone rows" "$TEMP_OUTPUT" 2>/dev/null || echo "0")
     if [ "$TOMBSTONE_WARNINGS" -gt 0 ]; then
@@ -675,7 +675,7 @@ if [ -f "$TEMP_OUTPUT" ]; then
             warn "   Commande : nodetool compact domirama2_poc operations_by_account"
         fi
     fi
-    
+
     if [ "$EXPORT_COUNT" != "0" ]; then
         result "Opérations exportées : $EXPORT_COUNT"
     fi

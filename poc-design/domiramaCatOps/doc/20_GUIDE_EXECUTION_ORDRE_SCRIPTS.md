@@ -64,6 +64,7 @@ cd /Users/david.leconte/Documents/Arkea/poc-design/domiramaCatOps/scripts
 ### Tests Unitaires Phase 1
 
 #### Test 01 : Vérification Keyspace
+
 ```bash
 # Vérifier que le keyspace existe
 ${HCD_DIR}/bin/cqlsh -e "DESCRIBE KEYSPACE domiramacatops_poc;"
@@ -71,6 +72,7 @@ ${HCD_DIR}/bin/cqlsh -e "DESCRIBE KEYSPACE domiramacatops_poc;"
 ```
 
 #### Test 02 : Vérification Table Operations
+
 ```bash
 # Vérifier que la table existe avec toutes les colonnes
 ${HCD_DIR}/bin/cqlsh -e "DESCRIBE TABLE domiramacatops_poc.operations_by_account;"
@@ -78,6 +80,7 @@ ${HCD_DIR}/bin/cqlsh -e "DESCRIBE TABLE domiramacatops_poc.operations_by_account
 ```
 
 #### Test 03 : Vérification Tables Meta-Categories
+
 ```bash
 # Vérifier les 7 tables
 ${HCD_DIR}/bin/cqlsh -e "USE domiramacatops_poc; DESCRIBE TABLES;"
@@ -85,6 +88,7 @@ ${HCD_DIR}/bin/cqlsh -e "USE domiramacatops_poc; DESCRIBE TABLES;"
 ```
 
 #### Test 04 : Vérification Index SAI
+
 ```bash
 # Vérifier les index créés
 ${HCD_DIR}/bin/cqlsh -e "SELECT index_name, table_name FROM system_schema.indexes WHERE keyspace_name = 'domiramacatops_poc';"
@@ -121,6 +125,7 @@ ${HCD_DIR}/bin/cqlsh -e "SELECT index_name, table_name FROM system_schema.indexe
 ### Tests Unitaires Phase 2
 
 #### Test 05 : Vérification Fichier Operations Parquet
+
 ```bash
 # Vérifier le fichier Parquet
 python3 << EOF
@@ -134,6 +139,7 @@ EOF
 ```
 
 #### Test 06 : Vérification Fichiers Meta-Categories Parquet
+
 ```bash
 # Vérifier les 7 fichiers Parquet
 for table in acceptations oppositions feedbacks_libelles feedbacks_ics regles_personnalisees decisions_salaires historique_oppositions; do
@@ -147,6 +153,7 @@ done
 ```
 
 #### Test 07 : Vérification Embeddings
+
 ```bash
 # Vérifier que les embeddings sont générés
 python3 << EOF
@@ -193,6 +200,7 @@ EOF
 ### Tests Unitaires Phase 3
 
 #### Test 08 : Vérification Chargement Operations
+
 ```bash
 # Vérifier le nombre d'opérations chargées
 ${HCD_DIR}/bin/cqlsh -e "SELECT COUNT(*) FROM domiramacatops_poc.operations_by_account;"
@@ -200,6 +208,7 @@ ${HCD_DIR}/bin/cqlsh -e "SELECT COUNT(*) FROM domiramacatops_poc.operations_by_a
 ```
 
 #### Test 09 : Vérification Catégorisation Automatique
+
 ```bash
 # Vérifier que cat_auto est rempli
 ${HCD_DIR}/bin/cqlsh -e "SELECT COUNT(*) FROM domiramacatops_poc.operations_by_account WHERE cat_auto IS NOT NULL;"
@@ -207,6 +216,7 @@ ${HCD_DIR}/bin/cqlsh -e "SELECT COUNT(*) FROM domiramacatops_poc.operations_by_a
 ```
 
 #### Test 10 : Vérification Chargement Meta-Categories
+
 ```bash
 # Vérifier chaque table meta-categories
 for table in acceptations oppositions feedbacks_libelles feedbacks_ics regles_personnalisees decisions_salaires historique_oppositions; do
@@ -217,6 +227,7 @@ done
 ```
 
 #### Test 11 : Vérification Corrections Client
+
 ```bash
 # Vérifier que cat_user est rempli pour certaines opérations
 ${HCD_DIR}/bin/cqlsh -e "SELECT COUNT(*) FROM domiramacatops_poc.operations_by_account WHERE cat_user IS NOT NULL;"
@@ -262,6 +273,7 @@ wait
 ### Tests Unitaires Phase 4
 
 #### Test 12 : Vérification Recherche par Catégorie
+
 ```bash
 # Vérifier que la recherche par catégorie fonctionne
 ${HCD_DIR}/bin/cqlsh -e "SELECT COUNT(*) FROM domiramacatops_poc.operations_by_account WHERE cat_auto = 'ALIMENTATION' ALLOW FILTERING;"
@@ -269,6 +281,7 @@ ${HCD_DIR}/bin/cqlsh -e "SELECT COUNT(*) FROM domiramacatops_poc.operations_by_a
 ```
 
 #### Test 13 : Vérification Acceptation/Opposition
+
 ```bash
 # Vérifier que les acceptations/oppositions sont enregistrées
 ${HCD_DIR}/bin/cqlsh -e "SELECT COUNT(*) FROM domiramacatops_poc.acceptations;"
@@ -277,6 +290,7 @@ ${HCD_DIR}/bin/cqlsh -e "SELECT COUNT(*) FROM domiramacatops_poc.oppositions;"
 ```
 
 #### Test 14 : Vérification Règles Personnalisées
+
 ```bash
 # Vérifier que les règles sont appliquées
 ${HCD_DIR}/bin/cqlsh -e "SELECT COUNT(*) FROM domiramacatops_poc.regles_personnalisees;"
@@ -284,6 +298,7 @@ ${HCD_DIR}/bin/cqlsh -e "SELECT COUNT(*) FROM domiramacatops_poc.regles_personna
 ```
 
 #### Test 15 : Vérification Compteurs Feedbacks
+
 ```bash
 # Vérifier que les compteurs sont incrémentés
 ${HCD_DIR}/bin/cqlsh -e "SELECT libelle, count FROM domiramacatops_poc.feedbacks_libelles LIMIT 5;"
@@ -291,6 +306,7 @@ ${HCD_DIR}/bin/cqlsh -e "SELECT libelle, count FROM domiramacatops_poc.feedbacks
 ```
 
 #### Test 16 : Vérification Export Incrémental
+
 ```bash
 # Vérifier que le fichier Parquet exporté existe
 if [ -f "data/exports/operations_2024-01.parquet" ]; then
@@ -330,6 +346,7 @@ fi
 ### Tests Unitaires Phase 5
 
 #### Test 17 : Vérification Fuzzy Search
+
 ```python
 # Vérifier que la recherche vectorielle fonctionne
 python3 << EOF
@@ -339,8 +356,8 @@ session = cluster.connect('domiramacatops_poc')
 
 # Test recherche vectorielle
 result = session.execute("""
-    SELECT libelle, cat_auto 
-    FROM operations_by_account 
+    SELECT libelle, cat_auto
+    FROM operations_by_account
     WHERE code_si = '01' AND contrat = '5913101072'
     ORDER BY libelle_embedding ANN OF [0.1, 0.2, ...] LIMIT 5;
 """)
@@ -350,6 +367,7 @@ EOF
 ```
 
 #### Test 18 : Vérification Hybrid Search
+
 ```python
 # Vérifier que la recherche hybride fonctionne
 python3 << EOF
@@ -359,8 +377,8 @@ session = cluster.connect('domiramacatops_poc')
 
 # Test recherche hybride (full-text + vector)
 result = session.execute("""
-    SELECT libelle, cat_auto 
-    FROM operations_by_account 
+    SELECT libelle, cat_auto
+    FROM operations_by_account
     WHERE code_si = '01' AND contrat = '5913101072'
       AND libelle : 'CARREFOUR'
     ORDER BY libelle_embedding ANN OF [0.1, 0.2, ...] LIMIT 5;
@@ -409,6 +427,7 @@ wait
 ### Tests Unitaires Phase 6
 
 #### Test 19 : Vérification TTL
+
 ```bash
 # Vérifier que le TTL est configuré
 ${HCD_DIR}/bin/cqlsh -e "SELECT default_time_to_live FROM system_schema.tables WHERE keyspace_name = 'domiramacatops_poc' AND table_name = 'operations_by_account';"
@@ -416,6 +435,7 @@ ${HCD_DIR}/bin/cqlsh -e "SELECT default_time_to_live FROM system_schema.tables W
 ```
 
 #### Test 20 : Vérification Performance Index
+
 ```bash
 # Vérifier que les index SAI améliorent les performances
 time ${HCD_DIR}/bin/cqlsh -e "SELECT * FROM domiramacatops_poc.operations_by_account WHERE cat_auto = 'ALIMENTATION' ALLOW FILTERING LIMIT 10;"
@@ -423,6 +443,7 @@ time ${HCD_DIR}/bin/cqlsh -e "SELECT * FROM domiramacatops_poc.operations_by_acc
 ```
 
 #### Test 21 : Vérification Feedbacks ICS
+
 ```bash
 # Vérifier que les compteurs ICS sont incrémentés
 ${HCD_DIR}/bin/cqlsh -e "SELECT code_categorie, count FROM domiramacatops_poc.feedbacks_ics LIMIT 5;"
@@ -583,6 +604,7 @@ echo "🎉 Exécution complète terminée avec succès !"
 ### Problème : Script échoue avec erreur de connexion HCD
 
 **Solution** :
+
 ```bash
 # Vérifier que HCD est démarré
 ps aux | grep cassandra
@@ -595,6 +617,7 @@ cd /Users/david.leconte/Documents/Arkea
 ### Problème : Script échoue avec erreur Java
 
 **Solution** :
+
 ```bash
 # Vérifier la version Java
 jenv local 11
@@ -605,6 +628,7 @@ java -version
 ### Problème : Script échoue avec erreur Spark
 
 **Solution** :
+
 ```bash
 # Vérifier que Spark est installé
 which spark-submit
@@ -617,6 +641,7 @@ echo $SPARK_HOME
 ### Problème : Données non chargées
 
 **Solution** :
+
 ```bash
 # Vérifier que les fichiers Parquet existent
 ls -lh data/*.parquet
@@ -644,6 +669,7 @@ ls -lh data/*.parquet
 ## ✅ CONCLUSION
 
 **Ordre d'exécution recommandé** :
+
 1. ✅ Phase 1 : Setup (séquentiel)
 2. ✅ Phase 2 : Génération (parallélisé sauf embeddings)
 3. ✅ Phase 3 : Chargement (séquentiel)
@@ -657,5 +683,3 @@ ls -lh data/*.parquet
 
 **Date** : 2025-01-XX  
 **Version** : 1.0
-
-

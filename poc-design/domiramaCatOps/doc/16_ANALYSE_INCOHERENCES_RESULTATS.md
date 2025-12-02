@@ -43,22 +43,28 @@ Ce document analyse les incohérences identifiées dans les résultats des tests
 ### 1. Problème de Cohérence (Lignes 467-484, 491-498)
 
 #### Symptômes Observés
+
 - Les résultats changent entre les itérations d'une même requête
 - L'ordre des résultats varie
 - Message "✅ Cohérence OK" mais résultats différents affichés
 
 #### Cause Identifiée
+
 Le modèle ByteT5 peut générer des embeddings légèrement différents à chaque exécution si :
+
 - La seed n'est pas fixée
 - Le modèle utilise des opérations non-déterministes (dropout, etc.)
 
 #### Solution Implémentée
+
 ✅ **Correction appliquée** :
+
 - Ajout de `torch.manual_seed(42)` et `random.seed(42)` dans `test_vector_search_base.py`
 - Fixation de la seed avant chaque génération d'embedding
 - Le modèle est maintenant déterministe
 
 #### Résultat
+
 - ✅ Cohérence garantie : Tous les résultats identiques entre itérations
 - ✅ Ordre stable : L'ordre des résultats est cohérent
 
@@ -67,6 +73,7 @@ Le modèle ByteT5 peut générer des embeddings légèrement différents à chaq
 ### 2. Problème de Pertinence (Toutes les sections)
 
 #### Symptômes Observés
+
 - Requête "LOYER IMPAYE" retourne "CB PARKING Q PARK PARIS" (non pertinent)
 - Requête "LOYER" retourne "CB SPORT PISCINE PARIS" (non pertinent)
 - Les résultats ne correspondent pas aux mots-clés de la requête
@@ -74,6 +81,7 @@ Le modèle ByteT5 peut générer des embeddings légèrement différents à chaq
 #### Cause Identifiée
 
 **Analyse des données** :
+
 - Les données de test contiennent bien des libellés pertinents :
   - "REGULARISATION LOYER IMPAYE" existe dans la base
   - "VIREMENT SALAIRE" existe dans la base
@@ -113,6 +121,7 @@ Le modèle ByteT5 peut générer des embeddings légèrement différents à chaq
    - Explication que cela peut être dû aux données de test
 
 #### Résultat
+
 - ⚠️ **Pertinence détectée** : Les tests signalent maintenant quand les résultats ne sont pas pertinents
 - 💡 **Explication fournie** : Messages clairs expliquant pourquoi les résultats peuvent ne pas être pertinents
 - 📊 **Métriques affichées** : Score de pertinence visible dans les rapports
@@ -122,23 +131,29 @@ Le modèle ByteT5 peut générer des embeddings légèrement différents à chaq
 ### 3. Problème avec Synonymes (Lignes 536-568)
 
 #### Symptômes Observés
+
 - "LOYER", "LOCATION", "LOUER" retournent tous les mêmes résultats
 - "VIREMENT", "TRANSFERT", "VERSEMENT" retournent tous les mêmes résultats
 - Les synonymes ne trouvent pas de résultats différents
 
 #### Cause Identifiée
+
 Même cause que le problème de pertinence :
+
 - Les données de test ne contiennent pas assez de variété
 - La recherche vectorielle retourne les mêmes résultats car ils ont les meilleurs scores de similarité
 - Les synonymes sont sémantiquement proches, donc ils trouvent les mêmes résultats
 
 #### Solution Implémentée
+
 ✅ **Correction appliquée** :
+
 - Ajout de vérification de pertinence dans `test_vector_search_synonyms.py`
 - Avertissements affichés quand la pertinence est faible
 - Explication que les synonymes peuvent trouver les mêmes résultats si les données sont limitées
 
 #### Résultat
+
 - ⚠️ **Problème identifié** : Les tests signalent maintenant quand les synonymes retournent des résultats non pertinents
 - 💡 **Explication fournie** : Messages clairs expliquant pourquoi les synonymes peuvent trouver les mêmes résultats
 
@@ -147,22 +162,28 @@ Même cause que le problème de pertinence :
 ### 4. Problème Multilingue (Lignes 599-616, 620-637)
 
 #### Symptômes Observés
+
 - "LOYER IMPAYE" (français) et "UNPAID RENT" (anglais) retournent les mêmes résultats
 - Les résultats ne sont pas pertinents pour les requêtes multilingues
 
 #### Cause Identifiée
+
 Même cause que le problème de pertinence :
+
 - ByteT5 est multilingue mais les données sont en français
 - La recherche vectorielle trouve les mêmes résultats car ils ont les meilleurs scores
 - Les libellés en français ne correspondent pas aux requêtes en anglais
 
 #### Solution Implémentée
+
 ✅ **Correction appliquée** :
+
 - Ajout de vérification de pertinence dans `test_vector_search_multilang.py`
 - Avertissements affichés quand la pertinence est faible
 - Explication que les résultats peuvent ne pas être pertinents pour les requêtes multilingues
 
 #### Résultat
+
 - ⚠️ **Problème identifié** : Les tests signalent maintenant quand les résultats multilingues ne sont pas pertinents
 - 💡 **Explication fournie** : Messages clairs expliquant pourquoi les résultats peuvent ne pas être pertinents
 
@@ -171,22 +192,28 @@ Même cause que le problème de pertinence :
 ### 5. Problème Multi-Mots (Lignes 660-683)
 
 #### Symptômes Observés
+
 - "LOYER" (mot unique) retourne "CB SPORT PISCINE PARIS" (non pertinent)
 - Les résultats ne correspondent pas aux mots-clés
 
 #### Cause Identifiée
+
 Même cause que le problème de pertinence :
+
 - La recherche vectorielle cherche la similarité sémantique globale
 - "LOYER" peut être interprété comme "location" et trouver des résultats liés aux locations
 - Les données de test ne contiennent pas assez de libellés pertinents
 
 #### Solution Implémentée
+
 ✅ **Correction appliquée** :
+
 - Ajout de vérification de pertinence dans `test_vector_search_multiworld.py`
 - Avertissements affichés quand la pertinence est faible
 - Explication que les résultats peuvent ne pas être pertinents
 
 #### Résultat
+
 - ⚠️ **Problème identifié** : Les tests signalent maintenant quand les résultats ne sont pas pertinents
 - 💡 **Explication fournie** : Messages clairs expliquant pourquoi les résultats peuvent ne pas être pertinents
 
@@ -199,6 +226,7 @@ Même cause que le problème de pertinence :
 **Problème** : Les données de test sont limitées (49 libellés) et ne couvrent pas tous les cas d'usage.
 
 **Solution** :
+
 - Générer plus de données de test avec des libellés pertinents pour chaque requête
 - Inclure des libellés comme :
   - "LOYER IMPAYE PARIS"
@@ -214,6 +242,7 @@ Même cause que le problème de pertinence :
 **Problème** : Les embeddings ByteT5-small sont génériques et ne sont pas optimisés pour le domaine bancaire.
 
 **Solution** :
+
 - Fine-tuner le modèle sur des données bancaires
 - Ou utiliser un modèle spécialisé pour le domaine bancaire
 - Ou améliorer la génération d'embeddings avec un préprocessing spécifique
@@ -223,6 +252,7 @@ Même cause que le problème de pertinence :
 **Problème** : La recherche ANN peut retourner des résultats non pertinents.
 
 **Solution** :
+
 - Combiner recherche vectorielle + full-text search (hybrid search)
 - Utiliser des seuils de similarité plus stricts
 - Filtrer les résultats par mots-clés après la recherche vectorielle
@@ -232,6 +262,7 @@ Même cause que le problème de pertinence :
 **Problème** : Les limitations ne sont pas clairement documentées.
 
 **Solution** :
+
 - Documenter que la recherche vectorielle est basée sur la similarité sémantique, pas la correspondance textuelle
 - Expliquer que les résultats peuvent ne pas être pertinents si les données sont limitées
 - Fournir des exemples de requêtes qui fonctionnent bien vs celles qui ne fonctionnent pas bien
@@ -241,15 +272,18 @@ Même cause que le problème de pertinence :
 ## ✅ Corrections Appliquées
 
 ### 1. Cohérence
+
 - ✅ Seed fixée pour rendre le modèle déterministe
 - ✅ Résultats cohérents entre itérations
 
 ### 2. Détection de Pertinence
+
 - ✅ Fonction `check_relevance()` créée
 - ✅ Vérification de pertinence dans tous les tests
 - ✅ Avertissements affichés quand la pertinence est faible
 
 ### 3. Messages d'Explication
+
 - ✅ Messages clairs expliquant pourquoi les résultats peuvent ne pas être pertinents
 - ✅ Suggestions pour améliorer les résultats
 
@@ -275,6 +309,7 @@ Les incohérences identifiées ont été **analysées et partiellement corrigée
 3. 💡 **Explications** : Messages clairs expliquant les limitations
 
 **Prochaines étapes recommandées** :
+
 1. Générer plus de données de test pertinentes
 2. Optimiser les embeddings pour le domaine bancaire
 3. Améliorer la recherche vectorielle avec hybrid search
@@ -283,4 +318,3 @@ Les incohérences identifiées ont été **analysées et partiellement corrigée
 
 **Date de génération** : 2025-11-30  
 **Version** : 1.0
-

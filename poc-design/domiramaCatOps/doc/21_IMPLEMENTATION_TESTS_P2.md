@@ -21,12 +21,14 @@
 **Script Python** : `examples/python/test_fenetre_glissante_complexe.py`
 
 **Fonctionnalités** :
+
 - ✅ Fenêtre glissante avec chevauchement
 - ✅ Fenêtre glissante sans chevauchement
 - ✅ Gestion des frontières (première/dernière fenêtre)
 - ✅ Agrégation multi-fenêtres
 
 **Tests inclus** :
+
 1. Fenêtre avec chevauchement (validation pas de doublons)
 2. Fenêtre sans chevauchement (validation complétude)
 3. Gestion frontières (première/dernière date)
@@ -40,12 +42,14 @@
 **Script Python** : `examples/python/test_scalabilite.py`
 
 **Fonctionnalités** :
+
 - ✅ Performance avec volumes croissants (10K, 100K, 1M, 10M)
 - ✅ Performance avec index multiples
 - ✅ Performance avec recherche hybride multi-modèles
 - ✅ Dégradation performance selon volume
 
 **Tests inclus** :
+
 1. Scalabilité volume (estimation pour volumes croissants)
 2. Scalabilité index (nombre d'index SAI, utilisation)
 3. Scalabilité modèles (nombre de colonnes vectorielles)
@@ -59,12 +63,14 @@
 **Script Python** : `examples/python/test_filtres_multiples.py`
 
 **Fonctionnalités** :
+
 - ✅ Vector + Full-Text + Filtres (date, montant, catégorie) simultanément
 - ✅ Optimisation requête (ordre des filtres)
 - ✅ Performance avec filtres multiples
 - ✅ Validation résultats (tous les filtres respectés)
 
 **Tests inclus** :
+
 1. Vector + Full-Text + Date + Montant + Catégorie
 2. Optimisation ordre filtres (filtres sélectifs d'abord)
 3. Performance avec filtres multiples (latence)
@@ -78,12 +84,14 @@
 **Script Python** : `examples/python/test_contraintes_metier.py`
 
 **Fonctionnalités** :
+
 - ✅ Validation règles métier (ex: cat_user ne peut pas être modifié si accepté)
 - ✅ Validation contraintes temporelles (ex: date_op <= date_valeur)
 - ✅ Validation contraintes logiques (ex: cat_auto doit exister dans regles_personnalisees)
 - ✅ Validation contraintes d'intégrité (pas de références orphelines)
 
 **Tests inclus** :
+
 1. Contrainte cat_user si accepté
 2. Contraintes temporelles (dates cohérentes)
 3. Contraintes logiques (cat_auto dans regles_personnalisees)
@@ -97,12 +105,14 @@
 **Script Python** : `examples/python/test_aggregations.py`
 
 **Fonctionnalités** :
+
 - ✅ Agrégations temporelles (COUNT, SUM, AVG par période)
 - ✅ Agrégations par catégorie (groupement)
 - ✅ Agrégations combinées (date + catégorie)
 - ✅ Performance agrégations
 
 **Tests inclus** :
+
 1. Agrégations temporelles (COUNT par jour, SUM, AVG)
 2. Agrégations par catégorie (COUNT, SUM, AVG par cat_auto)
 3. Agrégations combinées (date + catégorie)
@@ -224,6 +234,7 @@ python3 examples/python/test_aggregations.py
 **Tous les tests P2 sont implémentés et prêts à être exécutés.**
 
 **Prochaines étapes** :
+
 1. Exécuter les tests pour valider leur fonctionnement
 2. Analyser les résultats et générer les rapports
 3. Implémenter les tests P3 (Priorité Moyenne) si nécessaire
@@ -232,4 +243,3 @@ python3 examples/python/test_aggregations.py
 
 **Date de génération** : 2025-11-30  
 **Version** : 1.0
-

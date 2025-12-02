@@ -20,13 +20,15 @@
 
 **Statut** : ⚠️ **OBSOLÈTE** - Informations dépassées  
 **Date** : 2025-01-XX  
-**Raison** : 
+**Raison** :
+
 - Fait référence à "59 scripts à la racine"
 - **Réalité actuelle** : 61 scripts dans `scripts/`, 0 à la racine
 - Structure décrite ne correspond plus à la réalité après réorganisation
 - Les statistiques et chemins sont incorrects
 
-**Recommandation** : 
+**Recommandation** :
+
 - ⚠️ **Archiver** dans `archive/audits/`
 - ✅ **Créer un nouvel audit** si nécessaire avec les statistiques actuelles
 
@@ -37,6 +39,7 @@
 **Statut** : ⚠️ **PARTIELLEMENT OBSOLÈTE** - Structure décrite incorrecte  
 **Date** : 2025-01-XX  
 **Raison** :
+
 - Décrit une structure avec "scripts à la racine (10-41_*.sh)"
 - **Réalité actuelle** : Tous les scripts sont dans `scripts/`
 - Décrit "doc/ avec 00-43_*.md à la racine"
@@ -44,6 +47,7 @@
 - Les statistiques de structure sont incorrectes
 
 **Recommandation** :
+
 - ⚠️ **Mettre à jour** avec la nouvelle structure OU
 - ⚠️ **Archiver** et créer un nouvel audit complet
 
@@ -56,11 +60,13 @@
 **Statut** : ⚠️ **À VÉRIFIER** - Peuvent être obsolètes si les améliorations ont été appliquées  
 **Date** : 2025-11-25  
 **Raison** :
+
 - Ces fichiers datent d'avant la migration des scripts
 - Si les améliorations recommandées ont été appliquées, ces documents peuvent être historiques
 - `38_PLAN_AMELIORATION_SCRIPTS.md` est un plan, pas un audit final
 
 **Recommandation** :
+
 - ⚠️ **Vérifier** si les améliorations ont été appliquées
 - Si oui : **Archiver** comme documents historiques
 - Si non : **Conserver** comme référence pour les améliorations à faire
@@ -72,6 +78,7 @@
 ### 1. AUDIT_COMPLET_2025.md
 
 **Action** : Mettre à jour la section "Structure" pour refléter :
+
 - Scripts dans `scripts/` (61 scripts)
 - Documentation organisée en catégories (design/, guides/, etc.)
 - INDEX.md créé
@@ -92,12 +99,14 @@
 **Statut** : ✅ **À CONSERVER** - Analyses détaillées toujours valides
 
 Ces fichiers analysent des scripts spécifiques et leur contenu reste valide même si les scripts ont été déplacés vers `scripts/`. Les analyses portent sur :
+
 - La structure et le contenu des scripts
 - Les templates à utiliser
 - Les améliorations à apporter
 - Les comparaisons entre versions
 
 **Fichiers** :
+
 - `48_ANALYSE_SCRIPT_10_ET_TEMPLATE.md` à `91_ANALYSE_SCRIPT_30_ET_TEMPLATE.md`
 - `64_ANALYSE_COMPARATIVE_SCRIPT_17_VS_18.md`
 - `65_ENRICHISSEMENT_SCRIPT_18.md`
@@ -180,6 +189,7 @@ Ces fichiers analysent des scripts spécifiques et leur contenu reste valide mê
 ### Fichiers Restants
 
 **32 fichiers** conservés dans `doc/audits/` :
+
 - ✅ `AUDIT_MIGRATION_REORGANISATION_2025.md` (récent, actuel)
 - ✅ `39_STANDARDS_FICHIERS_CQL.md` (toujours valide)
 - ✅ Toutes les analyses de scripts individuels (48-91) - 30 fichiers
@@ -194,6 +204,7 @@ Ces fichiers analysent des scripts spécifiques et leur contenu reste valide mê
 **Fichiers à conserver** : **33-35 fichiers** (analyses détaillées toujours valides)
 
 **Recommandation principale** :
+
 - ✅ Archiver `AUDIT_SCRIPTS_SHELL_2025.md` (structure complètement incorrecte)
 - ⚠️ Mettre à jour ou archiver `AUDIT_COMPLET_2025.md` (structure incorrecte mais contenu partiellement valide)
 - ✅ Conserver toutes les analyses de scripts individuels (48-91) - contenu toujours valide
@@ -202,4 +213,3 @@ Ces fichiers analysent des scripts spécifiques et leur contenu reste valide mê
 
 **Date de création** : 2025-01-XX  
 **Version** : 1.0
-

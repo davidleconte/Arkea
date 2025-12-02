@@ -9,7 +9,7 @@
 #   complémentaires pour améliorer la pertinence des résultats :
 #   1. Full-Text Search (SAI) : Filtre initial pour la précision
 #   2. Vector Search (ByteT5) : Tri par similarité pour tolérer les typos
-#   
+#
 #   La recherche hybride offre une meilleure pertinence que chaque
 #   approche seule, en combinant précision et tolérance aux erreurs.
 #   Elle inclut un fallback automatique si Full-Text ne trouve rien.
@@ -110,4 +110,3 @@ python3 "$SCRIPT_DIR/examples/python/search/hybrid_search.py" 2>&1
 echo ""
 success "✅ Démonstration terminée !"
 info "📝 Script disponible: examples/python/search/hybrid_search.py"
-

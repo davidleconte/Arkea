@@ -7,7 +7,7 @@
 # OBJECTIF :
 #   Ce script exécute des tests de recherche full-text avancés en utilisant
 #   les index SAI avec différentes stratégies de recherche configurées.
-#   
+#
 #   Cette version didactique affiche :
 #   - Les types de recherches avancées expliqués en détail
 #   - Les cas d'usage pour chaque type de recherche
@@ -465,36 +465,36 @@ echo "[]" > "$TEMP_RESULTS"
 # Exécuter chaque test individuellement
 for i in $(seq 1 $TOTAL_TESTS); do
     TEST_DATA=$(echo "$TESTS_JSON" | python3 -c "import sys, json; data = json.load(sys.stdin); print(json.dumps(data[$((i-1))]))" 2>/dev/null)
-    
+
     if [ -z "$TEST_DATA" ]; then
         continue
     fi
-    
+
     # Extraire les informations du test
     TEST_NUM=$(echo "$TEST_DATA" | python3 -c "import sys, json; print(json.load(sys.stdin)['test_number'])" 2>/dev/null)
     TEST_TITLE=$(echo "$TEST_DATA" | python3 -c "import sys, json; print(json.load(sys.stdin)['title'])" 2>/dev/null)
     TEST_DESC=$(echo "$TEST_DATA" | python3 -c "import sys, json; print(json.load(sys.stdin)['description'])" 2>/dev/null)
     TEST_EXPECTED=$(echo "$TEST_DATA" | python3 -c "import sys, json; print(json.load(sys.stdin)['expected'])" 2>/dev/null)
     TEST_QUERY=$(echo "$TEST_DATA" | python3 -c "import sys, json; print(json.load(sys.stdin)['query'])" 2>/dev/null)
-    
+
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "  TEST $TEST_NUM/20 : $TEST_TITLE"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-    
+
     # Afficher la description
     if [ -n "$TEST_DESC" ] && [ "$TEST_DESC" != "" ]; then
         info "📋 Description : $TEST_DESC"
         echo ""
     fi
-    
+
     # Afficher le résultat attendu
     if [ -n "$TEST_EXPECTED" ] && [ "$TEST_EXPECTED" != "" ]; then
         expected "📋 Résultat attendu : $TEST_EXPECTED"
         echo ""
     fi
-    
+
     # Afficher la requête CQL
     info "📝 Requête CQL exécutée :"
     echo "   ┌─────────────────────────────────────────────────────────┐"
@@ -505,10 +505,10 @@ for i in $(seq 1 $TOTAL_TESTS); do
     done
     echo "   └─────────────────────────────────────────────────────────┘"
     echo ""
-    
+
     # Construire la requête complète avec USE
     FULL_QUERY="USE domirama2_poc; $TEST_QUERY;"
-    
+
     # Utiliser les chemins déjà configurés par setup_paths()
     # Si HCD_DIR n'est pas défini, utiliser la détection automatique
     if [ -z "${HCD_DIR:-}" ]; then
@@ -518,7 +518,7 @@ for i in $(seq 1 $TOTAL_TESTS); do
         HCD_DIR="${INSTALL_DIR}/binaire/hcd-1.2.3"
     fi
     CQLSH="${HCD_DIR}/bin/cqlsh"
-    
+
     # ============================================
     # FALL-BACK : Pour le test 4 (recherche partielle)
     # ============================================
@@ -527,7 +527,7 @@ for i in $(seq 1 $TOTAL_TESTS); do
     USE_FALLBACK=false
     FALLBACK_USED=false
     ORIGINAL_QUERY="$FULL_QUERY"
-    
+
     if [ "$TEST_NUM" -eq 4 ]; then
         # Détecter si la requête cherche sur libelle (recherche partielle)
         if echo "$TEST_QUERY" | grep -q "libelle :"; then
@@ -535,48 +535,48 @@ for i in $(seq 1 $TOTAL_TESTS); do
             info "🔄 Test 4 : Activation du fall-back libelle → libelle_tokens"
         fi
     fi
-    
+
     # Exécuter la requête principale et mesurer le temps
     START_TIME=$(date +%s.%N)
     QUERY_OUTPUT=$("$CQLSH" "$HCD_HOST" "$HCD_PORT" -e "$FULL_QUERY" 2>&1)
     EXIT_CODE=$?
     END_TIME=$(date +%s.%N)
     QUERY_TIME=$(echo "$END_TIME - $START_TIME" | bc)
-    
+
     # Filtrer les warnings
     QUERY_RESULTS=$(echo "$QUERY_OUTPUT" | grep -vE "^Warnings|^$")
-    
+
     # Compter les résultats (lignes avec des données, pas les en-têtes)
     RESULT_COUNT=$(echo "$QUERY_RESULTS" | grep -E "^[[:space:]]*[0-9]" | wc -l | tr -d " ")
-    
+
     # ============================================
     # FALL-BACK : Si aucun résultat et fall-back activé
     # ============================================
     if [ "$USE_FALLBACK" = true ] && [ "$RESULT_COUNT" -eq 0 ] && [ "$EXIT_CODE" -eq 0 ]; then
         info "⚠️  Aucun résultat sur libelle, tentative fall-back sur libelle_tokens (CONTAINS)..."
-        
+
         # Extraire le terme de recherche de la requête libelle : 'terme'
         SEARCH_TERM=$(echo "$TEST_QUERY" | grep -o "libelle : '[^']*'" | sed "s/libelle : '\([^']*\)'/\1/")
-        
+
         # Construire la requête fall-back avec libelle_tokens CONTAINS
         # Remplacer la clause libelle : par libelle_tokens CONTAINS
         FALLBACK_QUERY=$(echo "$TEST_QUERY" | sed "s/AND libelle : '[^']*'/AND libelle_tokens CONTAINS '$SEARCH_TERM'/")
         FALLBACK_QUERY_FULL="USE domirama2_poc; $FALLBACK_QUERY;"
-        
+
         # Exécuter la requête de fall-back
         START_TIME_FALLBACK=$(date +%s.%N)
         FALLBACK_OUTPUT=$("$CQLSH" "$HCD_HOST" "$HCD_PORT" -e "$FALLBACK_QUERY_FULL" 2>&1)
         FALLBACK_EXIT_CODE=$?
         END_TIME_FALLBACK=$(date +%s.%N)
         FALLBACK_TIME=$(echo "$END_TIME_FALLBACK - $START_TIME_FALLBACK" | bc)
-        
+
         # Extraire les résultats du fall-back
         FALLBACK_RESULTS=$(echo "$FALLBACK_OUTPUT" | grep -vE "^Warnings|^$")
         FALLBACK_COUNT=$(echo "$FALLBACK_RESULTS" | grep -E "^[[:space:]]*[0-9]" | wc -l | tr -d " ")
-        
+
         # Toujours marquer que le fall-back a été tenté (pour documentation)
         FALLBACK_ATTEMPTED=true
-        
+
         if [ "$FALLBACK_COUNT" -gt 0 ]; then
             FALLBACK_USED=true
             QUERY_RESULTS="$FALLBACK_RESULTS"
@@ -585,7 +585,7 @@ for i in $(seq 1 $TOTAL_TESTS); do
             QUERY_OUTPUT="$FALLBACK_OUTPUT"
             EXIT_CODE=$FALLBACK_EXIT_CODE
             FULL_QUERY="$FALLBACK_QUERY_FULL"  # Mettre à jour pour le rapport
-            
+
             success "✅ Fall-back réussi : $FALLBACK_COUNT résultat(s) trouvé(s) sur libelle_tokens"
             info "   Requête fall-back : $FALLBACK_QUERY"
         else
@@ -599,7 +599,7 @@ for i in $(seq 1 $TOTAL_TESTS); do
             QUERY_RESULTS="$FALLBACK_RESULTS"
         fi
     fi
-    
+
     # Afficher les résultats
     if [ $EXIT_CODE -eq 0 ]; then
         result "📊 Résultats obtenus ($RESULT_COUNT ligne(s)) en ${QUERY_TIME}s :"
@@ -613,7 +613,7 @@ for i in $(seq 1 $TOTAL_TESTS); do
             echo "   │ ... ($((RESULT_COUNT - 10)) ligne(s) supplémentaire(s))"
         fi
         echo "   └─────────────────────────────────────────────────────────┘"
-        
+
         if [ "$RESULT_COUNT" -gt 0 ]; then
             success "✅ Test $TEST_NUM réussi : $RESULT_COUNT résultat(s) trouvé(s)"
         else
@@ -623,7 +623,7 @@ for i in $(seq 1 $TOTAL_TESTS); do
         error "❌ Test $TEST_NUM : Erreur lors de l'exécution"
         echo "$QUERY_OUTPUT" | head -5
     fi
-    
+
     # Sauvegarder les résultats pour le rapport
     # Utiliser des fichiers temporaires pour éviter les problèmes d'échappement
     TEMP_TEST_DATA=$(mktemp)
@@ -635,7 +635,7 @@ for i in $(seq 1 $TOTAL_TESTS); do
     echo "$QUERY_OUTPUT" | head -30 > "$TEMP_QUERY_OUTPUT"
     echo "$ORIGINAL_QUERY" > "$TEMP_ORIGINAL_QUERY"
     echo "$FULL_QUERY" > "$TEMP_FINAL_QUERY"
-    
+
     python3 << PYSAVEEOF
 import sys
 import json
@@ -698,9 +698,9 @@ results.append(test_data)
 with open(results_file, 'w', encoding='utf-8') as f:
     json.dump(results, f, indent=2, ensure_ascii=False)
 PYSAVEEOF
-    
+
     rm -f "$TEMP_TEST_DATA" "$TEMP_QUERY_OUTPUT" "$TEMP_ORIGINAL_QUERY" "$TEMP_FINAL_QUERY"
-    
+
     echo ""
 done
 
@@ -873,24 +873,24 @@ for test in test_results:
     result_count = test.get('result_count', 0)
     success = test.get('success', False)
     query_output = test.get('query_output', '')
-    
+
     print(f"\n### TEST {test_num} : {title}\n")
-    
+
     if description:
         print(f"**Description** : {description}\n")
-    
+
     if expected:
         print(f"**Résultat attendu** : {expected}\n")
-    
+
     print(f"**Temps d'exécution** : {query_time:.3f}s\n")
     status_text = '✅ Succès' if success else '⚠️  Aucun résultat'
     print(f"**Statut** : {status_text}\n")
-    
+
     # Afficher les informations du fall-back si tenté (test 4)
     # Pour le test 4, toujours afficher la stratégie de fall-back
     fallback_used = test.get('fallback_used', False)
     original_query = test.get('original_query', '')
-    
+
     if test_num == 4 and original_query:
         print("**Stratégie de recherche :** Fall-back libelle → libelle_tokens\n")
         print("**Requête initiale (libelle) :**\n")
@@ -917,7 +917,7 @@ for test in test_results:
             print("**Résultat fall-back** : Résultats trouvés ✅ (vraie recherche partielle via collection)\n")
         else:
             print("**Résultat fall-back** : Aucun résultat (libelle_tokens non rempli pour ces données)\n")
-        
+
         # Afficher les résultats obtenus après le fall-back
         print(f"**Résultats obtenus** : {result_count} ligne(s)\n")
         if query_output and result_count > 0:
@@ -940,7 +940,7 @@ for test in test_results:
             print("```\n")
         elif result_count == 0:
             print("**Aperçu des résultats après fall-back** : Aucun résultat trouvé\n")
-    
+
     # Analyser la cause si échec
     if not success:
         cause = ""
@@ -969,21 +969,21 @@ for test in test_results:
                 cause = "**Cause** : Données manquantes. Aucun libellé contenant ces termes techniques n'existait dans la table. **Solution** : Données ajoutées via `scripts/add_missing_test_data.cql`. Relancer le test."
             else:
                 cause = "**Cause** : À analyser (données manquantes ou limitation SAI)."
-        
+
         if cause:
             print(f"{cause}\n")
-    
+
     # Afficher la requête (sauf si déjà affichée avec fall-back)
     if not (test_num == 4 and original_query):
         print("**Requête CQL exécutée :**\n")
         print("```cql")
         print(query)
         print("```\n")
-    
+
     # Ne pas afficher les résultats ici si c'est le test 4 avec fall-back (déjà affiché)
     if not (test_num == 4 and original_query):
         print(f"**Résultats obtenus** : {result_count} ligne(s)\n")
-        
+
         if query_output and result_count > 0:
             print("**Aperçu des résultats :**\n")
             print("```")
@@ -999,7 +999,7 @@ for test in test_results:
             print("```\n")
         elif result_count == 0:
             print("**Aperçu des résultats** : Aucun résultat trouvé\n")
-    
+
     print("---")
 PYSCRIPTEOF
 
@@ -1031,7 +1031,7 @@ for test in test_results:
     query_time = test.get('query_time', 0)
     success = test.get('success', False)
     status = '✅' if success else '⚠️'
-    
+
     print(f"| {test_num} | {title} | {result_count} | {query_time:.3f}s | {status} |")
 PYEOF
 
@@ -1094,20 +1094,20 @@ Ces tests échouaient car les libellés correspondants n'existaient pas dans la 
 
 Les tests Full-Text Search avancés ont été exécutés avec succès :
 
-✅ **$TOTAL_TESTS tests de recherche avancés** exécutés  
-✅ **$SUCCESS_COUNT tests réussis**  
-✅ **$TOTAL_RESULTS résultats obtenus** au total  
-✅ **Types de recherches validés** : stemming, exact, phrase, partielle  
-✅ **Recherches multi-termes validées**  
+✅ **$TOTAL_TESTS tests de recherche avancés** exécutés
+✅ **$SUCCESS_COUNT tests réussis**
+✅ **$TOTAL_RESULTS résultats obtenus** au total
+✅ **Types de recherches validés** : stemming, exact, phrase, partielle
+✅ **Recherches multi-termes validées**
 ✅ **Recherches combinées validées** : full-text + filtres
 
 ### Points Clés Démontrés
 
-✅ **Recherche avec stemming** : Pluriel/singulier  
-✅ **Recherche exacte** : Noms propres, codes  
-✅ **Recherche de phrase** : Phrases complètes  
-✅ **Recherche partielle** : N-Gram, typos  
-✅ **Recherche avec stop words** : Français avancé  
+✅ **Recherche avec stemming** : Pluriel/singulier
+✅ **Recherche exacte** : Noms propres, codes
+✅ **Recherche de phrase** : Phrases complètes
+✅ **Recherche partielle** : N-Gram, typos
+✅ **Recherche avec stop words** : Français avancé
 ✅ **Recherches combinées** : Full-text + filtres
 
 ---
@@ -1119,4 +1119,3 @@ rm -f "$TEMP_RESULTS"
 
 success "✅ Rapport généré : $REPORT_FILE"
 echo ""
-

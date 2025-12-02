@@ -11,15 +11,18 @@
 ### Script Shell : `18_test_hybrid_search.sh`
 
 **Changements** :
+
 1. ✅ Documentation mise à jour pour mentionner les 3 modèles disponibles
 2. ✅ Référence au nouveau script Python `hybrid_search_v2.py`
 3. ✅ Exemples de requêtes CQL mis à jour avec `libelle_embedding_invoice`
 
 **Avant** :
+
 - Mention uniquement de ByteT5
 - Script Python : `hybrid_search.py`
 
 **Après** :
+
 - Mention des 3 modèles : ByteT5, e5-large, Modèle Facturation
 - Script Python : `hybrid_search_v2.py` (avec sélection intelligente)
 
@@ -28,6 +31,7 @@
 ### Script Python : `hybrid_search_v2.py` (NOUVEAU)
 
 **Fonctionnalités** :
+
 1. ✅ **Sélection intelligente du modèle** :
    - ByteT5 pour "PAIEMENT CARTE" / "CB" (100% pertinence)
    - Modèle Facturation pour le reste (80% pertinence, 4x plus rapide)
@@ -43,6 +47,7 @@
    - Filtrage côté client pour améliorer la pertinence
 
 **Fonctions principales** :
+
 - `select_best_model(query_text)` : Sélectionne automatiquement le meilleur modèle
 - `hybrid_search(...)` : Recherche hybride avec choix du modèle
 - `smart_hybrid_search(...)` : Recherche hybride intelligente avec fallback
@@ -78,6 +83,7 @@ select_best_model("TAXE FONCIERE")    # -> "invoice"
 ```
 
 **Résultat** :
+
 - Exécute `hybrid_search_v2.py`
 - Génère rapport dans `doc/demonstrations/18_HYBRID_SEARCH_DEMONSTRATION.md`
 
@@ -91,10 +97,10 @@ cluster, session = connect_to_hcd()
 
 # Recherche (sélection automatique du modèle)
 results, model_used = smart_hybrid_search(
-    session, 
-    "LOYER IMPAYE", 
-    code_si="6", 
-    contrat="600000041", 
+    session,
+    "LOYER IMPAYE",
+    code_si="6",
+    contrat="600000041",
     limit=5
 )
 
@@ -113,6 +119,7 @@ for result in results:
 **Après** : Sélectionne automatiquement le meilleur modèle selon la requête
 
 **Bénéfices** :
+
 - ✅ Meilleure pertinence (80% vs 20% pour ByteT5 sur la plupart des requêtes)
 - ✅ Performance optimale (modèle facturation 4x plus rapide que e5-large)
 - ✅ Spécialisation (ByteT5 pour "CB", Facturation pour le reste)
@@ -123,6 +130,7 @@ for result in results:
 **Après** : 3 modèles (ByteT5, e5-large, Facturation)
 
 **Bénéfices** :
+
 - ✅ Flexibilité maximale
 - ✅ Choix optimal selon le cas d'usage
 - ✅ Possibilité de forcer un modèle spécifique
@@ -133,6 +141,7 @@ for result in results:
 **Après** : Full-Text + Modèle optimal (ByteT5/Facturation/e5-large)
 
 **Bénéfices** :
+
 - ✅ Meilleure pertinence grâce au modèle optimal
 - ✅ Performance améliorée (modèle facturation plus rapide)
 - ✅ Tolérance aux typos maintenue
@@ -164,10 +173,11 @@ for result in results:
 ### Requêtes CQL Générées
 
 **Exemple avec modèle facturation** :
+
 ```cql
 SELECT libelle, montant, cat_auto, cat_user, cat_confidence
 FROM domiramacatops_poc.operations_by_account
-WHERE code_si = '6' 
+WHERE code_si = '6'
   AND contrat = '600000041'
   AND libelle : 'loyer'
 ORDER BY libelle_embedding_invoice ANN OF [...]
@@ -175,10 +185,11 @@ LIMIT 5
 ```
 
 **Exemple avec ByteT5** :
+
 ```cql
 SELECT libelle, montant, cat_auto, cat_user, cat_confidence
 FROM domiramacatops_poc.operations_by_account
-WHERE code_si = '6' 
+WHERE code_si = '6'
   AND contrat = '600000041'
   AND libelle : 'carte'
 ORDER BY libelle_embedding ANN OF [...]
@@ -204,6 +215,7 @@ LIMIT 5
 ✅ **Recherche hybride V2 implémentée avec succès**
 
 **Améliorations** :
+
 - ✅ Sélection intelligente du modèle (ByteT5 pour CB, Facturation pour le reste)
 - ✅ Support des 3 modèles (ByteT5, e5-large, Facturation)
 - ✅ Meilleure pertinence (80% vs 20%)
@@ -215,4 +227,3 @@ LIMIT 5
 
 **Date de génération** : 2025-11-30  
 **Version** : 2.0
-

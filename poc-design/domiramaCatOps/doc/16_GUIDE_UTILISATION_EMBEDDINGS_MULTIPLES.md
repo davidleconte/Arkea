@@ -50,6 +50,7 @@ pip install sentence-transformers
 ```
 
 **Résultat attendu** :
+
 - ✅ Colonne `libelle_embedding_e5` créée
 - ✅ Index `idx_libelle_embedding_e5_vector` créé
 - ✅ Index `idx_meta_device` supprimé (slot libéré)
@@ -62,6 +63,7 @@ pip install sentence-transformers
 ```
 
 **Résultat attendu** :
+
 - ✅ 80 opérations avec libellés pertinents
 - ✅ Couverture de toutes les requêtes de test
 
@@ -73,6 +75,7 @@ pip install sentence-transformers
 ```
 
 **Résultat attendu** :
+
 - ✅ Embeddings e5-large générés pour toutes les opérations
 - ✅ Colonne `libelle_embedding_e5` remplie
 
@@ -84,6 +87,7 @@ pip install sentence-transformers
 ```
 
 **Résultat attendu** :
+
 - ✅ Comparaison des performances
 - ✅ Comparaison de la pertinence
 - ✅ Recommandation du meilleur modèle
@@ -162,33 +166,36 @@ DESCRIBE TABLE domiramacatops_poc.operations_by_account;
 ```
 
 **Vérifier** :
+
 - ✅ `libelle_embedding vector<float, 1472>` (ByteT5)
 - ✅ `libelle_embedding_e5 vector<float, 1024>` (e5-large)
 
 ### Vérifier les Index
 
 ```cql
-SELECT index_name FROM system_schema.indexes 
-WHERE keyspace_name = 'domiramacatops_poc' 
+SELECT index_name FROM system_schema.indexes
+WHERE keyspace_name = 'domiramacatops_poc'
   AND table_name = 'operations_by_account'
   AND kind = 'CUSTOM'
 ALLOW FILTERING;
 ```
 
 **Vérifier** :
+
 - ✅ `idx_libelle_embedding_vector` (ByteT5)
 - ✅ `idx_libelle_embedding_e5_vector` (e5-large)
 
 ### Vérifier les Données
 
 ```cql
-SELECT code_si, contrat, libelle, 
+SELECT code_si, contrat, libelle,
        libelle_embedding, libelle_embedding_e5
 FROM domiramacatops_poc.operations_by_account
 LIMIT 5;
 ```
 
 **Vérifier** :
+
 - ✅ `libelle_embedding` non NULL (ByteT5)
 - ✅ `libelle_embedding_e5` non NULL (e5-large)
 
@@ -199,11 +206,13 @@ LIMIT 5;
 ### Stratégie 1 : e5-large Seul (RECOMMANDÉ après validation)
 
 **Quand utiliser** :
+
 - Après validation que e5-large est plus pertinent
 - Pour simplifier le code
 - Pour économiser le stockage (1024 vs 1472 dimensions)
 
 **Code** :
+
 ```python
 # Utiliser uniquement e5-large
 from test_vector_search_base_e5 import load_model_e5, encode_text_e5, vector_search_e5
@@ -216,11 +225,13 @@ results = vector_search_e5(session, embedding, code_si, contrat, limit=5)
 ### Stratégie 2 : Hybrid (Les Deux)
 
 **Quand utiliser** :
+
 - Pendant la phase de transition
 - Pour comparaison continue
 - Pour fallback si un modèle échoue
 
 **Code** :
+
 ```python
 # Essayer e5-large d'abord
 try:
@@ -233,11 +244,13 @@ except:
 ### Stratégie 3 : Sélection Dynamique
 
 **Quand utiliser** :
+
 - Pour optimiser selon le type de requête
 - Pour A/B testing
 - Pour optimisation continue
 
 **Code** :
+
 ```python
 # Sélectionner le modèle selon la requête
 if is_french_query(query):
@@ -274,6 +287,7 @@ else:
 ### Problème : sentence-transformers non installé
 
 **Solution** :
+
 ```bash
 pip install sentence-transformers
 ```
@@ -281,6 +295,7 @@ pip install sentence-transformers
 ### Problème : Limite SAI atteinte
 
 **Solution** :
+
 - Vérifier les index existants
 - Supprimer un index non critique si nécessaire
 - Voir `doc/16_SOLUTION_LIMITE_SAI.md`
@@ -288,6 +303,7 @@ pip install sentence-transformers
 ### Problème : Embeddings e5 non générés
 
 **Solution** :
+
 ```bash
 # Régénérer les embeddings
 ./scripts/18_generate_embeddings_e5_auto.sh
@@ -296,6 +312,7 @@ pip install sentence-transformers
 ### Problème : Résultats non pertinents
 
 **Solution** :
+
 1. Vérifier que les données de test pertinentes sont générées
 2. Vérifier que les embeddings sont générés
 3. Comparer les deux modèles pour choisir le meilleur
@@ -367,4 +384,3 @@ print("e5-large:", [r.libelle for r in results_e5])
 
 **Date de génération** : 2025-11-30  
 **Version** : 1.0
-

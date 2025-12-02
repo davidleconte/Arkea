@@ -23,6 +23,7 @@
 **Cause** : Le champ `date_op` peut être soit un `datetime` soit un `timestamp` (int), et le code tentait de diviser un `datetime` par 1000.
 
 **Correction** : Ajout d'une vérification de type avant conversion
+
 ```python
 if isinstance(first_row.date_op, datetime):
     first_date = first_row.date_op
@@ -41,6 +42,7 @@ else:
 **Cause** : La clause `LIKE` n'est pas supportée pour filtrer les types de colonnes dans `system_schema.columns`.
 
 **Correction** : Filtrage côté client après récupération de toutes les colonnes
+
 ```python
 query_columns = f"""
 SELECT column_name, type
@@ -65,6 +67,7 @@ vector_columns = [col for col in all_columns if col.type and 'vector' in str(col
 **Cause** : HCD ne permet pas d'utiliser `ORDER BY ANN OF` avec des filtres sur des colonnes non-indexées (comme `date_op` avec une plage).
 
 **Correction** : Suppression du filtre date de la requête CQL et filtrage côté client
+
 ```python
 # Requête vectorielle de base (sans filtre date pour éviter l'erreur ORDER BY)
 base_filters = [f"code_si = '{code_si}'", f"contrat = '{contrat}'"]
@@ -94,6 +97,7 @@ if date_start and date_end:
 **Cause** : Même problème que P2-01, `date_op` peut être un `datetime` ou un `timestamp`.
 
 **Correction** : Vérification de type avant conversion
+
 ```python
 if isinstance(row.date_op, datetime):
     date_op = row.date_op
@@ -106,6 +110,7 @@ else:
 **Cause** : Le champ `montant` est de type `Decimal` dans HCD, et ne peut pas être additionné directement à un `float`.
 
 **Correction** : Conversion explicite en `float` avant agrégation
+
 ```python
 if row.montant:
     montant_val = float(row.montant)
@@ -134,6 +139,7 @@ if row.montant:
 **Toutes les corrections ont été appliquées et sont prêtes pour réexécution.**
 
 **Prochaines étapes** :
+
 1. Réexécuter les tests P2 pour valider les corrections
 2. Analyser les résultats et générer les rapports finaux
 3. Documenter les résultats dans les rapports de démonstration
@@ -142,4 +148,3 @@ if row.montant:
 
 **Date de génération** : 2025-11-30  
 **Version** : 1.0
-

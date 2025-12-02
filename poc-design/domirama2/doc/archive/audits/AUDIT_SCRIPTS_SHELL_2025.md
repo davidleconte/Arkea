@@ -59,11 +59,13 @@
 | Scripts avec `set -o pipefail` | 0 | ⚠️ Manquant |
 
 **Recommandation** :
+
 - ✅ Maintenir `set -e` (déjà bien fait)
 - ⚠️ Ajouter `set -u` pour détecter les variables non définies
 - ⚠️ Ajouter `set -o pipefail` pour les pipes
 
 **Exemple recommandé** :
+
 ```bash
 set -euo pipefail  # Meilleure pratique
 ```
@@ -75,6 +77,7 @@ set -euo pipefail  # Meilleure pratique
 **✅ Excellent** : Documentation inline très complète
 
 **Éléments présents** :
+
 - ✅ En-tête avec OBJECTIF, PRÉREQUIS, UTILISATION, EXEMPLE
 - ✅ Commentaires explicatifs dans le code
 - ✅ Messages informatifs avec couleurs
@@ -102,7 +105,7 @@ set -euo pipefail  # Meilleure pratique
 
 **⚠️ Problème Majeur** : Chemins hardcodés dans de nombreux scripts
 
-#### Problème identifié :
+#### Problème identifié
 
 ```bash
 INSTALL_DIR="/Users/david.leconte/Documents/Arkea"
@@ -111,24 +114,28 @@ INSTALL_DIR="/Users/david.leconte/Documents/Arkea"
 **Scripts affectés** : ~40 scripts
 
 **Exemples** :
+
 - `10_setup_domirama2_poc.sh` : ligne 55
 - `11_load_domirama2_data_parquet.sh` : ligne 62
 - Tous les scripts `_v2_didactique.sh`
 
-#### Solutions Recommandées :
+#### Solutions Recommandées
 
 **Option 1 : Variable d'environnement** (Recommandé)
+
 ```bash
 INSTALL_DIR="${ARKEA_HOME:-$(cd "$(dirname "$0")/../.." && pwd)}"
 ```
 
 **Option 2 : Détection automatique**
+
 ```bash
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 INSTALL_DIR="$( cd "$SCRIPT_DIR/../.." && pwd )"
 ```
 
 **Option 3 : Fichier de configuration**
+
 ```bash
 # Charger depuis .poc-profile si disponible
 if [ -f "${SCRIPT_DIR}/../.poc-profile" ]; then
@@ -145,7 +152,7 @@ INSTALL_DIR="${INSTALL_DIR:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 
 **⚠️ Problème** : localhost et port hardcodés
 
-#### Problème identifié :
+#### Problème identifié
 
 ```bash
 localhost 9042
@@ -154,11 +161,12 @@ localhost 9042
 **Scripts affectés** : ~15 scripts
 
 **Exemples** :
+
 - `30_demo_requetes_startrow_stoprow_v2_didactique.sh`
 - `29_demo_requetes_fenetre_glissante_v2_didactique.sh`
 - `28_demo_fenetre_glissante_v2_didactique.sh`
 
-#### Solution Recommandée :
+#### Solution Recommandée
 
 ```bash
 HCD_HOST="${HCD_HOST:-localhost}"
@@ -174,19 +182,20 @@ CQLSH="$CQLSH_BIN $HCD_HOST $HCD_PORT"
 
 **⚠️ Problème** : `set -e` seul n'est pas suffisant
 
-#### Problèmes identifiés :
+#### Problèmes identifiés
 
 1. **Variables non définies** : Pas de `set -u`
 2. **Pipes** : Pas de `set -o pipefail`
 3. **Gestion d'erreurs conditionnelle** : Certains scripts désactivent `set -e` temporairement
 
-#### Solution Recommandée :
+#### Solution Recommandée
 
 ```bash
 set -euo pipefail  # Meilleure pratique complète
 ```
 
 **Exceptions possibles** :
+
 ```bash
 set +e  # Désactiver temporairement si nécessaire
 # ... commande qui peut échouer ...
@@ -201,7 +210,7 @@ set -e  # Réactiver
 
 **⚠️ À Clarifier** : Plusieurs variantes de scripts
 
-#### Variantes identifiées :
+#### Variantes identifiées
 
 1. **Versions didactiques vs standard** :
    - `10_setup_domirama2_poc.sh` vs `10_setup_domirama2_poc_v2_didactique.sh`
@@ -216,6 +225,7 @@ set -e  # Réactiver
    - ⚠️ À documenter : Différence entre les versions
 
 **Recommandation** :
+
 - ✅ Conserver les variantes si elles ont un but différent
 - ⚠️ Documenter les différences dans les en-têtes
 - ⚠️ Créer un README expliquant les variantes
@@ -226,18 +236,19 @@ set -e  # Réactiver
 
 **⚠️ À Vérifier** : Scripts potentiellement obsolètes
 
-#### Scripts dans archive/ :
+#### Scripts dans archive/
 
 - ✅ Bien organisés dans `archive/`
 - ✅ Ne posent pas de problème
 
-#### Scripts à la racine potentiellement obsolètes :
+#### Scripts à la racine potentiellement obsolètes
 
 - `11_load_domirama2_data_fixed.sh` : Version CSV (Parquet recommandé)
 - `demo_data_api_http.sh` : À vérifier si toujours utilisé
 - `demo_multi_version_complete_v2.sh` : À vérifier si remplacé par script 26
 
 **Recommandation** :
+
 - ⚠️ Vérifier l'utilisation de ces scripts
 - ⚠️ Archiver ou supprimer s'ils sont obsolètes
 - ⚠️ Documenter les scripts recommandés dans README
@@ -248,14 +259,16 @@ set -e  # Réactiver
 
 **⚠️ Incohérence** : Deux méthodes de détection de chemins
 
-#### Méthode 1 (Majoritaire) :
+#### Méthode 1 (Majoritaire)
+
 ```bash
 INSTALL_DIR="/Users/david.leconte/Documents/Arkea"  # Hardcodé
 HCD_DIR="${INSTALL_DIR}/binaire/hcd-1.2.3"
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 ```
 
-#### Méthode 2 (Quelques scripts) :
+#### Méthode 2 (Quelques scripts)
+
 ```bash
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 INSTALL_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -263,6 +276,7 @@ HCD_DIR="${INSTALL_DIR}/binaire/hcd-1.2.3"
 ```
 
 **Scripts utilisant la méthode 2** :
+
 - `28_demo_fenetre_glissante.sh`
 - `33_demo_colonnes_dynamiques_v2.sh`
 - `31_demo_bloomfilter_equivalent_v2.sh`
@@ -276,6 +290,7 @@ HCD_DIR="${INSTALL_DIR}/binaire/hcd-1.2.3"
 - `41_demo_complete_podman.sh`
 
 **Recommandation** :
+
 - ⚠️ Standardiser sur la méthode 2 (détection automatique)
 - ⚠️ Créer une fonction commune dans `utils/didactique_functions.sh`
 
@@ -286,12 +301,14 @@ HCD_DIR="${INSTALL_DIR}/binaire/hcd-1.2.3"
 **✅ Bon** : La plupart des scripts vérifient les prérequis
 
 **Vérifications communes** :
+
 - ✅ HCD démarré (`pgrep -f "cassandra"`)
 - ✅ Keyspace existe (`DESCRIBE KEYSPACE`)
 - ✅ Fichiers présents (`[ -f "$FILE" ]`)
 - ✅ Java configuré (`jenv local 11`)
 
 **Recommandation** :
+
 - ✅ Maintenir ces vérifications
 - ⚠️ Standardiser les messages d'erreur
 - ⚠️ Créer des fonctions réutilisables pour les vérifications communes
@@ -303,10 +320,12 @@ HCD_DIR="${INSTALL_DIR}/binaire/hcd-1.2.3"
 **⚠️ À Nettoyer** : Code de debug présent dans certains scripts
 
 **Exemples trouvés** :
+
 - `30_demo_requetes_startrow_stoprow_v2_didactique.sh` : `print(f"DEBUG: ...")`
 - `28_demo_fenetre_glissante_v2_didactique.sh` : Commentaires `# Debug`
 
 **Recommandation** :
+
 - ⚠️ Retirer ou conditionner le code de debug
 - ⚠️ Utiliser un système de logging avec niveaux
 - ⚠️ Ou utiliser des flags : `if [ "${DEBUG:-}" = "1" ]; then ... fi`
@@ -327,11 +346,13 @@ HCD_DIR="${INSTALL_DIR}/binaire/hcd-1.2.3"
 | `13_test_domirama2_api_client.sh` | ✅ | Chemin hardcodé | 8/10 |
 
 **Points forts** :
+
 - ✅ Documentation complète
 - ✅ Gestion d'erreurs avec `set -e`
 - ✅ Vérifications préalables
 
 **Points à améliorer** :
+
 - ⚠️ Chemins hardcodés
 - ⚠️ Ajouter `set -u` et `set -o pipefail`
 
@@ -350,10 +371,12 @@ HCD_DIR="${INSTALL_DIR}/binaire/hcd-1.2.3"
 | `20_test_typo_tolerance.sh` | ✅ | Chemin hardcodé | 8/10 |
 
 **Points forts** :
+
 - ✅ Documentation complète
 - ✅ Gestion d'erreurs
 
 **Points à améliorer** :
+
 - ⚠️ Chemins hardcodés
 - ⚠️ Standardiser la gestion d'erreurs
 
@@ -370,10 +393,12 @@ HCD_DIR="${INSTALL_DIR}/binaire/hcd-1.2.3"
 | `25_test_hybrid_search.sh` | ✅ | Chemin hardcodé | 8/10 |
 
 **Points forts** :
+
 - ✅ Documentation complète
 - ✅ Gestion d'erreurs
 
 **Points à améliorer** :
+
 - ⚠️ Chemins hardcodés
 
 ---
@@ -388,10 +413,12 @@ HCD_DIR="${INSTALL_DIR}/binaire/hcd-1.2.3"
 | `30_demo_requetes_startrow_stoprow.sh` | ✅ | Chemin hardcodé | 8/10 |
 
 **Points forts** :
+
 - ✅ Scripts 27-28 utilisent la détection automatique (exemple à suivre)
 - ✅ Documentation complète
 
 **Points à améliorer** :
+
 - ⚠️ Scripts 29-30 : Standardiser sur détection automatique
 
 ---
@@ -407,10 +434,12 @@ HCD_DIR="${INSTALL_DIR}/binaire/hcd-1.2.3"
 | `35_demo_dsbulk_v2.sh` | ✅ | Détection auto (bon) | 9/10 |
 
 **Points forts** :
+
 - ✅ Scripts 31, 33-35 utilisent la détection automatique
 - ✅ Documentation complète
 
 **Points à améliorer** :
+
 - ⚠️ Script 32 : Standardiser sur détection automatique
 
 ---
@@ -427,6 +456,7 @@ HCD_DIR="${INSTALL_DIR}/binaire/hcd-1.2.3"
 | `41_demo_complete_podman.sh` | ✅ | Détection auto (bon) | 9/10 |
 
 **Points forts** :
+
 - ✅ Tous utilisent la détection automatique (exemple à suivre)
 - ✅ Documentation complète
 
@@ -443,6 +473,7 @@ HCD_DIR="${INSTALL_DIR}/binaire/hcd-1.2.3"
 **Scripts à modifier** : ~40 scripts
 
 **Méthode recommandée** :
+
 ```bash
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 INSTALL_DIR="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
@@ -451,6 +482,7 @@ SPARK_HOME="${SPARK_HOME:-${INSTALL_DIR}/binaire/spark-3.5.1}"
 ```
 
 **Ou créer une fonction commune** :
+
 ```bash
 # Dans utils/didactique_functions.sh
 setup_paths() {
@@ -468,6 +500,7 @@ setup_paths() {
 **Action** : Utiliser des variables d'environnement pour HCD_HOST et HCD_PORT
 
 **Méthode recommandée** :
+
 ```bash
 HCD_HOST="${HCD_HOST:-localhost}"
 HCD_PORT="${HCD_PORT:-9042}"
@@ -481,6 +514,7 @@ CQLSH="$CQLSH_BIN $HCD_HOST $HCD_PORT"
 **Action** : Ajouter `set -u` et `set -o pipefail`
 
 **Méthode recommandée** :
+
 ```bash
 set -euo pipefail  # Au début de chaque script
 ```
@@ -496,6 +530,7 @@ set -euo pipefail  # Au début de chaque script
 **Fichier proposé** : `.poc-config.sh` ou `.poc-profile`
 
 **Contenu** :
+
 ```bash
 # Configuration POC Domirama2
 export ARKEA_HOME="${ARKEA_HOME:-/Users/david.leconte/Documents/Arkea}"
@@ -506,6 +541,7 @@ export HCD_PORT="${HCD_PORT:-9042}"
 ```
 
 **Utilisation** :
+
 ```bash
 # Charger la configuration
 if [ -f "${SCRIPT_DIR}/../.poc-config.sh" ]; then
@@ -520,6 +556,7 @@ fi
 **Action** : Retirer ou conditionner le code de debug
 
 **Méthode recommandée** :
+
 ```bash
 # Au début du script
 DEBUG="${DEBUG:-0}"
@@ -580,6 +617,7 @@ fi
 ### Score Global : **8.4/10** ✅
 
 **Détail** :
+
 - Organisation : 10/10 ✅
 - Documentation : 9.7/10 ✅
 - Code Quality : 7.25/10 ⚠️
@@ -608,6 +646,7 @@ fi
 **✅ Les scripts shell sont globalement excellents avec quelques améliorations importantes à apporter.**
 
 **Priorités** :
+
 1. Standardiser les chemins (détection automatique)
 2. Améliorer la gestion d'erreurs (`set -euo pipefail`)
 3. Standardiser localhost/port (variables d'environnement)
@@ -619,7 +658,7 @@ fi
 **✅ Audit Terminé : Scripts shell prêts pour amélioration avec standardisation des chemins !**
 
 **Mise à jour** : 2025-01-XX
+
 - ✅ **59 scripts analysés**
 - ✅ **Problèmes identifiés et priorisés**
 - ✅ **Recommandations détaillées fournies**
-

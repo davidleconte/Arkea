@@ -20,11 +20,13 @@ en utilisant les index SAI pour des performances optimales.
 **Description** : Filtrer les interactions par type (consultation, conseil, transaction, reclamation).
 
 **Exigences** :
+
 - Utilisation des index SAI sur colonne `type_interaction`
 - Performance optimale
 - Support de tous les types identifiés
 
 **Types Supportés** :
+
 - `consultation` - Consultation (30% des interactions)
 - `conseil` - Conseil (25% des interactions)
 - `transaction` - Transaction (20% des interactions)
@@ -37,13 +39,13 @@ en utilisant les index SAI pour des performances optimales.
 
 ## 📝 Requêtes CQL
 
-
 ### TEST 1 : Filtrage par Type (Consultation)
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
-WHERE code_efs = 'EFS001' 
+SELECT * FROM bic_poc.interactions_by_client
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND type_interaction = 'consultation'
 LIMIT 50;
@@ -67,11 +69,13 @@ LIMIT 50;
 | EFS001 | CLIENT123 | 2025-06-28 18:53:37.000000+0000 | SMS | consultation | INT-2024-000041 |
 
 **Explication** :
+
 - Filtrage par type 'consultation' utilisant l'index SAI
 - Performance optimale grâce à l'index SAI
 - Conforme au use case BIC-05 (Filtrage par type)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-05
 - ✅ Intégrité : 18 interactions de type 'consultation' récupérées
 - ✅ Performance : .932126000s (max: 0.1s)
@@ -83,9 +87,10 @@ LIMIT 50;
 ### TEST 2 : Filtrage par Type (Conseil)
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
-WHERE code_efs = 'EFS001' 
+SELECT * FROM bic_poc.interactions_by_client
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND type_interaction = 'conseil'
 LIMIT 50;
@@ -107,11 +112,13 @@ LIMIT 50;
 | EFS001 | CLIENT123 | 2025-02-22 18:53:31.000000+0000 | SMS | conseil | INT-2024-000032 |
 
 **Explication** :
+
 - Filtrage par type 'conseil' utilisant l'index SAI
 - Performance optimale grâce à l'index SAI
 - Conforme au use case BIC-05 (Filtrage par type)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-05
 - ✅ Intégrité : 11 interactions de type 'conseil' récupérées
 - ✅ Performance : .792654000s (max: 0.1s)
@@ -123,9 +130,10 @@ LIMIT 50;
 ### TEST 3 : Filtrage par Type (Transaction)
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
-WHERE code_efs = 'EFS001' 
+SELECT * FROM bic_poc.interactions_by_client
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND type_interaction = 'transaction'
 LIMIT 50;
@@ -147,11 +155,13 @@ LIMIT 50;
 | EFS001 | CLIENT123 | 2024-05-18 18:53:16.000000+0000 | SMS | transaction | INT-2024-000012 |
 
 **Explication** :
+
 - Filtrage par type 'transaction' utilisant l'index SAI
 - Performance optimale grâce à l'index SAI
 - Conforme au use case BIC-05 (Filtrage par type)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-05
 - ✅ Intégrité : 7 interactions de type 'transaction' récupérées
 - ✅ Performance : .824353000s (max: 0.1s)
@@ -163,9 +173,10 @@ LIMIT 50;
 ### TEST 4 : Filtrage par Type (Réclamation)
 
 **Requête** :
+
 ```cql
-SELECT * FROM bic_poc.interactions_by_client 
-WHERE code_efs = 'EFS001' 
+SELECT * FROM bic_poc.interactions_by_client
+WHERE code_efs = 'EFS001'
   AND numero_client = 'CLIENT123'
   AND type_interaction = 'reclamation'
 LIMIT 50;
@@ -187,11 +198,13 @@ LIMIT 50;
 | EFS001 | CLIENT123 | 2025-04-05 18:53:33.000000+0000 | email | reclamation | INT-2024-000035 |
 
 **Explication** :
+
 - Filtrage par type 'reclamation' utilisant l'index SAI
 - Performance optimale grâce à l'index SAI
 - Conforme au use case BIC-05 (Filtrage par type)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-05
 - ✅ Intégrité : 14 interactions de type 'reclamation' récupérées
 - ✅ Performance : .799527000s (max: 0.1s)
@@ -205,6 +218,7 @@ LIMIT 50;
 **Objectif** : Tester le filtrage pour tous les types d'interaction supportés.
 
 **Types Testés** :
+
 - consultation : 18 interaction(s)
 - conseil : 11 interaction(s)
 - transaction : 7 interaction(s)
@@ -220,12 +234,14 @@ LIMIT 50;
 ### TEST 6 : Test de Performance avec Statistiques
 
 **Statistiques** (temps total incluant overheads cqlsh) :
+
 - Temps moyen : .8141s
 - Temps minimum : .773334000s
 - Temps maximum : .909005000s
 - Écart-type : .0424s
 
 **Note importante** :
+
 - ⚠️ Le temps mesuré inclut les overheads de cqlsh (connexion, parsing, formatage)
 - ✅ Le temps réel d'exécution de la requête avec index SAI est < 0.01s (vérifié avec TRACING ON)
 - ✅ L'index SAI idx_interactions_type est correctement utilisé (vérifié avec TRACING ON)
@@ -236,6 +252,7 @@ LIMIT 50;
 **Stabilité** : Écart-type .0424s (plus faible = plus stable)
 
 **Explication** :
+
 - Test complexe : 10 exécutions pour statistiques fiables
 - Performance mesurée : .8141s (inclut overheads cqlsh)
 - Performance réelle : < 0.01s (vérifié avec TRACING ON)
@@ -244,6 +261,7 @@ LIMIT 50;
 - Index SAI : Correctement utilisé (vérifié avec TRACING ON)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-05 (performance)
 - ✅ Intégrité : Statistiques complètes (min/max/moyenne/écart-type)
 - ✅ Consistance : Performance stable si écart-type faible
@@ -259,12 +277,14 @@ LIMIT 50;
 **Cohérence** : ⚠️ 49 doublon(s) détecté(s)
 
 **Explication** :
+
 - Test complexe : Vérification de l'absence de doublons entre types
 - Analyse de tous les IDs collectés sur tous les types
 - Validation de l'intégrité (une interaction = un seul type)
 - Conforme au use case BIC-05 (cohérence multi-types)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-05 (cohérence)
 - ✅ Intégrité : 50 IDs collectés, 1 uniques
 - ✅ Cohérence : 49 doublon(s) détecté(s)
@@ -282,12 +302,14 @@ LIMIT 50;
 **Conformité** : Performance sous charge acceptable ✅
 
 **Explication** :
+
 - Test très complexe : Simulation avec plusieurs types simultanément
 - Validation de la performance sous charge
 - Mesure du temps moyen par requête sous charge
 - Conforme au use case BIC-05 (charge multi-types)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond au use case BIC-05 (charge)
 - ✅ Intégrité : 5 requêtes réussies sur 5 types
 - ✅ Performance : .7871s (acceptable sous charge)
@@ -303,6 +325,7 @@ LIMIT 50;
 **Performance moyenne** : .7936s
 
 **Statistiques** :
+
 - Temps minimum : .763206000s
 - Temps maximum : .815362000s
 - Écart-type : .0141s
@@ -312,12 +335,14 @@ LIMIT 50;
 **Index SAI utilisés** : idx_interactions_type, idx_interactions_resultat (2 index simultanés)
 
 **Explication** :
+
 - Test très complexe : Combinaison de 2 index SAI avec performance statistique
 - Utilisation simultanée de 2 index SAI (type + résultat)
 - Performance moyenne : .7936s avec statistiques (10 exécutions)
 - Conforme aux use cases BIC-05 et BIC-11 (combinaison de filtres)
 
 **Validations** :
+
 - ✅ Pertinence : Test répond aux use cases BIC-05 et BIC-11 (combinaison)
 - ✅ Intégrité : 14 interactions trouvées avec 2 filtres combinés
 - ✅ Cohérence : Combinaison (14) <= Type seul (14) et Résultat seul
@@ -330,6 +355,7 @@ LIMIT 50;
 ### TEST 10 : Distribution des Types
 
 **Distribution** :
+
 - consultation : 18 interaction(s) (36.00%)
 - conseil : 11 interaction(s) (22.00%)
 - transaction : 7 interaction(s) (14.00%)
@@ -345,6 +371,7 @@ LIMIT 50;
 0%)
 
 **Statistiques** :
+
 - Type le plus fréquent : 18 interaction(s)
 - Type le moins fréquent : 7 interaction(s)
 - Écart : 11 interaction(s)
@@ -397,9 +424,11 @@ LIMIT 50;
 ## ✅ Conclusion
 
 **Use Cases Validés** :
+
 - ✅ BIC-05 : Filtrage par type d'interaction (tous les 7 types testés exhaustivement)
 
 **Validations** :
+
 - ✅ 5 dimensions validées pour chaque test
 - ✅ Comparaisons attendus vs obtenus effectuées
 - ✅ Justesse des résultats validée

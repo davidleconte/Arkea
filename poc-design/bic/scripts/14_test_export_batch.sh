@@ -85,8 +85,8 @@ success "HCD est démarré"
 cat > "$REPORT_FILE" << EOF
 # 🧪 Démonstration : Export Batch ORC avec Équivalences HBase
 
-**Date** : 2025-12-01  
-**Script** : \`14_test_export_batch.sh\`  
+**Date** : 2025-12-01
+**Script** : \`14_test_export_batch.sh\`
 **Use Cases** : BIC-03 (Export batch ORC), BIC-10 (Équivalences HBase STARTROW/STOPROW/TIMERANGE)
 
 ---
@@ -164,7 +164,7 @@ demo "Objectif : Exporter les interactions d'une période (équivalent TIMERANGE
 CODE_EFS_EXPORT="EFS001"
 NUMERO_CLIENT_EXPORT="CLIENT123"
 
-QUERY1="SELECT * FROM $KEYSPACE.$TABLE 
+QUERY1="SELECT * FROM $KEYSPACE.$TABLE
 WHERE code_efs = '$CODE_EFS_EXPORT'
   AND numero_client = '$NUMERO_CLIENT_EXPORT'
   AND date_interaction >= '$START_DATE 00:00:00+0000'
@@ -258,7 +258,7 @@ CODE_EFS="EFS001"
 CLIENT_START="CLIENT001"
 CLIENT_END="CLIENT100"
 
-QUERY3="SELECT * FROM $KEYSPACE.$TABLE 
+QUERY3="SELECT * FROM $KEYSPACE.$TABLE
 WHERE code_efs = '$CODE_EFS'
   AND numero_client >= '$CLIENT_START'
   AND numero_client < '$CLIENT_END'
@@ -298,7 +298,7 @@ demo "Objectif : Export incrémental (seulement les nouvelles interactions)"
 LAST_EXPORT_DATE="2024-11-30 23:59:59+0000"
 
 # Pour export incrémental, on utilise Spark qui filtre après lecture
-QUERY4="SELECT * FROM $KEYSPACE.$TABLE 
+QUERY4="SELECT * FROM $KEYSPACE.$TABLE
 WHERE code_efs = '$CODE_EFS_EXPORT'
   AND numero_client = '$NUMERO_CLIENT_EXPORT'
   AND date_interaction > '$LAST_EXPORT_DATE';"
@@ -536,7 +536,7 @@ $SPARK_CODE_INCREMENTAL
 
 ---
 
-**Date** : 2025-12-01  
+**Date** : 2025-12-01
 **Script** : \`14_test_export_batch.sh\`
 EOF
 
@@ -647,16 +647,16 @@ for i in {1..10}; do
     START_TIME_PERF=$(date +%s.%N)
     $CQLSH -e "$QUERY_PERF" > /dev/null 2>&1
     END_TIME_PERF=$(date +%s.%N)
-    
+
     if command -v bc &> /dev/null; then
         DURATION_PERF=$(echo "$END_TIME_PERF - $START_TIME_PERF" | bc)
     else
         DURATION_PERF=$(python3 -c "print($END_TIME_PERF - $START_TIME_PERF)")
     fi
-    
+
     TIMES_PERF+=("$DURATION_PERF")
     TOTAL_TIME_PERF=$(echo "$TOTAL_TIME_PERF + $DURATION_PERF" | bc 2>/dev/null || python3 -c "print($TOTAL_TIME_PERF + $DURATION_PERF)")
-    
+
     # Min/Max
     if (( $(echo "$DURATION_PERF < $MIN_TIME_PERF" | bc -l 2>/dev/null || echo "0") )); then
         MIN_TIME_PERF=$DURATION_PERF
@@ -760,7 +760,7 @@ if [ $EXIT_CODE_HV -eq 0 ]; then
         "$EXEC_TIME_HV" \
         "$COUNT_HV" \
         "$EXPECTED_MAX_TIME_HV"
-    
+
     # EXPLICATIONS
     echo ""
     info "📚 Explications détaillées :"
@@ -845,20 +845,20 @@ SUCCESSFUL_QUERIES_EXPORT=0
 for PERIOD_LOAD in "${PERIODS_LOAD[@]}"; do
     PERIOD_START_LOAD=$(echo "$PERIOD_LOAD" | cut -d'|' -f1)
     PERIOD_END_LOAD=$(echo "$PERIOD_LOAD" | cut -d'|' -f2)
-    
+
     QUERY_LOAD_EXPORT="SELECT COUNT(*) FROM $KEYSPACE.$TABLE WHERE code_efs = '$CODE_EFS_EXPORT' AND numero_client = '$NUMERO_CLIENT_EXPORT' AND date_interaction >= '$PERIOD_START_LOAD 00:00:00+0000' AND date_interaction < '$PERIOD_END_LOAD 23:59:59+0000';"
-    
+
     START_TIME_LOAD_EXPORT=$(date +%s.%N)
     RESULT_LOAD_EXPORT=$($CQLSH -e "$QUERY_LOAD_EXPORT" 2>&1)
     EXIT_CODE_LOAD_EXPORT=$?
     END_TIME_LOAD_EXPORT=$(date +%s.%N)
-    
+
     if command -v bc &> /dev/null; then
         DURATION_LOAD_EXPORT=$(echo "$END_TIME_LOAD_EXPORT - $START_TIME_LOAD_EXPORT" | bc)
     else
         DURATION_LOAD_EXPORT=$(python3 -c "print($END_TIME_LOAD_EXPORT - $START_TIME_LOAD_EXPORT)")
     fi
-    
+
     if [ $EXIT_CODE_LOAD_EXPORT -eq 0 ]; then
         SUCCESSFUL_QUERIES_EXPORT=$((SUCCESSFUL_QUERIES_EXPORT + 1))
         LOAD_TIMES_EXPORT+=("$DURATION_LOAD_EXPORT")
@@ -868,19 +868,19 @@ done
 
 if [ "$SUCCESSFUL_QUERIES_EXPORT" -gt 0 ]; then
     AVG_LOAD_TIME_EXPORT=$(echo "scale=4; $TOTAL_LOAD_TIME_EXPORT / $SUCCESSFUL_QUERIES_EXPORT" | bc 2>/dev/null || python3 -c "print($TOTAL_LOAD_TIME_EXPORT / $SUCCESSFUL_QUERIES_EXPORT)")
-    
+
     result "📊 Résultats test de charge multi-exports :"
     echo "   - Requêtes réussies : $SUCCESSFUL_QUERIES_EXPORT / ${#PERIODS_LOAD[@]}"
     echo "   - Temps moyen par requête : ${AVG_LOAD_TIME_EXPORT}s"
     echo "   - Temps total : ${TOTAL_LOAD_TIME_EXPORT}s"
-    
+
     # VALIDATION : Performance sous charge
     if (( $(echo "$AVG_LOAD_TIME_EXPORT < 1.0" | bc -l 2>/dev/null || echo "0") )); then
         success "✅ Performance sous charge validée : Temps moyen acceptable (< 1.0s)"
     else
         warn "⚠️  Performance sous charge : Temps moyen ${AVG_LOAD_TIME_EXPORT}s (peut être améliorée)"
     fi
-    
+
     # VALIDATION COMPLÈTE
     validate_complete \
         "TEST 8 : Test de Charge Multi-Exports" \
@@ -967,4 +967,3 @@ success "✅ Tests terminés avec succès"
 echo ""
 result "📄 Rapport généré : $REPORT_FILE"
 echo ""
-

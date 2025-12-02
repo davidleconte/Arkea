@@ -25,10 +25,12 @@ tests/
 **Objectif** : Tester des fonctions individuelles en isolation
 
 **Tests disponibles** :
+
 - `test_portability.sh` : Tests de portabilité cross-platform
 - `test_consistency.sh` : Tests de cohérence du projet
 
 **Exemple** :
+
 ```bash
 # tests/unit/test_setup_paths.sh
 #!/bin/bash
@@ -41,9 +43,11 @@ source ../../utils/didactique_functions.sh
 **Objectif** : Tester l'interaction entre composants
 
 **Tests disponibles** :
+
 - `test_poc_structure.sh` : Tests de structure des POCs
 
 **Exemple** :
+
 ```bash
 # tests/integration/test_hcd_spark.sh
 #!/bin/bash
@@ -55,6 +59,7 @@ source ../../utils/didactique_functions.sh
 **Objectif** : Tester des scénarios complets
 
 **Exemple** :
+
 ```bash
 # tests/e2e/test_kafka_hcd_pipeline.sh
 #!/bin/bash
@@ -122,7 +127,7 @@ test_function() {
     local test_name="$1"
     local expected="$2"
     local actual="$3"
-    
+
     if [ "$expected" = "$actual" ]; then
         echo "✅ $test_name"
         PASSED=$((PASSED + 1))
@@ -151,6 +156,7 @@ exit $FAILED
 **Objectif** : 80%+ de couverture de code
 
 **Mesure** :
+
 - Tests unitaires : Fonctions individuelles
 - Tests d'intégration : Interactions entre composants
 - Tests E2E : Scénarios complets
@@ -177,6 +183,6 @@ Les fixtures sont dans `tests/fixtures/` :
 ---
 
 **Pour plus d'informations, voir** :
+
 - `CONTRIBUTING.md` - Guide de contribution
 - `docs/TROUBLESHOOTING.md` - Guide de dépannage
-

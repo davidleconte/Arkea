@@ -8,11 +8,13 @@
 ## 📁 Structure des Catégories
 
 ### 🎨 Design et Architecture
+
 Documents de design, analyse, architecture et data model.
 
 **Répertoire** : [`design/`](design/)
 
 **Fichiers prévus** :
+
 - `01_DATA_MODEL.md` - Modèle de données BIC
 - `02_ARCHITECTURE.md` - Architecture du POC
 - `03_MIGRATION_STRATEGY.md` - Stratégie de migration HBase → HCD
@@ -23,11 +25,13 @@ Documents de design, analyse, architecture et data model.
 ---
 
 ### 📖 Guides et Références
+
 Guides d'utilisation, index et références.
 
 **Répertoire** : [`guides/`](guides/)
 
 **Fichiers prévus** :
+
 - `01_README.md` - Vue d'ensemble du POC BIC
 - `02_GUIDE_SETUP.md` - Guide de configuration
 - `03_GUIDE_INGESTION.md` - Guide d'ingestion
@@ -39,11 +43,13 @@ Guides d'utilisation, index et références.
 ---
 
 ### 🔧 Implémentations
+
 Documents d'implémentation et de développement.
 
 **Répertoire** : [`implementation/`](implementation/)
 
 **Fichiers prévus** :
+
 - `01_IMPLEMENTATION_SETUP.md` - Implémentation du setup
 - `02_IMPLEMENTATION_INGESTION.md` - Implémentation de l'ingestion
 - `03_IMPLEMENTATION_EXPORT.md` - Implémentation de l'export
@@ -54,11 +60,13 @@ Documents d'implémentation et de développement.
 ---
 
 ### 📊 Résultats
+
 Résultats de tests et exécutions.
 
 **Répertoire** : [`results/`](results/)
 
 **Fichiers prévus** :
+
 - `01_RESULTS_SETUP.md` - Résultats du setup
 - `02_RESULTS_INGESTION.md` - Résultats de l'ingestion
 - `03_RESULTS_PERFORMANCE.md` - Résultats de performance
@@ -69,6 +77,7 @@ Résultats de tests et exécutions.
 ---
 
 ### 🔧 Corrections
+
 Corrections appliquées.
 
 **Répertoire** : [`corrections/`](corrections/)
@@ -80,11 +89,13 @@ Corrections appliquées.
 ---
 
 ### 🔍 Audits
+
 Audits et analyses complètes.
 
 **Répertoire** : [`audits/`](audits/)
 
 **Fichiers prévus** :
+
 - `01_AUDIT_STRUCTURE.md` - Audit de la structure
 - `02_AUDIT_SCRIPTS.md` - Audit des scripts
 - `03_AUDIT_COUVERTURE.md` - Audit de couverture des use cases
@@ -94,6 +105,7 @@ Audits et analyses complètes.
 ---
 
 ### 🎬 Démonstrations
+
 Rapports auto-générés des démonstrations.
 
 **Répertoire** : [`demonstrations/`](demonstrations/)
@@ -105,11 +117,13 @@ Rapports auto-générés des démonstrations.
 ---
 
 ### 📝 Templates
+
 Templates réutilisables pour scripts didactiques.
 
 **Répertoire** : [`templates/`](templates/)
 
 **Fichiers prévus** :
+
 - `TEMPLATE_SCRIPT_SETUP.md` - Template pour scripts de setup
 - `TEMPLATE_SCRIPT_INGESTION.md` - Template pour scripts d'ingestion
 - `TEMPLATE_SCRIPT_TEST.md` - Template pour scripts de test
@@ -134,4 +148,3 @@ Les fichiers sont numérotés dans chaque catégorie pour préserver l'ordre log
 
 **Date de création** : 2025-12-01  
 **Version** : 1.0
-

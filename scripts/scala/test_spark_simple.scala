@@ -41,18 +41,18 @@ println("\n🔗 Test 4: Test de connexion à HCD")
 try {
   spark.conf.set("spark.cassandra.connection.host", "localhost")
   spark.conf.set("spark.cassandra.connection.port", "9042")
-  
+
   println("Tentative de connexion à HCD...")
-  
+
   // Utiliser l'API RDD du connector
   import com.datastax.spark.connector._
   val rdd = sc.cassandraTable("system", "local")
   println(s"✅ Connexion réussie ! Nombre de partitions: ${rdd.getNumPartitions}")
   println("Première ligne:")
   rdd.take(1).foreach(row => println(s"  $row"))
-  
+
 } catch {
-  case e: Exception => 
+  case e: Exception =>
     println(s"⚠️  Erreur de connexion: ${e.getMessage}")
     println("   Vérifiez que HCD est démarré sur localhost:9042")
 }

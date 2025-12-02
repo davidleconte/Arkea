@@ -7,7 +7,7 @@
 #   Ce script documente l'équivalent REPLICATION_SCOPE HBase avec les consistency
 #   levels HCD, permettant de contrôler la réplication et la cohérence des données
 #   dans un environnement multi-cluster ou multi-datacenter.
-#   
+#
 #   Fonctionnalités :
 #   - Consistency levels (QUORUM, LOCAL_QUORUM, ONE, ALL, EACH_QUORUM)
 #   - Load balancing policies (DatacenterAwareRoundRobinPolicy)
@@ -569,4 +569,3 @@ code "  ✅ Retry Policy : DefaultRetryPolicy"
 code "  ✅ Exemple Java complet : Code fonctionnel"
 code "  ✅ Comparaison avec HBase : Avantages consistance"
 echo ""
-

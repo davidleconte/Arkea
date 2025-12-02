@@ -73,11 +73,13 @@ Arkea/
 **Problème** : Aucun fichier de licence présent
 
 **Impact** :
+
 - ❌ Incertitude sur les droits d'utilisation
 - ❌ Non-conformité aux standards open-source
 - ❌ Risque juridique pour réutilisation
 
 **Recommandation** :
+
 ```bash
 # Créer LICENSE (Apache 2.0 recommandé pour projets d'entreprise)
 touch LICENSE
@@ -93,11 +95,13 @@ touch LICENSE
 **Problème** : Pas de guide pour les contributeurs
 
 **Impact** :
+
 - ❌ Pas de standards de contribution
 - ❌ Pas de processus de review
 - ❌ Pas de guidelines de code
 
 **Recommandation** :
+
 ```markdown
 # CONTRIBUTING.md
 - Standards de code
@@ -115,11 +119,13 @@ touch LICENSE
 **Problème** : Pas de suivi des versions et changements
 
 **Impact** :
+
 - ❌ Difficile de suivre l'évolution
 - ❌ Pas de release notes
 - ❌ Pas de versioning clair
 
 **Recommandation** :
+
 ```markdown
 # CHANGELOG.md
 ## [Unreleased]
@@ -140,11 +146,13 @@ touch LICENSE
 **Problème** : Pas de configuration d'éditeur standardisée
 
 **Impact** :
+
 - ❌ Inconsistance des indentations (tabs vs spaces)
 - ❌ Inconsistance des fins de ligne (LF vs CRLF)
 - ❌ Inconsistance des encodages
 
 **Recommandation** :
+
 ```ini
 # .editorconfig
 root = true
@@ -178,11 +186,13 @@ trim_trailing_whitespace = false
 **Problème** : Pas de hooks de pré-commit
 
 **Impact** :
+
 - ❌ Pas de validation automatique
 - ❌ Risque de commits avec erreurs
 - ❌ Pas de formatage automatique
 
 **Recommandation** :
+
 ```yaml
 # .pre-commit-config.yaml
 repos:
@@ -205,11 +215,13 @@ repos:
 **Problème** : Pas de CI/CD
 
 **Impact** :
+
 - ❌ Pas de tests automatiques
 - ❌ Pas de validation de code
 - ❌ Pas de déploiement automatique
 
 **Recommandation** :
+
 ```yaml
 # .github/workflows/test.yml
 name: Tests
@@ -234,11 +246,13 @@ jobs:
 **Problème** : Pas de répertoire dédié aux tests
 
 **Impact** :
+
 - ❌ Tests dispersés
 - ❌ Pas de structure claire pour tests
 - ❌ Difficile d'exécuter tous les tests
 
 **Recommandation** :
+
 ```
 tests/
 ├── unit/              # Tests unitaires
@@ -256,11 +270,13 @@ tests/
 **Problème** : Pas de scripts de test standardisés
 
 **Impact** :
+
 - ❌ Tests manuels uniquement
 - ❌ Pas d'automatisation
 - ❌ Difficile de valider avant commit
 
 **Recommandation** :
+
 ```bash
 # tests/run_all_tests.sh
 #!/bin/bash
@@ -279,11 +295,13 @@ set -euo pipefail
 **Problème** : Pas de document d'architecture détaillé
 
 **Impact** :
+
 - ❌ Architecture dispersée dans plusieurs docs
 - ❌ Pas de vue d'ensemble claire
 - ❌ Difficile pour nouveaux contributeurs
 
 **Recommandation** : Créer `docs/ARCHITECTURE.md` avec :
+
 - Diagrammes d'architecture
 - Flux de données
 - Composants principaux
@@ -298,11 +316,13 @@ set -euo pipefail
 **Problème** : Pas de guide de déploiement
 
 **Impact** :
+
 - ❌ Pas de procédure standardisée
 - ❌ Risque d'erreurs de déploiement
 - ❌ Difficile de reproduire l'environnement
 
 **Recommandation** : Créer `docs/DEPLOYMENT.md` avec :
+
 - Prérequis
 - Étapes de déploiement
 - Configuration requise
@@ -317,11 +337,13 @@ set -euo pipefail
 **Problème** : Pas de guide de dépannage
 
 **Impact** :
+
 - ❌ Pas de solutions aux problèmes courants
 - ❌ Perte de temps sur erreurs connues
 - ❌ Pas de FAQ
 
 **Recommandation** : Créer `docs/TROUBLESHOOTING.md` avec :
+
 - Problèmes courants et solutions
 - Logs à vérifier
 - Commandes de diagnostic
@@ -346,11 +368,13 @@ set -euo pipefail
 **Problème** : Pas de template de variables d'environnement
 
 **Impact** :
+
 - ❌ Difficile de configurer l'environnement
 - ❌ Pas d'exemple de configuration
 - ❌ Risque d'oublier des variables
 
 **Recommandation** :
+
 ```bash
 # .env.example
 ARKEA_HOME=/path/to/Arkea
@@ -369,35 +393,37 @@ KAFKA_BOOTSTRAP_SERVERS=localhost:9092
 **Problème** : Pas de commandes standardisées
 
 **Impact** :
+
 - ❌ Pas de raccourcis pour tâches communes
 - ❌ Commandes dispersées
 - ❌ Difficile de découvrir les commandes disponibles
 
 **Recommandation** :
+
 ```makefile
 # Makefile
 .PHONY: help install test clean verify
 
 help:
-	@echo "Available targets:"
-	@echo "  make install    - Install dependencies"
-	@echo "  make test       - Run tests"
-	@echo "  make verify     - Verify all components"
-	@echo "  make clean      - Clean temporary files"
+ @echo "Available targets:"
+ @echo "  make install    - Install dependencies"
+ @echo "  make test       - Run tests"
+ @echo "  make verify     - Verify all components"
+ @echo "  make clean      - Clean temporary files"
 
 install:
-	./scripts/setup/01_install_hcd.sh
-	./scripts/setup/02_install_spark_kafka.sh
+ ./scripts/setup/01_install_hcd.sh
+ ./scripts/setup/02_install_spark_kafka.sh
 
 test:
-	./scripts/utils/80_verify_all.sh
+ ./scripts/utils/80_verify_all.sh
 
 verify:
-	./scripts/utils/80_verify_all.sh
+ ./scripts/utils/80_verify_all.sh
 
 clean:
-	find . -type f -name "*.bak" -delete
-	find . -type d -name "__pycache__" -exec rm -rf {} +
+ find . -type f -name "*.bak" -delete
+ find . -type d -name "__pycache__" -exec rm -rf {} +
 ```
 
 **Action** : Créer `Makefile` avec commandes principales
@@ -495,6 +521,7 @@ clean:
 **Atteindre 90%+ de conformité aux bonnes pratiques** en implémentant les priorités 1 et 2.
 
 **Bénéfices attendus** :
+
 - ✅ Professionnalisme accru
 - ✅ Facilité d'onboarding
 - ✅ Maintenabilité améliorée
@@ -506,4 +533,3 @@ clean:
 **Date** : 2025-12-01  
 **Version** : 1.0  
 **Statut** : ✅ **Audit complet - Prêt pour implémentation**
-

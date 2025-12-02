@@ -8,7 +8,7 @@
 # OBJECTIF :
 #   Ce script charge les données d'opérations depuis un fichier Parquet
 #   dans la table HCD 'operations_by_account' via Spark.
-#   
+#
 #   IMPORTANT - Stratégie Multi-Version (conforme IBM) :
 #   - Le batch écrit UNIQUEMENT cat_auto et cat_confidence
 #   - Le batch NE TOUCHE JAMAIS cat_user, cat_date_user, cat_validee
@@ -611,8 +611,8 @@ info "📝 Génération du rapport de démonstration..."
 cat > "$REPORT_FILE" << EOF
 # 📥 Démonstration : Chargement des Données Domirama2 (Parquet)
 
-**Date** : $(date +"%Y-%m-%d %H:%M:%S")  
-**Script** : $(basename "$0")  
+**Date** : $(date +"%Y-%m-%d %H:%M:%S")
+**Script** : $(basename "$0")
 **Objectif** : Démontrer le chargement de données Parquet dans HCD via Spark
 
 ---
@@ -852,18 +852,18 @@ spark.stop()
 
 Le chargement des données Parquet a été effectué avec succès :
 
-✅ **Fichier source** : $PARQUET_FILE  
-✅ **Format** : Parquet (columnar binaire)  
-✅ **Opérations chargées** : $COUNT  
-✅ **Stratégie batch validée** : cat_user est null  
+✅ **Fichier source** : $PARQUET_FILE
+✅ **Format** : Parquet (columnar binaire)
+✅ **Opérations chargées** : $COUNT
+✅ **Stratégie batch validée** : cat_user est null
 ✅ **Stratégie multi-version** : Conforme IBM
 
 ### Avantages Parquet Validés
 
-✅ **Performance** : Lecture 3-10x plus rapide que CSV  
-✅ **Schéma typé** : Types préservés, pas de parsing  
-✅ **Compression** : Jusqu'à 10x plus petit  
-✅ **Optimisations** : Projection pushdown, predicate pushdown  
+✅ **Performance** : Lecture 3-10x plus rapide que CSV
+✅ **Schéma typé** : Types préservés, pas de parsing
+✅ **Compression** : Jusqu'à 10x plus petit
+✅ **Optimisations** : Projection pushdown, predicate pushdown
 ✅ **Production** : Format standard pour l'analytique
 
 ### Prochaines Étapes
@@ -878,8 +878,3 @@ EOF
 
 success "✅ Rapport généré : $REPORT_FILE"
 echo ""
-
-
-
-
-

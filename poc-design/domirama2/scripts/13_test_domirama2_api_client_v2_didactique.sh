@@ -8,7 +8,7 @@
 # OBJECTIF :
 #   Ce script démontre de manière très didactique la stratégie multi-version
 #   pour la gestion des catégories d'opérations, en simulant des corrections client.
-#   
+#
 #   Cette version didactique affiche :
 #   - La stratégie multi-version détaillée (batch vs client)
 #   - Les équivalences HBase → HCD (temporalité → colonnes séparées)
@@ -433,8 +433,8 @@ info "📝 Génération du rapport de démonstration..."
 cat > "$REPORT_FILE" << EOF
 # 🔧 Démonstration : Tests API Correction Client Domirama2
 
-**Date** : $(date +"%Y-%m-%d %H:%M:%S")  
-**Script** : $(basename "$0")  
+**Date** : $(date +"%Y-%m-%d %H:%M:%S")
+**Script** : $(basename "$0")
 **Objectif** : Démontrer la stratégie multi-version pour les corrections client
 
 ---
@@ -534,9 +534,9 @@ WHERE code_si = '01' AND contrat = '1234567890'
 
 ### Avantages HCD
 
-✅ **Séparation explicite** : Colonnes dédiées pour batch et client  
-✅ **Traçabilité complète** : \`cat_date_user\` pour chaque correction  
-✅ **Garantie de non-perte** : Batch et client n'écrasent jamais leurs colonnes  
+✅ **Séparation explicite** : Colonnes dédiées pour batch et client
+✅ **Traçabilité complète** : \`cat_date_user\` pour chaque correction
+✅ **Garantie de non-perte** : Batch et client n'écrasent jamais leurs colonnes
 ✅ **Time travel possible** : Via \`cat_date_user\`
 
 ---
@@ -629,19 +629,19 @@ WHERE code_si = '01'
 
 ### Vérification 1 : cat_user mis à jour
 
-**Attendu** : Opérations avec \`cat_user\` non null (corrigées par client)  
-**Obtenu** : $(if [ -n "$CORRECTED_SAMPLE" ]; then echo "✅ Opération(s) corrigée(s) trouvée(s) (cat_user = '$CORRECTED_SAMPLE')"; else echo "⚠️  Aucune opération corrigée trouvée"; fi)  
+**Attendu** : Opérations avec \`cat_user\` non null (corrigées par client)
+**Obtenu** : $(if [ -n "$CORRECTED_SAMPLE" ]; then echo "✅ Opération(s) corrigée(s) trouvée(s) (cat_user = '$CORRECTED_SAMPLE')"; else echo "⚠️  Aucune opération corrigée trouvée"; fi)
 **Statut** : ✅ Validé
 
 ### Vérification 2 : cat_auto préservé
 
-**Attendu** : \`cat_auto\` non modifié par les UPDATE client  
-**Obtenu** : $(if [ -n "$AUTO_SAMPLE" ]; then echo "✅ Opération(s) avec cat_auto trouvée(s) (cat_auto = '$AUTO_SAMPLE')"; else echo "⚠️  Aucune opération avec cat_auto trouvée"; fi)  
+**Attendu** : \`cat_auto\` non modifié par les UPDATE client
+**Obtenu** : $(if [ -n "$AUTO_SAMPLE" ]; then echo "✅ Opération(s) avec cat_auto trouvée(s) (cat_auto = '$AUTO_SAMPLE')"; else echo "⚠️  Aucune opération avec cat_auto trouvée"; fi)
 **Statut** : ✅ Validé
 
 ### Vérification 3 : Logique de Priorité
 
-**Attendu** : \`cat_user\` prioritaire sur \`cat_auto\` si non null  
+**Attendu** : \`cat_user\` prioritaire sur \`cat_auto\` si non null
 **Statut** : ✅ Validé
 
 **Explication** :
@@ -655,17 +655,17 @@ WHERE code_si = '01'
 
 Les tests API correction client ont été exécutés avec succès :
 
-✅ **3 exemples d'UPDATE** exécutés  
-✅ **Stratégie multi-version** validée  
-✅ **Équivalences HBase → HCD** démontrées  
+✅ **3 exemples d'UPDATE** exécutés
+✅ **Stratégie multi-version** validée
+✅ **Équivalences HBase → HCD** démontrées
 ✅ **Logique de priorité** validée
 
 ### Points Clés Démontrés
 
-✅ **BATCH écrit UNIQUEMENT** \`cat_auto\` et \`cat_confidence\`  
-✅ **CLIENT écrit dans** \`cat_user\`, \`cat_date_user\`, \`cat_validee\`  
-✅ **APPLICATION priorise** \`cat_user\` si non nul, sinon \`cat_auto\`  
-✅ **Aucune correction client** ne sera perdue  
+✅ **BATCH écrit UNIQUEMENT** \`cat_auto\` et \`cat_confidence\`
+✅ **CLIENT écrit dans** \`cat_user\`, \`cat_date_user\`, \`cat_validee\`
+✅ **APPLICATION priorise** \`cat_user\` si non nul, sinon \`cat_auto\`
+✅ **Aucune correction client** ne sera perdue
 ✅ **Traçabilité complète** via \`cat_date_user\`
 
 ### Prochaines Étapes
@@ -680,8 +680,3 @@ EOF
 
 success "✅ Rapport généré : $REPORT_FILE"
 echo ""
-
-
-
-
-

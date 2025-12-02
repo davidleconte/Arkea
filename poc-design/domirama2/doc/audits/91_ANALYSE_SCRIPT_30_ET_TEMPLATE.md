@@ -53,6 +53,7 @@ Le script exécute 3 requêtes CQL différentes :
 ### Template 68 : Script Démonstration Requêtes CQL
 
 **Points communs** :
+
 - ✅ Structure didactique avec explications
 - ✅ Affichage de requêtes CQL
 - ✅ Génération de rapport markdown
@@ -62,6 +63,7 @@ Le script exécute 3 requêtes CQL différentes :
 - ✅ Valeur ajoutée SAI
 
 **Différences** :
+
 - ⚠️ Template 68 : Générique pour toutes les requêtes CQL
 - ✅ Script 30 : Spécifique aux requêtes STARTROW/STOPROW
 - ⚠️ Template 68 : Peut être utilisé pour TIMERANGE, STARTROW/STOPROW, etc.
@@ -74,11 +76,13 @@ Le script exécute 3 requêtes CQL différentes :
 ### Template 43 : Script Didactique Général
 
 **Points communs** :
+
 - ✅ Structure didactique avec explications
 - ✅ Affichage de requêtes CQL
 - ✅ Génération de rapport markdown
 
 **Différences** :
+
 - ⚠️ Template 43 : Générique (peut être pour setup, test, etc.)
 - ✅ Script 30 : Spécifique aux requêtes CQL avec STARTROW/STOPROW
 - ⚠️ Template 43 : Peut utiliser Spark ou Python
@@ -93,11 +97,13 @@ Le script exécute 3 requêtes CQL différentes :
 ### Template 63 : Script d'Orchestration
 
 **Points communs** :
+
 - ✅ Plusieurs démonstrations
 - ✅ Structure didactique
 - ✅ Génération de rapport
 
 **Différences** :
+
 - ❌ Template 63 : Orchestre plusieurs scripts
 - ✅ Script 30 : Exécute plusieurs requêtes dans un seul script
 - ❌ Template 63 : Appelle d'autres scripts
@@ -164,6 +170,7 @@ Le script 30 version didactique suivra exactement la même structure que le scri
 **Utiliser Template 68** : Script Démonstration Requêtes CQL
 
 **Justification** :
+
 1. Le script 30 suit exactement le même pattern que le script 29
 2. Template 68 a été créé spécifiquement pour ce type de script
 3. La structure est identique (3 requêtes, équivalences HBase → HCD, valeur ajoutée SAI)
@@ -189,7 +196,3 @@ Le script 30 version didactique suivra exactement la même structure que le scri
 **Date de création** : 2025-11-27  
 **Auteur** : Analyse du script 30  
 **Version** : 1.0
-
-
-
-

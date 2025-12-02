@@ -1,7 +1,7 @@
 # 🚀 Guide : Déploiement Data API pour POC Local
 
 **Date** : 2025-11-25  
-**Référence** : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html  
+**Référence** : <https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html>  
 **Objectif** : Déployer réellement la Data API pour un POC local HCD
 
 ---
@@ -27,6 +27,7 @@ D'après la [documentation Data API HCD](https://docs.datastax.com/en/hyper-conv
 ### HCD Local (Standalone)
 
 Notre POC utilise **HCD local** (tarball, single-node) :
+
 - ✅ HCD installé : `binaire/hcd-1.2.3/`
 - ✅ Port CQL : `9042` (accessible)
 - ❌ **Pas de Kubernetes**
@@ -43,7 +44,7 @@ Notre POC utilise **HCD local** (tarball, single-node) :
 
 **Stargate** est le gateway open-source qui expose Cassandra via REST/GraphQL.
 
-**Documentation officielle** : https://stargate.io/docs/latest/index.html
+**Documentation officielle** : <https://stargate.io/docs/latest/index.html>
 
 #### Installation via Podman
 
@@ -75,6 +76,7 @@ curl http://localhost:8080/v1/status
 ```
 
 **Ports Stargate** (selon [Stargate Ports](https://stargate.io/docs/latest/install/stargate-ports.html)) :
+
 - `8080` : REST API v1
 - `8081` : REST API v2
 - `8082` : GraphQL API
@@ -109,17 +111,20 @@ Pour un déploiement production-like :
 
 1. **Déployer HCD en Kubernetes** (via Mission Control ou manuellement)
 2. **Trouver l'endpoint** :
+
    ```bash
    # CLUSTER_HOST
    kubectl get nodes -o wide
    # Utiliser EXTERNAL-IP
-   
+
    # GATEWAY_PORT
    kubectl get svc
    # Trouver le service Data API / Stargate / Gateway
    # Utiliser le NodePort
    ```
+
 3. **Configurer** :
+
    ```bash
    export API_ENDPOINT="http://EXTERNAL-IP:NODEPORT"
    ```
@@ -129,12 +134,14 @@ Pour un déploiement production-like :
 ### Option 3 : Utiliser CQL Direct (Actuel - Recommandé pour POC)
 
 **Pour le POC, utiliser directement CQL** :
+
 - ✅ Déjà démontré et fonctionnel
 - ✅ Performance optimale
 - ✅ Pas de dépendance supplémentaire
 - ✅ Conforme aux besoins fonctionnels
 
 **La Data API reste optionnelle** pour :
+
 - Applications mobiles
 - Intégration partenaires
 - Microservices
@@ -150,6 +157,7 @@ Un script automatisé est disponible :
 ```
 
 Ce script :
+
 1. Vérifie que HCD est démarré
 2. Vérifie que Podman est disponible
 3. Déploie Stargate via Podman
@@ -199,12 +207,14 @@ python3 data_api_examples/01_connect_data_api.py
 ### Pour Démonstration Conceptuelle
 
 **Suffisant** :
+
 - ✅ Configuration documentée
 - ✅ Exemples de code créés
 - ✅ Valeur ajoutée expliquée
 - ✅ Documentation complète
 
 **Pas besoin de Stargate** si :
+
 - On utilise CQL direct (déjà démontré)
 - On veut juste montrer la valeur ajoutée
 - On n'a pas besoin de tests réels
@@ -212,11 +222,13 @@ python3 data_api_examples/01_connect_data_api.py
 ### Pour Tests Réels
 
 **Nécessaire** :
+
 - ✅ Déployer Stargate (Podman)
 - ✅ Configurer l'endpoint
 - ✅ Tester avec les exemples
 
 **Utile si** :
+
 - On veut tester réellement la Data API
 - On veut démontrer l'accès mobile/front-end
 - On veut valider les performances
@@ -226,21 +238,24 @@ python3 data_api_examples/01_connect_data_api.py
 ## 📚 Références
 
 ### Data API HCD
-- **Documentation officielle** : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html
-- **Quickstart** : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/quickstart.html
+
+- **Documentation officielle** : <https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html>
+- **Quickstart** : <https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/quickstart.html>
 
 ### Stargate
-- **Documentation officielle** : https://stargate.io/docs/latest/index.html
-- **Installation Cassandra 4.0** : https://stargate.io/docs/latest/install/cassandra-4.0.html
-- **Ports Stargate** : https://stargate.io/docs/latest/install/stargate-ports.html
-- **REST API** : https://stargate.io/docs/latest/develop/rest.html
-- **GraphQL API** : https://stargate.io/docs/latest/develop/graphql.html
+
+- **Documentation officielle** : <https://stargate.io/docs/latest/index.html>
+- **Installation Cassandra 4.0** : <https://stargate.io/docs/latest/install/cassandra-4.0.html>
+- **Ports Stargate** : <https://stargate.io/docs/latest/install/stargate-ports.html>
+- **REST API** : <https://stargate.io/docs/latest/develop/rest.html>
+- **GraphQL API** : <https://stargate.io/docs/latest/develop/graphql.html>
 
 ---
 
 ## ✅ Conclusion
 
 **Pour POC Local** :
+
 - **Option A** : Utiliser CQL direct (déjà démontré) ✅
 - **Option B** : Déployer Stargate pour tests réels Data API 🟢
 
@@ -250,4 +265,3 @@ python3 data_api_examples/01_connect_data_api.py
 
 **✅ Configuration : Complète**  
 **⚠️ Déploiement : Optionnel (Stargate requis pour endpoint réel)**
-

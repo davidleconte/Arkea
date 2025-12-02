@@ -8,11 +8,13 @@
 ## 🎯 Résumé Exécutif
 
 ### Problème Initial
+
 - ❌ DSBulk ne fonctionnait pas avec les requêtes WHERE complexes
 - ❌ Tests retournaient 0 opérations
 - ❌ Utilisation de ALLOW FILTERING (interdit)
 
 ### Solution Implémentée
+
 - ✅ **Script Python** créé (`14_export_incremental_python.py`)
 - ✅ **Itération automatique** sur les partitions
 - ✅ **Sans ALLOW FILTERING** (utilise correctement les partition keys)
@@ -24,17 +26,20 @@
 ## ✅ Tests Validés
 
 ### TEST 1 : Export TIMERANGE
+
 - ✅ **360 opérations exportées**
 - ✅ **31 fichiers Parquet créés**
 - ✅ **31 partitions créées** (par date)
 - ✅ **VECTOR préservé**
 
 ### TEST 2 : Export STARTROW/STOPROW équivalent
+
 - ✅ **360 opérations exportées**
 - ✅ **31 fichiers Parquet créés**
 - ✅ **Filtrage par partition fonctionnel**
 
 ### TEST 3 : Fenêtre glissante
+
 - ✅ **Script créé et fonctionnel**
 - ✅ **Calcul automatique des fenêtres**
 
@@ -79,14 +84,17 @@ Taux de réussite : 100%
 ## ✅ Corrections Appliquées
 
 ### 1. Retrait de ALLOW FILTERING
+
 - ✅ Toutes les requêtes utilisent les partition keys
 - ✅ Plus de `ALLOW FILTERING` dans les requêtes CQL
 
 ### 2. Ajout de Données de Test
+
 - ✅ 360 opérations avec code_si='TEST_EXPORT', contrat='TEST_CONTRAT'
 - ✅ Dates dans la plage 2024-06-01 à 2024-07-01
 
 ### 3. Solution Python Alternative
+
 - ✅ Contourne les problèmes DSBulk
 - ✅ Fonctionne avec les requêtes WHERE
 - ✅ Export direct vers Parquet
@@ -115,6 +123,7 @@ Taux de réussite : 100%
 ## ✅ Validation Complète
 
 ### Contrôles Effectués
+
 - ✅ **Cohérence** : Count exporté = count lu (360 = 360)
 - ✅ **Schéma Parquet** : Toutes les colonnes critiques présentes
 - ✅ **VECTOR** : Colonne libelle_embedding présente
@@ -122,6 +131,7 @@ Taux de réussite : 100%
 - ✅ **Sans ALLOW FILTERING** : Toutes les requêtes utilisent les partition keys
 
 ### Résultats
+
 - ✅ **360 opérations exportées**
 - ✅ **31 fichiers Parquet créés**
 - ✅ **31 partitions créées**
@@ -156,5 +166,3 @@ Taux de réussite : 100%
 ---
 
 **Date de génération** : 2025-11-30
-
-

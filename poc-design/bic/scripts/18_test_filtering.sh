@@ -83,8 +83,8 @@ success "HCD est démarré"
 cat > "$REPORT_FILE" << 'EOF'
 # 🧪 Démonstration : Filtrage Avancé Exhaustif
 
-**Date** : 2025-12-01  
-**Script** : `18_test_filtering.sh`  
+**Date** : 2025-12-01
+**Script** : `18_test_filtering.sh`
 **Use Cases** : BIC-04, BIC-05, BIC-11, BIC-15 (Filtres combinés exhaustifs)
 
 ---
@@ -128,8 +128,8 @@ demo "Objectif : Filtrer par canal 'email' ET type 'reclamation'"
 CANAL="email"
 TYPE="reclamation"
 
-QUERY1="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY1="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND canal = '$CANAL'
   AND type_interaction = '$TYPE'
@@ -166,7 +166,7 @@ if [ $EXIT_CODE1 -eq 0 ]; then
     success "✅ Requête exécutée avec succès en ${EXEC_TIME1}s"
     COUNT1=$(echo "$RESULT1" | grep -c "^[[:space:]]*EFS001" || echo "0")
     result "Nombre d'interactions trouvées : $COUNT1"
-    
+
     # Extraire un échantillon représentatif pour le rapport
     SAMPLE1=$(echo "$RESULT1" | grep -E "^[[:space:]]*EFS001" | head -5 | awk -F'|' '{
         for (i=1; i<=NF; i++) {
@@ -176,7 +176,7 @@ if [ $EXIT_CODE1 -eq 0 ]; then
             printf "| %s | %s | %s | %s | %s | %s |\n", $1, $2, $3, $4, $5, $6
         }
     }' || echo "")
-    
+
     # VALIDATION : Comparaison attendus vs obtenus
     EXPECTED_COUNT1=">= 0"
     compare_expected_vs_actual \
@@ -184,12 +184,12 @@ if [ $EXIT_CODE1 -eq 0 ]; then
         "$EXPECTED_COUNT1 interactions email de type 'reclamation'" \
         "$COUNT1 interactions email de type 'reclamation'" \
         "0"
-    
+
     # VALIDATION : Justesse (vérifier que toutes ont canal='email' ET type='reclamation')
     if [ "$COUNT1" -gt 0 ]; then
         success "✅ Justesse validée : Toutes les interactions ont canal='email' ET type='reclamation'"
     fi
-    
+
     # VALIDATION COMPLÈTE
     validate_complete \
         "TEST 1 : Filtre Combiné (Canal + Type)" \
@@ -199,7 +199,7 @@ if [ $EXIT_CODE1 -eq 0 ]; then
         "$EXEC_TIME1" \
         "0" \
         "0.1"
-    
+
     # EXPLICATIONS
     echo ""
     info "📚 Explications détaillées :"
@@ -225,8 +225,8 @@ demo "Objectif : Filtrer par canal 'SMS' ET résultat 'succès'"
 CANAL="SMS"
 RESULTAT="succès"
 
-QUERY2="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY2="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND canal = '$CANAL'
   AND resultat = '$RESULTAT'
@@ -242,7 +242,7 @@ if [ $? -eq 0 ]; then
     success "✅ Requête exécutée avec succès"
     COUNT2=$(echo "$RESULT2" | grep -c "^[[:space:]]*EFS001" || echo "0")
     result "Nombre d'interactions trouvées : $COUNT2"
-    
+
     # Extraire un échantillon représentatif pour le rapport
     SAMPLE2=$(echo "$RESULT2" | grep -E "^[[:space:]]*EFS001" | head -5 | awk -F'|' '{
         for (i=1; i<=NF; i++) {
@@ -269,8 +269,8 @@ demo "Objectif : Filtrer par type 'consultation' ET résultat 'succès'"
 TYPE="consultation"
 RESULTAT="succès"
 
-QUERY3="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY3="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND type_interaction = '$TYPE'
   AND resultat = '$RESULTAT'
@@ -286,7 +286,7 @@ if [ $? -eq 0 ]; then
     success "✅ Requête exécutée avec succès"
     COUNT3=$(echo "$RESULT3" | grep -c "^[[:space:]]*EFS001" || echo "0")
     result "Nombre d'interactions trouvées : $COUNT3"
-    
+
     # Extraire un échantillon représentatif pour le rapport
     SAMPLE3=$(echo "$RESULT3" | grep -E "^[[:space:]]*EFS001" | head -5 | awk -F'|' '{
         for (i=1; i<=NF; i++) {
@@ -314,8 +314,8 @@ CANAL="agence"
 TYPE="conseil"
 RESULTAT="succès"
 
-QUERY4="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY4="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND canal = '$CANAL'
   AND type_interaction = '$TYPE'
@@ -353,7 +353,7 @@ if [ $EXIT_CODE4 -eq 0 ]; then
     success "✅ Requête exécutée avec succès en ${EXEC_TIME4}s"
     COUNT4=$(echo "$RESULT4" | grep -c "^[[:space:]]*EFS001" || echo "0")
     result "Nombre d'interactions trouvées : $COUNT4"
-    
+
     # Extraire un échantillon représentatif pour le rapport
     SAMPLE4=$(echo "$RESULT4" | grep -E "^[[:space:]]*EFS001" | head -5 | awk -F'|' '{
         for (i=1; i<=NF; i++) {
@@ -363,7 +363,7 @@ if [ $EXIT_CODE4 -eq 0 ]; then
             printf "| %s | %s | %s | %s | %s | %s |\n", $1, $2, $3, $4, $5, $6
         }
     }' || echo "")
-    
+
     # VALIDATION : Comparaison attendus vs obtenus (TEST COMPLEXE - Triple combinaison)
     EXPECTED_COUNT4=">= 0"
     compare_expected_vs_actual \
@@ -371,12 +371,12 @@ if [ $EXIT_CODE4 -eq 0 ]; then
         "$EXPECTED_COUNT4 interactions agence de type 'conseil' avec résultat 'succès'" \
         "$COUNT4 interactions agence de type 'conseil' avec résultat 'succès'" \
         "0"
-    
+
     # VALIDATION : Justesse (vérifier que toutes ont les 3 critères)
     if [ "$COUNT4" -gt 0 ]; then
         success "✅ Justesse validée : Toutes les interactions ont canal='agence' ET type='conseil' ET résultat='succès'"
     fi
-    
+
     # VALIDATION COMPLÈTE
     validate_complete \
         "TEST 4 : Filtre Combiné (Canal + Type + Résultat)" \
@@ -386,7 +386,7 @@ if [ $EXIT_CODE4 -eq 0 ]; then
         "$EXEC_TIME4" \
         "0" \
         "0.15"
-    
+
     # EXPLICATIONS
     echo ""
     info "📚 Explications détaillées (TEST COMPLEXE) :"
@@ -414,8 +414,8 @@ TYPE="reclamation"
 RESULTAT="succès"
 SIX_MONTHS_AGO=$(date -u -v-6m +"%Y-%m-%d %H:%M:%S+0000" 2>/dev/null || date -u -d "6 months ago" +"%Y-%m-%d %H:%M:%S+0000" 2>/dev/null || echo "2025-06-01 00:00:00+0000")
 
-QUERY5="SELECT * FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+QUERY5="SELECT * FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND canal = '$CANAL'
   AND type_interaction = '$TYPE'
@@ -454,7 +454,7 @@ if [ $EXIT_CODE5 -eq 0 ]; then
     success "✅ Requête exécutée avec succès en ${EXEC_TIME5}s"
     COUNT5=$(echo "$RESULT5" | grep -c "^[[:space:]]*EFS001" || echo "0")
     result "Nombre d'interactions trouvées : $COUNT5"
-    
+
     # Extraire un échantillon représentatif pour le rapport
     SAMPLE5=$(echo "$RESULT5" | grep -E "^[[:space:]]*EFS001" | head -5 | awk -F'|' '{
         for (i=1; i<=NF; i++) {
@@ -464,7 +464,7 @@ if [ $EXIT_CODE5 -eq 0 ]; then
             printf "| %s | %s | %s | %s | %s | %s |\n", $1, $2, $3, $4, $5, $6
         }
     }' || echo "")
-    
+
     # VALIDATION : Comparaison attendus vs obtenus (TEST TRÈS COMPLEXE - Quadruple combinaison)
     EXPECTED_COUNT5=">= 0"
     compare_expected_vs_actual \
@@ -472,17 +472,17 @@ if [ $EXIT_CODE5 -eq 0 ]; then
         "$EXPECTED_COUNT5 interactions email de type 'reclamation' avec résultat 'succès' des 6 derniers mois" \
         "$COUNT5 interactions email de type 'reclamation' avec résultat 'succès' des 6 derniers mois" \
         "0"
-    
+
     # VALIDATION : Justesse (vérifier que toutes ont les 4 critères)
     if [ "$COUNT5" -gt 0 ]; then
         success "✅ Justesse validée : Toutes les interactions ont les 4 critères combinés"
     fi
-    
+
     # VALIDATION : Cohérence (COUNT5 <= COUNT4 si même client)
     if [ "$COUNT5" -le "$COUNT4" ] || [ "$COUNT4" -eq 0 ]; then
         success "✅ Cohérence validée : Résultats cohérents avec filtres supplémentaires"
     fi
-    
+
     # VALIDATION COMPLÈTE
     validate_complete \
         "TEST 5 : Filtre Combiné (Canal + Type + Résultat + Période)" \
@@ -492,7 +492,7 @@ if [ $EXIT_CODE5 -eq 0 ]; then
         "$EXEC_TIME5" \
         "0" \
         "0.2"
-    
+
     # EXPLICATIONS
     echo ""
     info "📚 Explications détaillées (TEST TRÈS COMPLEXE) :"
@@ -523,20 +523,20 @@ TOTAL_CANAUX=0
 SAMPLE6_ALL=""
 
 for canal in "${CANAUX[@]}"; do
-    QUERY_CANAL="SELECT COUNT(*) as count FROM $KEYSPACE.$TABLE 
-WHERE code_efs = '$CODE_EFS' 
+    QUERY_CANAL="SELECT COUNT(*) as count FROM $KEYSPACE.$TABLE
+WHERE code_efs = '$CODE_EFS'
   AND numero_client = '$NUMERO_CLIENT'
   AND canal = '$canal';"
-    
+
     RESULT_CANAL=$($CQLSH -e "$QUERY_CANAL" 2>&1)
     COUNT_CANAL=$(echo "$RESULT_CANAL" | grep -oE "[0-9]+" | head -1 || echo "0")
     TOTAL_CANAUX=$((TOTAL_CANAUX + COUNT_CANAL))
-    
+
     if [ "$COUNT_CANAL" -gt 0 ]; then
         success "  ✅ Canal '$canal' : $COUNT_CANAL interaction(s)"
         # Collecter un échantillon pour ce canal
-        QUERY_SAMPLE6="SELECT * FROM $KEYSPACE.$TABLE 
-        WHERE code_efs = '$CODE_EFS' 
+        QUERY_SAMPLE6="SELECT * FROM $KEYSPACE.$TABLE
+        WHERE code_efs = '$CODE_EFS'
           AND numero_client = '$NUMERO_CLIENT'
           AND canal = '$canal'
         LIMIT 1;"
@@ -594,16 +594,16 @@ for i in {1..10}; do
     START_TIME_PERF=$(date +%s.%N)
     $CQLSH -e "$QUERY4" > /dev/null 2>&1
     END_TIME_PERF=$(date +%s.%N)
-    
+
     if command -v bc &> /dev/null; then
         DURATION_PERF=$(echo "$END_TIME_PERF - $START_TIME_PERF" | bc)
     else
         DURATION_PERF=$(python3 -c "print($END_TIME_PERF - $START_TIME_PERF)")
     fi
-    
+
     TIMES_PERF+=("$DURATION_PERF")
     TOTAL_TIME_PERF=$(echo "$TOTAL_TIME_PERF + $DURATION_PERF" | bc 2>/dev/null || python3 -c "print($TOTAL_TIME_PERF + $DURATION_PERF)")
-    
+
     # Min/Max
     if (( $(echo "$DURATION_PERF < $MIN_TIME_PERF" | bc -l 2>/dev/null || echo "0") )); then
         MIN_TIME_PERF=$DURATION_PERF
@@ -761,13 +761,13 @@ for i in "${!QUERIES_LOAD[@]}"; do
     RESULT_LOAD_FILTER=$($CQLSH -e "$QUERY_LOAD_FILTER" > /dev/null 2>&1)
     EXIT_CODE_LOAD_FILTER=$?
     END_TIME_LOAD_FILTER=$(date +%s.%N)
-    
+
     if command -v bc &> /dev/null; then
         DURATION_LOAD_FILTER=$(echo "$END_TIME_LOAD_FILTER - $START_TIME_LOAD_FILTER" | bc)
     else
         DURATION_LOAD_FILTER=$(python3 -c "print($END_TIME_LOAD_FILTER - $START_TIME_LOAD_FILTER)")
     fi
-    
+
     if [ $EXIT_CODE_LOAD_FILTER -eq 0 ]; then
         SUCCESSFUL_QUERIES_FILTER=$((SUCCESSFUL_QUERIES_FILTER + 1))
         LOAD_TIMES_FILTER+=("$DURATION_LOAD_FILTER")
@@ -783,19 +783,19 @@ done
 
 if [ "$SUCCESSFUL_QUERIES_FILTER" -gt 0 ]; then
     AVG_LOAD_TIME_FILTER=$(echo "scale=4; $TOTAL_LOAD_TIME_FILTER / $SUCCESSFUL_QUERIES_FILTER" | bc 2>/dev/null || python3 -c "print($TOTAL_LOAD_TIME_FILTER / $SUCCESSFUL_QUERIES_FILTER)")
-    
+
     result "📊 Résultats test de charge multi-combinaisons :"
     echo "   - Requêtes réussies : $SUCCESSFUL_QUERIES_FILTER / ${#QUERIES_LOAD[@]}"
     echo "   - Temps moyen par requête : ${AVG_LOAD_TIME_FILTER}s"
     echo "   - Temps total : ${TOTAL_LOAD_TIME_FILTER}s"
-    
+
     # VALIDATION : Performance sous charge
     if (( $(echo "$AVG_LOAD_TIME_FILTER < 0.3" | bc -l 2>/dev/null || echo "0") )); then
         success "✅ Performance sous charge validée : Temps moyen acceptable (< 0.3s)"
     else
         warn "⚠️  Performance sous charge : Temps moyen ${AVG_LOAD_TIME_FILTER}s (peut être améliorée)"
     fi
-    
+
     # VALIDATION COMPLÈTE
     validate_complete \
         "TEST 9 : Test de Charge Multi-Combinaisons" \
@@ -835,23 +835,23 @@ COMBINATION_NUM=0
 for CANAL_EXH in "${CANAUX_EXHAUSTIVE[@]}"; do
     for TYPE_EXH in "${TYPES_EXHAUSTIVE[@]}"; do
         for RESULTAT_EXH in "${RESULTATS_EXHAUSTIVE[@]}"; do
-            QUERY_COMB_EXH="SELECT COUNT(*) FROM $KEYSPACE.$TABLE 
-            WHERE code_efs = '$CODE_EFS' 
+            QUERY_COMB_EXH="SELECT COUNT(*) FROM $KEYSPACE.$TABLE
+            WHERE code_efs = '$CODE_EFS'
               AND numero_client = '$NUMERO_CLIENT'
               AND canal = '$CANAL_EXH'
               AND type_interaction = '$TYPE_EXH'
               AND resultat = '$RESULTAT_EXH'
             LIMIT 1;"
-            
+
             COUNT_COMB_EXH=$($CQLSH -e "$QUERY_COMB_EXH" 2>&1 | grep -E "^\s+[0-9]+" | tr -d ' ' || echo "0")
             COMBINATION_MATRIX+=("$CANAL_EXH|$TYPE_EXH|$RESULTAT_EXH|$COUNT_COMB_EXH")
             TOTAL_COMBINATIONS_EXHAUSTIVE=$((TOTAL_COMBINATIONS_EXHAUSTIVE + COUNT_COMB_EXH))
             COMBINATION_NUM=$((COMBINATION_NUM + 1))
-            
+
             # Collecter un échantillon pour la première combinaison avec résultats
             if [ "$COUNT_COMB_EXH" -gt 0 ] && [ -z "$SAMPLE10" ]; then
-                QUERY_SAMPLE10="SELECT * FROM $KEYSPACE.$TABLE 
-                WHERE code_efs = '$CODE_EFS' 
+                QUERY_SAMPLE10="SELECT * FROM $KEYSPACE.$TABLE
+                WHERE code_efs = '$CODE_EFS'
                   AND numero_client = '$NUMERO_CLIENT'
                   AND canal = '$CANAL_EXH'
                   AND type_interaction = '$TYPE_EXH'
@@ -1165,7 +1165,7 @@ $([ -n "$SAMPLE10" ] && echo "$SAMPLE10" || echo "| *Aucune donnée à afficher*
 
 ---
 
-**Date** : 2025-12-01  
+**Date** : 2025-12-01
 **Script** : \`18_test_filtering.sh\`
 EOF
 
@@ -1175,4 +1175,3 @@ success "✅ Tests terminés avec succès"
 echo ""
 result "📄 Rapport généré : $REPORT_FILE"
 echo ""
-

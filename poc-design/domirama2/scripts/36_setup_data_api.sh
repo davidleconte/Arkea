@@ -7,7 +7,7 @@
 #   Ce script configure la Data API HCD pour Domirama, qui permet un accès
 #   simplifié à HCD via des requêtes HTTP REST/GraphQL, sans nécessiter
 #   de drivers binaires CQL.
-#   
+#
 #   Fonctionnalités configurées :
 #   - Génération du token d'authentification (format: Cassandra:BASE64-USERNAME:BASE64-PASSWORD)
 #   - Installation du client Python (astrapy)
@@ -261,7 +261,7 @@ try:
     )
     print("✅ Connexion réussie")
     print()
-    
+
     # 3. Lister les keyspaces disponibles
     print("📋 Keyspaces disponibles :")
     admin = database.get_admin()
@@ -269,11 +269,11 @@ try:
     for ks in keyspaces:
         print(f"   - {ks}")
     print()
-    
+
     print("=" * 80)
     print("✅ Connexion Data API réussie !")
     print("=" * 80)
-    
+
 except Exception as e:
     print(f"❌ Erreur de connexion : {e}")
     print()
@@ -336,7 +336,7 @@ try:
         },
         limit=5
     )
-    
+
     print("📊 Résultats :")
     count = 0
     for result in results:
@@ -344,15 +344,15 @@ try:
         print(f"   {count}. {result.get('libelle', 'N/A')} - {result.get('montant', 'N/A')} {result.get('devise', 'EUR')}")
         print(f"      Catégorie : {result.get('cat_auto', 'N/A')}")
         print()
-    
+
     if count == 0:
         print("   ⚠️  Aucun résultat trouvé")
         print("   💡 Vérifiez que des données existent dans la table")
-    
+
     print("=" * 80)
     print(f"✅ Recherche terminée : {count} résultat(s)")
     print("=" * 80)
-    
+
 except Exception as e:
     print(f"❌ Erreur : {e}")
     print()
@@ -428,10 +428,10 @@ try:
             }
         }
     )
-    
+
     print("✅ Catégorie mise à jour avec succès")
     print()
-    
+
     # Vérification : lire l'opération mise à jour
     print("🔍 Vérification de la mise à jour...")
     updated = table.find_one(
@@ -442,16 +442,16 @@ try:
             "numero_op": numero_op
         }
     )
-    
+
     if updated:
         print(f"   Catégorie auto : {updated.get('cat_auto', 'N/A')}")
         print(f"   Catégorie user : {updated.get('cat_user', 'N/A')}")
         print(f"   Date user : {updated.get('cat_date_user', 'N/A')}")
-    
+
     print("=" * 80)
     print("✅ Mise à jour terminée")
     print("=" * 80)
-    
+
 except Exception as e:
     print(f"❌ Erreur : {e}")
     print()
@@ -517,7 +517,7 @@ try:
     result = table.insert_one(operation)
     print("✅ Opération insérée avec succès")
     print()
-    
+
     # Vérification
     print("🔍 Vérification de l'insertion...")
     inserted = table.find_one(
@@ -528,16 +528,16 @@ try:
             "numero_op": operation["numero_op"]
         }
     )
-    
+
     if inserted:
         print("✅ Opération trouvée dans la base")
         print(f"   Libellé : {inserted.get('libelle', 'N/A')}")
         print(f"   Montant : {inserted.get('montant', 'N/A')} {inserted.get('devise', 'EUR')}")
-    
+
     print("=" * 80)
     print("✅ Insertion terminée")
     print("=" * 80)
-    
+
 except Exception as e:
     print(f"❌ Erreur : {e}")
     print()
@@ -559,7 +559,7 @@ echo ""
 cat > "$SCRIPT_DIR/README_DATA_API.md" <<'EOF'
 # 📡 Data API HCD - Guide d'Utilisation pour Domirama
 
-**Date** : 2025-11-25  
+**Date** : 2025-11-25
 **Objectif** : Guide complet pour utiliser la Data API HCD avec Domirama
 
 ---
@@ -828,4 +828,3 @@ code "  1. Configurer Stargate/gateway si nécessaire"
 code "  2. Exécuter les exemples : python3 examples/python/data_api/examples/01_connect_data_api.py"
 code "  3. Voir README_DATA_API.md pour plus de détails"
 echo ""
-

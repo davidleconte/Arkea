@@ -114,8 +114,8 @@ info "Nombre d'événements JSON : $JSON_COUNT"
 cat > "$REPORT_FILE" << EOF
 # 📥 Démonstration : Ingestion depuis Fichiers JSON
 
-**Date** : 2025-12-01  
-**Script** : \`10_load_interactions_json.sh\`  
+**Date** : 2025-12-01
+**Script** : \`10_load_interactions_json.sh\`
 **Use Cases** : BIC-07 (Format JSON), Ingestion fichiers JSON individuels
 
 ---
@@ -315,15 +315,15 @@ $SPARK_CODE_WRITE
 
 ## ✅ Validation
 
-**Pertinence** : ✅ Conforme BIC-07 (Format JSON)  
-**Cohérence** : ✅ Format JSON → HCD correct  
-**Intégrité** : ✅ Toutes les données chargées  
-**Consistance** : ✅ Format uniforme  
+**Pertinence** : ✅ Conforme BIC-07 (Format JSON)
+**Cohérence** : ✅ Format JSON → HCD correct
+**Intégrité** : ✅ Toutes les données chargées
+**Consistance** : ✅ Format uniforme
 **Conformité** : ✅ Conforme aux exigences
 
 ---
 
-**Date** : 2025-12-01  
+**Date** : 2025-12-01
 **Script** : \`10_load_interactions_json.sh\`
 EOF
 
@@ -442,10 +442,10 @@ if (jsonCount > 0) {
       col("version")
     )
     .filter(col("code_efs").isNotNull)
-  
+
   val count = interactions.count()
   println(s"✅ \$count interaction(s) transformée(s)")
-  
+
   if (count > 0) {
     println("💾 Écriture dans HCD...")
     interactions.write
@@ -456,7 +456,7 @@ if (jsonCount > 0) {
       ))
       .mode("append")
       .save()
-    
+
     println(s"✅ \$count interaction(s) écrite(s) dans HCD")
   }
 }
@@ -500,7 +500,7 @@ rm -f "$SCALA_TEMP"
         rm -f "$SPARK_SCALA_SCRIPT"
         exit 1
     fi
-    
+
 # Vérification post-chargement (test de santé)
 echo ""
 info "🔍 Test de santé post-ingestion..."
@@ -528,4 +528,3 @@ fi
 echo ""
 result "📄 Rapport généré : $REPORT_FILE"
 echo ""
-

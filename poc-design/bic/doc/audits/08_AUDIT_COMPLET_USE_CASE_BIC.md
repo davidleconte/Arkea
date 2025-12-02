@@ -95,10 +95,12 @@
 #### R1.1 : Améliorer la Robustesse des Scripts d'Ingestion
 
 **Problème Identifié** :
+
 - Script 09 (Kafka) : Problèmes de configuration Spark-Cassandra-Connector identifiés et corrigés
 - Script 08 (Batch) : Dépendance à Spark/HDFS qui peut échouer silencieusement
 
 **Recommandations** :
+
 1. ✅ **Ajouter vérifications préalables** : Vérifier que Spark est démarré avant script 08
 2. ✅ **Améliorer gestion d'erreurs** : Capturer et afficher les erreurs Spark explicitement
 3. ✅ **Ajouter tests de santé** : Vérifier que les données sont bien écrites après ingestion
@@ -112,10 +114,12 @@
 #### R1.2 : Standardiser la Gestion des Erreurs
 
 **Problème Identifié** :
+
 - Certains scripts utilisent `|| true` pour éviter les erreurs (script 16)
 - Inconsistance dans la gestion des erreurs CQLSH
 
 **Recommandations** :
+
 1. ✅ **Créer fonction standardisée** : `execute_cql_safe()` qui gère les erreurs CQLSH
 2. ✅ **Documenter les erreurs attendues** : Certaines erreurs CQLSH sont normales (pas de données)
 3. ✅ **Améliorer les messages d'erreur** : Messages plus explicites avec actions correctives
@@ -130,11 +134,13 @@
 #### R2.1 : Ajouter Tests de Performance Globaux
 
 **Problème Identifié** :
+
 - Tests de performance individuels par script
 - Pas de benchmark global comparatif
 - Pas de métriques agrégées
 
 **Recommandations** :
+
 1. ✅ **Créer script de benchmark global** : `19_test_performance_global.sh`
 2. ✅ **Métriques à mesurer** :
    - Latence moyenne/médiane/p95/p99 pour toutes les requêtes
@@ -151,11 +157,13 @@
 #### R2.2 : Améliorer la Documentation des Équivalences HBase
 
 **Problème Identifié** :
+
 - Équivalences HBase documentées dans script 14
 - Pas de document centralisé de référence
 - Pas de guide de migration complet
 
 **Recommandations** :
+
 1. ✅ **Créer guide de migration HBase → HCD** : `doc/guides/05_GUIDE_MIGRATION_HBASE.md`
 2. ✅ **Documenter toutes les équivalences** :
    - SCAN → SELECT
@@ -174,11 +182,13 @@
 #### R2.3 : Ajouter Tests de Charge et Scalabilité
 
 **Problème Identifié** :
+
 - Tests de charge individuels dans certains scripts (11, 12, 13, etc.)
 - Pas de test de charge global
 - Pas de validation de scalabilité (millions d'interactions)
 
 **Recommandations** :
+
 1. ✅ **Créer script de test de charge global** : `20_test_load_global.sh`
 2. ✅ **Scénarios de charge** :
    - 10 000 interactions simultanées
@@ -198,11 +208,13 @@
 #### R2.4 : Améliorer la Génération de Données de Test
 
 **Problème Identifié** :
+
 - Données de test limitées (50-100 interactions par client)
 - Pas de génération de données volumineuses (millions)
 - Distribution des données peut être améliorée
 
 **Recommandations** :
+
 1. ✅ **Ajouter option volume** : `--volume=small|medium|large|huge`
 2. ✅ **Générer données volumineuses** :
    - Small : 1 000 interactions
@@ -224,10 +236,12 @@
 #### R3.1 : Créer Script de Démonstration Data API REST/GraphQL
 
 **Problème Identifié** :
+
 - BIC-08 partiel : CQL fonctionnel mais pas de démonstration Data API
 - Stargate non déployé dans le POC
 
 **Recommandations** :
+
 1. ✅ **Créer script de déploiement Stargate** : `21_deploy_stargate.sh`
 2. ✅ **Créer script de démonstration Data API** : `22_demo_data_api.sh`
 3. ✅ **Démontrer** :
@@ -243,10 +257,12 @@
 #### R3.2 : Ajouter Support Recherche Vectorielle (Extension)
 
 **Problème Identifié** :
+
 - BIC-13 optionnel : Recherche vectorielle non implémentée
 - Cas d'usage IA générative/RAG non couvert
 
 **Recommandations** :
+
 1. ✅ **Créer script de génération d'embeddings** : `23_generate_embeddings.sh`
 2. ✅ **Créer index vectoriel SAI** : Index sur colonne vectorielle
 3. ✅ **Créer script de recherche vectorielle** : `24_test_vector_search.sh`
@@ -260,11 +276,13 @@
 #### R3.3 : Améliorer la Documentation Utilisateur
 
 **Problème Identifié** :
+
 - Guides manquants : `02_GUIDE_SETUP.md`, `03_GUIDE_INGESTION.md`, `04_GUIDE_RECHERCHE.md`
 - Pas de guide de démarrage rapide complet
 - Pas de guide de troubleshooting
 
 **Recommandations** :
+
 1. ✅ **Créer guides manquants** :
    - `doc/guides/02_GUIDE_SETUP.md` : Guide de configuration complète
    - `doc/guides/03_GUIDE_INGESTION.md` : Guide d'ingestion (batch, Kafka, JSON)
@@ -281,11 +299,13 @@
 #### R3.4 : Automatiser les Tests d'Intégration
 
 **Problème Identifié** :
+
 - Tests manuels par script
 - Pas de suite de tests automatisée
 - Pas de CI/CD
 
 **Recommandations** :
+
 1. ✅ **Créer script de test d'intégration** : `25_test_integration.sh`
 2. ✅ **Exécuter tous les scripts dans l'ordre** : Setup → Génération → Ingestion → Tests
 3. ✅ **Valider les résultats** : Vérifier que tous les tests passent
@@ -304,11 +324,13 @@
 **Score** : **98%** ✅
 
 **Points Forts** :
+
 - ✅ Tous les use cases critiques couverts
 - ✅ Tous les use cases haute priorité couverts
 - ✅ Scripts alignés avec les exigences clients/IBM
 
 **Points à Améliorer** :
+
 - ⚠️ BIC-08 partiel (Data API non démontré)
 - 🟢 BIC-13 optionnel (recherche vectorielle)
 
@@ -319,12 +341,14 @@
 **Score** : **95%** ✅
 
 **Points Forts** :
+
 - ✅ Schéma cohérent avec les exigences
 - ✅ Index SAI cohérents avec les filtres
 - ✅ Noms de scripts cohérents
 - ✅ Structure de documentation cohérente
 
 **Points à Améliorer** :
+
 - ⚠️ Gestion d'erreurs inconsistante (certains scripts utilisent `|| true`)
 - ⚠️ Messages d'erreur pas toujours standardisés
 
@@ -335,11 +359,13 @@
 **Score** : **97%** ✅
 
 **Points Forts** :
+
 - ✅ Validations systématiques dans tous les scripts
 - ✅ Vérifications de cohérence (pas de doublons, etc.)
 - ✅ Tests d'intégrité dans scripts de test
 
 **Points à Améliorer** :
+
 - ⚠️ Pas de validation automatique après ingestion (script 08, 09, 10)
 - ⚠️ Pas de vérification de l'intégrité des données exportées (script 14)
 
@@ -350,11 +376,13 @@
 **Score** : **96%** ✅
 
 **Points Forts** :
+
 - ✅ Tous les scripts utilisent les mêmes fonctions utilitaires
 - ✅ Structure de code cohérente
 - ✅ Format de documentation uniforme
 
 **Points à Améliorer** :
+
 - ⚠️ Certains scripts ont des validations plus complètes que d'autres
 - ⚠️ Pas de standardisation des temps de performance attendus
 
@@ -365,11 +393,13 @@
 **Score** : **96.4%** ✅
 
 **Points Forts** :
+
 - ✅ 96.4% de couverture des exigences
 - ✅ 100% des exigences critiques couvertes
 - ✅ Conforme aux bonnes pratiques HCD/Cassandra
 
 **Points à Améliorer** :
+
 - ⚠️ BIC-08 partiel (Data API non démontré)
 - 🟢 BIC-13 optionnel (recherche vectorielle)
 
@@ -384,6 +414,7 @@
 **Impact** : 🔴 Critique
 
 **Actions** :
+
 - Ajouter vérifications préalables (Spark, Kafka, HCD)
 - Améliorer gestion d'erreurs avec messages explicites
 - Ajouter tests de santé après ingestion
@@ -397,6 +428,7 @@
 **Impact** : 🟡 Haute
 
 **Actions** :
+
 - Créer fonction `execute_cql_safe()` standardisée
 - Documenter erreurs attendues vs erreurs critiques
 - Améliorer messages d'erreur avec actions correctives
@@ -410,6 +442,7 @@
 **Impact** : 🟡 Haute
 
 **Actions** :
+
 - Créer script `19_test_performance_global.sh`
 - Mesurer latence moyenne/médiane/p95/p99
 - Générer rapport de performance avec graphiques
@@ -423,6 +456,7 @@
 **Impact** : 🟡 Haute
 
 **Actions** :
+
 - Créer `doc/guides/05_GUIDE_MIGRATION_HBASE.md`
 - Documenter toutes les équivalences HBase → HCD
 - Ajouter exemples de code avant/après
@@ -436,6 +470,7 @@
 **Impact** : 🟡 Haute
 
 **Actions** :
+
 - Créer script `20_test_load_global.sh`
 - Tester avec 10K, 100K, 1M interactions
 - Mesurer dégradation de performance sous charge
@@ -480,6 +515,7 @@
 **Statut Global** : ✅ **EXCELLENT**
 
 **Points Forts** :
+
 - ✅ 96.4% de couverture des exigences
 - ✅ 100% des scripts essentiels créés
 - ✅ Qualité de code très bonne
@@ -487,6 +523,7 @@
 - ✅ Documentation complète
 
 **Recommandations** :
+
 - 🔴 **2 recommandations critiques** (robustesse, gestion erreurs)
 - 🟡 **4 recommandations importantes** (performance, migration, charge, données)
 - 🟢 **4 recommandations optionnelles** (Data API, vectorielle, docs, CI/CD)
@@ -498,4 +535,3 @@
 **Date** : 2025-12-01  
 **Version** : 1.0.0  
 **Statut** : ✅ Audit complet terminé, 10 recommandations identifiées
-

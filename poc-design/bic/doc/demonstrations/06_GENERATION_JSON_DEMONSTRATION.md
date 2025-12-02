@@ -48,7 +48,6 @@ Les événements générés sont conformes au format attendu par le topic Kafka 
 
 ## 🚀 Génération
 
-
 ---
 
 ## ✅ Résultats
@@ -58,12 +57,14 @@ Les événements générés sont conformes au format attendu par le topic Kafka 
 **Format** : JSONL (une ligne JSON par événement)
 
 **Distribution** :
+
 - Canaux : Tous les 8 canaux couverts
 - Types : Tous les 7 types couverts
 - Résultats : Tous les 4 résultats couverts
 - Période : 30 derniers jours (pour ingestion temps réel)
 
 **Structure** :
+
 - ✅ Format JSON conforme au topic Kafka 'bic-event'
 - ✅ Tous les champs requis présents
 - ✅ Métadonnées Kafka incluses (topic, partition, offset)

@@ -30,55 +30,66 @@
 #### 1. Colonne `resultat` manquante dans le schéma
 
 **Problème** :
+
 - Les scripts 12 et 18 utilisent `resultat` pour filtrer (BIC-11)
 - La colonne n'existe pas dans `02_create_bic_tables.cql`
 - L'index SAI sur `resultat` n'existe pas dans `03_create_bic_indexes.cql`
 
 **Impact** :
+
 - ❌ BIC-11 (Filtrage par résultat) ne peut pas être testé
 - ❌ Les tests de filtrage combiné échouent
 
 **Solution** :
+
 - Ajouter `resultat text` dans `02_create_bic_tables.cql`
 - Ajouter index SAI sur `resultat` dans `03_create_bic_indexes.cql`
 
 #### 2. Structure JSON non définie
 
 **Problème** :
+
 - Le contenu exact de `json_data` n'est pas défini
 - Les scripts de génération ne savent pas quelle structure créer
 - La recherche full-text (BIC-12) nécessite un contenu structuré
 
 **Exigences** :
+
 - Doit contenir des détails textuels pour recherche full-text
 - Doit être conforme aux exigences clients/IBM
 - Doit supporter tous les canaux et types d'interactions
 
 **Solution** :
+
 - Définir la structure JSON complète
 - Documenter tous les champs requis
 
 #### 3. Colonnes dynamiques non définies
 
 **Problème** :
+
 - Le contenu de `colonnes_dynamiques` (MAP<text, text>) n'est pas défini
 - Les scripts de génération ne savent pas quelles clés/valeurs créer
 
 **Exigences** :
+
 - Doit permettre flexibilité (BIC-07)
 - Doit être compatible avec les filtres HBase équivalents
 
 **Solution** :
+
 - Définir les clés/valeurs standard
 - Documenter les cas d'usage
 
 #### 4. Scripts de génération manquants
 
 **Problème** :
+
 - Scripts 05, 06, 07 n'existent pas encore
 - Pas de données de test volumineuses
 
 **Exigences** :
+
 - Au moins 10 000 interactions (plan mentionne 10 000+)
 - Couvrir tous les canaux (8 canaux)
 - Couvrir tous les types (5+ types)
@@ -87,6 +98,7 @@
 - Distribution réaliste
 
 **Solution** :
+
 - Créer script 05 : Génération Parquet (10 000+ interactions)
 - Créer script 06 : Génération JSON (1 000+ événements Kafka)
 - Créer script 07 : Génération données de test ciblées
@@ -150,6 +162,7 @@
 ```
 
 **Champs Requis pour Recherche Full-Text** :
+
 - `details` : Texte libre pour recherche (BIC-12)
 - `sujet` : Sujet de l'interaction
 - `contenu` : Contenu détaillé (email, SMS, etc.)
@@ -158,6 +171,7 @@
 ### Colonnes Dynamiques (`colonnes_dynamiques`)
 
 **Clés Standard** :
+
 - `resultat_detail` : Détail du résultat (ex: "succès - résolu en 24h")
 - `priorite` : Priorité (ex: "haute", "moyenne", "basse")
 - `categorie` : Catégorie métier (ex: "service_client", "vente", "conseil")
@@ -170,6 +184,7 @@
 - `id_agence` : ID agence (ex: "AG001")
 
 **Exemple** :
+
 ```cql
 colonnes_dynamiques = {
   'resultat_detail': 'succès - résolu en 24h',
@@ -309,6 +324,7 @@ colonnes_dynamiques = {
 ## 📝 Conclusion
 
 **Manques Identifiés** :
+
 1. ❌ Colonne `resultat` manquante
 2. ❌ Index SAI sur `resultat` manquant
 3. ❌ Structure JSON non définie
@@ -316,13 +332,14 @@ colonnes_dynamiques = {
 5. ❌ Scripts de génération manquants
 
 **Actions Requises** :
+
 1. ✅ Ajuster le schéma (ajouter `resultat`)
 2. ✅ Ajuster les index (ajouter index `resultat`)
 3. ✅ Documenter la structure complète des données
 4. ✅ Créer les scripts de génération
 
 **Une fois ces actions effectuées** :
+
 - ✅ Toutes les colonnes nécessaires seront présentes
 - ✅ Toutes les exigences pourront être testées
 - ✅ Un jeu de données complet et volumineux pourra être généré
-

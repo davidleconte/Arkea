@@ -8,7 +8,7 @@
 # OBJECTIF :
 #   Ce script exécute une série de tests de recherche full-text sur la table
 #   'operations_by_account' en utilisant les index SAI (Storage-Attached Index).
-#   
+#
 #   Les tests couvrent :
 #   - Recherche par libellé (full-text search)
 #   - Filtrage par catégorie automatique (cat_auto)
@@ -109,4 +109,3 @@ echo "   - Comparez les performances avec l'ancien workflow HBase (SCAN → Solr
 echo ""
 info "📝 Prochaines étapes:"
 echo "   - Script 13: Tests de correction client (API)"
-

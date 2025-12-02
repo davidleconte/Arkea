@@ -74,21 +74,21 @@ calculate_percentile() {
     local percentile=$1
     shift
     local times=("$@")
-    
+
     # Trier les temps
     IFS=$'\n' sorted=($(sort -n <<<"${times[*]}"))
     unset IFS
-    
+
     local count=${#sorted[@]}
     local index=$(python3 -c "import math; print(int(math.ceil($percentile * $count / 100)) - 1)")
-    
+
     if [ $index -lt 0 ]; then
         index=0
     fi
     if [ $index -ge $count ]; then
         index=$((count - 1))
     fi
-    
+
     echo "${sorted[$index]}"
 }
 
@@ -100,18 +100,18 @@ run_performance_test() {
     local total_time=0
     local min_time=999
     local max_time=0
-    
+
     info "Test : $test_name ($ITERATIONS itérations)..."
-    
+
     for i in $(seq 1 $ITERATIONS); do
         START_TIME=$(date +%s.%N)
         $CQLSH -e "$query" > /dev/null 2>&1 || true
         END_TIME=$(date +%s.%N)
-        
+
         DURATION=$(python3 -c "print($END_TIME - $START_TIME)")
         times+=("$DURATION")
         total_time=$(python3 -c "print($total_time + $DURATION)")
-        
+
         if (( $(echo "$DURATION < $min_time" | bc -l 2>/dev/null || echo "0") )); then
             min_time=$DURATION
         fi
@@ -119,9 +119,9 @@ run_performance_test() {
             max_time=$DURATION
         fi
     done
-    
+
     local avg_time=$(python3 -c "print($total_time / $ITERATIONS)")
-    
+
     # Calculer l'écart-type
     local variance=0
     for time in "${times[@]}"; do
@@ -130,12 +130,12 @@ run_performance_test() {
         variance=$(python3 -c "print($variance + $squared)")
     done
     local std_dev=$(python3 -c "import math; print(math.sqrt($variance / $ITERATIONS))")
-    
+
     # Calculer les percentiles
     local p50=$(calculate_percentile 50 "${times[@]}")
     local p95=$(calculate_percentile 95 "${times[@]}")
     local p99=$(calculate_percentile 99 "${times[@]}")
-    
+
     # Retourner les résultats
     echo "$test_name|$avg_time|$min_time|$max_time|$std_dev|$p50|$p95|$p99"
 }
@@ -144,8 +144,8 @@ run_performance_test() {
 cat > "$REPORT_FILE" << EOF
 # 📊 Démonstration : Tests de Performance Globaux
 
-**Date** : $(date +%Y-%m-%d)  
-**Script** : \`19_test_performance_global.sh\`  
+**Date** : $(date +%Y-%m-%d)
+**Script** : \`19_test_performance_global.sh\`
 **Itérations par requête** : $ITERATIONS
 
 ---
@@ -279,7 +279,7 @@ Les percentiles (p95, p99) indiquent la performance dans les cas les plus défav
 
 ---
 
-**Date** : $(date +%Y-%m-%d)  
+**Date** : $(date +%Y-%m-%d)
 **Script** : \`19_test_performance_global.sh\`
 
 EOF
@@ -293,4 +293,3 @@ echo "   - Filtrage par canal : ${avg3}s (moyenne), ${p95_3}s (p95)"
 echo "   - Filtrage par type : ${avg4}s (moyenne), ${p95_4}s (p95)"
 echo "   - Recherche full-text : ${avg6}s (moyenne), ${p95_6}s (p95)"
 echo ""
-

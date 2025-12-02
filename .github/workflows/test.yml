@@ -13,23 +13,23 @@ jobs:
   syntax-check:
     name: Syntax Check
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
+
       - name: Check Shell Scripts Syntax
         run: |
           find scripts/ -name "*.sh" -type f | while read -r script; do
             echo "Checking: $script"
             bash -n "$script" || exit 1
           done
-      
+
       - name: Check Python Scripts Syntax
         run: |
           find . -name "*.py" -type f -not -path "./.git/*" -not -path "./binaire/*" | while read -r script; do
@@ -43,11 +43,11 @@ jobs:
   config-check:
     name: Configuration Check
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Check .poc-config.sh
         run: |
           if [ -f .poc-config.sh ]; then
@@ -57,7 +57,7 @@ jobs:
             echo "❌ .poc-config.sh missing"
             exit 1
           fi
-      
+
       - name: Check .poc-profile
         run: |
           if [ -f .poc-profile ]; then
@@ -67,7 +67,7 @@ jobs:
             echo "❌ .poc-profile missing"
             exit 1
           fi
-      
+
       - name: Check .gitignore
         run: |
           if [ -f .gitignore ]; then
@@ -83,11 +83,11 @@ jobs:
   docs-check:
     name: Documentation Check
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Check README.md
         run: |
           if [ -f README.md ]; then
@@ -96,7 +96,7 @@ jobs:
             echo "❌ README.md missing"
             exit 1
           fi
-      
+
       - name: Check Markdown Links
         run: |
           # Vérifier que les liens dans la documentation sont valides
@@ -111,11 +111,11 @@ jobs:
   structure-check:
     name: Structure Check
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Check Required Directories
         run: |
           required_dirs=("scripts" "docs" "schemas")
@@ -127,7 +127,7 @@ jobs:
               exit 1
             fi
           done
-      
+
       - name: Check Scripts Organization
         run: |
           if [ -d "scripts/setup" ] && [ -d "scripts/utils" ]; then
@@ -136,4 +136,3 @@ jobs:
             echo "❌ Scripts not organized correctly"
             exit 1
           fi
-

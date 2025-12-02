@@ -7,16 +7,19 @@ Utiliser une **colonne collection** (`SET<TEXT>`) pour stocker tous les ngrams (
 ## ✅ Avantages
 
 ### 1. **Vraie Recherche Partielle**
+
 - ✅ `libelle_tokens CONTAINS 'carref'` → trouve "CARREFOUR"
 - ✅ Pas besoin de terme complet : "carref" fonctionne
 - ✅ Tolérance aux typos : "carref" trouve "CARREFOUR"
 
 ### 2. **Support Natif SAI**
+
 - ✅ `CONTAINS` est supporté nativement par SAI sur les collections
 - ✅ Index SAI standard (pas besoin d'analyzer personnalisé)
 - ✅ Performance optimale avec index SAI
 
 ### 3. **Simplicité**
+
 - ✅ Pas de développement Java (analyzer personnalisé)
 - ✅ Utilise les fonctionnalités natives de Cassandra/HCD
 - ✅ Maintenance simple
@@ -24,11 +27,13 @@ Utiliser une **colonne collection** (`SET<TEXT>`) pour stocker tous les ngrams (
 ## ⚠️ Inconvénients
 
 ### 1. **Stockage Supplémentaire**
+
 - ⚠️ Tous les ngrams sont stockés (ex: "CARREFOUR" → ~20 ngrams)
 - ⚠️ Impact sur la taille de la table
 - ⚠️ Impact sur les performances d'écriture
 
 ### 2. **Génération Côté Application**
+
 - ⚠️ Les ngrams doivent être générés lors de l'insertion
 - ⚠️ Nécessite un script Spark/Java pour générer les ngrams
 - ⚠️ Maintenance : s'assurer que tous les inserts génèrent les ngrams
@@ -99,6 +104,7 @@ WHERE code_si = '1' AND contrat = '5913101072'
 ## 🎯 Cas d'Usage
 
 ### Cas 1 : Recherche Partielle Simple
+
 ```cql
 -- Utilisateur tape "carref"
 SELECT * FROM operations_by_account
@@ -108,6 +114,7 @@ WHERE code_si = '1' AND contrat = '5913101072'
 ```
 
 ### Cas 2 : Recherche avec Typo
+
 ```cql
 -- Utilisateur tape "carref" (au lieu de "carrefour")
 SELECT * FROM operations_by_account
@@ -117,6 +124,7 @@ WHERE code_si = '1' AND contrat = '5913101072'
 ```
 
 ### Cas 3 : Recherche Combinée
+
 ```cql
 -- Recherche partielle + filtre
 SELECT * FROM operations_by_account
@@ -128,16 +136,19 @@ WHERE code_si = '1' AND contrat = '5913101072'
 ## 📈 Impact sur les Performances
 
 ### Stockage
+
 - **Taille estimée** : ~20-30 ngrams par libellé
 - **Exemple** : "CB CARREFOUR MARKET PARIS" (25 caractères) → ~25 ngrams
 - **Impact** : +50-100% de stockage pour les libellés
 
 ### Écriture
+
 - **Génération** : O(n²) où n = longueur du libellé
 - **Insertion** : SET<TEXT> est efficace (index SAI)
 - **Impact** : +10-20% de temps d'écriture
 
 ### Lecture
+
 - **Index SAI** : Performance optimale avec CONTAINS
 - **Impact** : Performance similaire à `libelle_prefix`
 
@@ -146,6 +157,7 @@ WHERE code_si = '1' AND contrat = '5913101072'
 ### Pour le POC : ✅ **OUI, implémenter**
 
 **Raisons** :
+
 1. ✅ Démontre une **vraie recherche partielle** (requis par le client)
 2. ✅ Utilise les fonctionnalités natives de HCD (CONTAINS sur collections)
 3. ✅ Simple à implémenter (pas de développement Java)
@@ -154,6 +166,7 @@ WHERE code_si = '1' AND contrat = '5913101072'
 ### Pour la Production : ⚠️ **À évaluer**
 
 **Facteurs à considérer** :
+
 - Volume de données (impact stockage)
 - Fréquence des recherches partielles
 - Budget stockage
@@ -164,6 +177,7 @@ WHERE code_si = '1' AND contrat = '5913101072'
 ## 🔄 Migration depuis `libelle_prefix`
 
 Si on adopte `libelle_tokens`, on peut :
+
 1. ✅ **Garder `libelle_prefix`** : Pour compatibilité et recherche de préfixes
 2. ✅ **Utiliser `libelle_tokens`** : Pour recherche partielle avancée
 3. ✅ **Fall-back** : `libelle` → `libelle_prefix` → `libelle_tokens`
@@ -171,13 +185,10 @@ Si on adopte `libelle_tokens`, on peut :
 ## 📝 Conclusion
 
 **`libelle_tokens` SET<TEXT> est une excellente solution pour la recherche partielle** car :
+
 - ✅ Utilise CONTAINS (supporté nativement)
 - ✅ Permet vraie recherche partielle ("carref" → "CARREFOUR")
 - ✅ Simple à implémenter
 - ✅ Performance acceptable
 
 **Recommandation** : Implémenter pour le POC et évaluer pour la production.
-
-
-
-

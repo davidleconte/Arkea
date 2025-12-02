@@ -43,6 +43,7 @@
 #### ✅ PARTIE 1: Contexte - Pourquoi des Index Avancés ?
 
 **Ajouté** :
+
 - Explication du problème : Recherches full-text limitées
 - Scénario concret : Recherche de 'loyers' (pluriel)
 - Limitations de l'index standard
@@ -56,6 +57,7 @@
 #### ✅ PARTIE 2: DDL - Index avec Explications Détaillées
 
 **Ajouté** :
+
 - Affichage du DDL avant exécution
 - Explication de chaque analyzer (tokenizer, filters)
 - Exemples de transformations (lowercase, asciifolding, stemming)
@@ -67,6 +69,7 @@
 #### ✅ PARTIE 3: Comparaisons et Recommandations
 
 **Ajouté** :
+
 - Tableau comparatif des index
 - Quand utiliser chaque index
 - Recommandations d'utilisation
@@ -78,6 +81,7 @@
 #### ✅ PARTIE 4: Vérifications Détaillées
 
 **Amélioré** :
+
 - Vérification de chaque index créé (détaillée)
 - Affichage des configurations dans des boîtes formatées
 - Vérification de la colonne libelle_prefix
@@ -89,6 +93,7 @@
 #### ✅ PARTIE 5: Résumé et Conclusion
 
 **Ajouté** :
+
 - Résumé de la configuration
 - Liste des capacités activées
 - Prochaines étapes
@@ -108,6 +113,7 @@
 #### ✅ PARTIE 0: Contexte - Pourquoi ces Tests ?
 
 **Ajouté** :
+
 - Objectif du POC : Valider les capacités de recherche full-text
 - Équivalences HBase → HCD pour les recherches
 - Améliorations HCD listées
@@ -119,6 +125,7 @@
 #### ✅ PARTIE 0.5: Explications des Index Utilisés
 
 **Ajouté** :
+
 - Liste complète des index SAI disponibles
 - Configuration de chaque index (analyzers)
 - Usage de chaque index avec exemples
@@ -130,6 +137,7 @@
 #### ✅ PARTIE 1: Types de Recherches Avancées (Enrichie)
 
 **Amélioré** :
+
 - Explications plus détaillées de chaque type de recherche
 - Exemples concrets pour chaque type
 - Cas d'usage détaillés
@@ -148,6 +156,7 @@
 #### ✅ PARTIE 0: Contexte Global - Architecture du POC
 
 **Ajouté** :
+
 - Objectif du POC : Démontrer le remplacement de HBase
 - Architecture actuelle (HBase) vs cible (HCD)
 - Tableau des équivalences HBase → HCD
@@ -159,6 +168,7 @@
 #### ✅ PARTIE 0.5: Architecture Complète
 
 **Ajouté** :
+
 - Schéma visuel de l'architecture HCD
 - Rôle de chaque composant (keyspace, table, colonnes, index)
 - Flux de données (chargement → indexation → recherche)
@@ -169,6 +179,7 @@
 #### ✅ PARTIE 1.5: Explications d'Orchestration
 
 **Ajouté** :
+
 - Pourquoi cette séquence d'orchestration ?
 - Explication de chaque étape (1️⃣ à 5️⃣)
 - Pourquoi chaque étape dans cet ordre ?
@@ -180,6 +191,7 @@
 #### ✅ PARTIE 2: Configuration Schéma (Enrichie)
 
 **Amélioré** :
+
 - Explications de ce qui est configuré
 - Pourquoi appeler le script 16 avant le script 11 ?
 - Rôle de chaque composant créé
@@ -286,4 +298,3 @@ Les versions améliorées (`_b19sh`) des scripts 16, 17 et 18 intègrent **tous 
 ---
 
 **✅ Améliorations terminées !**
-

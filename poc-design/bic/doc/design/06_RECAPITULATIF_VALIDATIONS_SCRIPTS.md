@@ -24,26 +24,31 @@
 #### Détails des Validations
 
 **TEST 1 : Timeline Complète**
+
 - ✅ Comparaison attendus vs obtenus
 - ✅ Validation complète (5 dimensions)
 - ✅ Validation de justesse (tri DESC)
 - ✅ Explications détaillées
 
 **TEST 2 : Pagination LIMIT**
+
 - ✅ Comparaison attendus vs obtenus (<= PAGE_SIZE)
 - ✅ Validation de cohérence (COUNT2 <= COUNT1)
 - ✅ Validation complète (5 dimensions)
 - ✅ Explications détaillées
 
 **TEST 3 : Pagination Curseur**
+
 - ✅ Validation de la pagination avec curseur
 - ✅ Explications détaillées
 
 **TEST 4 : Timeline Période (2 ans)**
+
 - ✅ Validation conformité TTL 2 ans
 - ✅ Explications détaillées
 
 **TEST 5 : Performance Complexe**
+
 - ✅ Test statistique (10 exécutions)
 - ✅ Calcul min/max/écart-type
 - ✅ Validation performance
@@ -68,18 +73,21 @@
 #### Détails des Validations
 
 **TEST 1 : Filtrage Canal Email**
+
 - ✅ Comparaison attendus vs obtenus
 - ✅ Validation de justesse (vérification canal='email')
 - ✅ Validation complète (5 dimensions)
 - ✅ Explications détaillées
 
 **TEST 3 : Filtrage Résultat Succès (BIC-11)**
+
 - ✅ Comparaison attendus vs obtenus
 - ✅ Validation de justesse (vérification résultat='succès')
 - ✅ Validation complète (5 dimensions)
 - ✅ Explications détaillées
 
 **TEST 6 : Test Exhaustif Tous Canaux**
+
 - ✅ Test exhaustif pour tous les canaux supportés
 - ✅ Validation de couverture complète
 
@@ -101,16 +109,19 @@
 #### Détails des Validations
 
 **TEST 1 : Recherche Mot-Clé**
+
 - ✅ Comparaison attendus vs obtenus
 - ✅ Validation de justesse (vérification terme présent)
 - ✅ Validation complète (5 dimensions)
 - ✅ Explications détaillées
 
 **TEST 3 : Recherche Préfixe**
+
 - ✅ Validation support stemming (analyseur Lucene)
 - ✅ Explications détaillées
 
 **TEST 4 : Recherche Combinée (Full-Text + Canal)**
+
 - ✅ Test complexe : Combinaison index SAI multiples
 - ✅ Validation performance
 - ✅ Explications détaillées
@@ -133,18 +144,21 @@
 #### Détails des Validations
 
 **TEST 1 : Filtre Combiné (Canal + Type)**
+
 - ✅ Comparaison attendus vs obtenus
 - ✅ Validation de justesse (vérification 2 critères)
 - ✅ Validation complète (5 dimensions)
 - ✅ Explications détaillées
 
 **TEST 4 : Filtre Combiné (Canal + Type + Résultat) - COMPLEXE**
+
 - ✅ Comparaison attendus vs obtenus
 - ✅ Validation de justesse (vérification 3 critères)
 - ✅ Validation complète (5 dimensions)
 - ✅ Explications détaillées (TEST COMPLEXE)
 
 **TEST 5 : Filtre Combiné (Canal + Type + Résultat + Période) - TRÈS COMPLEXE**
+
 - ✅ Comparaison attendus vs obtenus
 - ✅ Validation de justesse (vérification 4 critères)
 - ✅ Validation de cohérence (COUNT5 <= COUNT4)
@@ -152,6 +166,7 @@
 - ✅ Explications détaillées (TEST TRÈS COMPLEXE)
 
 **TEST 6 : Test Exhaustif Tous Canaux**
+
 - ✅ Test exhaustif pour tous les canaux
 - ✅ Validation de couverture complète
 
@@ -170,18 +185,22 @@
 #### Détails des Validations
 
 **Validation Pertinence**
+
 - ✅ Validation que le script répond au use case BIC-09
 - ✅ Explication équivalence bulkLoad HBase
 
 **Validation Cohérence**
+
 - ✅ Vérification que la table existe
 - ✅ Validation schéma conforme
 
 **Validation Conformité**
+
 - ✅ Validation équivalence bulkLoad HBase
 - ✅ Explication avantages HCD
 
 **Explications Détaillées**
+
 - ✅ Explication de chaque dimension de validation
 - ✅ Explication équivalences HBase
 - ✅ Explication avantages HCD
@@ -203,14 +222,17 @@
 #### Détails des Validations
 
 **TEST 1 : Export TIMERANGE**
+
 - ✅ Validation équivalence TIMERANGE HBase
 - ✅ Explications détaillées
 
 **TEST 3 : Export STARTROW/STOPROW**
+
 - ✅ Validation équivalence STARTROW/STOPROW HBase
 - ✅ Explications détaillées
 
 **TEST COMPLEXE : Validation Export Incrémental**
+
 - ✅ Comptage total interactions dans HCD
 - ✅ Comptage interactions de la période
 - ✅ Validation cohérence (COUNT_PERIOD <= TOTAL_IN_HCD)
@@ -234,6 +256,7 @@
 | **14** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 **Légende** :
+
 - ✅ : Complètement couvert
 - ⚠️ : Partiellement couvert (script d'ingestion, validations pré-exécution)
 
@@ -242,7 +265,7 @@
 1. **Script 11** : Test de performance avec statistiques (10 exécutions, min/max/écart-type)
 2. **Script 12** : Test exhaustif tous les canaux
 3. **Script 16** : Recherche combinée (full-text + filtre canal)
-4. **Script 18** : 
+4. **Script 18** :
    - Triple combinaison de filtres (TEST 4)
    - Quadruple combinaison de filtres (TEST 5 - TRÈS COMPLEXE)
 5. **Script 14** : Validation cohérence source vs export (TEST COMPLEXE)
@@ -274,6 +297,7 @@ Pour chaque test dans chaque script :
 ### Comparaisons Attendus vs Obtenus
 
 Pour chaque test :
+
 - ✅ Résultats attendus définis explicitement
 - ✅ Résultats obtenus capturés
 - ✅ Comparaison effectuée avec `compare_expected_vs_actual()`
@@ -282,6 +306,7 @@ Pour chaque test :
 ### Validations de Justesse
 
 Pour chaque test :
+
 - ✅ Vérification que les résultats correspondent aux critères
 - ✅ Validation de la justesse des données retournées
 - ✅ Vérification des patterns attendus
@@ -289,6 +314,7 @@ Pour chaque test :
 ### Explications Détaillées
 
 Pour chaque validation :
+
 - ✅ Explication de pourquoi la validation est nécessaire
 - ✅ Explication de comment elle est effectuée
 - ✅ Explication des critères de réussite
@@ -316,4 +342,3 @@ Pour chaque validation :
 **Date** : 2025-12-01  
 **Version** : 1.0.0  
 **Statut** : ✅ Tous les scripts améliorés avec validations complètes
-

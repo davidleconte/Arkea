@@ -10,9 +10,11 @@
 ### 1. ✅ Suppression des Fichiers Obsolètes
 
 **Fichiers supprimés** :
+
 - ✅ `11_load_domirama11_load_domirama11_load_domirama2_data_parquet.sh.old` (obsolète)
 
 **Fichiers archivés** :
+
 - ✅ `demo_multi_version_complete.sh` → `archive/` (remplacé par v2)
 - ✅ `31_demo_bloomfilter_equivalent.sh` → `archive/` (remplacé par v2)
 - ✅ `33_demo_colonnes_dynamiques.sh` → `archive/` (remplacé par v2)
@@ -24,6 +26,7 @@
 ### 2. ✅ Consolidation des Scripts Data API
 
 **Scripts archivés** (redondants) :
+
 - ✅ `demo_data_api_crud_complete.py` → `archive/data_api/`
 - ✅ `demo_data_api_crud_proof.py` → `archive/data_api/`
 - ✅ `demo_data_api_operations.py` → `archive/data_api/`
@@ -31,9 +34,11 @@
 - ✅ `demo_data_api_validation.py` → `archive/data_api/`
 
 **Script conservé** (référence principale) :
+
 - ✅ `demo_data_api_official.py` → `examples/python/data_api/`
 
 **Exemples** :
+
 - ✅ `data_api_examples/` → `examples/python/data_api/examples/`
 
 ---
@@ -41,6 +46,7 @@
 ### 3. ✅ Création de la Structure examples/
 
 **Structure créée** :
+
 ```
 examples/
 ├── python/
@@ -79,6 +85,7 @@ examples/
 ### 4. ✅ Création de la Structure schemas/
 
 **Schémas CQL déplacés** :
+
 ```
 schemas/
 ├── schemas/01_create_domirama2_schema.cql
@@ -162,10 +169,12 @@ domirama2/
 ### Documentation
 
 **À mettre à jour** (si nécessaire) :
+
 - Références aux chemins des scripts Python
 - Références aux schémas CQL
 
 **Exemple** :
+
 ```bash
 # Avant
 python3 test_vector_search.py
@@ -228,4 +237,3 @@ Les scripts shell doivent toujours fonctionner, mais les chemins vers les script
 ---
 
 **✅ Réorganisation terminée avec succès !**
-

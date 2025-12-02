@@ -22,6 +22,7 @@
 ### Objectif
 
 Le script 20 est un **script de test/comparaison** qui :
+
 - ✅ Compare `libelle` vs `libelle_prefix` sur 3 aspects
 - ✅ Démontre la tolérance aux typos
 - ✅ Teste les différences de comportement (stemming, typo)
@@ -56,6 +57,7 @@ Le script 20 est un **script de test/comparaison** qui :
 ### Objectif
 
 Le script 17 est un **script de test avancé** qui :
+
 - ✅ Exécute 20 tests de recherche full-text avancés
 - ✅ Teste différents types d'index SAI
 - ✅ Valide la pertinence des résultats
@@ -87,6 +89,7 @@ D'après l'analyse du fichier `schemas/05_domirama2_search_advanced.cql` et du s
 ### Objectif
 
 Le script 18 est un **script d'orchestration complète** qui :
+
 - ✅ Orchestre plusieurs étapes (setup, chargement, indexation)
 - ✅ Exécute 20 démonstrations (10 pédagogiques + 10 avancées)
 - ✅ Démontre toutes les capacités de recherche
@@ -147,10 +150,12 @@ D'après l'analyse du script 18 :
 **Valeur ajoutée** : Le script 20 est le **seul script qui compare directement** les deux colonnes côte à côte.
 
 **Exemples** :
+
 - TEST 2 : Compare `libelle : 'loyers'` vs `libelle_prefix : 'loyers'` (stemming)
 - TEST 3 : Compare `libelle : 'loyr'` vs `libelle_prefix : 'loy'` (typo)
 
 **Pourquoi c'est important** :
+
 - ✅ Permet de voir **directement** la différence de comportement
 - ✅ Aide à comprendre **quand utiliser** chaque colonne
 - ✅ Démontre **visuellement** les avantages/inconvénients
@@ -160,6 +165,7 @@ D'après l'analyse du script 18 :
 **Valeur ajoutée** : Le script 20 est **entièrement dédié** à la tolérance aux typos, contrairement aux scripts 17 et 18 qui couvrent de nombreux autres aspects.
 
 **Pourquoi c'est important** :
+
 - ✅ **Focus clair** : Tous les tests sont liés à la tolérance aux typos
 - ✅ **Compréhension approfondie** : Permet de comprendre en détail le problème et les solutions
 - ✅ **Documentation dédiée** : Rapport markdown spécifique à la tolérance aux typos
@@ -169,6 +175,7 @@ D'après l'analyse du script 18 :
 **Valeur ajoutée** : Le TEST 2 du script 20 compare **explicitement** le comportement avec et sans stemming.
 
 **Pourquoi c'est important** :
+
 - ✅ Démontre que `libelle` réduit 'loyers' → 'loyer' (stemming)
 - ✅ Démontre que `libelle_prefix` cherche 'loyers' exact (sans stemming)
 - ✅ Aide à comprendre **quand utiliser** chaque colonne selon le besoin
@@ -176,11 +183,13 @@ D'après l'analyse du script 18 :
 #### ⚠️ **4. Limitations du Script 20**
 
 **Ce qui manque** :
+
 - ❌ Pas de test avec `libelle_tokens CONTAINS` (vraie recherche partielle)
 - ❌ Pas de test avec fall-back (comme dans script 17, test 4)
 - ❌ Pas de test avec `libelle_embedding` (fuzzy search)
 
 **Ce qui est redondant** :
+
 - ⚠️ Les limites des typos sont déjà démontrées dans script 18 (démos 7-8)
 - ⚠️ Les solutions (préfixe, stemming) sont déjà démontrées dans script 18 (démos 9-10)
 
@@ -195,11 +204,13 @@ D'après l'analyse du script 18 :
 **Valeur** : Le script 20 est le **seul script qui compare directement** libelle vs libelle_prefix côte à côte.
 
 **Impact** :
+
 - ✅ Permet de voir **immédiatement** la différence de comportement
 - ✅ Aide à comprendre **quand utiliser** chaque colonne
 - ✅ Démontre **visuellement** les avantages/inconvénients
 
 **Exemple** :
+
 - Script 17/18 : Teste `libelle : 'loyers'` (trouve via stemming)
 - Script 20 : Teste `libelle : 'loyers'` ET `libelle_prefix : 'loyers'` (compare les résultats)
 
@@ -208,6 +219,7 @@ D'après l'analyse du script 18 :
 **Valeur** : Le script 20 est **entièrement dédié** à la tolérance aux typos.
 
 **Impact** :
+
 - ✅ **Compréhension approfondie** : Permet de comprendre en détail le problème et les solutions
 - ✅ **Documentation dédiée** : Rapport markdown spécifique à la tolérance aux typos
 - ✅ **Utile pour formation** : Script standalone pour expliquer la tolérance aux typos
@@ -217,6 +229,7 @@ D'après l'analyse du script 18 :
 **Valeur** : Le TEST 2 compare **explicitement** le comportement avec et sans stemming.
 
 **Impact** :
+
 - ✅ Démontre que `libelle` réduit 'loyers' → 'loyer' (stemming)
 - ✅ Démontre que `libelle_prefix` cherche 'loyers' exact (sans stemming)
 - ✅ Aide à comprendre **quand utiliser** chaque colonne selon le besoin
@@ -228,6 +241,7 @@ D'après l'analyse du script 18 :
 **Problème** : Les limites et solutions sont déjà démontrées dans le script 18.
 
 **Exemples** :
+
 - Script 18 (Démo 7) : Démontre que `libelle : 'loyr'` ne fonctionne pas
 - Script 20 (Test 3) : Démontre la même chose + comparaison avec libelle_prefix
 
@@ -238,6 +252,7 @@ D'après l'analyse du script 18 :
 **Problème** : Le script 20 ne teste pas `libelle_tokens CONTAINS` (vraie recherche partielle).
 
 **Exemples** :
+
 - Script 17 (Test 4) : Démontre le fall-back libelle → libelle_tokens CONTAINS
 - Script 20 : Ne teste pas libelle_tokens
 
@@ -257,13 +272,13 @@ D'après l'analyse du script 18 :
 
 **⭐⭐⭐ Moyenne à Haute** - Le script 20 apporte une **valeur ajoutée réelle** mais **limitée** :
 
-#### ✅ **Points Forts** :
+#### ✅ **Points Forts**
 
 1. **Comparaison directe** : Seul script qui compare libelle vs libelle_prefix côte à côte
 2. **Focus spécifique** : Entièrement dédié à la tolérance aux typos
 3. **Démonstration stemming** : Compare explicitement avec/sans stemming
 
-#### ⚠️ **Points Faibles** :
+#### ⚠️ **Points Faibles**
 
 1. **Redondance partielle** : Les limites sont déjà démontrées dans script 18
 2. **Incomplet** : Ne teste pas libelle_tokens CONTAINS ni libelle_embedding
@@ -274,6 +289,7 @@ D'après l'analyse du script 18 :
 #### **Conserver le Script 20 comme Script Standalone**
 
 **Raisons** :
+
 1. ✅ **Valeur éducative** : Comparaison directe très didactique
 2. ✅ **Focus spécifique** : Utile pour expliquer la tolérance aux typos
 3. ✅ **Documentation dédiée** : Rapport markdown spécifique
@@ -316,13 +332,13 @@ D'après l'analyse du script 18 :
 
 **⭐⭐⭐ Moyenne** - Le script 20 apporte une **valeur ajoutée réelle** mais **limitée** :
 
-#### ✅ **Valeur Ajoutée** :
+#### ✅ **Valeur Ajoutée**
 
 1. **Comparaison directe** : Seul script qui compare libelle vs libelle_prefix côte à côte
 2. **Focus spécifique** : Entièrement dédié à la tolérance aux typos
 3. **Démonstration stemming** : Compare explicitement avec/sans stemming
 
-#### ⚠️ **Limitations** :
+#### ⚠️ **Limitations**
 
 1. **Redondance partielle** : Les limites sont déjà démontrées dans script 18
 2. **Incomplet** : Ne teste pas libelle_tokens CONTAINS ni libelle_embedding
@@ -331,6 +347,7 @@ D'après l'analyse du script 18 :
 ### Recommandation
 
 **Conserver le script 20 comme script standalone** avec :
+
 1. ✅ Documentation claire indiquant la valeur ajoutée (comparaison directe)
 2. ✅ Mention de la redondance partielle avec script 18
 3. ✅ Améliorations recommandées (tests avec libelle_tokens et libelle_embedding)
@@ -340,7 +357,3 @@ D'après l'analyse du script 18 :
 ---
 
 *Analyse créée le 2025-11-26 pour déterminer la valeur ajoutée réelle du script 20*
-
-
-
-

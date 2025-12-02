@@ -102,6 +102,7 @@ ls -la hcd-1.2.3/
 ```
 
 **Structure attendue** :
+
 ```
 hcd-1.2.3/
 ├── bin/
@@ -210,6 +211,7 @@ cqlsh localhost 9042
 ```
 
 **Dans cqlsh** :
+
 ```cql
 -- Vérifier la version
 SELECT release_version FROM system.local;
@@ -289,6 +291,7 @@ endpoint_snitch: SimpleSnitch
 ### Problème : HCD ne démarre pas
 
 **Vérifications** :
+
 ```bash
 # 1. Vérifier Java 11
 java -version
@@ -395,4 +398,3 @@ Une fois HCD installé et démarré :
 ---
 
 **Prêt à installer ?** Suivez les étapes dans l'ordre ! 🚀
-

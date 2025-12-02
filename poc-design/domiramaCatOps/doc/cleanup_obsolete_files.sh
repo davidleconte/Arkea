@@ -84,4 +84,3 @@ if [ $DELETED -gt 0 ]; then
 else
     warn "⚠️  Aucun fichier supprimé (tous déjà supprimés ?)"
 fi
-

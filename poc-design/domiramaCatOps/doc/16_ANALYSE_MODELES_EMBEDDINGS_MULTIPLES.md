@@ -48,6 +48,7 @@
 ### Scénario 2 : Suppression d'Index Non Critiques
 
 **Index supprimables** (priorité basse/moyenne) :
+
 - `idx_meta_source` (🟢 Basse) - Filtrage par source
 - `idx_type_operation` (🟡 Moyenne) - Filtrage par type
 
@@ -57,6 +58,7 @@
 ### Scénario 3 : Augmentation de la Limite SAI
 
 **Configuration HCD** :
+
 ```yaml
 # Dans cassandra.yaml ou configuration HCD
 sai_index_max_per_table: 15  # Au lieu de 10 par défaut
@@ -84,6 +86,7 @@ sai_index_max_per_table: 15  # Au lieu de 10 par défaut
 ### Modèles Supplémentaires Recommandés
 
 #### 1. **Invoices_bilingual-embedding-large** (RECOMMANDÉ - Spécialisé Facturation)
+
 - **Modèle** : `NoureddineSa/Invoices_bilingual-embedding-large`
 - **Dimensions** : À vérifier (probablement 768-1024)
 - **Avantages** :
@@ -97,6 +100,7 @@ sai_index_max_per_table: 15  # Au lieu de 10 par défaut
 - **Usage** : **PRIORITÉ 1** - Pour libellés bancaires/facturation
 
 #### 2. **multilingual-e5-base** (ALTERNATIVE)
+
 - **Modèle** : `intfloat/multilingual-e5-base`
 - **Dimensions** : 768
 - **Avantages** :
@@ -109,6 +113,7 @@ sai_index_max_per_table: 15  # Au lieu de 10 par défaut
 - **Usage** : Alternative si modèle facturation non disponible
 
 #### 2. **paraphrase-multilingual-MiniLM** (RECOMMANDÉ)
+
 - **Modèle** : `paraphrase-multilingual-MiniLM-L12-v2`
 - **Dimensions** : 384
 - **Avantages** :
@@ -120,6 +125,7 @@ sai_index_max_per_table: 15  # Au lieu de 10 par défaut
 - **Usage** : Pour recherche rapide avec volume élevé
 
 #### 3. **sentence-transformers/all-MiniLM-L6-v2** (OPTIONNEL)
+
 - **Modèle** : `sentence-transformers/all-MiniLM-L6-v2`
 - **Dimensions** : 384
 - **Avantages** :
@@ -130,6 +136,7 @@ sai_index_max_per_table: 15  # Au lieu de 10 par défaut
 - **Usage** : Benchmark de performance
 
 #### 4. **camembert-base** (OPTIONNEL - Spécialisé Français)
+
 - **Modèle** : `dangvantuan/sentence-camembert-base`
 - **Dimensions** : 768
 - **Avantages** :
@@ -141,6 +148,7 @@ sai_index_max_per_table: 15  # Au lieu de 10 par défaut
 - **Usage** : Si données 100% françaises
 
 #### 5. **LaBSE** (OPTIONNEL - Multilingue Avancé)
+
 - **Modèle** : `sentence-transformers/LaBSE`
 - **Dimensions** : 768
 - **Avantages** :
@@ -176,6 +184,7 @@ sai_index_max_per_table: 15  # Au lieu de 10 par défaut
 **Recommandation** : **Garder ByteT5 + e5-large** (déjà implémenté)
 
 **Justification** :
+
 - ✅ Couverture complète (rapide + pertinent)
 - ✅ ByteT5 excelle pour "CB" (100% pertinence)
 - ✅ e5-large excelle pour la plupart des requêtes (50% pertinence)
@@ -186,11 +195,13 @@ sai_index_max_per_table: 15  # Au lieu de 10 par défaut
 **Recommandation** : **ByteT5 + e5-large + Modèle Facturation**
 
 **Actions** :
+
 1. Supprimer `idx_meta_source` (priorité basse)
 2. Ajouter `libelle_embedding_invoice VECTOR<FLOAT, 768-1024>` (dimensions à vérifier)
 3. Créer `idx_libelle_embedding_invoice_vector`
 
 **Avantages** :
+
 - ✅ **Modèle spécialisé facturation** : Meilleure compréhension terminologie bancaire
 - ✅ **Optimisé pour libellés financiers** : LOYER, VIREMENT, TAXE, ASSURANCE, etc.
 - ✅ **Comparaison spécialisé vs généraliste** : Facturation vs e5-large
@@ -203,12 +214,14 @@ sai_index_max_per_table: 15  # Au lieu de 10 par défaut
 **Recommandation** : **ByteT5 + e5-large + e5-base + MiniLM-L12**
 
 **Actions** :
+
 1. Supprimer `idx_meta_source` et `idx_type_operation`
 2. Ajouter `libelle_embedding_e5_base` (768 dim)
 3. Ajouter `libelle_embedding_minilm` (384 dim)
 4. Créer les index correspondants
 
 **Avantages** :
+
 - ✅ Couverture complète : rapide (MiniLM) + équilibré (e5-base) + optimal (e5-large)
 - ✅ Comparaison complète des stratégies
 - ✅ Choix optimal selon le cas d'usage
@@ -218,16 +231,19 @@ sai_index_max_per_table: 15  # Au lieu de 10 par défaut
 **Recommandation** : **Tous les modèles recommandés**
 
 **Actions** :
+
 1. Augmenter limite SAI à 15 (configuration HCD)
 2. Ajouter tous les modèles recommandés
 3. Comparaison exhaustive
 
 **Avantages** :
+
 - ✅ Comparaison exhaustive de tous les modèles
 - ✅ Choix optimal basé sur données réelles
 - ✅ Flexibilité maximale
 
 **Inconvénients** :
+
 - ⚠️ Impact sur les performances (plus d'index)
 - ⚠️ Complexité de maintenance
 - ⚠️ Stockage accru
@@ -261,6 +277,7 @@ sai_index_max_per_table: 15  # Au lieu de 10 par défaut
 **Scénario B : 3 Modèles** (ByteT5 + e5-large + Modèle Facturation)
 
 **Justification** :
+
 - ✅ **Modèle spécialisé facturation** : Plus pertinent pour libellés bancaires
 - ✅ **Comparaison spécialisé vs généraliste** : Facturation vs e5-large
 - ✅ Impact minimal (suppression d'1 index non critique)
@@ -272,14 +289,17 @@ sai_index_max_per_table: 15  # Au lieu de 10 par défaut
 ### Pour la Production (Selon Besoins)
 
 **Option 1** : **2 Modèles** (ByteT5 + e5-large)
+
 - Si limite SAI stricte
 - Stratégie hybride optimale
 
 **Option 2** : **3 Modèles** (ByteT5 + e5-large + e5-base)
+
 - Si besoin de fallback rapide
 - Comparaison performance/pertinence
 
 **Option 3** : **4 Modèles** (ByteT5 + e5-large + e5-base + MiniLM)
+
 - Si besoin de recherche très rapide
 - Comparaison exhaustive
 
@@ -298,4 +318,3 @@ sai_index_max_per_table: 15  # Au lieu de 10 par défaut
 
 **Date de génération** : 2025-11-30  
 **Version** : 1.0
-

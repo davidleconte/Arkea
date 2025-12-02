@@ -11,6 +11,7 @@
 ### Besoin 1 : Unload Incrémental ORC
 
 **HBase** :
+
 ```
 Lecture batch pour des unload incrémentaux sur HDFS au format ORC
 FullScan + STARTROW + STOPROW + TIMERANGE pour une fenêtre glissante
@@ -19,6 +20,7 @@ FullScan + STARTROW + STOPROW + TIMERANGE pour une fenêtre glissante
 ### Besoin 2 : Fenêtre Glissante
 
 **HBase** :
+
 ```
 TIMERANGE pour une fenêtre glissante et un ciblage plus précis des données
 ```
@@ -26,6 +28,7 @@ TIMERANGE pour une fenêtre glissante et un ciblage plus précis des données
 ### Besoin 3 : STARTROW/STOPROW
 
 **HBase** :
+
 ```
 STARTROW + STOPROW pour cibler précisément les données
 ```
@@ -39,6 +42,7 @@ STARTROW + STOPROW pour cibler précisément les données
 **Fichier** : `27_export_incremental_parquet.sh`
 
 **Fonctionnalités** :
+
 - ✅ Export depuis HCD vers HDFS (format Parquet)
 - ✅ WHERE date_op BETWEEN start AND end (équivalent TIMERANGE)
 - ✅ Partitionnement par date_op (performance)
@@ -46,10 +50,12 @@ STARTROW + STOPROW pour cibler précisément les données
 - ✅ Vérification post-export
 
 **Équivalence HBase** :
+
 - ✅ FullScan + TIMERANGE → WHERE date_op BETWEEN
 - ✅ Unload ORC → Export Parquet (recommandé)
 
 **Code Clé** :
+
 ```scala
 val df = spark.read
   .format("org.apache.spark.sql.cassandra")
@@ -75,22 +81,25 @@ df.write
 **Fichier** : `28_demo_fenetre_glissante_spark_submit.sh`
 
 **Fonctionnalités** :
+
 - ✅ Exports mensuels automatisés
 - ✅ Calcul automatique des dates (début/fin de mois)
 - ✅ WHERE date_op BETWEEN pour chaque fenêtre
 - ✅ Idempotence (mode overwrite pour rejeux)
 
 **Équivalence HBase** :
+
 - ✅ TIMERANGE fenêtre glissante → WHERE date_op BETWEEN (calculé)
 - ✅ Ciblage précis → WHERE sur clustering keys
 
 **Code Clé** :
+
 ```scala
 // Fenêtre glissante mensuelle
 for (month <- 1 to 12) {
   val startDate = s"2024-${month:02d}-01"
   val endDate = s"2024-${(month + 1):02d}-01"
-  
+
   val df = spark.read
     .format("org.apache.spark.sql.cassandra")
     .load()
@@ -98,7 +107,7 @@ for (month <- 1 to 12) {
       col("date_op") >= startDate &&
       col("date_op") < endDate
     )
-  
+
   df.write
     .mode("overwrite")  // Idempotence
     .partitionBy("date_op")
@@ -187,6 +196,7 @@ for (month <- 1 to 12) {
 **✅ Les deux scripts fonctionnent et répondent aux besoins Arkéa identifiés dans le PDF !**
 
 **Mise à jour** : 2024-11-27
+
 - ✅ **57 scripts** créés (18 versions didactiques avec documentation automatique)
 - ✅ **18 démonstrations** .md générées automatiquement
 - ✅ **Export incrémental** : Démontré avec DSBulk + Spark (`27_export_incremental_parquet_v2_didactique.sh`)
@@ -195,4 +205,3 @@ for (month <- 1 to 12) {
 - ✅ **BLOOMFILTER** : Démontré avec performance validée (`32_demo_performance_comparison.sh`)
 - ✅ **Colonnes dynamiques** : Démontrées (`33_demo_colonnes_dynamiques_v2.sh`)
 - ✅ **REPLICATION_SCOPE** : Démontré (`34_demo_replication_scope_v2.sh`)
-

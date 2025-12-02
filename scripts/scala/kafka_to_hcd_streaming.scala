@@ -89,8 +89,3 @@ println("   Tapez Ctrl+C pour arrêter")
 
 // Attendre la terminaison
 query.awaitTermination()
-
-
-
-
-

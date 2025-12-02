@@ -16,11 +16,11 @@
 #
 get_realpath() {
     local path="$1"
-    
+
     if [ -z "$path" ]; then
         return 1
     fi
-    
+
     # macOS (BSD) - readlink -f n'existe pas
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # Utiliser Python pour obtenir le chemin réel
@@ -57,11 +57,11 @@ get_realpath() {
 #
 check_port() {
     local port="$1"
-    
+
     if [ -z "$port" ]; then
         return 1
     fi
-    
+
     # macOS / Linux - utiliser lsof
     if [[ "$OSTYPE" == "darwin"* ]] || [[ "$OSTYPE" == "linux-gnu"* ]]; then
         if command -v lsof &> /dev/null; then
@@ -69,7 +69,7 @@ check_port() {
             return $?
         fi
     fi
-    
+
     # Windows (Git Bash) - utiliser netstat
     if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]]; then
         if command -v netstat &> /dev/null; then
@@ -77,7 +77,7 @@ check_port() {
             return $?
         fi
     fi
-    
+
     # WSL2 - utiliser ss ou netstat
     if [[ "$OSTYPE" == *"wsl"* ]] || [[ "$OSTYPE" == "linux-gnu"* ]]; then
         if command -v ss &> /dev/null; then
@@ -88,13 +88,13 @@ check_port() {
             return $?
         fi
     fi
-    
+
     # Fallback : essayer de se connecter au port
     if command -v nc &> /dev/null; then
         nc -z localhost "$port" >/dev/null 2>&1
         return $?
     fi
-    
+
     # Si aucune méthode n'est disponible, retourner 1 (port non utilisé)
     return 1
 }
@@ -108,11 +108,11 @@ check_port() {
 #
 kill_process() {
     local pattern="$1"
-    
+
     if [ -z "$pattern" ]; then
         return 1
     fi
-    
+
     # macOS / Linux - utiliser pkill
     if [[ "$OSTYPE" == "darwin"* ]] || [[ "$OSTYPE" == "linux-gnu"* ]]; then
         if command -v pkill &> /dev/null; then
@@ -120,7 +120,7 @@ kill_process() {
             return 0
         fi
     fi
-    
+
     # Windows (Git Bash) / WSL2 - utiliser taskkill ou kill
     if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]]; then
         # Git Bash sur Windows
@@ -129,7 +129,7 @@ kill_process() {
             return 0
         fi
     fi
-    
+
     # WSL2 / Linux - utiliser pgrep + kill
     if [[ "$OSTYPE" == *"wsl"* ]] || [[ "$OSTYPE" == "linux-gnu"* ]]; then
         if command -v pgrep &> /dev/null; then
@@ -137,13 +137,13 @@ kill_process() {
             return 0
         fi
     fi
-    
+
     # Fallback : utiliser ps + grep + kill
     if command -v ps &> /dev/null; then
         ps aux | grep -i "$pattern" | grep -v grep | awk '{print $2}' | xargs kill -9 2>/dev/null || true
         return 0
     fi
-    
+
     return 1
 }
 
@@ -177,4 +177,3 @@ command_exists() {
     local cmd="$1"
     command -v "$cmd" &> /dev/null
 }
-

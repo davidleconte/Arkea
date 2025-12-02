@@ -26,6 +26,7 @@
 ### Code Scala Temporaire
 
 Le script crée dynamiquement un script Scala avec :
+
 - Paramètres injectés : `startDate`, `endDate`, `outputPath`
 - Lecture depuis HCD avec filtrage par dates
 - Exclusion de la colonne `libelle_embedding` (type VECTOR)
@@ -45,12 +46,14 @@ Le script crée dynamiquement un script Scala avec :
 ### Template 66 : Script Export Didactique
 
 **Points communs** :
+
 - ✅ Export HCD → Parquet
 - ✅ Filtrage par dates (TIMERANGE)
 - ✅ Structure didactique avec explications
 - ✅ Génération de rapport markdown
 
 **Différences** :
+
 - ❌ Template 66 : Export unique (une seule période)
 - ✅ Script 28 : Fenêtre glissante (plusieurs périodes en boucle)
 - ❌ Template 66 : Utilise DSBulk + Spark (pour éviter problème VECTOR)
@@ -61,10 +64,12 @@ Le script crée dynamiquement un script Scala avec :
 ### Template 65 : Script Test avec Délégation Python
 
 **Points communs** :
+
 - ✅ Structure didactique
 - ✅ Génération de rapport markdown
 
 **Différences** :
+
 - ❌ Template 65 : Délègue à Python
 - ✅ Script 28 : Délègue à Spark/Scala
 - ❌ Template 65 : Pour les tests
@@ -77,6 +82,7 @@ Le script crée dynamiquement un script Scala avec :
 ### Template 67 : Script Export avec Fenêtre Glissante
 
 **Justification** :
+
 1. **Spécificité** : La fenêtre glissante (boucle sur plusieurs périodes) est un pattern unique
 2. **Complexité** : Nécessite une structure spécifique pour gérer plusieurs exports
 3. **Didactique** : Doit afficher les résultats pour chaque fenêtre
@@ -95,7 +101,7 @@ Le script crée dynamiquement un script Scala avec :
 # OBJECTIF :
 #   Ce script démontre la fenêtre glissante pour les exports incrémentaux,
 #   équivalent au TIMERANGE HBase avec décalage progressif.
-#   
+#  
 #   Cette version didactique affiche :
 #   - Le code Spark complet pour chaque fenêtre avec explications
 #   - Les équivalences HBase → HCD détaillées
@@ -181,12 +187,14 @@ Le script crée dynamiquement un script Scala avec :
 **Recommandation** : **Créer un nouveau Template 67** spécifiquement pour les scripts avec fenêtre glissante.
 
 **Raisons** :
+
 1. ✅ Pattern unique (boucle sur plusieurs fenêtres)
 2. ✅ Nécessite une structure spécifique pour gérer plusieurs exports
 3. ✅ Rapport markdown doit documenter toutes les fenêtres
 4. ✅ Statistiques doivent être agrégées par fenêtre et globalement
 
 **Prochaines étapes** :
+
 1. Créer le Template 67 : `67_TEMPLATE_SCRIPT_EXPORT_FENETRE_GLISSANTE_DIDACTIQUE.md`
 2. Appliquer le template au script 28 pour créer `28_demo_fenetre_glissante_v2_didactique.sh`
 3. Tester et valider la version didactique
@@ -195,7 +203,3 @@ Le script crée dynamiquement un script Scala avec :
 
 **Date de création** : 2025-11-26  
 **Auteur** : Analyse automatique
-
-
-
-

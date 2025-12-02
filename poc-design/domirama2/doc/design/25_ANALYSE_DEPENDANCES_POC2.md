@@ -8,6 +8,7 @@
 ## 🎯 Contexte
 
 Le **POC2** de la proposition IBM nécessite :
+
 - Lecture des **SequenceFiles** existants (format HBase actuel)
 - Décodage **COBOL** via **OperationDecoder** (composants production)
 - Alimentation HCD via Spark
@@ -42,11 +43,13 @@ D'après la demande, les dépendances suivantes sont **strictement nécessaires*
 **Archive analysée** : `inputs-clients/groupe_2025-11-25-110250.zip`
 
 **Contenu** :
+
 - 11 archives `tar.gz` (code source des projets)
 - 1 JAR : `com.arkea.commons.hbase-0.5.5.jar` (54 KB)
 - 1 PDF : Documentation
 
 **Résultat** :
+
 - ❌ **JARs manquants** : Aucun des JARs requis n'est présent dans l'archive
 - ⚠️ **JAR présent** : `com.arkea.commons.hbase-0.5.5.jar` (mais **pas dans la liste requise**)
 - ✅ **Code source** : `domiramabatch-develop.tar.gz` (641 KB) - Contient probablement les dépendances déclarées dans `ivy.xml`
@@ -59,6 +62,7 @@ D'après la demande, les dépendances suivantes sont **strictement nécessaires*
 **Section** : `3.1. Jars Arkéa à récupérer (minimum)` (lignes 1379-1391)
 
 **JARs mentionnés par IBM** :
+
 - ✅ `com.arkea.commons.cobol-0.30.jar` (confirmé)
 - ✅ `com.arkea.cav.operationdecoder-0.6.3.jar` (confirmé)
 - ⚠️ `com.arkea.commons.thrift-1.6.6.jar` (probable - mentionné par IBM)
@@ -66,6 +70,7 @@ D'après la demande, les dépendances suivantes sont **strictement nécessaires*
 - ✅ `cb2xml-1.01.1.jar` (open-source - confirmé)
 
 **Différence avec la liste fournie** :
+
 - ❓ `com.arkea.commons.crypto-0.8.jar` : **Non mentionné par IBM** mais présent dans la liste fournie
   - **Hypothèse** : Nécessaire pour le décryptage des données COBOL chiffrées
   - **Action** : Vérifier si présent dans `ivy.xml` du projet `domiramabatch`
@@ -92,6 +97,7 @@ D'après la demande, les dépendances suivantes sont **strictement nécessaires*
 #### 1. `com.arkea.cav.operationdecoder:0.6.3` ⭐ CRITIQUE
 
 **Usage** :
+
 - Instanciation des `OperationDecoder` (ex. `Y7XDOMIOperationDecoder`)
 - Décodage des données COBOL depuis SequenceFile
 - Transformation COBOL → Colonnes normalisées
@@ -101,6 +107,7 @@ D'après la demande, les dépendances suivantes sont **strictement nécessaires*
 #### 2. `com.arkea.commons.cobol:0.30` ⭐ CRITIQUE
 
 **Usage** :
+
 - Parsing des structures COBOL
 - Décodage des formats COBOL
 - Gestion des copies COBOL
@@ -110,6 +117,7 @@ D'après la demande, les dépendances suivantes sont **strictement nécessaires*
 #### 3. `com.arkea.commons.thrift:1.6.6` ⚠️ IMPORTANT
 
 **Usage** :
+
 - Décodage des données Thrift (catégorisation)
 - Sérialisation/désérialisation Thrift
 
@@ -118,6 +126,7 @@ D'après la demande, les dépendances suivantes sont **strictement nécessaires*
 #### 4. `com.arkea.commons.crypto:0.8` ⚠️ IMPORTANT
 
 **Usage** :
+
 - Décryptage des données chiffrées
 - Gestion des clés de chiffrement
 
@@ -126,6 +135,7 @@ D'après la demande, les dépendances suivantes sont **strictement nécessaires*
 #### 5. `com.arkea.commons.hadoop:2.0.0` ⚠️ IMPORTANT
 
 **Usage** :
+
 - Lecture des SequenceFiles Hadoop
 - InputFormat personnalisés
 - Intégration avec l'écosystème Hadoop
@@ -135,6 +145,7 @@ D'après la demande, les dépendances suivantes sont **strictement nécessaires*
 #### 6. `net.sf:cb2xml:1.01.1` ✅ DISPONIBLE
 
 **Usage** :
+
 - Conversion COBOL → XML
 - Parsing des structures COBOL
 
@@ -232,7 +243,7 @@ decoded.write
     <scope>provided</scope>
   </dependency>
   <!-- ... autres dépendances Arkéa ... -->
-  
+
   <!-- Spark Cassandra Connector -->
   <dependency>
     <groupId>com.datastax.spark</groupId>
@@ -276,6 +287,7 @@ decoded.write
 ### Statut Actuel
 
 **POC2 non réalisable** sans les JARs Arkéa :
+
 - ❌ **5/6 dépendances manquantes** (83%)
 - ❌ **2 dépendances critiques** manquantes (OperationDecoder, Cobol)
 - ✅ **1 dépendance disponible** (cb2xml sur Maven Central)
@@ -283,6 +295,7 @@ decoded.write
 ### Vérification Proposition IBM
 
 **✅ Liste validée** : La liste fournie est **cohérente** avec la proposition IBM :
+
 - **5/6 dépendances** confirmées par IBM (lignes 1383-1391)
 - **1 dépendance** (`crypto`) non mentionnée par IBM mais probablement nécessaire
 
@@ -302,11 +315,13 @@ decoded.write
 ### Recommandation
 
 **Pour réaliser le POC2 conforme IBM** :
+
 - ✅ **Demander les JARs** à Arkéa (priorité haute)
 - ✅ **Vérifier les SequenceFiles** disponibles (échantillons ou production)
 - ✅ **Préparer la configuration** Spark avec les JARs
 
 **Sans ces JARs** :
+
 - ⚠️ POC2 **non réalisable**
 - ✅ POC1 (CSV) reste fonctionnel et valide pour la démonstration
 
@@ -322,4 +337,3 @@ decoded.write
 
 **Date de vérification** : 2025-11-25  
 **Statut** : ⚠️ **JARs manquants - Action requise auprès d'Arkéa**
-

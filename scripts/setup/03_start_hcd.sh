@@ -80,4 +80,3 @@ else
     echo ""
     CASSANDRA_LOG_DIR="$LOG_DIR" bin/hcd cassandra
 fi
-

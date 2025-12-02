@@ -188,8 +188,3 @@ echo ""
 info "📝 Prochaines étapes:"
 echo "   - Script 12: Tests de recherche"
 echo "   - Script 13: Tests de correction client (API)"
-
-
-
-
-

@@ -26,10 +26,12 @@ Ce guide documente toutes les équivalences entre HBase et HCD pour le use case 
 **Clé de ligne** : `code_efs + numero_client + date (yyyyMMdd) + cd_canal + idt_tech`
 
 **Column Families** :
+
 - `A`, `C`, `E`, `M` : Attributs extraits de l'événement
 - `VERSIONS=2` : Pour certaines CF (conservation dernière modification)
 
 **Format de stockage** :
+
 - JSON dans une colonne principale
 - Colonnes dynamiques "normalisées" extraites du JSON
 - Permet filtres via SCAN + Bloomfilter (ROWCOL)
@@ -39,11 +41,13 @@ Ce guide documente toutes les équivalences entre HBase et HCD pour le use case 
 **Table HCD** : `bic_poc.interactions_by_client`
 
 **Clé Primaire** :
+
 - Partition Key : `(code_efs, numero_client)`
 - Clustering Key : `(date_interaction, canal, type_interaction, idt_tech)`
 - Clustering Order : `DESC` (plus récent en premier)
 
 **Colonnes** :
+
 - `json_data` (text) : Données JSON complètes
 - `colonnes_dynamiques` (map<text, text>) : Colonnes dynamiques
 - `default_time_to_live = 63072000` : TTL 2 ans
@@ -68,6 +72,7 @@ HFileOutputFormat.configureIncrementalLoad(job, table);
 ```
 
 **Processus** :
+
 1. Génération des HFiles via MapReduce
 2. Chargement des HFiles dans HBase (bulkLoad)
 3. Compaction des HFiles
@@ -91,6 +96,7 @@ interactions.write
 ```
 
 **Avantages** :
+
 - ✅ Plus simple : Pas besoin de générer HFiles
 - ✅ Plus rapide : Écriture directe via connecteur
 - ✅ Plus flexible : Support de multiples formats (Parquet, JSON, CSV)
@@ -111,6 +117,7 @@ ResultScanner scanner = table.getScanner(scan);
 ```
 
 **Équivalent HBase** :
+
 - `STARTROW/STOPROW` : Filtrage par plage de clés de ligne
 - `TIMERANGE` : Filtrage par plage temporelle
 
@@ -126,10 +133,12 @@ WHERE code_efs = 'EFS001'
 ```
 
 **Équivalent HCD** :
+
 - `STARTROW/STOPROW` → `WHERE code_efs = ? AND numero_client = ? AND date_interaction >= ? AND < ?`
 - `TIMERANGE` → `WHERE date_interaction >= ? AND < ?`
 
 **Avantages** :
+
 - ✅ Syntaxe SQL standard (CQL)
 - ✅ Plus lisible et maintenable
 - ✅ Performance optimale avec partition key
@@ -154,6 +163,7 @@ ResultScanner scanner = table.getScanner(scan);
 ```
 
 **Équivalent HBase** :
+
 - `SCAN + value filter` : Filtrage par valeur de colonne
 
 #### HCD (CQL avec Index SAI)
@@ -167,12 +177,14 @@ WHERE code_efs = 'EFS001'
 ```
 
 **Index SAI requis** :
+
 ```cql
 CREATE CUSTOM INDEX idx_interactions_canal ON bic_poc.interactions_by_client (canal)
 USING 'StorageAttachedIndex';
 ```
 
 **Avantages** :
+
 - ✅ Index SAI plus performant que scan global
 - ✅ Syntaxe SQL standard
 - ✅ Support de filtres multiples simultanés
@@ -192,6 +204,7 @@ table.put(put);
 ```
 
 **Équivalent HBase** :
+
 - Colonnes dynamiques : Ajout de colonnes à la volée
 - Pas de schéma fixe
 
@@ -211,6 +224,7 @@ VALUES (..., {'categorie': 'premium', 'duree_secondes': '120'});
 ```
 
 **Avantages** :
+
 - ✅ Type MAP natif Cassandra
 - ✅ Plus structuré que colonnes dynamiques HBase
 - ✅ Requêtes efficaces sur les clés/valeurs du MAP
@@ -230,6 +244,7 @@ table.put(put);
 ```
 
 **Équivalent HBase** :
+
 - TTL par cellule ou par famille de colonnes
 
 #### HCD (default_time_to_live)
@@ -242,6 +257,7 @@ CREATE TABLE bic_poc.interactions_by_client (
 ```
 
 **Avantages** :
+
 - ✅ TTL automatique pour toutes les lignes
 - ✅ Plus simple à gérer
 - ✅ Pas besoin de définir TTL à chaque insertion
@@ -263,6 +279,7 @@ ResultScanner scanner = table.getScanner(scan); // Scan complet = lent
 ```
 
 **Équivalent HBase** :
+
 - Scan complet de la table (lent)
 - Filtres sur valeurs
 
@@ -291,6 +308,7 @@ WHERE code_efs = 'EFS001'
 ```
 
 **Avantages** :
+
 - ✅ Index SAI performant (pas de scan complet)
 - ✅ Analyseurs linguistiques (français, stemming)
 - ✅ Recherche par préfixe, racine, fuzzy
@@ -320,6 +338,7 @@ WHERE code_efs = 'EFS001'
 ### Exemple 1 : Migration BulkLoad → Spark Batch
 
 **Avant (HBase)** :
+
 ```java
 // MapReduce BulkLoad
 Job job = Job.getInstance(conf, "BICBulkLoad");
@@ -327,6 +346,7 @@ HFileOutputFormat.configureIncrementalLoad(job, table);
 ```
 
 **Après (HCD)** :
+
 ```scala
 // Spark Batch Write
 val interactions = spark.read.parquet("data/interactions.parquet")
@@ -340,6 +360,7 @@ interactions.write
 ### Exemple 2 : Migration SCAN → SELECT
 
 **Avant (HBase)** :
+
 ```java
 Scan scan = new Scan();
 scan.setStartRow(Bytes.toBytes("EFS001_CLIENT123_20240101"));
@@ -348,6 +369,7 @@ ResultScanner scanner = table.getScanner(scan);
 ```
 
 **Après (HCD)** :
+
 ```cql
 SELECT * FROM bic_poc.interactions_by_client
 WHERE code_efs = 'EFS001'
@@ -359,6 +381,7 @@ WHERE code_efs = 'EFS001'
 ### Exemple 3 : Migration Filtres → Index SAI
 
 **Avant (HBase)** :
+
 ```java
 SingleColumnValueFilter filter = new SingleColumnValueFilter(
     Bytes.toBytes("A"),
@@ -370,6 +393,7 @@ scan.setFilter(filter);
 ```
 
 **Après (HCD)** :
+
 ```cql
 -- Index SAI
 CREATE CUSTOM INDEX idx_interactions_canal ON bic_poc.interactions_by_client (canal)
@@ -433,4 +457,3 @@ WHERE code_efs = 'EFS001'
 
 **Date** : 2025-12-01  
 **Version** : 1.0.0
-

@@ -142,7 +142,7 @@ Pour chaque test :
 
 ## 🔧 Processus Standardisé
 
-### Pour chaque nouveau script :
+### Pour chaque nouveau script
 
 1. **Script Python** :
    - Créer structure `all_results = []`
@@ -175,8 +175,3 @@ Pour chaque test :
 ---
 
 **✅ Le processus est maintenant généralisé et peut être appliqué à toutes les démonstrations !**
-
-
-
-
-

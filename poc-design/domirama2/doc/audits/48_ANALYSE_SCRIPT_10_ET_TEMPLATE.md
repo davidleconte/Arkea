@@ -44,14 +44,17 @@ Le script `10_setup_domirama2_poc.sh` est un **script de setup/schéma** qui :
 ### Fonctionnalités Actuelles
 
 ✅ **Vérifications** :
+
 - HCD démarré
 - HCD prêt (cqlsh accessible)
 - Fichier schéma présent
 
 ✅ **Exécution** :
+
 - Exécution du fichier CQL via `cqlsh -f`
 
 ✅ **Vérifications Post-Création** :
+
 - Keyspace existe
 - Colonnes de catégorisation (5/5)
 - Index SAI (5+)
@@ -59,18 +62,22 @@ Le script `10_setup_domirama2_poc.sh` est un **script de setup/schéma** qui :
 ### Limitations Actuelles
 
 ❌ **Pas d'affichage du DDL** :
+
 - Le DDL n'est pas affiché avant exécution
 - Pas d'explication des sections (keyspace, table, index)
 
 ❌ **Vérifications basiques** :
+
 - Vérifications limitées (existence, comptage)
 - Pas d'affichage détaillé des résultats
 
 ❌ **Pas d'explications** :
+
 - Pas d'explications des équivalences HBase → HCD
 - Pas d'explications des concepts (partition keys, clustering keys, etc.)
 
 ❌ **Pas de documentation générée** :
+
 - Pas de rapport markdown généré automatiquement
 
 ---
@@ -82,12 +89,14 @@ Le script `10_setup_domirama2_poc.sh` est un **script de setup/schéma** qui :
 Le template actuel est **orienté vers les tests DML** (SELECT, INSERT, UPDATE) :
 
 **Structure** :
+
 1. PARTIE 1: DDL - Schéma (affichage partiel)
 2. PARTIE 2: Définition et Principe
 3. PARTIE 3: Tests (avec requêtes DML)
 4. PARTIE 4: Résumé et Conclusion
 
 **Focus** :
+
 - Tests de recherche
 - Requêtes CQL avec résultats
 - Validation des résultats de requêtes
@@ -143,10 +152,12 @@ Le template actuel est **orienté vers les tests DML** (SELECT, INSERT, UPDATE) 
 ### Option 1 : Enrichir le Template Actuel
 
 **Avantages** :
+
 - Un seul template pour tous les scripts
 - Cohérence dans la structure
 
 **Inconvénients** :
+
 - Template complexe avec beaucoup de conditionnels
 - Sections non utilisées pour chaque type de script
 - Difficile à maintenir
@@ -156,12 +167,14 @@ Le template actuel est **orienté vers les tests DML** (SELECT, INSERT, UPDATE) 
 ### Option 2 : Créer un Template Spécifique pour Setup
 
 **Avantages** :
+
 - Template adapté spécifiquement aux scripts de setup
 - Structure claire et dédiée
 - Facile à utiliser et maintenir
 - Sections pertinentes uniquement
 
 **Inconvénients** :
+
 - Deux templates à maintenir
 - Nécessite de choisir le bon template
 
@@ -170,10 +183,12 @@ Le template actuel est **orienté vers les tests DML** (SELECT, INSERT, UPDATE) 
 ### Option 3 : Template Hybride avec Sections Optionnelles
 
 **Avantages** :
+
 - Un seul template
 - Sections optionnelles selon le type
 
 **Inconvénients** :
+
 - Template très complexe
 - Difficile à comprendre et utiliser
 - Risque d'erreurs
@@ -262,8 +277,3 @@ Le template spécifique pour setup (`47_TEMPLATE_SCRIPT_SETUP_DIDACTIQUE.md`) do
 ---
 
 **✅ Conclusion : Le template spécifique pour setup est nécessaire et a été créé !**
-
-
-
-
-

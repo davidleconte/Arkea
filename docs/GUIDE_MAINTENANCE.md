@@ -176,6 +176,7 @@ Utiliser le script `scripts/utils/91_check_consistency.sh` :
 **Symptôme** : Scripts avec chemins `/Users/...` ou `/opt/homebrew/...`
 
 **Solution** :
+
 ```bash
 # Détecter
 ./scripts/utils/91_check_consistency.sh --check-hardcoded-paths
@@ -188,6 +189,7 @@ Utiliser le script `scripts/utils/91_check_consistency.sh` :
 **Symptôme** : Scripts sans `set -euo pipefail`
 
 **Solution** :
+
 ```bash
 # Détecter
 ./scripts/utils/91_check_consistency.sh --check-scripts
@@ -200,6 +202,7 @@ Utiliser le script `scripts/utils/91_check_consistency.sh` :
 **Symptôme** : Liens cassés, références obsolètes
 
 **Solution** :
+
 ```bash
 # Détecter
 ./scripts/utils/91_check_consistency.sh --check-docs
@@ -287,7 +290,7 @@ Générer un rapport de maintenance :
 ---
 
 **Pour plus d'informations, voir** :
+
 - `scripts/utils/95_cleanup.sh` - Script de nettoyage
 - `scripts/utils/91_check_consistency.sh` - Script de vérification
 - `docs/AUDIT_COMPLET_PROJET_ARKEA_2025_V2.md` - Audit complet
-

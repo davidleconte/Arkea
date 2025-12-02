@@ -1,7 +1,8 @@
 # 🔍 Audit : Scripts 09 (Acceptation/Opposition)
 
 **Date** : 2025-11-29
-**Scripts audités** : 
+**Scripts audités** :
+
 - `09_test_acceptation_opposition.sh`
 - `09_prepare_test_data.sh`
 **Rapport audité** : `09_ACCEPTATION_OPPOSITION_DEMONSTRATION.md`
@@ -11,10 +12,12 @@
 ## 📋 Méthodologie d'Audit
 
 ### Comparaison avec Scripts Référents
+
 - **Script 10** : `10_test_regles_personnalisees.sh` (8 tests)
 - **Script 11** : `11_test_feedbacks_counters.sh` (8 tests avec vérification avant/après)
 
 ### Critères d'Évaluation
+
 1. **Complétude** : Tous les éléments nécessaires sont présents
 2. **Cohérence** : Pas de contradictions entre script et rapport
 3. **Didactique** : Explications claires et détaillées
@@ -27,6 +30,7 @@
 ## ✅ Points Positifs
 
 ### 1. Structure Générale
+
 - ✅ Structure cohérente avec les autres scripts
 - ✅ Fonction `execute_query` bien implémentée
 - ✅ Gestion des erreurs correcte
@@ -34,11 +38,13 @@
 - ✅ Script de préparation des données présent (`09_prepare_test_data.sh`)
 
 ### 2. Affichage des Requêtes
+
 - ✅ Requêtes CQL affichées avant exécution
 - ✅ Requêtes CQL incluses dans le rapport
 - ✅ Équivalences HBase → HCD documentées
 
 ### 3. Note Sémantique
+
 - ✅ Note sémantique sur `accepted_at` dans le script (lignes 265-271)
 - ✅ Explication de la cohérence `accepted`/`accepted_at`
 
@@ -49,20 +55,24 @@
 ### 1. **MANQUE CRITIQUE : Vérification Avant/Après pour les UPDATE**
 
 **Problème** :
+
 - Les tests 5 et 6 (UPDATE) ne vérifient pas que les modifications ont été appliquées
 - Pas de SELECT avant/après pour valider les UPDATE
 - Le script 11 a cette fonctionnalité pour les UPDATE
 
 **Impact** :
+
 - Impossible de valider que les UPDATE fonctionnent correctement
 - Pas de démonstration que les modifications sont bien appliquées
 - Le rapport ne montre pas les valeurs avant/après
 
 **Détails** :
+
 - Test 5 : "Activation Opposition" (UPDATE `opposed = true`)
 - Test 6 : "Désactivation Opposition" (UPDATE `opposed = false`)
 
 **Recommandation** :
+
 ```bash
 # Pour chaque test UPDATE (5, 6) :
 # 1. SELECT avant pour lire la valeur initiale (opposed)
@@ -74,16 +84,19 @@
 ### 2. **MANQUE : Validation de Cohérence dans le Rapport**
 
 **Problème** :
+
 - Le rapport affiche les résultats mais ne valide pas la cohérence des données
 - Pas de vérification que `accepted = true` avec `accepted_at` renseigné est cohérent
 - Pas de vérification que `opposed = true` avec `opposed_at` renseigné est cohérent
 - Le script 11 a une section "Démonstration de l'atomicité" pour les UPDATE
 
 **Impact** :
+
 - Le rapport ne démontre pas que les données sont cohérentes
 - Pas d'explication détaillée de pourquoi les résultats sont valides
 
 **Recommandation** :
+
 - Ajouter une section "Validation de cohérence" dans le rapport pour chaque test
 - Vérifier que les valeurs booléennes et les timestamps sont cohérents
 - Expliquer la sémantique de `accepted_at` et `opposed_at` dans le rapport
@@ -91,16 +104,19 @@
 ### 3. **MANQUE : Explication Détaillée des Résultats dans le Rapport**
 
 **Problème** :
+
 - Le rapport affiche les résultats mais ne les explique pas en détail
 - Pas d'explication de pourquoi les valeurs sont cohérentes
 - Pas de comparaison entre les différents tests
 - Le script 11 a des explications détaillées pour chaque test
 
 **Impact** :
+
 - Le rapport n'est pas assez didactique
 - Difficile de comprendre la logique métier derrière les résultats
 
 **Recommandation** :
+
 - Pour chaque test avec résultats, ajouter :
   - Explication détaillée de chaque valeur retournée
   - Comparaison avec les valeurs attendues
@@ -110,11 +126,13 @@
 ### 4. **MANQUE : Section SAI Value Add**
 
 **Problème** :
+
 - Le script 08 a une section "SAI Value Add" qui explique les avantages de SAI
 - Le script 09 n'a pas de section équivalente pour expliquer les avantages de HCD pour acceptation/opposition
 
 **Recommandation** :
 Ajouter une section dans le rapport expliquant :
+
 - Les avantages de HCD vs HBase pour les données d'acceptation/opposition
 - La garantie de cohérence
 - La performance des requêtes
@@ -122,19 +140,23 @@ Ajouter une section dans le rapport expliquant :
 ### 5. **MANQUE : Affichage des Données dans le Rapport pour Tests 2 et 4**
 
 **Problème** :
+
 - Test 2 : "Vérification avant Affichage" - Le rapport montre une ligne vide dans les résultats
 - Test 4 : "Vérification avant Catégorisation" - Le rapport montre une ligne vide dans les résultats
 - Les résultats sont filtrés mais ne montrent pas la valeur `accepted` ou `opposed`
 
 **Détails** :
+
 ```
 Test 2 - Résultats obtenus :
 ----------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------+-----------+----------------+-----------
 ```
+
 La valeur `accepted` n'est pas affichée.
 
 **Recommandation** :
+
 - Améliorer le filtrage des résultats pour capturer les valeurs booléennes
 - Afficher explicitement la valeur retournée dans le rapport
 
@@ -145,26 +167,31 @@ La valeur `accepted` n'est pas affichée.
 ### 1. **INCOHÉRENCE : Note Sémantique dans le Script mais Pas dans le Rapport**
 
 **Problème** :
+
 - Le script affiche une note sémantique sur `accepted_at` (lignes 265-271)
 - Cette note n'apparaît pas dans le rapport généré
 - Le rapport devrait inclure cette information importante
 
 **Impact** :
+
 - Perte d'information importante lors de la génération du rapport
 - Le rapport ne documente pas la sémantique de `accepted_at`
 
 **Recommandation** :
+
 - Ajouter la note sémantique dans le rapport pour tous les tests qui utilisent `accepted` ou `accepted_at`
 - Inclure un lien vers `doc/ANALYSE_COHERENCE_ACCEPTED_AT.md`
 
 ### 2. **INCOHÉRENCE : Validation Générique vs Spécifique**
 
 **Problème** :
+
 - Le rapport affiche une validation générique pour tous les tests
 - Pas de validation spécifique selon le type de test (SELECT vs UPDATE)
 - Le script 11 a des validations spécifiques selon le type de test
 
 **Recommandation** :
+
 - Ajouter des validations spécifiques :
   - Pour les SELECT : vérifier que les données correspondent aux critères
   - Pour les UPDATE : vérifier avant/après que les modifications sont appliquées
@@ -173,25 +200,30 @@ La valeur `accepted` n'est pas affichée.
 ### 3. **INCOHÉRENCE : Limitation OUTPUT_FOR_REPORT à 5 lignes**
 
 **Problème** :
+
 - Ligne 287 : `OUTPUT_FOR_REPORT=$(echo "$QUERY_RESULTS_FILTERED" | head -5 | awk '{printf "%s___NL___", $0}')`
 - Limite à 5 lignes alors que le script 11 limite à 15 lignes
 - Incohérence avec les autres scripts
 
 **Recommandation** :
+
 - Augmenter la limite à 15 lignes pour cohérence avec le script 11
 
 ### 4. **INCOHÉRENCE : Variable TEMP_RESULTS_FILE Non Définie**
 
 **Problème** :
+
 - Ligne 608 : `rm -f "$TEMP_RESULTS_FILE"`
 - La variable `TEMP_RESULTS_FILE` n'est pas définie
 - La variable correcte est `TEMP_RESULTS` (ligne 80)
 
 **Impact** :
+
 - Erreur silencieuse (le fichier n'existe pas, donc pas d'erreur)
 - Code mort qui ne nettoie rien
 
 **Recommandation** :
+
 - Corriger pour utiliser `TEMP_RESULTS` au lieu de `TEMP_RESULTS_FILE`
 
 ---
@@ -201,26 +233,31 @@ La valeur `accepted` n'est pas affichée.
 ### 1. **CONTRADICTION : Explication UPDATE dans le Rapport**
 
 **Problème** :
+
 - Tests 5 et 6 : Le rapport dit "Pour un UPDATE/INSERT, c'est normal (pas de SELECT)"
 - Mais le script devrait faire un SELECT après pour vérifier que l'UPDATE a fonctionné
 - Le script 11 fait cette vérification
 
 **Contradiction** :
+
 - Le rapport explique que c'est normal de ne pas avoir de résultats
 - Mais on devrait quand même vérifier que l'UPDATE a fonctionné
 
 **Recommandation** :
+
 - Ajouter une vérification avant/après pour les UPDATE
 - Modifier l'explication dans le rapport pour refléter cette vérification
 
 ### 2. **CONTRADICTION : Validation Générique vs Données Réelles**
 
 **Problème** :
+
 - Le rapport affiche "Les données correspondent aux critères de recherche" pour tous les tests
 - Mais pour les tests 2 et 4, les résultats sont vides dans le rapport
 - Contradiction entre la validation et les données affichées
 
 **Recommandation** :
+
 - Améliorer le filtrage pour capturer les valeurs booléennes
 - Afficher explicitement les valeurs dans le rapport
 - Valider seulement si les données sont réellement présentes
@@ -296,12 +333,14 @@ La valeur `accepted` n'est pas affichée.
 ## 📝 Résumé Exécutif
 
 ### Points Forts
+
 - ✅ Structure cohérente avec les autres scripts
 - ✅ Requêtes CQL bien affichées
 - ✅ Script de préparation des données présent
 - ✅ Note sémantique dans le script (mais pas dans le rapport)
 
 ### Points Faibles
+
 - ❌ **Pas de vérification avant/après pour les UPDATE** (CRITIQUE)
 - ❌ **Note sémantique absente du rapport** (IMPORTANT)
 - ⚠️ **Validation de cohérence incomplète** (IMPORTANT)
@@ -310,6 +349,7 @@ La valeur `accepted` n'est pas affichée.
 - ⚠️ **OUTPUT_FOR_REPORT limité à 5 lignes** (Moyen)
 
 ### Score Global
+
 - **Complétude** : 7/10 (manque vérification avant/après UPDATE)
 - **Cohérence** : 6/10 (quelques incohérences de variables et de filtrage)
 - **Didactique** : 6/10 (bon mais peut être amélioré avec note sémantique dans rapport)
@@ -322,7 +362,9 @@ La valeur `accepted` n'est pas affichée.
 ## 🔧 Corrections Techniques Détailées
 
 ### Correction 1 : Variable TEMP_RESULTS_FILE
+
 **Ligne 608** :
+
 ```bash
 # AVANT
 rm -f "$TEMP_RESULTS_FILE"
@@ -332,7 +374,9 @@ rm -f "$TEMP_RESULTS"
 ```
 
 ### Correction 2 : OUTPUT_FOR_REPORT
+
 **Ligne 287** :
+
 ```bash
 # AVANT
 OUTPUT_FOR_REPORT=$(echo "$QUERY_RESULTS_FILTERED" | head -5 | awk '{printf "%s___NL___", $0}')
@@ -342,7 +386,9 @@ OUTPUT_FOR_REPORT=$(echo "$QUERY_RESULTS_FILTERED" | head -15 | awk '{printf "%s
 ```
 
 ### Correction 3 : Filtrage pour Tests 2 et 4
+
 **Ligne 220** :
+
 ```bash
 # AVANT
 QUERY_RESULTS_FILTERED=$(echo "$QUERY_OUTPUT" | grep -vE "..." | grep -E "^[[:space:]]*code_efs|^[[:space:]]*-{3,}|^[[:space:]]*[0-9]+[[:space:]]*\|" | ...)
@@ -352,7 +398,9 @@ QUERY_RESULTS_FILTERED=$(echo "$QUERY_OUTPUT" | grep -vE "..." | grep -E "^[[:sp
 ```
 
 ### Correction 4 : Vérification Avant/Après pour Tests 5 et 6
+
 **Ajouter après chaque UPDATE** :
+
 ```bash
 # Étape 1 : Lire la valeur avant
 BEFORE_VALUE=$($CQLSH -e "USE domiramacatops_poc; SELECT opposed FROM opposition_categorisation WHERE code_efs = '1' AND no_pse = 'PSE001';" 2>&1 | grep -E "^\s+(True|False)" | tr -d ' ' || echo "false")
@@ -386,7 +434,9 @@ PYEOF
 ```
 
 ### Correction 5 : Note Sémantique dans le Rapport
+
 **Dans la génération du rapport Python** :
+
 ```python
 # Pour les tests avec accepted
 if 'accepted' in r.get('query', '') or 'accepted_at' in r.get('query', ''):
@@ -400,5 +450,3 @@ if 'accepted' in r.get('query', '') or 'accepted_at' in r.get('query', ''):
 ---
 
 **Date de génération** : 2025-11-29
-
-

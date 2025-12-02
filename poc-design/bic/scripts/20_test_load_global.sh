@@ -90,7 +90,7 @@ run_concurrent_queries() {
     local num_requests="$2"
     local pids=()
     local temp_dir=$(mktemp -d)
-    
+
     for i in $(seq 1 $num_requests); do
         (
             result=$(run_query_measure "$query")
@@ -98,7 +98,7 @@ run_concurrent_queries() {
         ) &
         pids+=($!)
     done
-    
+
     # Attendre toutes les requêtes
     local start_wait=$(date +%s.%N)
     for pid in "${pids[@]}"; do
@@ -106,7 +106,7 @@ run_concurrent_queries() {
     done
     local end_wait=$(date +%s.%N)
     local total_time=$(python3 -c "print($end_wait - $start_wait)")
-    
+
     # Collecter les résultats
     local times=()
     local success_count=0
@@ -119,9 +119,9 @@ run_concurrent_queries() {
             fi
         fi
     done
-    
+
     rm -rf "$temp_dir"
-    
+
     # Calculer les statistiques
     local total=0
     local min=999
@@ -135,10 +135,10 @@ run_concurrent_queries() {
             max=$time
         fi
     done
-    
+
     local avg=$(python3 -c "print($total / ${#times[@]})" 2>/dev/null || echo "0")
     local throughput=$(python3 -c "print($num_requests / $total_time)" 2>/dev/null || echo "0")
-    
+
     echo "$avg|$min|$max|$success_count|$throughput"
 }
 
@@ -146,9 +146,9 @@ run_concurrent_queries() {
 cat > "$REPORT_FILE" << EOF
 # 🔥 Démonstration : Tests de Charge et Scalabilité Globaux
 
-**Date** : $(date +%Y-%m-%d)  
-**Script** : \`20_test_load_global.sh\`  
-**Volume** : $VOLUME interactions  
+**Date** : $(date +%Y-%m-%d)
+**Script** : \`20_test_load_global.sh\`
+**Volume** : $VOLUME interactions
 **Requêtes simultanées** : $CONCURRENT_REQUESTS
 
 ---
@@ -279,7 +279,7 @@ cat >> "$REPORT_FILE" << EOF
 
 ---
 
-**Date** : $(date +%Y-%m-%d)  
+**Date** : $(date +%Y-%m-%d)
 **Script** : \`20_test_load_global.sh\`
 
 EOF

@@ -106,8 +106,8 @@ success "Fichier Parquet trouvé : $PARQUET_FILE"
 cat > "$REPORT_FILE" << EOF
 # 📥 Démonstration : Chargement Batch des Interactions (Parquet)
 
-**Date** : 2025-12-01  
-**Script** : \`08_load_interactions_batch.sh\`  
+**Date** : 2025-12-01
+**Script** : \`08_load_interactions_batch.sh\`
 **Use Cases** : BIC-07 (Format JSON), BIC-09 (Écriture batch - bulkLoad équivalent)
 
 ---
@@ -369,7 +369,7 @@ $SPARK_CODE_WRITE
 
 ---
 
-**Date** : 2025-12-01  
+**Date** : 2025-12-01
 **Script** : \`08_load_interactions_batch.sh\`
 EOF
 
@@ -499,4 +499,3 @@ fi
 echo ""
 result "📄 Rapport généré : $REPORT_FILE"
 echo ""
-

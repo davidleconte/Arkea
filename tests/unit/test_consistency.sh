@@ -25,9 +25,9 @@ test_function() {
     local test_name="$1"
     local expected="$2"
     local actual="$3"
-    
+
     TOTAL=$((TOTAL + 1))
-    
+
     if [ "$expected" = "$actual" ]; then
         echo "✅ $test_name"
         PASSED=$((PASSED + 1))
@@ -170,4 +170,3 @@ else
     echo "❌ $FAILED test(s) ont échoué"
     exit 1
 fi
-

@@ -8,7 +8,7 @@
 # OBJECTIF :
 #   Ce script démontre les requêtes en base avec ciblage précis (STARTROW/STOPROW
 #   équivalent HBase) en exécutant 3 requêtes CQL directement via cqlsh.
-#   
+#
 #   Cette version didactique affiche :
 #   - Les équivalences HBase → HCD détaillées
 #   - Les requêtes CQL complètes avant exécution
@@ -181,21 +181,21 @@ execute_query() {
     local query_cql="$5"
     local expected_result="$6"
     local sai_value="$7"
-    
+
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "  🔍 REQUÊTE $query_num : $query_title"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-    
+
     info "📚 DÉFINITION - $query_title :"
     echo "   $query_description"
     echo ""
-    
+
     info "🔄 ÉQUIVALENT HBase :"
     code "   $hbase_equivalent"
     echo ""
-    
+
     info "📝 Requête CQL :"
     echo "$query_cql" | while IFS= read -r line; do
         if [ -n "$line" ]; then
@@ -203,16 +203,16 @@ execute_query() {
         fi
     done
     echo ""
-    
+
     if [ -n "$sai_value" ]; then
         info "💡 VALEUR AJOUTÉE SAI :"
         echo "   $sai_value" | sed 's/^/   /'
         echo ""
     fi
-    
+
     expected "📋 Résultat attendu : $expected_result"
     echo ""
-    
+
     # Créer un fichier temporaire pour la requête
     TEMP_QUERY_FILE=$(mktemp "/tmp/query_${query_num}_$(date +%s).cql")
     cat > "$TEMP_QUERY_FILE" <<EOF
@@ -220,25 +220,25 @@ USE domirama2_poc;
 TRACING ON;
 $query_cql
 EOF
-    
+
     # Exécuter la requête et mesurer le temps
     info "🚀 Exécution de la requête..."
     START_TIME=$(date +%s.%N)
     QUERY_OUTPUT=$($CQLSH -f "$TEMP_QUERY_FILE" 2>&1 | tee -a "$TEMP_OUTPUT")
     EXIT_CODE=$?
     END_TIME=$(date +%s.%N)
-    
+
     # Calculer le temps d'exécution (compatible macOS)
     if command -v bc >/dev/null 2>&1; then
         QUERY_TIME=$(echo "$END_TIME - $START_TIME" | bc 2>/dev/null || echo "0.000")
     else
         QUERY_TIME=$(python3 -c "print($END_TIME - $START_TIME)" 2>/dev/null || echo "0.000")
     fi
-    
+
     # Extraire les métriques du tracing
     COORDINATOR_TIME=$(echo "$QUERY_OUTPUT" | grep "coordinator" | awk -F'|' '{print $4}' | tr -d ' ' | head -1 || echo "")
     TOTAL_TIME=$(echo "$QUERY_OUTPUT" | grep "total" | awk -F'|' '{print $4}' | tr -d ' ' | head -1 || echo "")
-    
+
     # Compter les lignes retournées
     ROW_COUNT=$(echo "$QUERY_OUTPUT" | grep -E "^[A-Z_]+ \|" | grep -v "^code_si " | wc -l | tr -d ' ')
     if [ -z "$ROW_COUNT" ] || [ "$ROW_COUNT" -eq 0 ]; then
@@ -248,14 +248,14 @@ EOF
     if [ -z "$ROW_COUNT" ] || ! [[ "$ROW_COUNT" =~ ^[0-9]+$ ]]; then
         ROW_COUNT=0
     fi
-    
+
     # Extraire le plan d'exécution
     EXECUTION_PLAN=$(echo "$QUERY_OUTPUT" | grep -E "(Executing|single-partition|Read|Scanned|Merging)" | head -3 | tr '\n' '; ' || echo "")
-    
+
     # Filtrer les résultats pour affichage (sans tracing, sans en-têtes de colonnes)
     # Garder uniquement les lignes de données (commençant par un espace suivi d'un chiffre ou d'un caractère)
     QUERY_RESULTS_FILTERED=$(echo "$QUERY_OUTPUT" | grep -vE "^Warnings|^$|^\([0-9]+ rows\)|coordinator|total|Executing|Read|Scanned|Merging|^ code_si |^---------|^Tracing" | grep -E "^[[:space:]]*[0-9]|^[[:space:]]*[A-Z]" | head -20)
-    
+
     # Afficher les résultats
     if [ $EXIT_CODE -eq 0 ]; then
         result "📊 Résultats obtenus ($ROW_COUNT ligne(s)) en ${QUERY_TIME}s :"
@@ -265,7 +265,7 @@ EOF
             echo "... (affichage limité à 15 lignes)"
         fi
         echo ""
-        
+
         if [ -n "$COORDINATOR_TIME" ] && [ "$COORDINATOR_TIME" != "" ]; then
             info "   ⏱️  Temps coordinateur : ${COORDINATOR_TIME}μs"
         fi
@@ -275,14 +275,14 @@ EOF
         if [ -n "$EXECUTION_PLAN" ]; then
             info "   📋 Plan d'exécution : $EXECUTION_PLAN"
         fi
-        
+
         success "✅ Requête $query_num exécutée avec succès"
-        
+
         # Stocker les résultats pour le rapport (avec les lignes retournées)
         # Sauvegarder la sortie complète dans un fichier temporaire (comme le script 17)
         TEMP_QUERY_OUTPUT=$(mktemp "/tmp/query_${query_num}_output_$(date +%s).txt")
         echo "$QUERY_OUTPUT" | head -30 > "$TEMP_QUERY_OUTPUT"
-        
+
         # Stocker les résultats dans un JSON (comme le script 17)
         # Utiliser des fichiers temporaires pour éviter les problèmes d'échappement
         TEMP_QUERY_DATA=$(mktemp)
@@ -292,7 +292,7 @@ EOF
         echo "$query_cql" > "$TEMP_QUERY_DATA.cql"
         echo "$expected_result" > "$TEMP_QUERY_DATA.expected"
         echo "$sai_value" > "$TEMP_QUERY_DATA.sai"
-        
+
         python3 << PYSAVEEOF
 import json
 import os
@@ -347,14 +347,14 @@ results.append(result_entry)
 with open(results_file, 'w', encoding='utf-8') as f:
     json.dump(results, f, indent=2, ensure_ascii=False)
 PYSAVEEOF
-        
+
         rm -f "$TEMP_QUERY_DATA.title" "$TEMP_QUERY_DATA.description" "$TEMP_QUERY_DATA.hbase" "$TEMP_QUERY_DATA.cql" "$TEMP_QUERY_DATA.expected" "$TEMP_QUERY_DATA.sai" "$TEMP_QUERY_DATA"
     else
         error "❌ Erreur lors de l'exécution de la requête $query_num"
         echo "$QUERY_OUTPUT" | tail -10
         TEMP_QUERY_OUTPUT=$(mktemp "/tmp/query_${query_num}_output_$(date +%s).txt")
         echo "$QUERY_OUTPUT" | head -30 > "$TEMP_QUERY_OUTPUT"
-        
+
         # Stocker les résultats dans un JSON (comme le script 17)
         # Utiliser des fichiers temporaires pour éviter les problèmes d'échappement
         TEMP_QUERY_DATA=$(mktemp)
@@ -364,7 +364,7 @@ PYSAVEEOF
         echo "$query_cql" > "$TEMP_QUERY_DATA.cql"
         echo "$expected_result" > "$TEMP_QUERY_DATA.expected"
         echo "$sai_value" > "$TEMP_QUERY_DATA.sai"
-        
+
         python3 << PYSAVEEOF
 import json
 import os
@@ -419,10 +419,10 @@ results.append(result_entry)
 with open(results_file, 'w', encoding='utf-8') as f:
     json.dump(results, f, indent=2, ensure_ascii=False)
 PYSAVEEOF
-        
+
         rm -f "$TEMP_QUERY_DATA.title" "$TEMP_QUERY_DATA.description" "$TEMP_QUERY_DATA.hbase" "$TEMP_QUERY_DATA.cql" "$TEMP_QUERY_DATA.expected" "$TEMP_QUERY_DATA.sai" "$TEMP_QUERY_DATA"
     fi
-    
+
     # Nettoyer
     rm -f "$TEMP_QUERY_FILE"
     echo ""
@@ -598,13 +598,13 @@ report += "## 📊 Résultats par Requête\n\n"
 for r in results:
     # Construire la section de la requête
     report += "### Requête " + str(r.get('query_num', '')) + " : " + r.get('title', '') + "\n\n"
-    
+
     if r.get('description'):
         report += "**Description** : " + r.get('description', '') + "\n\n"
-    
+
     if r.get('hbase_equivalent'):
         report += "**Équivalent HBase** : " + r.get('hbase_equivalent', '') + "\n\n"
-    
+
     # Toujours afficher la requête CQL si elle existe
     query_cql = r.get('query_cql', '')
     if query_cql:
@@ -622,13 +622,13 @@ for r in results:
             print(f"DEBUG: query_cql original (first 100): {repr(str(query_cql)[:100])}", file=sys.stderr)
     else:
         print(f"DEBUG: query_cql est falsy pour requête {r.get('query_num', '?')}", file=sys.stderr)
-    
+
     if r.get('expected_result'):
         report += "**Résultat attendu** : " + r.get('expected_result', '') + "\n\n"
-    
+
     if r.get('sai_value'):
         report += "**Valeur ajoutée SAI** : " + r.get('sai_value', '') + "\n\n"
-    
+
     report += "- **Lignes retournées** : " + str(r.get('row_count', 0)) + "\n"
     report += "- **Temps d'exécution** : " + str(r.get('query_time', 0)) + "s\n"
     if r.get('coordinator_time'):
@@ -637,11 +637,11 @@ for r in results:
         report += "- **Temps total** : " + str(r.get('total_time', '')) + "μs\n"
     status_icon = "✅ OK" if r.get('status', '') == 'OK' else "❌ ERROR"
     report += "- **Statut** : " + status_icon + "\n"
-    
+
     # Afficher les lignes retournées si disponibles (comme le script 17)
     query_output = r.get('query_output', '')
     row_count = r.get('row_count', 0)
-    
+
     if query_output and row_count and row_count > 0:
         report += "\n**Lignes retournées :**\n\n"
         report += "```\n"
@@ -658,7 +658,7 @@ for r in results:
                 # Exclure les lignes qui sont des en-têtes ou des séparateurs
                 if not stripped.startswith('code_si') and not stripped.startswith('---') and '|' in line:
                     result_lines.append(line)
-        
+
         # Afficher jusqu'à 10 lignes de résultats
         for line in result_lines[:10]:
             report += line + "\n"
@@ -668,7 +668,7 @@ for r in results:
         report += "```\n"
     elif row_count == 0:
         report += "\n**Lignes retournées** : Aucun résultat trouvé\n"
-    
+
     report += "\n"
 
 report += "---\n\n"
@@ -737,4 +737,3 @@ code "  ✅ Plages de dates et numéros d'opération"
 code "  ✅ Valeur ajoutée SAI : Index sur clustering keys + full-text"
 code "  ✅ Performance optimisée vs scan complet"
 echo ""
-

@@ -6,7 +6,7 @@
 # OBJECTIF :
 #   Ce script vérifie si l'endpoint Data API est réellement accessible et
 #   fonctionnel, en testant la connectivité HTTP et les opérations de base.
-#   
+#
 #   Vérifications effectuées :
 #   - Connectivité HTTP vers l'endpoint
 #   - Authentification avec token
@@ -225,15 +225,15 @@ echo ""
 if command -v kubectl &> /dev/null; then
     success "kubectl disponible"
     echo ""
-    
+
     info "Recherche de services Data API / Stargate / Gateway..."
     SERVICES=$(kubectl get svc 2>/dev/null | grep -iE "stargate|gateway|data-api|api-gateway" || true)
-    
+
     if [ -n "$SERVICES" ]; then
         success "Services trouvés :"
         echo "$SERVICES" | sed 's/^/   /'
         echo ""
-        
+
         info "Pour trouver l'endpoint, exécutez :"
         code "  kubectl get nodes -o wide  # Pour CLUSTER_HOST (EXTERNAL-IP)"
         code "  kubectl get svc <service-name> -o jsonpath='{.spec.ports[0].nodePort}'  # Pour GATEWAY_PORT"
@@ -261,13 +261,13 @@ CONTAINER_CMD="podman"
 if command -v podman &> /dev/null; then
     success "Podman disponible"
     echo ""
-    
+
     info "Recherche de conteneur Stargate..."
     STARGATE_CONTAINER=$($CONTAINER_CMD ps -a --filter "name=stargate" --format "{{.Names}}" 2>/dev/null | head -1 || true)
-    
+
     if [ -n "$STARGATE_CONTAINER" ]; then
         success "Conteneur Stargate trouvé : $STARGATE_CONTAINER"
-        
+
         # Vérifier si le conteneur est en cours d'exécution
         if $CONTAINER_CMD ps --filter "name=$STARGATE_CONTAINER" --format "{{.Names}}" 2>/dev/null | grep -q "$STARGATE_CONTAINER"; then
             success "Conteneur en cours d'exécution"
@@ -298,9 +298,9 @@ echo ""
 if python3 -c "import astrapy" 2>/dev/null; then
     success "Client astrapy installé"
     echo ""
-    
+
     info "Test de connexion avec le client Python..."
-    
+
     # Créer un script de test temporaire
     TEST_SCRIPT=$(mktemp /tmp/test_data_api_XXXXXX.py)
     cat > "$TEST_SCRIPT" <<EOF
@@ -326,7 +326,7 @@ except Exception as e:
     print(f"❌ Erreur de connexion : {e}")
     sys.exit(1)
 EOF
-    
+
     # Exécuter le test
     if python3 "$TEST_SCRIPT" 2>&1; then
         success "Test de connexion réussi"
@@ -334,7 +334,7 @@ EOF
         error "Test de connexion échoué"
         warn "   → Vérifiez que le gateway Data API est déployé et accessible"
     fi
-    
+
     rm -f "$TEST_SCRIPT"
 else
     warn "Client astrapy non installé"
@@ -422,4 +422,3 @@ echo ""
 
 success "✅ Vérification terminée"
 echo ""
-

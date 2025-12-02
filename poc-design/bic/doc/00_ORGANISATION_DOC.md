@@ -14,6 +14,7 @@ La documentation est organisée en catégories logiques pour faciliter la naviga
 Documents de design, analyse, architecture et data model.
 
 **Fichiers** :
+
 - `01_DATA_MODEL.md` - Modèle de données BIC
 - `02_ARCHITECTURE.md` - Architecture du POC
 - `03_MIGRATION_STRATEGY.md` - Stratégie de migration
@@ -26,6 +27,7 @@ Documents de design, analyse, architecture et data model.
 Guides d'utilisation, index et références.
 
 **Fichiers** :
+
 - `01_README.md` - Vue d'ensemble du POC BIC
 - `02_GUIDE_SETUP.md` - Guide de configuration
 - `03_GUIDE_INGESTION.md` - Guide d'ingestion
@@ -91,4 +93,3 @@ Templates réutilisables pour scripts didactiques.
 
 **Date** : 2025-12-01  
 **Version** : 1.0
-

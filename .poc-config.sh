@@ -132,7 +132,7 @@ if [ -z "${JAVA_HOME:-}" ]; then
             export JAVA11_HOME="$JAVA_HOME"
         fi
     fi
-    
+
     # Fallback Homebrew (macOS)
     if [ -z "$JAVA_HOME" ] && [[ "$OSTYPE" == "darwin"* ]]; then
         if [ -d "/opt/homebrew/opt/openjdk@11/libexec/openjdk.jdk/Contents/Home" ]; then
@@ -144,7 +144,7 @@ if [ -z "${JAVA_HOME:-}" ]; then
         fi
         export JAVA11_HOME="$JAVA_HOME"
     fi
-    
+
     # Fallback système
     if [ -z "$JAVA_HOME" ] && command -v java &> /dev/null; then
         # Fonction portable pour obtenir le chemin réel
@@ -226,4 +226,3 @@ export KAFKA_EVENTS_TABLE="${KAFKA_EVENTS_TABLE:-kafka_events}"
 export SPARK_SQL_KAFKA_VERSION="${SPARK_SQL_KAFKA_VERSION:-3.5.1}"
 export SPARK_OPTS="${SPARK_OPTS:---conf spark.cassandra.connection.host=${HCD_HOST} --conf spark.cassandra.connection.port=${HCD_PORT} --conf spark.sql.extensions=com.datastax.spark.connector.CassandraSparkExtensions}"
 export SPARK_PACKAGES="${SPARK_PACKAGES:-org.apache.spark:spark-sql-kafka-0-10_2.12:${SPARK_SQL_KAFKA_VERSION},com.datastax.spark:spark-cassandra-connector_2.12:${SPARK_CASSANDRA_CONNECTOR_VERSION}}"
-

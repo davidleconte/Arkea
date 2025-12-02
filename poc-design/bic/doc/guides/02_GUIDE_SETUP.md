@@ -90,6 +90,7 @@ cd poc-design/bic
 ```
 
 **Résultat attendu** : Table `interactions_by_client` créée avec :
+
 - Partition key : `(code_efs, numero_client)`
 - Clustering key : `(date_interaction, canal, type_interaction, idt_tech)`
 - TTL : 2 ans (63072000 secondes)
@@ -101,6 +102,7 @@ cd poc-design/bic
 ```
 
 **Résultat attendu** : Index SAI créés :
+
 - `idx_interactions_canal` : Index sur `canal`
 - `idx_interactions_type` : Index sur `type_interaction`
 - `idx_interactions_resultat` : Index sur `resultat`
@@ -146,6 +148,7 @@ cd poc-design/bic
 **Symptôme** : `Connection refused` ou `HCD n'est pas démarré`
 
 **Solution** :
+
 ```bash
 # Démarrer HCD
 "$HCD_DIR/bin/cassandra" -f
@@ -156,6 +159,7 @@ cd poc-design/bic
 **Symptôme** : `SPARK_HOME non trouvé`
 
 **Solution** :
+
 ```bash
 # Définir SPARK_HOME
 export SPARK_HOME="/path/to/spark-3.5.1"
@@ -169,6 +173,7 @@ echo "export SPARK_HOME=\"/path/to/spark-3.5.1\"" >> .poc-config.sh
 **Symptôme** : `Keyspace already exists`
 
 **Solution** :
+
 ```bash
 # Supprimer le keyspace existant (ATTENTION : supprime toutes les données)
 "$HCD_DIR/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "DROP KEYSPACE IF EXISTS bic_poc;"
@@ -182,6 +187,7 @@ echo "export SPARK_HOME=\"/path/to/spark-3.5.1\"" >> .poc-config.sh
 **Symptôme** : `Index creation failed`
 
 **Solution** :
+
 ```bash
 # Vérifier que HCD supporte SAI
 "$HCD_DIR/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e "SELECT * FROM system_schema.indexes WHERE index_type = 'StorageAttachedIndex';"

@@ -218,16 +218,19 @@
 ### Scripts de Démonstration (35+ scripts)
 
 #### Configuration et Setup
+
 - ✅ `10_setup_domirama10_setup_domirama2_poc.sh` - Setup complet
 - ✅ `create_domirama2_schema*.cql` - Schémas CQL
 - ✅ **Couverture** : 100%
 
 #### Ingestion
+
 - ✅ `11_load_domirama11_load_domirama2_data_parquet.sh` - Ingestion Parquet
 - ✅ `14_generate_parquet_from_csv.sh` - Génération Parquet
 - ✅ **Couverture** : 100%
 
 #### Recherche
+
 - ✅ `12_test_domirama12_test_domirama2_search.sh` - Recherche de base
 - ✅ `15_test_fulltext_complex.sh` - Full-text complexe
 - ✅ `17_test_advanced_search.sh` - Recherche avancée
@@ -237,11 +240,13 @@
 - ✅ **Couverture** : 100%
 
 #### Multi-Version et Time Travel
+
 - ✅ `26_test_multi_version_time_travel.sh` - Time travel
 - ✅ `demo_multi_version_complete_v2.sh` - Démonstration complète
 - ✅ **Couverture** : 100%
 
 #### Exports
+
 - ✅ `27_export_incremental_parquet.sh` - Export incrémental
 - ✅ `28_demo_fenetre_glissante.sh` - Fenêtre glissante
 - ✅ `29_demo_requetes_fenetre_glissante.sh` - Requêtes fenêtre
@@ -249,6 +254,7 @@
 - ✅ **Couverture** : 100%
 
 #### Fonctionnalités HBase
+
 - ✅ `31_demo_bloomfilter_equivalent_v2.sh` - BLOOMFILTER (démonstration standard)
 - ✅ `32_demo_performance_comparison.sh` - BLOOMFILTER (comparaison performance - exécuté 2025-11-26)
 - ✅ `33_demo_colonnes_dynamiques_v2.sh` - Colonnes dynamiques (10 parties - exécuté 2025-11-26)
@@ -284,11 +290,13 @@ Tous les besoins fonctionnels majeurs sont satisfaits.
 #### 1. Data API (Optionnel)
 
 **IBM Proposition** :
+
 - API REST/GraphQL pour exposition des données
 - Simplification de l'accès applicatif
 - Endpoints HTTP pour microservices
 
 **POC Domirama2** :
+
 - ✅ **Démontré** (Scripts 36 et 37)
 - ✅ Configuration complète (token, endpoint)
 - ✅ 4 exemples de code Python créés
@@ -301,22 +309,26 @@ Tous les besoins fonctionnels majeurs sont satisfaits.
 **Priorité** : 🟡 **Moyenne** (optionnel, CQL suffisant)
 
 **Action** :
+
 - ✅ Documenter l'utilisation de Data API
 - ✅ Créer exemples d'utilisation Data API
 - ✅ Comparer Data API vs CQL direct
 - ✅ Démontrer valeur ajoutée par cas d'usage
 
 **Justification** :
+
 - CQL est suffisant pour la plupart des cas d'usage
 - Data API est une valeur ajoutée, pas un besoin fonctionnel
 - Peut être ajouté si besoin spécifique (microservices, front-end direct)
 
 **Impact** :
+
 - ⚠️ **Faible** : CQL couvre tous les besoins fonctionnels
 - ✅ **Optionnel** : Data API est un confort, pas une nécessité
 - 🟢 **Valeur ajoutée élevée** pour : Mobile, Partenaires, Microservices
 
 **Scripts créés** :
+
 - `36_setup_data_api.sh` : Configuration Data API
 - `37_demo_data_api.sh` : Démonstration valeur ajoutée
 - `data_api_examples/*.py` : 4 exemples de code
@@ -375,16 +387,19 @@ Tous les besoins fonctionnels majeurs sont satisfaits.
 #### Data API (Optionnel)
 
 **Objectif** :
+
 - Documenter l'utilisation de Data API si nécessaire
 - Créer exemple d'utilisation (optionnel)
 
 **Contenu** :
+
 - Explication Data API HCD
 - Exemples REST/GraphQL
 - Comparaison avec CQL
 - Cas d'usage
 
 **Justification** :
+
 - CQL est suffisant pour la plupart des cas
 - Data API est une valeur ajoutée, pas un besoin fonctionnel
 - Peut être ajouté si besoin spécifique
@@ -398,6 +413,7 @@ Tous les besoins fonctionnels majeurs sont satisfaits.
 ### Couverture Globale : **98%** ✅
 
 **Points Forts** :
+
 - ✅ **100% des besoins fonctionnels** satisfaits
 - ✅ **Tous les inputs-clients** couverts
 - ✅ **Toutes les recommandations IBM** implémentées
@@ -405,6 +421,7 @@ Tous les besoins fonctionnels majeurs sont satisfaits.
 - ✅ **Démonstrations complètes** et validées
 
 **Gap Restant** :
+
 - ⚠️ **1 gap optionnel** : Data API (non critique, CQL suffisant)
 
 ### Recommandation
@@ -412,6 +429,7 @@ Tous les besoins fonctionnels majeurs sont satisfaits.
 **Pour POC** : ✅ **Suffisant** (98% de couverture, 100% fonctionnel)
 
 **Pour Production** :
+
 - ✅ Tous les besoins fonctionnels sont couverts
 - ⚠️ Data API peut être ajouté si besoin spécifique
 - ✅ Documentation complète disponible
@@ -437,6 +455,7 @@ Tous les besoins fonctionnels majeurs sont satisfaits.
 **✅ Le POC Domirama2 couvre 98% des besoins (100% fonctionnel), avec des améliorations significatives !**
 
 **Mise à jour finale** : 2024-11-27
+
 - ✅ **BLOOMFILTER** : Démontré avec performance validée (`32_demo_performance_comparison.sh`)
 - ✅ **Colonnes dynamiques** : Démontrées avec 10 parties (`33_demo_colonnes_dynamiques_v2.sh`)
 - ✅ **REPLICATION_SCOPE** : Démontré avec consistency levels et drivers Java (`34_demo_replication_scope_v2.sh`)
@@ -448,4 +467,3 @@ Tous les besoins fonctionnels majeurs sont satisfaits.
 - ✅ **18 démonstrations** .md générées automatiquement
 - ✅ **12 templates** réutilisables créés
 - ✅ **1 gap optionnel** restant (DSBulk, Spark utilisé à la place, acceptable)
-

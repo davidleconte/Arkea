@@ -64,6 +64,7 @@
 #### TC-MISS-01 : Migration Incrémentale avec Validation
 
 **Description** :
+
 - Export par plages (STARTROW/STOPROW équivalents)
 - Validation cohérence source vs export
 - Gestion des doublons
@@ -72,6 +73,7 @@
 **Complexité** : 🔴 **Haute**
 
 **Tests à Implémenter** :
+
 1. Export par plages précises (code_si + contrat + date_op + numero_op)
 2. Validation cohérence (comptage, vérification intégrité)
 3. Gestion des doublons (déduplication)
@@ -85,6 +87,7 @@
 #### TC-MISS-02 : Migration avec Fenêtre Glissante Complexe
 
 **Description** :
+
 - Fenêtre glissante avec chevauchement
 - Validation cohérence entre fenêtres
 - Gestion des frontières (début/fin de période)
@@ -93,6 +96,7 @@
 **Complexité** : 🔴 **Haute**
 
 **Tests à Implémenter** :
+
 1. Fenêtre glissante avec chevauchement (validation pas de doublons)
 2. Fenêtre glissante sans chevauchement (validation complétude)
 3. Gestion des frontières (première/dernière fenêtre)
@@ -109,6 +113,7 @@
 #### TC-MISS-03 : Cohérence Transactionnelle Multi-Tables
 
 **Description** :
+
 - Validation cohérence entre plusieurs tables simultanément
 - Tests de référentiel (foreign keys équivalents)
 - Tests de contraintes métier complexes
@@ -117,6 +122,7 @@
 **Complexité** : 🔴 **Haute**
 
 **Tests à Implémenter** :
+
 1. Cohérence référentielle (acceptation_client → operations_by_account)
 2. Cohérence temporelle (dates cohérentes entre tables)
 3. Cohérence compteurs (feedbacks_count = SUM feedbacks)
@@ -130,6 +136,7 @@
 #### TC-MISS-04 : Tests de Contraintes Métier Complexes
 
 **Description** :
+
 - Validation règles métier (ex: cat_user ne peut pas être modifié si accepté)
 - Validation contraintes temporelles (ex: date_op <= date_valeur)
 - Validation contraintes logiques (ex: cat_auto doit exister dans regles_personnalisees)
@@ -137,6 +144,7 @@
 **Complexité** : 🟡 **Moyenne-Haute**
 
 **Tests à Implémenter** :
+
 1. Contraintes métier (règles de validation)
 2. Contraintes temporelles (dates cohérentes)
 3. Contraintes logiques (cohérence catégories)
@@ -153,6 +161,7 @@
 #### TC-MISS-05 : Tests de Charge Concurrente
 
 **Description** :
+
 - Lectures simultanées multiples
 - Écritures simultanées multiples
 - Mix lectures/écritures simultanées
@@ -161,6 +170,7 @@
 **Complexité** : 🔴 **Haute**
 
 **Tests à Implémenter** :
+
 1. Charge lecture (100+ requêtes simultanées)
 2. Charge écriture (100+ insertions simultanées)
 3. Charge mixte (50% lecture, 50% écriture)
@@ -175,6 +185,7 @@
 #### TC-MISS-06 : Tests de Scalabilité
 
 **Description** :
+
 - Performance avec volumes croissants (10K, 100K, 1M, 10M opérations)
 - Performance avec index multiples
 - Performance avec recherche hybride multi-modèles
@@ -183,6 +194,7 @@
 **Complexité** : 🟡 **Moyenne-Haute**
 
 **Tests à Implémenter** :
+
 1. Scalabilité volume (10K → 10M opérations)
 2. Scalabilité index (1 → 10 index SAI)
 3. Scalabilité modèles (1 → 3 modèles vectoriels)
@@ -200,6 +212,7 @@
 #### TC-MISS-07 : Recherche Hybride Multi-Modèles avec Fusion
 
 **Description** :
+
 - Recherche avec plusieurs modèles simultanément
 - Fusion des résultats (déduplication, scoring combiné)
 - Ranking personnalisé (score combiné)
@@ -208,6 +221,7 @@
 **Complexité** : 🔴 **Haute**
 
 **Tests à Implémenter** :
+
 1. Recherche multi-modèles simultanée (ByteT5 + e5-large + Facturation)
 2. Fusion résultats (déduplication, scoring combiné)
 3. Ranking personnalisé (score = moyenne pondérée)
@@ -221,6 +235,7 @@
 #### TC-MISS-08 : Recherche avec Filtres Multiples Combinés
 
 **Description** :
+
 - Vector + Full-Text + Filtres (date, montant, catégorie) simultanément
 - Optimisation requête (ordre des filtres)
 - Performance avec filtres multiples
@@ -229,6 +244,7 @@
 **Complexité** : 🟡 **Moyenne-Haute**
 
 **Tests à Implémenter** :
+
 1. Vector + Full-Text + Date + Montant + Catégorie
 2. Optimisation ordre filtres (filtres sélectifs d'abord)
 3. Performance avec filtres multiples (latence)
@@ -246,6 +262,7 @@
 #### TC-MISS-09 : Tests de Résilience (Erreurs, Timeouts, Retry)
 
 **Description** :
+
 - Gestion erreurs (connexion perdue, timeout)
 - Retry automatique (stratégie exponential backoff)
 - Fallback (modèle 1 → modèle 2 si erreur)
@@ -254,6 +271,7 @@
 **Complexité** : 🟡 **Moyenne**
 
 **Tests à Implémenter** :
+
 1. Simulation erreur connexion (reconnexion automatique)
 2. Simulation timeout (retry avec backoff)
 3. Simulation erreur modèle (fallback automatique)
@@ -267,6 +285,7 @@
 #### TC-MISS-10 : Tests de Disponibilité (Failover)
 
 **Description** :
+
 - Simulation panne nœud (failover automatique)
 - Validation cohérence après failover
 - Performance après failover
@@ -275,6 +294,7 @@
 **Complexité** : 🔴 **Haute** (nécessite cluster multi-nœuds)
 
 **Tests à Implémenter** :
+
 1. Simulation panne nœud (si cluster disponible)
 2. Validation failover (requêtes continuent)
 3. Validation cohérence (données accessibles)
@@ -292,6 +312,7 @@
 #### TC-MISS-11 : Tests d'Agrégation Complexe
 
 **Description** :
+
 - Agrégations temporelles (COUNT, SUM, AVG par période)
 - Agrégations par catégorie (groupement)
 - Agrégations combinées (date + catégorie)
@@ -300,6 +321,7 @@
 **Complexité** : 🟡 **Moyenne**
 
 **Tests à Implémenter** :
+
 1. Agrégations temporelles (COUNT par jour, semaine, mois)
 2. Agrégations par catégorie (SUM montant par cat_auto)
 3. Agrégations combinées (SUM montant par date + catégorie)
@@ -313,6 +335,7 @@
 #### TC-MISS-12 : Tests de Facettes (Groupement)
 
 **Description** :
+
 - Groupement par catégorie (facettes)
 - Groupement par date (facettes temporelles)
 - Groupement combiné (multi-facettes)
@@ -321,6 +344,7 @@
 **Complexité** : 🟡 **Moyenne**
 
 **Tests à Implémenter** :
+
 1. Facettes catégorie (COUNT par cat_auto)
 2. Facettes temporelles (COUNT par date_op)
 3. Facettes combinées (COUNT par cat_auto + date_op)
@@ -338,6 +362,7 @@
 #### TC-MISS-13 : Tests de Pagination Complexe
 
 **Description** :
+
 - Pagination avec LIMIT + OFFSET
 - Pagination avec token (paging_state)
 - Navigation avant/arrière
@@ -346,6 +371,7 @@
 **Complexité** : 🟡 **Moyenne**
 
 **Tests à Implémenter** :
+
 1. Pagination basique (LIMIT + OFFSET)
 2. Pagination avec token (paging_state HCD)
 3. Navigation avant/arrière (next/previous)
@@ -363,6 +389,7 @@
 #### TC-MISS-14 : Tests de Cache d'Embeddings
 
 **Description** :
+
 - Cache des embeddings (éviter régénération)
 - Cache des résultats de recherche
 - Invalidation cache (stratégies)
@@ -371,6 +398,7 @@
 **Complexité** : 🟡 **Moyenne**
 
 **Tests à Implémenter** :
+
 1. Cache embeddings (régénération vs réutilisation)
 2. Cache résultats (même requête = résultats cachés)
 3. Invalidation cache (TTL, manuel)
@@ -388,6 +416,7 @@
 #### TC-MISS-15 : Tests de Suggestions/Autocomplétion
 
 **Description** :
+
 - Suggestions basées sur libellés existants
 - Autocomplétion avec préfixes
 - Suggestions avec scoring (pertinence)
@@ -396,6 +425,7 @@
 **Complexité** : 🟡 **Moyenne**
 
 **Tests à Implémenter** :
+
 1. Suggestions par préfixe (libelle_prefix)
 2. Suggestions avec scoring (pertinence)
 3. Autocomplétion (completion suggérée)
@@ -418,6 +448,7 @@
 | **TC-MISS-03** | Cohérence Transactionnelle | 🔴 Critique | 🟡 Moyen | **P1** |
 
 **Justification** :
+
 - Migration incrémentale : Core fonctionnalité HBase → HCD
 - Charge concurrente : Validation production
 - Recherche multi-modèles : Optimisation pertinence
@@ -436,6 +467,7 @@
 | **TC-MISS-11** | Agrégations | 🟡 Moyenne | 🟢 Faible | **P2** |
 
 **Justification** :
+
 - Fenêtre glissante : Export périodique
 - Scalabilité : Validation volumes production
 - Filtres multiples : Recherche avancée
@@ -456,6 +488,7 @@
 | **TC-MISS-10** | Failover | 🔴 Haute | 🔴 Élevé | **P3** (nécessite cluster) |
 
 **Justification** :
+
 - Résilience : Robustesse production
 - Facettes : UX améliorée
 - Pagination : Navigation grandes volumétries
@@ -643,12 +676,14 @@
 ### Tests à Implémenter en Priorité
 
 **Priorité P1 (Critique)** : **4 tests**
+
 - Migration Incrémentale avec Validation
 - Tests de Charge Concurrente
 - Recherche Multi-Modèles avec Fusion
 - Cohérence Transactionnelle Multi-Tables
 
 **Priorité P2 (Haute)** : **5 tests**
+
 - Fenêtre Glissante Complexe
 - Scalabilité
 - Filtres Multiples
@@ -661,4 +696,3 @@
 
 **Date de génération** : 2025-11-30  
 **Version** : 1.0
-

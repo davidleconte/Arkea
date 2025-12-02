@@ -1,7 +1,7 @@
 # 🔍 Audit Complet : Documentation MD vs Scripts/CQL
 
 **Date** : 2025-11-25  
-**Objectif** : Vérifier et corriger tous les fichiers MD pour qu'ils soient à jour avec les scripts *.sh et *.cql
+**Objectif** : Vérifier et corriger tous les fichiers MD pour qu'ils soient à jour avec les scripts *.sh et*.cql
 
 ---
 
@@ -105,6 +105,7 @@
 ### 1. Existence des Scripts Référencés
 
 ✅ **Tous les scripts référencés existent maintenant** :
+
 - `10_setup_domirama2_poc.sh` ✅
 - `11_load_domirama2_data_parquet.sh` ✅
 - `12_test_domirama2_search.sh` ✅
@@ -117,6 +118,7 @@
 ### 2. Existence des Fichiers CQL Référencés
 
 ✅ **Tous les fichiers CQL référencés existent** :
+
 - `schemas/01_create_domirama2_schema.cql` ✅
 - `schemas/04_domirama2_search_test.cql` ✅
 - `schemas/08_domirama2_api_correction_client.cql` ✅
@@ -124,6 +126,7 @@
 ### 3. Syntaxe des Scripts
 
 ✅ **Syntaxe bash validée** :
+
 - `10_setup_domirama2_poc.sh` : ✅ Syntaxe OK
 - `11_load_domirama2_data_parquet.sh` : ✅ Syntaxe OK
 - `12_test_domirama2_search.sh` : ✅ Syntaxe OK
@@ -131,6 +134,7 @@
 ### 4. Syntaxe des Fichiers CQL
 
 ✅ **Syntaxe CQL validée** :
+
 - `schemas/01_create_domirama2_schema.cql` : ✅ Syntaxe CQL valide
 - `schemas/04_domirama2_search_test.cql` : ✅ Syntaxe CQL valide
 - `schemas/08_domirama2_api_correction_client.cql` : ✅ Syntaxe CQL valide
@@ -161,7 +165,7 @@
 
 ### Conformité
 
-- ✅ **100% des fichiers MD sont à jour** avec les scripts *.sh et *.cql
+- ✅ **100% des fichiers MD sont à jour** avec les scripts *.sh et*.cql
 - ✅ **Toutes les références sont valides** (scripts et fichiers existent)
 - ✅ **Tous les chemins sont corrects** (schemas/, examples/)
 - ✅ **Toutes les versions sont à jour** (_v2 pour les scripts de démonstration)
@@ -181,16 +185,19 @@
 Pour s'assurer que les scripts fonctionnent réellement :
 
 1. **Test du schéma** :
+
    ```bash
    ./10_setup_domirama2_poc.sh
    ```
 
 2. **Test du chargement** :
+
    ```bash
    ./11_load_domirama2_data_parquet.sh
    ```
 
 3. **Test de recherche** :
+
    ```bash
    ./12_test_domirama2_search.sh
    ```
@@ -200,8 +207,3 @@ Pour s'assurer que les scripts fonctionnent réellement :
 ---
 
 **✅ Audit terminé : Tous les fichiers MD sont à jour avec les scripts et fichiers CQL !**
-
-
-
-
-

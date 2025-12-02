@@ -7,7 +7,7 @@
 #   Ce script démontre les requêtes en base avec fenêtre glissante (TIMERANGE
 #   équivalent HBase), permettant d'interroger HCD avec des plages de dates
 #   spécifiques pour des analyses temporelles.
-#   
+#
 #   Fonctionnalités :
 #   - Requêtes avec filtrage par date_op (équivalent TIMERANGE HBase)
 #   - Fenêtre glissante pour analyses temporelles
@@ -271,4 +271,3 @@ code "  ✅ Requêtes mensuelles, hebdomadaires, etc."
 code "  ✅ Valeur ajoutée SAI : Index sur date_op + full-text"
 code "  ✅ Performance optimisée vs scan complet"
 echo ""
-
