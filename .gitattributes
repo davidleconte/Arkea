@@ -1,0 +1,4 @@
+software/*.tgz filter=lfs diff=lfs merge=lfs -text
+software/*.tar.gz filter=lfs diff=lfs merge=lfs -text
+binaire/spark-3.5.1/jars/*.jar filter=lfs diff=lfs merge=lfs -text
+binaire/spark-3.5.1/yarn/*.jar filter=lfs diff=lfs merge=lfs -text

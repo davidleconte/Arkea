@@ -183,3 +183,8 @@ hcd-1.2.3/
 
 # Répertoires vides ou temporaires
 ehB /
+# Exceptions pour Git LFS (fichiers volumineux nécessaires)
+!software/spark-3.5.1-bin-hadoop3.tgz
+!software/hcd-1.2.3-bin.tar.gz
+!binaire/spark-3.5.1/jars/rocksdbjni-8.3.2.jar
+!binaire/spark-3.5.1/yarn/spark-3.5.1-yarn-shuffle.jar
