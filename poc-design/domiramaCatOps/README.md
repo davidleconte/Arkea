@@ -4,7 +4,7 @@
 **Version** : 2.0.0  
 **Objectif** : Démonstration de la migration des tables Domirama (catégorisation) de HBase vers HCD  
 **Conformité** : **104%** avec les exigences clients et IBM  
-**IBM | Opportunité ICS 006gR000001hiA5QAI - AREKA | Ingénieur Avant-Vente** : David LECONTE | <david.leconte1@ibm.com> - Mobile : +33614126117
+**IBM | Opportunité ICS 006gR000001hiA5QAI - ARKEA | Ingénieur Avant-Vente** : David LECONTE | <david.leconte1@ibm.com> - Mobile : +33614126117
 
 ---
 

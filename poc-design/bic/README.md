@@ -3,7 +3,7 @@
 **Date** : 2025-12-01  
 **Version** : 1.0.0  
 **Objectif** : Démonstration de la migration de la table BIC (Base d'Interaction Client) de HBase vers HCD  
-**IBM | Opportunité ICS 006gR000001hiA5QAI - AREKA | Ingénieur Avant-Vente** : David LECONTE | <david.leconte1@ibm.com> - Mobile : +33614126117
+**IBM | Opportunité ICS 006gR000001hiA5QAI - ARKEA | Ingénieur Avant-Vente** : David LECONTE | <david.leconte1@ibm.com> - Mobile : +33614126117
 
 ---
 
