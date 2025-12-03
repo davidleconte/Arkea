@@ -1,8 +1,9 @@
 # 🧪 Proposition de Tests Complexes et Très Complexes pour Script 40
 
-**Date** : 2025-01-XX  
-**Script** : `40_test_like_patterns.sh`  
-**Objectif** : Étendre le script avec des tests complexes et très complexes basés sur les exigences inputs-clients et inputs-ibm
+**Date** : 2025-01-XX
+**Script** : `40_test_like_patterns.sh`
+**Objectif** : Étendre le script avec des tests complexes et très complexes basés sur les exigences
+inputs-clients et inputs-ibm
 
 ---
 
@@ -21,7 +22,7 @@
 
 #### TEST 6 : LIKE + Filtre Temporel (Range Query)
 
-**Source** : inputs-ibm (Range Queries pattern)  
+**Source** : inputs-ibm (Range Queries pattern)
 **Complexité** : ⭐⭐⭐
 
 **Description** :
@@ -50,7 +51,7 @@ hybrid_like_search(
 
 #### TEST 7 : LIKE + Filtre Montant (Range Query)
 
-**Source** : inputs-clients (RC-06)  
+**Source** : inputs-clients (RC-06)
 **Complexité** : ⭐⭐⭐
 
 **Description** :
@@ -78,7 +79,7 @@ hybrid_like_search(
 
 #### TEST 8 : LIKE + Filtre Catégorie (IN Clause)
 
-**Source** : inputs-ibm (Field-Specific Queries)  
+**Source** : inputs-ibm (Field-Specific Queries)
 **Complexité** : ⭐⭐⭐
 
 **Description** :
@@ -108,7 +109,7 @@ hybrid_like_search(
 
 #### TEST 9 : Multi-Field LIKE avec AND (Tous les patterns doivent matcher)
 
-**Source** : inputs-ibm (Boolean Search, Compound Queries)  
+**Source** : inputs-ibm (Boolean Search, Compound Queries)
 **Complexité** : ⭐⭐⭐⭐
 
 **Description** :
@@ -140,7 +141,7 @@ multi_field_like_search(
 
 #### TEST 10 : Multi-Field LIKE avec OR (Au moins un pattern doit matcher)
 
-**Source** : inputs-ibm (Boolean Search)  
+**Source** : inputs-ibm (Boolean Search)
 **Complexité** : ⭐⭐⭐⭐
 
 **Description** :
@@ -174,7 +175,7 @@ multi_field_like_search(
 
 #### TEST 11 : LIKE avec Typos Simulés
 
-**Source** : inputs-ibm (Fuzzy Logic Patterns, Typo Tolerance)  
+**Source** : inputs-ibm (Fuzzy Logic Patterns, Typo Tolerance)
 **Complexité** : ⭐⭐⭐
 
 **Description** :
@@ -210,7 +211,7 @@ hybrid_like_search(
 
 #### TEST 12 : LIKE avec Variations Linguistiques
 
-**Source** : inputs-clients (RC-02, RC-04), inputs-ibm (Synonym Recognition)  
+**Source** : inputs-clients (RC-02, RC-04), inputs-ibm (Synonym Recognition)
 **Complexité** : ⭐⭐⭐
 
 **Description** :
@@ -242,7 +243,7 @@ hybrid_like_search(
 
 #### TEST 13 : LIKE avec Description Étendue (Compound Query)
 
-**Source** : inputs-ibm (Compound and Contextual Queries)  
+**Source** : inputs-ibm (Compound and Contextual Queries)
 **Complexité** : ⭐⭐⭐⭐
 
 **Description** :
@@ -255,7 +256,9 @@ hybrid_like_search(
 
 ```python
 hybrid_like_search(
-    query_text="Je cherche toutes les opérations liées au paiement du loyer mensuel de mon appartement à Paris, qui sont généralement des prélèvements automatiques effectués en début de mois",
+    query_text="Je cherche toutes les opérations liées au paiement du loyer mensuel de mon
+    appartement à Paris, qui sont généralement des prélèvements automatiques effectués en début de
+    mois",
     like_query="libelle LIKE '%LOYER%'",
     limit=10
 )
@@ -274,7 +277,7 @@ hybrid_like_search(
 
 #### TEST 14 : LIKE + Filtres Multiples + Range Temporel + Range Montant
 
-**Source** : inputs-ibm (Compound Queries), inputs-clients (RC-06)  
+**Source** : inputs-ibm (Compound Queries), inputs-clients (RC-06)
 **Complexité** : ⭐⭐⭐⭐⭐
 
 **Description** :
@@ -308,7 +311,7 @@ hybrid_like_search(
 
 #### TEST 15 : Multi-Field LIKE Complexe avec Filtres
 
-**Source** : inputs-ibm (Compound Queries)  
+**Source** : inputs-ibm (Compound Queries)
 **Complexité** : ⭐⭐⭐⭐⭐
 
 **Description** :
@@ -341,7 +344,7 @@ multi_field_like_search(
 
 #### TEST 16 : LIKE avec Patterns Multi-Wildcards Complexes
 
-**Source** : inputs-ibm (Complex Fuzzy Logic)  
+**Source** : inputs-ibm (Complex Fuzzy Logic)
 **Complexité** : ⭐⭐⭐⭐⭐
 
 **Description** :
@@ -362,7 +365,8 @@ hybrid_like_search(
 # Pattern avec wildcards au début, milieu et fin
 hybrid_like_search(
     query_text="virement",
-    like_query="libelle LIKE '*VIREMENT*IMP*'",  # Commence par n'importe quoi, contient VIREMENT et IMP
+    like_query="libelle LIKE '*VIREMENT*IMP*'",  # Commence par n'importe quoi, contient VIREMENT
+    et IMP
     limit=10
 )
 ```
@@ -371,7 +375,7 @@ hybrid_like_search(
 
 #### TEST 17 : LIKE avec Patterns Alternatifs (Regex-like)
 
-**Source** : inputs-ibm (Boolean Search patterns)  
+**Source** : inputs-ibm (Boolean Search patterns)
 **Complexité** : ⭐⭐⭐⭐⭐
 
 **Description** :
@@ -402,7 +406,7 @@ results2 = hybrid_like_search(
 
 #### TEST 18 : LIKE avec Grand Volume de Candidats
 
-**Source** : inputs-clients (RC-03), inputs-ibm (Performance)  
+**Source** : inputs-clients (RC-03), inputs-ibm (Performance)
 **Complexité** : ⭐⭐⭐⭐
 
 **Description** :
@@ -431,7 +435,7 @@ hybrid_like_search(
 
 #### TEST 19 : LIKE avec Patterns Très Sélectifs
 
-**Source** : inputs-ibm (Precision Search)  
+**Source** : inputs-ibm (Precision Search)
 **Complexité** : ⭐⭐⭐⭐
 
 **Description** :
@@ -461,7 +465,7 @@ hybrid_like_search(
 
 #### TEST 20 : LIKE avec Caractères Spéciaux
 
-**Source** : inputs-clients (RC-07)  
+**Source** : inputs-clients (RC-07)
 **Complexité** : ⭐⭐⭐
 
 **Description** :
@@ -491,7 +495,7 @@ hybrid_like_search(
 
 #### TEST 21 : LIKE avec Patterns Vides ou Invalides
 
-**Source** : inputs-clients (RC-07)  
+**Source** : inputs-clients (RC-07)
 **Complexité** : ⭐⭐
 
 **Description** :
@@ -527,7 +531,7 @@ except ValueError as e:
 
 #### TEST 22 : LIKE avec Données NULL ou Manquantes
 
-**Source** : inputs-clients (RC-07)  
+**Source** : inputs-clients (RC-07)
 **Complexité** : ⭐⭐⭐
 
 **Description** :
@@ -557,41 +561,45 @@ hybrid_like_search(
 3. **TEST 9** : Multi-Field LIKE avec AND
 4. **TEST 14** : LIKE + Filtres Multiples Combinés
 
-**Justification** : Ces tests couvrent les cas d'usage les plus fréquents mentionnés dans inputs-ibm et inputs-clients.
+**Justification** : Ces tests couvrent les cas d'usage les plus fréquents mentionnés dans
+inputs-ibm et inputs-clients.
 
 ---
 
 ### Priorité 🟡 Haute (À implémenter ensuite)
 
-5. **TEST 8** : LIKE + Filtre Catégorie (IN Clause)
-6. **TEST 10** : Multi-Field LIKE avec OR
-7. **TEST 11** : LIKE avec Typos Simulés
-8. **TEST 18** : LIKE avec Grand Volume
+1. **TEST 8** : LIKE + Filtre Catégorie (IN Clause)
+2. **TEST 10** : Multi-Field LIKE avec OR
+3. **TEST 11** : LIKE avec Typos Simulés
+4. **TEST 18** : LIKE avec Grand Volume
 
-**Justification** : Ces tests valident des fonctionnalités importantes pour la robustesse et la performance.
+**Justification** : Ces tests valident des fonctionnalités importantes pour la robustesse et la
+performance.
 
 ---
 
 ### Priorité 🟢 Moyenne (Implémentation optionnelle)
 
-9. **TEST 12** : LIKE avec Variations Linguistiques
-10. **TEST 13** : LIKE avec Description Étendue
-11. **TEST 15** : Multi-Field LIKE Complexe avec Filtres
-12. **TEST 16** : LIKE avec Patterns Multi-Wildcards Complexes
-13. **TEST 19** : LIKE avec Patterns Très Sélectifs
-14. **TEST 20** : LIKE avec Caractères Spéciaux
+1. **TEST 12** : LIKE avec Variations Linguistiques
+2. **TEST 13** : LIKE avec Description Étendue
+3. **TEST 15** : Multi-Field LIKE Complexe avec Filtres
+4. **TEST 16** : LIKE avec Patterns Multi-Wildcards Complexes
+5. **TEST 19** : LIKE avec Patterns Très Sélectifs
+6. **TEST 20** : LIKE avec Caractères Spéciaux
 
-**Justification** : Ces tests couvrent des cas avancés moins fréquents mais utiles pour la validation complète.
+**Justification** : Ces tests couvrent des cas avancés moins fréquents mais utiles pour la
+validation complète.
 
 ---
 
 ### Priorité ⚪ Basse (Implémentation future)
 
-15. **TEST 17** : LIKE avec Patterns Alternatifs
-16. **TEST 21** : LIKE avec Patterns Vides ou Invalides
-17. **TEST 22** : LIKE avec Données NULL
+1. **TEST 17** : LIKE avec Patterns Alternatifs
+2. **TEST 21** : LIKE avec Patterns Vides ou Invalides
+3. **TEST 22** : LIKE avec Données NULL
 
-**Justification** : Tests de robustesse et cas limites, moins critiques pour la démonstration initiale.
+**Justification** : Tests de robustesse et cas limites, moins critiques pour la démonstration
+initiale.
 
 ---
 
@@ -719,4 +727,5 @@ Chaque test complexe doit :
 
 ---
 
-**Document créé pour guider l'extension du script 40 avec des tests complexes et très complexes basés sur les exigences inputs-clients et inputs-ibm.**
+**Document créé pour guider l'extension du script 40 avec des tests complexes et très complexes
+basés sur les exigences inputs-clients et inputs-ibm.**

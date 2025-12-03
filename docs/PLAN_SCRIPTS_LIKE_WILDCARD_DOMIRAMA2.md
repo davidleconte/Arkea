@@ -1,7 +1,12 @@
 # Plan d'Implémentation : Scripts LIKE et Wildcard pour domirama2
 
-**Date** : 2025-12-03  
-**Objectif** : Créer deux scripts dédiés à la mise en œuvre des patterns LIKE et wildcard via le CQL API pour domirama2, basés sur les démonstrations du fichier `inputs-ibm/[fuzzy_and_complex_search_with_vector_search].py`
+**Date** : 2025-12-03
+**Objectif** : Créer deux scripts dédiés à la mise en œuvre des patterns LIKE et wildcard via le
+CQL API pour domirama2, basés sur les démonstrations du fichier `inputs
+ibm/[fuzzy_and_complex_search_with_vector_search].py`
+
+> Note : Ce fichier référence un exemple de démonstration IBM pour
+> l'implémentation des patterns LIKE et wildcard.
 
 ---
 
@@ -14,7 +19,8 @@
 - **Fichier de référence** : `[fuzzy_and_complex_search_with_vector_search].py`
 - **Patterns identifiés** :
   - **LIKE Pattern** : Syntaxe `"field LIKE 'pattern'"` avec wildcards `*` ou `%`
-  - **Wildcard Pattern** : Support de `*` (n'importe quels caractères) et `%` (n'importe quels caractères)
+  - **Wildcard Pattern** : Support de `*` (n'importe quels caractères) et `%` (n'importe quels
+  caractères)
   - **Approche hybride** : Recherche vectorielle (ANN) + filtrage client-side avec regex
 
 #### inputs-clients/
@@ -233,26 +239,26 @@ def hybrid_like_search(session, query_text, like_query, filter_dict=None, limit=
 
 ### Cas 1 : Recherche de Libellés Partiels
 
-**Requête** : `libelle LIKE '%LOYER%'`  
-**Usage** : Trouver toutes les opérations contenant "LOYER" dans le libellé  
+**Requête** : `libelle LIKE '%LOYER%'`
+**Usage** : Trouver toutes les opérations contenant "LOYER" dans le libellé
 **Bénéfice** : Tolère les variations ("LOYER", "LOYERS", "LOYER IMPAYE")
 
 ### Cas 2 : Recherche avec Typos
 
-**Requête** : `libelle LIKE '%LOYR%'` (typo)  
-**Usage** : Trouver "LOYER" malgré la typo  
+**Requête** : `libelle LIKE '%LOYR%'` (typo)
+**Usage** : Trouver "LOYER" malgré la typo
 **Bénéfice** : Recherche vectorielle trouve les résultats sémantiquement proches
 
 ### Cas 3 : Recherche de Catégories
 
-**Requête** : `cat_auto LIKE '%IMP%'`  
-**Usage** : Trouver toutes les catégories contenant "IMP"  
+**Requête** : `cat_auto LIKE '%IMP%'`
+**Usage** : Trouver toutes les catégories contenant "IMP"
 **Bénéfice** : Filtrage rapide sur catégories automatiques
 
 ### Cas 4 : Recherche Combinée
 
-**Requête** : Vector search "loyer impayé" + `libelle LIKE '%LOYER%'`  
-**Usage** : Recherche sémantique + filtrage textuel précis  
+**Requête** : Vector search "loyer impayé" + `libelle LIKE '%LOYER%'`
+**Usage** : Recherche sémantique + filtrage textuel précis
 **Bénéfice** : Meilleure précision grâce à la combinaison
 
 ---
@@ -399,12 +405,13 @@ def hybrid_like_search(session, query_text, like_query, filter_dict=None, limit=
 
 ## ✅ Conclusion
 
-**Le jeu de données actuel dans le keyspace domirama2 permet d'implémenter les patterns LIKE et wildcard** :
+**Le jeu de données actuel dans le keyspace domirama2 permet d'implémenter les patterns LIKE et
+wildcard** :
 
-✅ Colonnes textuelles disponibles (`libelle`, `cat_auto`, `cat_user`)  
-✅ Colonne vectorielle disponible (`libelle_embedding`)  
-✅ Index appropriés (SAI full-text, vectoriel)  
-✅ Données de test disponibles  
+✅ Colonnes textuelles disponibles (`libelle`, `cat_auto`, `cat_user`)
+✅ Colonne vectorielle disponible (`libelle_embedding`)
+✅ Index appropriés (SAI full-text, vectoriel)
+✅ Données de test disponibles
 ✅ Approche hybride possible (vector + regex client-side)
 
 **Les deux scripts peuvent être créés et testés avec les données existantes.**

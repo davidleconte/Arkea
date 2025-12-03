@@ -1,8 +1,12 @@
 # 🔍 Démonstration : Patterns LIKE avec Wildcards via CQL API
 
-**Date** : 2025-12-03 16:30:13  
-**Script** : `40_test_like_patterns.sh`  
-**Objectif** : Démonstration complète de l'implémentation des patterns LIKE et wildcards dans HCD via recherche hybride (Vector + Filtrage Client-Side)
+**Date** : 2025-12-03 16:30:13
+**Script** : `40_test_like_patterns.sh`
+**Objectif** : Démonstration complète de l'implémentation des patterns LIKE et wildcards dans HCD
+via recherche hybride (Vector + Filtrage Client-Side)
+
+> Cette démonstration présente une implémentation professionnelle des
+> patterns LIKE et wildcards dans HCD.
 
 ---
 
@@ -22,14 +26,21 @@
 
 ## 📊 Résumé Exécutif
 
-Cette démonstration présente une implémentation professionnelle des patterns LIKE et wildcards dans HCD (Hyper-Converged Database), en contournant la limitation de CQL qui ne supporte pas nativement l'opérateur LIKE.
+Cette démonstration présente une implémentation professionnelle des patterns LIKE et wildcards dans
+HCD (Hyper-Converged Database), en contournant la limitation de CQL qui ne supporte pas nativement
+l'opérateur LIKE.
+
+> **Note** : HCD est une base de données hyper-convergée qui ne supporte pas
+> nativement l'opérateur LIKE en CQL.
 
 ### Approche Adoptée
 
 L'implémentation utilise une **recherche hybride en deux étapes** :
 
-1. **Recherche Vectorielle (ANN)** : Utilise la colonne `libelle_embedding` (VECTOR<FLOAT, 1472>) pour trouver les candidats par similarité sémantique
-2. **Filtrage Client-Side (Regex)** : Applique le pattern LIKE converti en regex sur les résultats vectoriels
+1. **Recherche Vectorielle (ANN)** : Utilise la colonne `libelle_embedding` (VECTOR<FLOAT, 1472>)
+pour trouver les candidats par similarité sémantique
+2. **Filtrage Client-Side (Regex)** : Applique le pattern LIKE converti en regex sur les résultats
+vectoriels
 
 ### Résultats des Tests
 
@@ -59,7 +70,8 @@ L'implémentation utilise une **recherche hybride en deux étapes** :
 
 ### Définition des Patterns LIKE
 
-Le pattern LIKE est un opérateur SQL standard permettant de rechercher des correspondances partielles dans du texte en utilisant des **wildcards** (caractères de remplacement).
+Le pattern LIKE est un opérateur SQL standard permettant de rechercher des correspondances
+partielles dans du texte en utilisant des **wildcards** (caractères de remplacement).
 
 **Syntaxe SQL standard** :
 
@@ -81,7 +93,8 @@ SELECT * FROM table WHERE field LIKE 'pattern';
 
 ### Limitations CQL
 
-**CQL (Cassandra Query Language) ne supporte pas nativement l'opérateur LIKE**, contrairement à SQL standard.
+**CQL (Cassandra Query Language) ne supporte pas nativement l'opérateur LIKE**, contrairement à SQL
+standard.
 
 **Comparaison HBase vs HCD** :
 
@@ -290,11 +303,11 @@ ORDER BY libelle_embedding ANN OF ? LIMIT ?
 
 ### TEST 1 : LIKE simple - '%LOYER%'
 
-**Pattern LIKE** : `libelle LIKE '%LOYER%'`  
-**Requête vectorielle** : `'loyer'`  
+**Pattern LIKE** : `libelle LIKE '%LOYER%'`
+**Requête vectorielle** : `'loyer'`
 **Pattern regex généré** : `.*LOYER.*`
 
-**Statut** : ✅ Succès  
+**Statut** : ✅ Succès
 **Résultats trouvés** : 5
 
 **⏱️ Métriques de Performance** :
@@ -358,11 +371,11 @@ ORDER BY libelle_embedding ANN OF ? LIMIT 200;
 
 ### TEST 2 : LIKE avec wildcard début - 'LOYER*'
 
-**Pattern LIKE** : `libelle LIKE 'LOYER*'`  
-**Requête vectorielle** : `'loyer'`  
+**Pattern LIKE** : `libelle LIKE 'LOYER*'`
+**Requête vectorielle** : `'loyer'`
 **Pattern regex généré** : `^LOYER.*`
 
-**Statut** : ✅ Succès  
+**Statut** : ✅ Succès
 **Résultats trouvés** : 4
 
 **⏱️ Métriques de Performance** :
@@ -425,11 +438,11 @@ ORDER BY libelle_embedding ANN OF ? LIMIT 200;
 
 ### TEST 3 : LIKE avec wildcard fin - '*LOYER'
 
-**Pattern LIKE** : `libelle LIKE '*LOYER'`  
-**Requête vectorielle** : `'loyer'`  
+**Pattern LIKE** : `libelle LIKE '*LOYER'`
+**Requête vectorielle** : `'loyer'`
 **Pattern regex généré** : `.*LOYER$`
 
-**Statut** : ⚠️ Aucun résultat  
+**Statut** : ⚠️ Aucun résultat
 **Résultats trouvés** : 0
 
 **⏱️ Métriques de Performance** :
@@ -485,11 +498,11 @@ ORDER BY libelle_embedding ANN OF ? LIMIT 200;
 
 ### TEST 4 : LIKE sur cat_auto - '%IR%' (trouve VIREMENT, RETRAIT, etc.)
 
-**Pattern LIKE** : `cat_auto LIKE '%IR%'`  
-**Requête vectorielle** : `'virement'`  
+**Pattern LIKE** : `cat_auto LIKE '%IR%'`
+**Requête vectorielle** : `'virement'`
 **Pattern regex généré** : `.*IR.*`
 
-**Statut** : ✅ Succès  
+**Statut** : ✅ Succès
 **Résultats trouvés** : 5
 
 **⏱️ Métriques de Performance** :
@@ -553,11 +566,11 @@ ORDER BY libelle_embedding ANN OF ? LIMIT 200;
 
 ### TEST 5 : LIKE avec wildcards multiples - '%LOYER%IMP%'
 
-**Pattern LIKE** : `libelle LIKE '%LOYER%IMP%'`  
-**Requête vectorielle** : `'loyer impaye'`  
+**Pattern LIKE** : `libelle LIKE '%LOYER%IMP%'`
+**Requête vectorielle** : `'loyer impaye'`
 **Pattern regex généré** : `.*LOYER.*IMP.*`
 
-**Statut** : ✅ Succès  
+**Statut** : ✅ Succès
 **Résultats trouvés** : 5
 
 **⏱️ Métriques de Performance** :
@@ -621,11 +634,11 @@ ORDER BY libelle_embedding ANN OF ? LIMIT 200;
 
 ### TEST 6 : LIKE + Filtre Temporel (Range Query)
 
-**Pattern LIKE** : `libelle LIKE '%LOYER%'`  
-**Requête vectorielle** : `'loyer'`  
+**Pattern LIKE** : `libelle LIKE '%LOYER%'`
+**Requête vectorielle** : `'loyer'`
 **Pattern regex généré** : `.*LOYER.*`
 
-**Statut** : ⚠️ Aucun résultat  
+**Statut** : ⚠️ Aucun résultat
 **Résultats trouvés** : 0
 
 **⏱️ Métriques de Performance** :
@@ -681,11 +694,11 @@ ORDER BY libelle_embedding ANN OF ? LIMIT 200;
 
 ### TEST 7 : LIKE + Filtre Montant (Range Query)
 
-**Pattern LIKE** : `libelle LIKE '%RESTAURANT%'`  
-**Requête vectorielle** : `'restaurant'`  
+**Pattern LIKE** : `libelle LIKE '%RESTAURANT%'`
+**Requête vectorielle** : `'restaurant'`
 **Pattern regex généré** : `.*RESTAURANT.*`
 
-**Statut** : ⚠️ Aucun résultat  
+**Statut** : ⚠️ Aucun résultat
 **Résultats trouvés** : 0
 
 **⏱️ Métriques de Performance** :
@@ -741,11 +754,11 @@ ORDER BY libelle_embedding ANN OF ? LIMIT 200;
 
 ### TEST 8 : LIKE + Filtre Catégorie (IN Clause)
 
-**Pattern LIKE** : `libelle LIKE '%CARREFOUR%'`  
-**Requête vectorielle** : `'alimentation'`  
+**Pattern LIKE** : `libelle LIKE '%CARREFOUR%'`
+**Requête vectorielle** : `'alimentation'`
 **Pattern regex généré** : `.*CARREFOUR.*`
 
-**Statut** : ⚠️ Aucun résultat  
+**Statut** : ⚠️ Aucun résultat
 **Résultats trouvés** : 0
 
 **⏱️ Métriques de Performance** :
@@ -801,11 +814,11 @@ ORDER BY libelle_embedding ANN OF ? LIMIT 200;
 
 ### TEST 9 : Multi-Field LIKE avec AND (Tous les patterns doivent matcher)
 
-**Pattern LIKE** : `libelle LIKE '%LOYER%' AND libelle LIKE '%IMP%'`  
-**Requête vectorielle** : `'loyer impaye'`  
+**Pattern LIKE** : `libelle LIKE '%LOYER%' AND libelle LIKE '%IMP%'`
+**Requête vectorielle** : `'loyer impaye'`
 **Pattern regex généré** : `(.*LOYER.* AND .*IMP.*)`
 
-**Statut** : ⚠️ Aucun résultat  
+**Statut** : ⚠️ Aucun résultat
 **Résultats trouvés** : 0
 
 **⏱️ Métriques de Performance** :
@@ -861,11 +874,11 @@ ORDER BY libelle_embedding ANN OF ? LIMIT 200;
 
 ### TEST 10 : Multi-Field LIKE avec OR (Au moins un pattern doit matcher)
 
-**Pattern LIKE** : `libelle LIKE '%VIREMENT%' OR cat_auto LIKE '%IR%'`  
-**Requête vectorielle** : `'virement'`  
+**Pattern LIKE** : `libelle LIKE '%VIREMENT%' OR cat_auto LIKE '%IR%'`
+**Requête vectorielle** : `'virement'`
 **Pattern regex généré** : `(.*VIREMENT.* OR .*IR.*)`
 
-**Statut** : ⚠️ Aucun résultat  
+**Statut** : ⚠️ Aucun résultat
 **Résultats trouvés** : 0
 
 **⏱️ Métriques de Performance** :
@@ -921,11 +934,11 @@ ORDER BY libelle_embedding ANN OF ? LIMIT 200;
 
 ### TEST 11 : LIKE avec Typos Simulés
 
-**Pattern LIKE** : `libelle LIKE '%LOYER%'`  
-**Requête vectorielle** : `'loyr impay'`  
+**Pattern LIKE** : `libelle LIKE '%LOYER%'`
+**Requête vectorielle** : `'loyr impay'`
 **Pattern regex généré** : `.*LOYER.*`
 
-**Statut** : ⚠️ Aucun résultat  
+**Statut** : ⚠️ Aucun résultat
 **Résultats trouvés** : 0
 
 **⏱️ Métriques de Performance** :
@@ -981,11 +994,11 @@ ORDER BY libelle_embedding ANN OF ? LIMIT 200;
 
 ### TEST 12 : LIKE avec Variations Linguistiques
 
-**Pattern LIKE** : `libelle LIKE '%CARREFOUR%'`  
-**Requête vectorielle** : `'achat courses'`  
+**Pattern LIKE** : `libelle LIKE '%CARREFOUR%'`
+**Requête vectorielle** : `'achat courses'`
 **Pattern regex généré** : `.*CARREFOUR.*`
 
-**Statut** : ⚠️ Aucun résultat  
+**Statut** : ⚠️ Aucun résultat
 **Résultats trouvés** : 0
 
 **⏱️ Métriques de Performance** :
@@ -1041,11 +1054,12 @@ ORDER BY libelle_embedding ANN OF ? LIMIT 200;
 
 ### TEST 13 : LIKE avec Description Étendue (Compound Query)
 
-**Pattern LIKE** : `libelle LIKE '%LOYER%'`  
-**Requête vectorielle** : `'Je cherche toutes les opérations liées au paiement du loyer mensuel de mon appartement à Paris'`  
+**Pattern LIKE** : `libelle LIKE '%LOYER%'`
+**Requête vectorielle** : `'Je cherche toutes les opérations liées au paiement du loyer mensuel de
+mon appartement à Paris'`
 **Pattern regex généré** : `.*LOYER.*`
 
-**Statut** : ⚠️ Aucun résultat  
+**Statut** : ⚠️ Aucun résultat
 **Résultats trouvés** : 0
 
 **⏱️ Métriques de Performance** :
@@ -1101,11 +1115,11 @@ ORDER BY libelle_embedding ANN OF ? LIMIT 200;
 
 ### TEST 14 : LIKE + Filtres Multiples Combinés (Très Complexe)
 
-**Pattern LIKE** : `libelle LIKE '%RESTAURANT%'`  
-**Requête vectorielle** : `'restaurant paris'`  
+**Pattern LIKE** : `libelle LIKE '%RESTAURANT%'`
+**Requête vectorielle** : `'restaurant paris'`
 **Pattern regex généré** : `.*RESTAURANT.*`
 
-**Statut** : ⚠️ Aucun résultat  
+**Statut** : ⚠️ Aucun résultat
 **Résultats trouvés** : 0
 
 **⏱️ Métriques de Performance** :
@@ -1161,11 +1175,11 @@ ORDER BY libelle_embedding ANN OF ? LIMIT 200;
 
 ### TEST 15 : Multi-Field LIKE Complexe avec Filtres (Très Complexe)
 
-**Pattern LIKE** : `libelle LIKE '%LOYER%'`  
-**Requête vectorielle** : `'loyer impaye regularisation'`  
+**Pattern LIKE** : `libelle LIKE '%LOYER%'`
+**Requête vectorielle** : `'loyer impaye regularisation'`
 **Pattern regex généré** : `.*LOYER.*`
 
-**Statut** : ⚠️ Aucun résultat  
+**Statut** : ⚠️ Aucun résultat
 **Résultats trouvés** : 0
 
 **⏱️ Métriques de Performance** :
@@ -1221,11 +1235,11 @@ ORDER BY libelle_embedding ANN OF ? LIMIT 200;
 
 ### TEST 16 : LIKE avec Patterns Multi-Wildcards Complexes (Très Complexe)
 
-**Pattern LIKE** : `libelle LIKE '%LOYER%IMP%REGULAR%'`  
-**Requête vectorielle** : `'loyer'`  
+**Pattern LIKE** : `libelle LIKE '%LOYER%IMP%REGULAR%'`
+**Requête vectorielle** : `'loyer'`
 **Pattern regex généré** : `.*LOYER.*IMP.*REGULAR.*`
 
-**Statut** : ⚠️ Aucun résultat  
+**Statut** : ⚠️ Aucun résultat
 **Résultats trouvés** : 0
 
 **⏱️ Métriques de Performance** :
@@ -1281,11 +1295,11 @@ ORDER BY libelle_embedding ANN OF ? LIMIT 200;
 
 ### TEST 17 : LIKE avec Patterns Alternatifs (Très Complexe)
 
-**Pattern LIKE** : `libelle LIKE '%LOYER%' OR libelle LIKE '%LOYERS%'`  
-**Requête vectorielle** : `'loyer'`  
+**Pattern LIKE** : `libelle LIKE '%LOYER%' OR libelle LIKE '%LOYERS%'`
+**Requête vectorielle** : `'loyer'`
 **Pattern regex généré** : `(.*LOYER.* OR .*LOYERS.*)`
 
-**Statut** : ⚠️ Aucun résultat  
+**Statut** : ⚠️ Aucun résultat
 **Résultats trouvés** : 0
 
 **⏱️ Métriques de Performance** :
@@ -1341,11 +1355,11 @@ ORDER BY libelle_embedding ANN OF ? LIMIT 200;
 
 ### TEST 18 : LIKE avec Grand Volume de Candidats (Très Complexe)
 
-**Pattern LIKE** : `libelle LIKE '%LOYER%'`  
-**Requête vectorielle** : `'loyer'`  
+**Pattern LIKE** : `libelle LIKE '%LOYER%'`
+**Requête vectorielle** : `'loyer'`
 **Pattern regex généré** : `.*LOYER.*`
 
-**Statut** : ⚠️ Aucun résultat  
+**Statut** : ⚠️ Aucun résultat
 **Résultats trouvés** : 0
 
 **⏱️ Métriques de Performance** :
@@ -1401,11 +1415,11 @@ ORDER BY libelle_embedding ANN OF ? LIMIT 200;
 
 ### TEST 19 : LIKE avec Patterns Très Sélectifs (Très Complexe)
 
-**Pattern LIKE** : `libelle LIKE '%LOYER%IMP%REGULAR%PARIS%'`  
-**Requête vectorielle** : `'loyer impaye regularisation paris'`  
+**Pattern LIKE** : `libelle LIKE '%LOYER%IMP%REGULAR%PARIS%'`
+**Requête vectorielle** : `'loyer impaye regularisation paris'`
 **Pattern regex généré** : `.*LOYER.*IMP.*REGULAR.*PARIS.*`
 
-**Statut** : ⚠️ Aucun résultat  
+**Statut** : ⚠️ Aucun résultat
 **Résultats trouvés** : 0
 
 **⏱️ Métriques de Performance** :
@@ -1461,11 +1475,11 @@ ORDER BY libelle_embedding ANN OF ? LIMIT 200;
 
 ### TEST 20 : LIKE avec Caractères Spéciaux
 
-**Pattern LIKE** : `libelle LIKE '%RESTAURANT%'`  
-**Requête vectorielle** : `'restaurant'`  
+**Pattern LIKE** : `libelle LIKE '%RESTAURANT%'`
+**Requête vectorielle** : `'restaurant'`
 **Pattern regex généré** : `.*RESTAURANT.*`
 
-**Statut** : ⚠️ Aucun résultat  
+**Statut** : ⚠️ Aucun résultat
 **Résultats trouvés** : 0
 
 **⏱️ Métriques de Performance** :
@@ -1522,10 +1536,10 @@ ORDER BY libelle_embedding ANN OF ? LIMIT 200;
 ### TEST 21 : LIKE avec Patterns Vides ou Invalides (Gestion d'erreurs)
 
 **Pattern LIKE** : ``
-**Requête vectorielle** : `''`  
+**Requête vectorielle** : `''`
 **Pattern regex généré** : ``
 
-**Statut** : ⚠️ Aucun résultat  
+**Statut** : ⚠️ Aucun résultat
 **Résultats trouvés** : 0
 
 **⏱️ Métriques de Performance** :
@@ -1581,11 +1595,11 @@ ORDER BY libelle_embedding ANN OF ? LIMIT 200;
 
 ### TEST 22 : LIKE avec Données NULL ou Manquantes
 
-**Pattern LIKE** : `cat_auto LIKE '%TEST%'`  
-**Requête vectorielle** : `'test'`  
+**Pattern LIKE** : `cat_auto LIKE '%TEST%'`
+**Requête vectorielle** : `'test'`
 **Pattern regex généré** : `.*TEST.*`
 
-**Statut** : ⚠️ Aucun résultat  
+**Statut** : ⚠️ Aucun résultat
 **Résultats trouvés** : 0
 
 **⏱️ Métriques de Performance** :
@@ -1818,14 +1832,15 @@ ORDER BY libelle_embedding ANN OF ? LIMIT 200;
 
 ## ✅ Conclusion
 
-Cette démonstration a présenté une implémentation complète et professionnelle des patterns LIKE et wildcards dans HCD, en contournant la limitation de CQL qui ne supporte pas nativement cet opérateur.
+Cette démonstration a présenté une implémentation complète et professionnelle des patterns LIKE et
+wildcards dans HCD, en contournant la limitation de CQL qui ne supporte pas nativement cet opérateur
 
 ### Points Clés
 
-✅ **Solution hybride efficace** : Combinaison recherche vectorielle + filtrage client-side  
-✅ **Tolérance aux typos** : Grâce à la recherche vectorielle  
-✅ **Filtrage précis** : Grâce au pattern LIKE  
-✅ **Performance optimisée** : Avec index vectoriel intégré  
+✅ **Solution hybride efficace** : Combinaison recherche vectorielle + filtrage client-side
+✅ **Tolérance aux typos** : Grâce à la recherche vectorielle
+✅ **Filtrage précis** : Grâce au pattern LIKE
+✅ **Performance optimisée** : Avec index vectoriel intégré
 ✅ **Compatibilité** : Patterns LIKE standards supportés
 
 ### Prochaines Étapes
@@ -1837,5 +1852,5 @@ Cette démonstration a présenté une implémentation complète et professionnel
 
 ---
 
-**Rapport généré automatiquement par le script `40_test_like_patterns.sh`**  
+**Rapport généré automatiquement par le script `40_test_like_patterns.sh`**
 **Pour plus de détails, consulter les résultats dans `/tmp/like_test_results.txt`**

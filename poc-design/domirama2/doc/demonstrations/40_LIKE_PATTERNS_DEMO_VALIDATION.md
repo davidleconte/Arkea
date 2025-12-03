@@ -1,7 +1,7 @@
 # 🔍 Rapport de Validation : Patterns LIKE avec Wildcards
 
-**Date** : 2025-12-03  
-**Script** : Validation manuelle des résultats  
+**Date** : 2025-12-03
+**Script** : Validation manuelle des résultats
 **Objectif** : Vérifier l'intégralité, la cohérence, la consistance et la justesse des résultats
 
 ---
@@ -12,9 +12,11 @@ Cette validation a identifié plusieurs problèmes dans le rapport généré aut
 
 ### Problèmes Identifiés
 
-1. **❌ Patterns regex incorrects** : Les patterns `*LOYER` et `LOYER*` ne sont pas correctement implémentés
+1. **❌ Patterns regex incorrects** : Les patterns `*LOYER` et `LOYER*` ne sont pas correctement
+implémentés
 2. **❌ Requêtes CQL théoriques** : Affichent `LIKE ''` au lieu du pattern réel
-3. **⚠️  Incohérences de comptage** : Différences entre le rapport (5 résultats) et la vérification (6 résultats)
+3. **⚠️  Incohérences de comptage** : Différences entre le rapport (5 résultats) et la vérification
+(6 résultats)
 4. **❌ TEST 4** : Utilise `libelle` au lieu de `cat_auto` dans la requête CQL théorique
 
 ---
@@ -38,7 +40,8 @@ Cette validation a identifié plusieurs problèmes dans le rapport généré aut
 **Impact** :
 
 - Les résultats incluent des libellés qui ne respectent pas la sémantique SQL LIKE
-- Exemple : `*LOYER` devrait trouver uniquement les libellés se terminant par "LOYER", mais trouve aussi "LOYER IMPAYE REGULARISATION"
+- Exemple : `*LOYER` devrait trouver uniquement les libellés se terminant par "LOYER", mais trouve
+aussi "LOYER IMPAYE REGULARISATION"
 
 ### Problème 2 : Requêtes CQL Théoriques Vides
 
@@ -62,7 +65,8 @@ AND libelle LIKE '%LOYER%'  -- ❌ Non supporté en CQL
 **TEST 2** : Rapport indique 5 résultats, vérification trouve 6 résultats
 **TEST 3** : Rapport indique 5 résultats, vérification trouve 6 résultats
 
-**Cause** : Le script limite à 5 résultats (`limit=5`), mais la vérification montre qu'il y a 6 résultats disponibles
+**Cause** : Le script limite à 5 résultats (`limit=5`), mais la vérification montre qu'il y a 6
+résultats disponibles
 
 ### Problème 4 : TEST 4 - Champ Incorrect
 
@@ -79,26 +83,26 @@ AND libelle LIKE '%LOYER%'  -- ❌ Non supporté en CQL
 
 ### Conversion Wildcards → Regex
 
-✅ `'%LOYER%'` → `'.*LOYER.*'` (correct)  
-✅ `'LOYER*'` → `'LOYER.*'` (correct pour matching, mais devrait être `^LOYER.*` pour précision)  
-✅ `'*LOYER'` → `'.*LOYER'` (correct pour matching, mais devrait être `.*LOYER$` pour précision)  
+✅ `'%LOYER%'` → `'.*LOYER.*'` (correct)
+✅ `'LOYER*'` → `'LOYER.*'` (correct pour matching, mais devrait être `^LOYER.*` pour précision)
+✅ `'*LOYER'` → `'.*LOYER'` (correct pour matching, mais devrait être `.*LOYER$` pour précision)
 ✅ `'%LOYER%IMP%'` → `'.*LOYER.*IMP.*'` (correct)
 
 ### Parsing Requêtes LIKE
 
-✅ `"libelle LIKE '%LOYER%'"` → field=`libelle`, regex=`.*LOYER.*`  
+✅ `"libelle LIKE '%LOYER%'"` → field=`libelle`, regex=`.*LOYER.*`
 ✅ `"cat_auto LIKE 'IMP*'"` → field=`cat_auto`, regex=`IMP.*`
 
 ### Cohérence des Données
 
-✅ Total libellés vérifiés : 85  
-✅ Contenant 'LOYER' : 6  
-✅ Contenant 'IMP' : 13  
+✅ Total libellés vérifiés : 85
+✅ Contenant 'LOYER' : 6
+✅ Contenant 'IMP' : 13
 ✅ Contenant 'LOYER' et 'IMP' : 5
 
 ### Matching des Patterns
 
-✅ Tous les résultats matchent les patterns regex générés  
+✅ Tous les résultats matchent les patterns regex générés
 ⚠️  Mais les patterns `*LOYER` et `LOYER*` ne respectent pas la sémantique SQL LIKE stricte
 
 ---
@@ -160,15 +164,18 @@ else:
 
 Le rapport devrait mentionner que :
 
-- Les patterns `*LOYER` et `LOYER*` utilisent une sémantique flexible (matchent "LOYER" n'importe où)
+- Les patterns `*LOYER` et `LOYER*` utilisent une sémantique flexible (matchent "LOYER" n'importe
+où)
 - Pour une sémantique SQL LIKE stricte, il faudrait utiliser `^LOYER.*` et `.*LOYER$`
-- La recherche vectorielle peut retourner des résultats qui ne respectent pas strictement le pattern LIKE
+- La recherche vectorielle peut retourner des résultats qui ne respectent pas strictement le
+pattern LIKE
 
 ---
 
 ## 📝 Recommandations
 
-1. **Corriger le script de génération** pour afficher correctement les patterns dans les requêtes CQL théoriques
+1. **Corriger le script de génération** pour afficher correctement les patterns dans les requêtes
+CQL théoriques
 2. **Améliorer `build_regex_pattern`** pour supporter une option `strict` qui ajoute `^` et `$`
 3. **Documenter les limitations** dans le rapport principal
 4. **Ajouter des tests unitaires** pour valider les patterns regex générés
@@ -178,4 +185,6 @@ Le rapport devrait mentionner que :
 
 ## ✅ Conclusion
 
-Les résultats sont **globalement cohérents** mais présentent des **problèmes de précision** dans l'implémentation des patterns LIKE. Les corrections proposées amélioreront la justesse et la cohérence du rapport.
+Les résultats sont **globalement cohérents** mais présentent des **problèmes de précision** dans
+l'implémentation des patterns LIKE. Les corrections proposées amélioreront la justesse et la
+cohérence du rapport.
