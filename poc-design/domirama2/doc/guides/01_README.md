@@ -69,7 +69,9 @@ domirama2/
 ├── 10_setup_domirama2_poc_v2_didactique.sh # Version didactique ⭐
 ├── 11_load_domirama2_data_parquet.sh # Script: Chargement données (batch) ⭐ Recommandé
 ├── 11_load_domirama2_data_parquet_v2_didactique.sh # Version didactique ⭐
-├── 12-41_*.sh                        # 45+ scripts de démonstration
+├── 12-41_*.sh                        # 47+ scripts de démonstration
+│   ├── 40_test_like_patterns.sh      # Démonstration patterns LIKE de base
+│   └── 41_demo_wildcard_search.sh    # Démonstration recherche wildcard avancée
 └── data/
     ├── operations_10000.csv          # Données de test (10 000 lignes)
     └── operations_10000.parquet/    # Format Parquet optimisé

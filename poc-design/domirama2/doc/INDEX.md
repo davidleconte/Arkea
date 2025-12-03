@@ -118,6 +118,11 @@ Rapports auto-générés des démonstrations.
 
 **Répertoire** : [`demonstrations/`](demonstrations/)
 
+**Démonstrations récentes** :
+
+- `40_LIKE_PATTERNS_DEMO.md` - Démonstration des patterns LIKE de base
+- `41_WILDCARD_SEARCH_DEMO.md` - Démonstration de la recherche wildcard avancée (multi-champs, filtres combinés)
+
 [Voir toutes les démonstrations →](demonstrations/)
 
 ---

@@ -237,6 +237,8 @@ Voir `doc/INDEX.md` pour l'index complet.
 - `33_demo_colonnes_dynamiques_v2.sh` - Colonnes dynamiques
 - `34_demo_replication_scope_v2.sh` - REPLICATION_SCOPE équivalent
 - `26_test_multi_version_time_travel.sh` - Multi-version / Time travel
+- `40_test_like_patterns.sh` - Démonstration des patterns LIKE de base
+- `41_demo_wildcard_search.sh` - Démonstration de la recherche wildcard avancée (multi-champs, filtres combinés)
 
 **Note** : La plupart des scripts ont une version didactique (`_v2_didactique.sh`) qui génère automatiquement une documentation structurée dans `doc/demonstrations/`.
 
