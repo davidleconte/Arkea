@@ -86,7 +86,8 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/lang/fr/).
 
 #### Scripts Utilitaires
 
-- **scripts/utils/91_check_consistency.sh** - Vérification de cohérence (chemins hardcodés, scripts, documentation)
+- **scripts/utils/91_check_consistency.sh** - Vérification de cohérence
+  (chemins hardcodés, scripts, documentation)
 - **scripts/utils/92_generate_docs.sh** - Génération automatique de documentation (index, listes, tableaux)
 - **scripts/utils/93_fix_hardcoded_paths.sh** - Correction automatique des chemins hardcodés
 
@@ -135,25 +136,31 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Ajouté
 
-**Documentation BIC**
+#### Documentation BIC
 
-- ✅ **`poc-design/bic/doc/audits/32_AUDIT_COMPLET_EXIGENCES_DECISION_ARKEA.md`** : Audit complet MECE des exigences BIC pour décision ARKEA (99.2% conformité)
-- ✅ **`poc-design/bic/doc/audits/33_TABLEAU_RECAPITULATIF_COUVERTURE_EXIGENCES.md`** : Tableau récapitulatif de couverture des exigences BIC
+- ✅ **`poc-design/bic/doc/audits/32_AUDIT_COMPLET_EXIGENCES_DECISION_ARKEA.md`** :
+  Audit complet MECE des exigences BIC pour décision ARKEA (99.2% conformité)
+- ✅ **`poc-design/bic/doc/audits/33_TABLEAU_RECAPITULATIF_COUVERTURE_EXIGENCES.md`** :
+  Tableau récapitulatif de couverture des exigences BIC
 
-**Documentation domirama2**
+#### Documentation domirama2
 
-- ✅ **`poc-design/domirama2/README.md`** : README complet créé (448 lignes) avec structure alignée sur BIC
+- ✅ **`poc-design/domirama2/README.md`** : README complet créé (448 lignes)
+  avec structure alignée sur BIC
 
-**Documentation domiramaCatOps**
+#### Documentation domiramaCatOps
 
-- ✅ **`poc-design/domiramaCatOps/README.md`** : README mis à jour et complété (509 lignes) avec structure alignée sur BIC
+- ✅ **`poc-design/domiramaCatOps/README.md`** : README mis à jour et complété
+  (509 lignes) avec structure alignée sur BIC
 
-**Audits et Documentation**
+#### Audits et Documentation
 
-- ✅ **`docs/AUDIT_COMPLET_RACINE_ARKEA_2025.md`** : Audit complet de la racine ARKEA avec corrections et enrichissements identifiés (score ~85%)
-- ✅ **`docs/EXPLICATION_NETTOYAGE_STRUCTURE.md`** : Explication détaillée du nettoyage de structure (data/, logs/UNLOAD_*, fichiers étranges)
+- ✅ **`docs/AUDIT_COMPLET_RACINE_ARKEA_2025.md`** : Audit complet de la racine
+  ARKEA avec corrections et enrichissements identifiés (score ~85%)
+- ✅ **`docs/EXPLICATION_NETTOYAGE_STRUCTURE.md`** : Explication détaillée du
+  nettoyage de structure (data/, logs/UNLOAD_*, fichiers étranges)
 
-**Scripts Utilitaires**
+#### Scripts Utilitaires
 
 - ✅ **`scripts/utils/95_cleanup.sh`** : Script de nettoyage automatique
   - Nettoyage des répertoires UNLOAD_* de plus de 30 jours
@@ -163,7 +170,7 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Modifié
 
-**Configuration**
+#### Configuration
 
 - ✅ **`.gitignore`** : Amélioration des patterns pour exclure tous les fichiers de données générés
   - Ajout patterns pour répertoires `data/` dans `poc-design/*/`
@@ -171,7 +178,7 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/lang/fr/).
   - Ajout patterns pour répertoires Parquet (`_SUCCESS`, `part-*.parquet`)
   - Ajout patterns pour `checkpoints/`, `export/`, `temp/`, `tmp/`
 
-**Documentation**
+#### Documentation
 
 - ✅ **`docs/INDEX.md`** : Ajout des nouveaux fichiers d'audit et d'explication
 - ✅ **`docs/SCRIPTS_A_JOUR.md`** : Ajout du script `95_cleanup.sh`
@@ -179,7 +186,7 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Supprimé
 
-**Nettoyage de Structure**
+#### Nettoyage de Structure
 
 - ✅ **Répertoire `data/`** : Supprimé (répertoire vide à la racine)
 - ✅ **Répertoires `logs/UNLOAD_*`** : 37 répertoires temporaires supprimés de `logs/archive/2025-11/`
@@ -194,7 +201,10 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/lang/fr/).
   - **Raison** : Remplacé par `domirama2/` (version complète et améliorée)
   - **Archivage** : Contenu archivé dans `poc-design/archive/domirama_archive_2025-12-01.tar.gz`
   - **Impact** : Aucun (aucune référence active trouvée)
-  - **Documentation** : `docs/ARCHITECTURE.md` et `poc-design/README.md` mis à jour
+
+#### Documentation
+
+- `docs/ARCHITECTURE.md` et `poc-design/README.md` mis à jour
 
 ### Modifié
 
@@ -209,21 +219,21 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/lang/fr/).
 
 #### Ajouté
 
-**Structure et Organisation**
+#### Structure et Organisation
 
 - ✅ Réorganisation complète de la racine ARKEA
 - ✅ Création de `scripts/setup/`, `scripts/utils/`, `scripts/scala/`
 - ✅ Création de `schemas/kafka/`
 - ✅ Organisation des logs (`logs/archive/`, `logs/current/`)
 
-**Configuration**
+#### Configuration
 
 - ✅ `.poc-config.sh` - Configuration centralisée avec détection OS
 - ✅ `.poc-profile` - Profil d'environnement amélioré
 - ✅ `.gitignore` - Exclusions complètes
 - ✅ Factorisation des chemins hardcodés
 
-**Documentation**
+#### Documentation
 
 - ✅ `README.md` - Documentation principale mise à jour
 - ✅ `docs/GUIDE_STRUCTURE.md` - Guide de structure complet
@@ -232,33 +242,33 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/lang/fr/).
 - ✅ `docs/AUDIT_BONNES_PRATIQUES_RACINE_2025.md` - Audit de conformité
 - ✅ `docs/ANALYSE_DOUBLON_HCD_1_2_3.md` - Analyse du doublon
 
-**Scripts**
+#### Scripts
 
 - ✅ Migration automatique des références aux scripts
 - ✅ `scripts/utils/update_script_references.py` - Script de mise à jour
 - ✅ Amélioration de tous les scripts avec `setup_paths()`
 - ✅ Ajout de `set -euo pipefail` dans tous les scripts
 
-**Bonnes Pratiques**
+#### Bonnes Pratiques
 
 - ✅ `LICENSE` - Licence Apache 2.0
 - ✅ `CONTRIBUTING.md` - Guide de contribution
 - ✅ `CHANGELOG.md` - Suivi des versions (ce fichier)
 - ✅ `.editorconfig` - Standardisation du code
 
-**Tests et Qualité**
+#### Tests et Qualité
 
 - ✅ `tests/` - Structure de tests créée
 - ✅ `.pre-commit-config.yaml` - Hooks de pré-commit
 - ✅ `.github/workflows/` - CI/CD de base
 
-**Documentation Complémentaire**
+#### Documentation Complémentaire
 
 - ✅ `docs/ARCHITECTURE.md` - Architecture détaillée (composants, flux, décisions)
 - ✅ `docs/DEPLOYMENT.md` - Guide de déploiement complet (installation, configuration, vérification)
 - ✅ `docs/TROUBLESHOOTING.md` - Guide de dépannage (problèmes courants, solutions, FAQ)
 
-**Tests et Qualité**
+#### Tests et Qualité (Suite)
 
 - ✅ `tests/` - Structure de tests (unit/, integration/, e2e/, fixtures/)
 - ✅ `tests/README.md` - Guide des tests

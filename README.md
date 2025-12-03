@@ -3,14 +3,17 @@
 **Date** : 2025-12-02  
 **Version** : 1.4.0  
 **Objectif** : Démonstration de faisabilité de la migration HBase vers DataStax HCD  
-**IBM | Opportunité ICS 006gR000001hiA5QAI - ARKEA | Ingénieur Avant-Vente** : David LECONTE | <david.leconte1@ibm.com> - Mobile : +33614126117  
+**IBM | Opportunité ICS 006gR000001hiA5QAI - ARKEA | Ingénieur Avant-Vente** :
+David LECONTE | <david.leconte1@ibm.com> - Mobile : +33614126117  
 **License** : [Apache 2.0](LICENSE)
 
 ---
 
 ## 📋 Vue d'Ensemble
 
-Ce projet démontre la faisabilité de migrer l'architecture HBase existante chez Arkéa vers DataStax Hyper-Converged Database (HCD) en utilisant Spark, Kafka et Cassandra.
+Ce projet démontre la faisabilité de migrer l'architecture HBase existante chez
+Arkéa vers DataStax Hyper-Converged Database (HCD) en utilisant Spark, Kafka et
+Cassandra.
 
 ---
 
@@ -19,7 +22,7 @@ Ce projet démontre la faisabilité de migrer l'architecture HBase existante che
 Le projet ARKEA est **cross-platform** et supporte les systèmes d'exploitation suivants :
 
 | Plateforme | Statut | Notes |
-|------------|--------|-------|
+| ---------- | ------ | ----- |
 | **macOS** 12+ | ✅ **Entièrement Supporté** | Testé sur MacBook Pro M3 Pro |
 | **Linux** (Ubuntu 20.04+, CentOS 7+) | ✅ **Entièrement Supporté** | Testé dans CI |
 | **Windows** (WSL2) | ✅ **Supporté** | Nécessite WSL2 (voir [Guide Windows](docs/GUIDE_INSTALLATION_WINDOWS.md)) |
@@ -103,7 +106,8 @@ source .poc-profile
 check_poc_env
 ```
 
-**Note** : Le projet utilise maintenant `.poc-config.sh` pour une configuration portable. Voir `docs/PLAN_ACTION_FACTORISATION_CONFIG.md` pour les détails.
+**Note** : Le projet utilise maintenant `.poc-config.sh` pour une configuration
+portable. Voir `docs/PLAN_ACTION_FACTORISATION_CONFIG.md` pour les détails.
 
 ### 2. Installation des Dépendances
 
@@ -273,7 +277,8 @@ Le projet inclut une structure de tests complète avec framework réutilisable :
 
 ### Framework de Tests
 
-Un framework de tests réutilisable est disponible dans `tests/utils/test_framework.sh` avec des fonctions d'assertion :
+Un framework de tests réutilisable est disponible dans
+`tests/utils/test_framework.sh` avec des fonctions d'assertion :
 
 - `assert_equal()`, `assert_not_equal()`
 - `assert_file_exists()`, `assert_dir_exists()`

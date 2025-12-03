@@ -22,7 +22,8 @@
 
 ### 🔍 Audits et Analyses Récentes
 
-1. **AUDIT_MCKINSEY_MECE_COMPLET_ARKEA_2025.md** ⭐ - Audit complet McKinsey MECE (8 dimensions, score 91.5/100) **NOUVEAU**
+1. **AUDIT_MCKINSEY_MECE_COMPLET_ARKEA_2025.md** ⭐ - Audit complet McKinsey
+   MECE (8 dimensions, score 91.5/100) **NOUVEAU**
 2. **AUDIT_COMPLET_PROJET_ARKEA_2025_V2.md** ⭐ - Audit complet V2 du projet ARKEA (corrections et enrichissements)
 3. **AUDIT_COMPLET_RACINE_ARKEA_2025.md** ⭐ - Audit complet de la racine ARKEA (corrections et enrichissements)
 4. **EXPLICATION_NETTOYAGE_STRUCTURE.md** ⭐ - Explication détaillée du nettoyage de structure
@@ -34,19 +35,23 @@
 
 ### 📚 Guides et Documentation
 
-6. **GUIDE_CHOIX_POC.md** ⭐ - Guide pour choisir entre BIC, domirama2, domiramaCatOps **NOUVEAU**
-7. **GUIDE_COMPARAISON_POCS.md** ⭐ - Comparaison technique détaillée des POCs **NOUVEAU**
-8. **GUIDE_CONTRIBUTION_POCS.md** ⭐ - Standards pour contribuer aux POCs **NOUVEAU**
-9. **GUIDE_MAINTENANCE.md** ⭐ - Processus de maintenance et archivage **NOUVEAU**
-10. **INDEX.md** - Index complet de la documentation
-11. **STRUCTURE_PROJET.md** - Structure complète du projet
-12. **ORGANISATION_FINALE.md** - Organisation finale du projet
-13. **ORDRE_EXECUTION_SCRIPTS.md** - Guide ordre d'exécution scripts
-14. **SCRIPTS_A_JOUR.md** - Documentation complète des scripts
-11. **RESULTATS_TEST_KAFKA_HCD.md** - Résultats tests Kafka → HCD
-12. **KAFKA_HCD_STREAMING_READY.md** - Guide streaming Kafka → HCD
-13. **ARCHITECTURE_POC_COMPLETE.md** - Architecture complète du POC
-14. **ANALYSE_ETAT_ART_HBASE.md** - Analyse "État de l'art HBase chez Arkéa"
+1. **GUIDE_CHOIX_POC.md** ⭐ - Guide pour choisir entre BIC, domirama2,
+   domiramaCatOps **NOUVEAU**
+2. **GUIDE_COMPARAISON_POCS.md** ⭐ - Comparaison technique détaillée des
+   POCs **NOUVEAU**
+3. **GUIDE_CONTRIBUTION_POCS.md** ⭐ - Standards pour contribuer aux POCs
+   **NOUVEAU**
+4. **GUIDE_MAINTENANCE.md** ⭐ - Processus de maintenance et archivage
+   **NOUVEAU**
+5. **INDEX.md** - Index complet de la documentation
+6. **STRUCTURE_PROJET.md** - Structure complète du projet
+7. **ORGANISATION_FINALE.md** - Organisation finale du projet
+8. **ORDRE_EXECUTION_SCRIPTS.md** - Guide ordre d'exécution scripts
+9. **SCRIPTS_A_JOUR.md** - Documentation complète des scripts
+10. **RESULTATS_TEST_KAFKA_HCD.md** - Résultats tests Kafka → HCD
+11. **KAFKA_HCD_STREAMING_READY.md** - Guide streaming Kafka → HCD
+12. **ARCHITECTURE_POC_COMPLETE.md** - Architecture complète du POC
+13. **ANALYSE_ETAT_ART_HBASE.md** - Analyse "État de l'art HBase chez Arkéa"
 
 ---
 
@@ -54,10 +59,12 @@
 
 ### Installation
 
-- **GUIDE_INSTALLATION_HCD.md** ⭐ : Guide cross-platform pour installer HCD 1.2.3 (macOS, Linux, Windows WSL2)
+- **GUIDE_INSTALLATION_HCD.md** ⭐ : Guide cross-platform pour installer HCD
+  1.2.3 (macOS, Linux, Windows WSL2)
 - **GUIDE_INSTALLATION_LINUX.md** ⭐ : Guide complet d'installation Linux
 - **GUIDE_INSTALLATION_WINDOWS.md** ⭐ : Guide d'installation Windows (WSL2)
-- **GUIDE_INSTALLATION_SPARK_KAFKA.md** : Guide cross-platform pour installer Spark 3.5.1, Kafka 4.1.1 et spark-cassandra-connector
+- **GUIDE_INSTALLATION_SPARK_KAFKA.md** : Guide cross-platform pour installer
+  Spark 3.5.1, Kafka 4.1.1 et spark-cassandra-connector
 - **DEPLOYMENT.md** : Guide de déploiement complet cross-platform
 
 ### Architecture et Analyse

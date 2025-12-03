@@ -1,7 +1,8 @@
 # 🎯 Plan d'Action Détaillé - Priorités 1 et 3
 
 **Date** : 2025-12-02  
-**Objectif** : Plans d'action détaillés pour améliorer les scores des priorités 1 (Tests) et 3 (CI/CD)  
+**Objectif** : Plans d'action détaillés pour améliorer les scores des priorités
+1 (Tests) et 3 (CI/CD)  
 **Référence** : `AUDIT_MCKINSEY_MECE_COMPLET_ARKEA_2025.md`
 
 ---
@@ -601,7 +602,7 @@ strategy:
 ### Timeline
 
 | Phase | Durée | Dates |
-|-------|-------|-------|
+| ----- | ----- | ----- |
 | **Priorité 1 - Phase 1** | 1 jour | Jour 1 |
 | **Priorité 1 - Phase 2** | 2 jours | Jours 2-3 |
 | **Priorité 1 - Phase 3** | 2 jours | Jours 4-5 |

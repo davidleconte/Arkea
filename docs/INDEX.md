@@ -57,7 +57,8 @@ Les fichiers sont triés du **plus récent au plus ancien** (par date de modific
 
 ### 🔍 Audits
 
-- **AUDIT_MCKINSEY_MECE_COMPLET_ARKEA_2025.md** - Audit complet McKinsey MECE du projet ARKEA (8 dimensions, score 91.5/100) ⭐ **NOUVEAU**
+- **AUDIT_MCKINSEY_MECE_COMPLET_ARKEA_2025.md** - Audit complet McKinsey MECE
+  du projet ARKEA (8 dimensions, score 91.5/100) ⭐ **NOUVEAU**
 - **AUDIT_MCKINSEY_PROJET_ARKEA_2025.md** - Audit complet McKinsey du projet ARKEA (score 92/100)
 - **AUDIT_COMPLET_PROJET_ARKEA_2025_V2.md** - Audit complet V2 du projet ARKEA (corrections et enrichissements)
 - **AUDIT_COMPLET_RACINE_ARKEA_2025.md** - Audit complet de la racine ARKEA (corrections et enrichissements)

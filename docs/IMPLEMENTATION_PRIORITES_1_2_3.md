@@ -174,7 +174,7 @@ pip install -r requirements-dev.txt
 ### Scores Avant/Après
 
 | Priorité | Avant | Après | Amélioration |
-|----------|-------|-------|--------------|
+| -------- | ----- | ----- | ------------ |
 | **Priorité 1** (Tests) | 82/100 | 90/100 | +8 points |
 | **Priorité 2** (Dépendances) | 85/100 | 90/100 | +5 points |
 | **Priorité 3** (CI/CD) | 92/100 | 97/100 | +5 points |
