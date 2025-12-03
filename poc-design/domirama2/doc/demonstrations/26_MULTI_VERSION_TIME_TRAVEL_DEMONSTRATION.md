@@ -139,7 +139,8 @@ Le script Python exécute 10 étapes de démonstration :
 
 **Description** : Nettoyage des données de test existantes pour garantir un état propre avant de commencer la démonstration
 
-**Explication détaillée** : Cette étape garantit que nous partons d'un état propre. Toute donnée de test précédente est supprimée pour éviter toute interférence.
+**Explication détaillée** : Cette étape garantit que nous partons d'un état propre. Toute donnée de test précédente est
+supprimée pour éviter toute interférence.
 
 **Résultat attendu** : Voir description ci-dessus
 
@@ -162,9 +163,11 @@ Le script Python exécute 10 étapes de démonstration :
       cat_date_user: None
       cat_validee: False
 
-**Description** : Insertion initiale par BATCH : Le batch catégorise automatiquement l'opération avec cat_auto='ALIMENTATION' et cat_confidence=0.85. Aucune correction client n'existe encore.
+**Description** : Insertion initiale par BATCH : Le batch catégorise automatiquement l'opération avec
+cat_auto='ALIMENTATION' et cat_confidence=0.85. Aucune correction client n'existe encore.
 
-**Explication détaillée** : Le batch exécute sa catégorisation automatique. À ce stade, seule cat_auto est remplie. cat_user, cat_date_user et cat_validee sont NULL/false.
+**Explication détaillée** : Le batch exécute sa catégorisation automatique. À ce stade, seule cat_auto est remplie.
+cat_user, cat_date_user et cat_validee sont NULL/false.
 
 **État des données après cette étape :**
 
@@ -207,9 +210,11 @@ Le script Python exécute 10 étapes de démonstration :
 
    ✅ Vérification: cat_user prioritaire sur cat_auto
 
-**Description** : Correction CLIENT : L'utilisateur corrige la catégorie en 'RESTAURANT' avec cat_date_user='2024-01-16 14:30:00'. La catégorie batch (cat_auto) est conservée mais cat_user devient prioritaire.
+**Description** : Correction CLIENT : L'utilisateur corrige la catégorie en 'RESTAURANT' avec cat_date_user='2024-01-16
+14:30:00'. La catégorie batch (cat_auto) est conservée mais cat_user devient prioritaire.
 
-**Explication détaillée** : L'utilisateur corrige la catégorie. cat_user est maintenant rempli avec 'RESTAURANT' et cat_date_user contient la date de correction. cat_auto reste inchangé (conservé).
+**Explication détaillée** : L'utilisateur corrige la catégorie. cat_user est maintenant rempli avec 'RESTAURANT' et
+cat_date_user contient la date de correction. cat_auto reste inchangé (conservé).
 
 **État des données après cette étape :**
 
@@ -250,9 +255,11 @@ Le script Python exécute 10 étapes de démonstration :
 
    ✅ Vérification CRITIQUE: cat_user n'a PAS été écrasé par le batch
 
-**Description** : Ré-écriture BATCH : Simulation d'une ré-exécution du batch qui met à jour cat_auto en 'SUPERMARCHE'. CRITIQUE : cat_user doit être conservé et non écrasé.
+**Description** : Ré-écriture BATCH : Simulation d'une ré-exécution du batch qui met à jour cat_auto en 'SUPERMARCHE'.
+CRITIQUE : cat_user doit être conservé et non écrasé.
 
-**Explication détaillée** : SCÉNARIO CRITIQUE : Le batch ré-exécute sa catégorisation et met à jour cat_auto. La vérification CRITIQUE est que cat_user, cat_date_user et cat_validee sont CONSERVÉS et non écrasés.
+**Explication détaillée** : SCÉNARIO CRITIQUE : Le batch ré-exécute sa catégorisation et met à jour cat_auto. La
+vérification CRITIQUE est que cat_user, cat_date_user et cat_validee sont CONSERVÉS et non écrasés.
 
 **État des données après cette étape :**
 
@@ -303,9 +310,11 @@ Le script Python exécute 10 étapes de démonstration :
       Validée: True
       ℹ️  Correction client du 2024-01-16 13:30:00
 
-**Description** : TIME TRAVEL : Test de récupération des catégories valides à différentes dates pour démontrer que la logique time travel fonctionne correctement
+**Description** : TIME TRAVEL : Test de récupération des catégories valides à différentes dates pour démontrer que la
+logique time travel fonctionne correctement
 
-**Explication détaillée** : Le time travel permet de déterminer quelle catégorie était valide à une date donnée. Si cat_date_user <= date_requête, alors cat_user était déjà en place. Sinon, seule cat_auto était disponible.
+**Explication détaillée** : Le time travel permet de déterminer quelle catégorie était valide à une date donnée. Si
+cat_date_user <= date_requête, alors cat_user était déjà en place. Sinon, seule cat_auto était disponible.
 
 **Catégories mentionnées :**
 
@@ -331,9 +340,11 @@ Le script Python exécute 10 étapes de démonstration :
    ❌ PROBLÈME: cat_user a été écrasé!
    ⚠️  En production, le batch ne doit JAMAIS toucher cat_user
 
-**Description** : Test de NON-ÉCRASEMENT : Vérification que cat_user n'est jamais écrasé même si le batch tente de le faire (simulation d'erreur)
+**Description** : Test de NON-ÉCRASEMENT : Vérification que cat_user n'est jamais écrasé même si le batch tente de le
+faire (simulation d'erreur)
 
-**Explication détaillée** : Cette étape simule une erreur où le batch tenterait d'écraser cat_user. En production, cela ne devrait JAMAIS arriver, mais cette démonstration montre comment le détecter.
+**Explication détaillée** : Cette étape simule une erreur où le batch tenterait d'écraser cat_user. En production, cela
+ne devrait JAMAIS arriver, mais cette démonstration montre comment le détecter.
 
 **Résultat attendu** : Voir description ci-dessus
 
@@ -351,7 +362,8 @@ Le script Python exécute 10 étapes de démonstration :
 
 **Description** : Restauration de l'état correct après le test de non-écrasement pour continuer la démonstration
 
-**Explication détaillée** : Après le test de non-écrasement, on restaure l'état correct pour continuer la démonstration avec des données cohérentes.
+**Explication détaillée** : Après le test de non-écrasement, on restaure l'état correct pour continuer la démonstration
+avec des données cohérentes.
 
 **Résultat attendu** : Voir description ci-dessus
 
@@ -379,9 +391,11 @@ Le script Python exécute 10 étapes de démonstration :
 
    ✅ La logique de priorité fonctionne correctement
 
-**Description** : Démonstration de la Logique de Priorité : Application de la logique côté application pour déterminer quelle catégorie utiliser
+**Description** : Démonstration de la Logique de Priorité : Application de la logique côté application pour déterminer
+quelle catégorie utiliser
 
-**Explication détaillée** : La logique de priorité côté application détermine quelle catégorie utiliser : cat_user si non NULL, sinon cat_auto. Cette logique garantit que les corrections client sont toujours prioritaires.
+**Explication détaillée** : La logique de priorité côté application détermine quelle catégorie utiliser : cat_user si
+non NULL, sinon cat_auto. Cette logique garantit que les corrections client sont toujours prioritaires.
 
 **Catégories mentionnées :**
 
@@ -409,9 +423,11 @@ Le script Python exécute 10 étapes de démonstration :
    ⚠️  Note: Cassandra ne garde qu'une version, donc seule la dernière correction est visible
    💡 Pour l'historique complet, il faudrait une table séparée (domirama-meta-categories)
 
-**Description** : Test avec Plusieurs Corrections Client : Simulation d'un historique où le client corrige plusieurs fois la catégorie
+**Description** : Test avec Plusieurs Corrections Client : Simulation d'un historique où le client corrige plusieurs
+fois la catégorie
 
-**Explication détaillée** : Cette étape simule un scénario où le client corrige plusieurs fois. Cassandra ne garde qu'une version, donc seule la dernière correction est visible. Pour l'historique complet, il faudrait une table séparée.
+**Explication détaillée** : Cette étape simule un scénario où le client corrige plusieurs fois. Cassandra ne garde
+qu'une version, donc seule la dernière correction est visible. Pour l'historique complet, il faudrait une table séparée.
 
 **État des données après cette étape :**
 
@@ -452,7 +468,8 @@ Le script Python exécute 10 étapes de démonstration :
 
 **Description** : Time Travel Final : Test complet du time travel avec toutes les corrections appliquées
 
-**Explication détaillée** : Test final du time travel avec toutes les corrections appliquées. Démontre que la logique fonctionne correctement même avec plusieurs corrections successives.
+**Explication détaillée** : Test final du time travel avec toutes les corrections appliquées. Démontre que la logique
+fonctionne correctement même avec plusieurs corrections successives.
 
 **Catégories mentionnées :**
 
@@ -726,13 +743,15 @@ batch
 
 **Problème** : Cassandra ne garde qu'une version, donc l'historique de  n'est pas visible.
 
-**Solution** : Utiliser  pour savoir quand la correction client a été faite. Pour l'historique complet, utiliser une table séparée (domirama-meta-categories).
+**Solution** : Utiliser  pour savoir quand la correction client a été faite. Pour l'historique complet, utiliser une
+table séparée (domirama-meta-categories).
 
 #### Limitation 2 : Historique de Corrections Client
 
 **Problème** : Si le client corrige plusieurs fois, seule la dernière correction est visible.
 
-**Solution** : Pour l'historique complet des corrections, utiliser une table séparée (domirama-meta-categories) comme proposé par IBM.
+**Solution** : Pour l'historique complet des corrections, utiliser une table séparée (domirama-meta-categories) comme
+proposé par IBM.
 
 ### Avantages de la Stratégie Multi-Version
 

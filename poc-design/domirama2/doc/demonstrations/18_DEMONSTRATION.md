@@ -255,7 +255,9 @@ WITH OPTIONS = {
 
 ### DÉMONSTRATION 1 : Recherche Full-Text Simple
 
-**Description** : La recherche full-text permet de rechercher des mots ou phrases dans un texte, contrairement à la recherche exacte (LIKE). Elle utilise un index inversé pour trouver rapidement les documents contenant les termes recherchés.
+**Description** : La recherche full-text permet de rechercher des mots ou phrases dans un texte, contrairement à la
+recherche exacte (LIKE). Elle utilise un index inversé pour trouver rapidement les documents contenant les termes
+recherchés.
 
 **Résultat attendu** : Opérations contenant 'loyer'
 
@@ -311,7 +313,10 @@ LIMIT 5;
 
 ### DÉMONSTRATION 2 : Stemming Français
 
-**Description** : Le stemming réduit les mots à leur racine (stem) pour trouver toutes les variations grammaticales. Par exemple : 'loyers' (pluriel) → 'loyer' (racine), 'mangé', 'mange', 'manger' → 'mang' (racine). Cela permet de trouver un mot même si sa forme change.
+**Description** : Le stemming réduit les mots à leur racine (stem) pour trouver toutes les variations grammaticales. Par
+exemple : 'loyers' (pluriel) → 'loyer' (racine), 'mangé', 'mange', 'manger' → 'mang' (racine). Cela permet de trouver un
+mot même si sa forme
+change.
 
 **Résultat attendu** : Opérations contenant 'loyer' (via stemming de 'loyers')
 
@@ -367,7 +372,9 @@ LIMIT 5;
 
 ### DÉMONSTRATION 3 : Asciifolding (Gestion des Accents)
 
-**Description** : L'asciifolding normalise les caractères accentués en supprimant les accents pour permettre une recherche insensible aux accents. Exemples de transformations : 'é', 'è', 'ê' → 'e', 'à' → 'a', 'ç' → 'c', 'ù', 'û' → 'u'. Cela permet de trouver 'impayé' même si on cherche 'impaye'.
+**Description** : L'asciifolding normalise les caractères accentués en supprimant les accents pour permettre une
+recherche insensible aux accents. Exemples de transformations : 'é', 'è', 'ê' → 'e', 'à' → 'a', 'ç' → 'c', 'ù', 'û' →
+'u'. Cela permet de trouver 'impayé' même si on cherche 'impaye'.
 
 **Résultat attendu** : Opérations contenant 'impayé' ou 'IMPAYE' (via asciifolding)
 
@@ -423,7 +430,9 @@ LIMIT 5;
 
 ### DÉMONSTRATION 4 : Recherche Multi-Termes
 
-**Description** : La recherche multi-termes permet de rechercher plusieurs mots simultanément dans un texte. Par défaut, l'opérateur AND est utilisé : tous les termes doivent être présents. Exemple : 'loyer' AND 'paris' trouve uniquement les opérations contenant à la fois 'loyer' ET 'paris'.
+**Description** : La recherche multi-termes permet de rechercher plusieurs mots simultanément dans un texte. Par défaut,
+l'opérateur AND est utilisé : tous les termes doivent être présents. Exemple : 'loyer' AND 'paris' trouve uniquement les
+opérations contenant à la fois 'loyer' ET 'paris'.
 
 **Résultat attendu** : Opérations contenant à la fois 'loyer' ET 'paris'
 
@@ -473,7 +482,10 @@ LIMIT 5;
 
 ### DÉMONSTRATION 5 : Combinaison de Capacités
 
-**Description** : Les capacités de full-text search peuvent être combinées : Multi-termes (plusieurs mots recherchés simultanément), Stemming (variations grammaticales pluriel/singulier), Asciifolding (gestion des accents), Case-insensitive (insensible à la casse). Toutes ces capacités fonctionnent ensemble pour une recherche robuste et intuitive.
+**Description** : Les capacités de full-text search peuvent être combinées : Multi-termes (plusieurs mots recherchés
+simultanément), Stemming (variations grammaticales pluriel/singulier), Asciifolding (gestion des accents),
+Case-insensitive (insensible à la casse). Toutes ces capacités fonctionnent ensemble pour une recherche robuste et
+intuitive.
 
 **Résultat attendu** : Opérations contenant 'virement' ET 'impaye' (avec ou sans accent)
 
@@ -531,7 +543,10 @@ LIMIT 5;
 
 ### DÉMONSTRATION 6 : Full-Text + Filtres Numériques
 
-**Description** : La recherche full-text peut être combinée avec des filtres sur d'autres colonnes (numériques, dates, catégories, etc.). HCD utilise plusieurs index simultanément : Index SAI full-text sur la colonne texte, Index SAI numérique/range sur les colonnes numériques, Index SAI d'égalité sur les catégories. Le moteur combine intelligemment ces index pour une recherche performante et précise.
+**Description** : La recherche full-text peut être combinée avec des filtres sur d'autres colonnes (numériques, dates,
+catégories, etc.). HCD utilise plusieurs index simultanément : Index SAI full-text sur la colonne texte, Index SAI
+numérique/range sur les colonnes numériques, Index SAI d'égalité sur les catégories. Le moteur combine intelligemment
+ces index pour une recherche performante et précise.
 
 **Résultat attendu** : Opérations contenant 'loyer' ET 'paris' avec montant < -1000
 
@@ -583,7 +598,9 @@ LIMIT 5;
 
 ### DÉMONSTRATION 7 : Limites - Caractères Manquants (Typos)
 
-**Description** : Les utilisateurs peuvent faire des fautes de frappe : Caractères manquants ('loyr' au lieu de 'loyer'), Caractères inversés ('paris' → 'parsi'), Caractères supplémentaires ('loyerr' au lieu de 'loyer'). L'index SAI standard avec stemming ne gère pas automatiquement ces erreurs. Il faut utiliser des techniques spécifiques.
+**Description** : Les utilisateurs peuvent faire des fautes de frappe : Caractères manquants ('loyr' au lieu de
+'loyer'), Caractères inversés ('paris' → 'parsi'), Caractères supplémentaires ('loyerr' au lieu de 'loyer'). L'index SAI
+standard avec stemming ne gère pas automatiquement ces erreurs. Il faut utiliser des techniques spécifiques.
 
 **Résultat attendu** : Aucun résultat (typo non gérée par index standard)
 
@@ -630,7 +647,8 @@ Aucun résultat trouvé
 
 ### DÉMONSTRATION 8 : Limites - Caractères Inversés
 
-**Description** : Les utilisateurs peuvent inverser des caractères adjacents : 'paris' → 'parsi' (i et s inversés), 'loyer' → 'loyre' (e et r inversés). C'est une erreur courante lors de la saisie rapide.
+**Description** : Les utilisateurs peuvent inverser des caractères adjacents : 'paris' → 'parsi' (i et s inversés),
+'loyer' → 'loyre' (e et r inversés). C'est une erreur courante lors de la saisie rapide.
 
 **Résultat attendu** : Aucun résultat (inversion non gérée par index standard)
 
@@ -677,7 +695,9 @@ Aucun résultat trouvé
 
 ### DÉMONSTRATION 9 : Solution - Recherche Partielle (Préfixe)
 
-**Description** : Une solution pour gérer les typos est de rechercher par préfixe : 'loy' trouve 'loyer', 'loyers', 'loyr' (si présent), 'par' trouve 'paris', 'parsi' (si présent). Cette approche est plus tolérante aux erreurs mais peut retourner plus de résultats (moins précis).
+**Description** : Une solution pour gérer les typos est de rechercher par préfixe : 'loy' trouve 'loyer', 'loyers',
+'loyr' (si présent), 'par' trouve 'paris', 'parsi' (si présent). Cette approche est plus tolérante aux erreurs mais peut
+retourner plus de résultats (moins précis).
 
 **Résultat attendu** : Opérations contenant des mots commençant par 'loy'
 
@@ -732,7 +752,8 @@ LIMIT 5;
 
 ### DÉMONSTRATION 10 : Solution - Recherche avec Caractères Supplémentaires
 
-**Description** : Parfois les utilisateurs ajoutent des caractères : 'loyerr' au lieu de 'loyer' (double 'r'), 'pariss' au lieu de 'paris' (double 's'). Le stemming peut parfois aider, mais pas toujours.
+**Description** : Parfois les utilisateurs ajoutent des caractères : 'loyerr' au lieu de 'loyer' (double 'r'), 'pariss'
+au lieu de 'paris' (double 's'). Le stemming peut parfois aider, mais pas toujours.
 
 **Résultat attendu** : Opérations contenant 'loyer' (via stemming de 'loyers')
 
@@ -788,7 +809,9 @@ LIMIT 5;
 
 ### DÉMONSTRATION 11 : Recherche avec Filtre Type Opération
 
-**Description** : La recherche full-text peut être combinée avec des filtres sur d'autres colonnes. Ici, on combine la recherche full-text sur libelle avec un filtre exact sur type_operation. HCD utilise plusieurs index simultanément pour une performance optimale.
+**Description** : La recherche full-text peut être combinée avec des filtres sur d'autres colonnes. Ici, on combine la
+recherche full-text sur libelle avec un filtre exact sur type_operation. HCD utilise plusieurs index simultanément pour
+une performance optimale.
 
 **Résultat attendu** : Opérations contenant 'prelevement' avec type_operation = 'PRELEVEMENT'
 
@@ -846,7 +869,9 @@ LIMIT 5;
 
 ### DÉMONSTRATION 12 : Recherche avec Filtre Date (Range)
 
-**Description** : La recherche full-text peut être combinée avec des filtres de plage sur les dates. Cela permet de rechercher des opérations dans une période spécifique. HCD utilise l'index sur date_op (clustering key) pour une performance optimale.
+**Description** : La recherche full-text peut être combinée avec des filtres de plage sur les dates. Cela permet de
+rechercher des opérations dans une période spécifique. HCD utilise l'index sur date_op (clustering key) pour une
+performance optimale.
 
 **Résultat attendu** : Opérations contenant 'loyer' entre 2024-01-01 et 2025-01-01
 
@@ -902,9 +927,12 @@ LIMIT 5;
 
 ### DÉMONSTRATION 13 : Recherche Complexe Multi-Critères
 
-**Description** : Les recherches les plus complexes combinent plusieurs critères : full-text search, filtres exacts, filtres numériques. HCD optimise automatiquement l'utilisation de tous les index disponibles pour une performance maximale.
+**Description** : Les recherches les plus complexes combinent plusieurs critères : full-text search, filtres exacts,
+filtres numériques. HCD optimise automatiquement l'utilisation de tous les index disponibles pour une performance
+maximale.
 
-**Résultat attendu** : Opérations contenant 'virement' ET 'sepa' avec cat_auto='VIREMENT', type_operation='VIREMENT' et montant > 0
+**Résultat attendu** : Opérations contenant 'virement' ET 'sepa' avec cat_auto='VIREMENT', type_operation='VIREMENT' et
+montant > 0
 
 **Temps d'exécution** : 0.615s
 
@@ -963,7 +991,8 @@ LIMIT 5;
 
 ### DÉMONSTRATION 14 : Recherche avec Variations (Stemming Avancé)
 
-**Description** : Le stemming français gère automatiquement les variations grammaticales. Le pluriel 'prelevements' est réduit à la racine 'prelevement', permettant de trouver 'PRELEVEMENT' (singulier) dans les données.
+**Description** : Le stemming français gère automatiquement les variations grammaticales. Le pluriel 'prelevements' est
+réduit à la racine 'prelevement', permettant de trouver 'PRELEVEMENT' (singulier) dans les données.
 
 **Résultat attendu** : Opérations contenant 'prelevement' (via stemming de 'prelevements')
 
@@ -1019,7 +1048,9 @@ LIMIT 5;
 
 ### DÉMONSTRATION 15 : Recherche avec Noms Propres
 
-**Description** : Les noms propres (EDF, ORANGE, CARREFOUR) nécessitent une recherche exacte sans stemming. Le stemming ne s'applique pas aux noms propres, permettant une recherche précise. La recherche multi-termes permet de trouver des opérations contenant plusieurs noms propres.
+**Description** : Les noms propres (EDF, ORANGE, CARREFOUR) nécessitent une recherche exacte sans stemming. Le stemming
+ne s'applique pas aux noms propres, permettant une recherche précise. La recherche multi-termes permet de trouver des
+opérations contenant plusieurs noms propres.
 
 **Résultat attendu** : Opérations contenant à la fois 'EDF' ET 'ORANGE' (noms propres)
 
@@ -1069,7 +1100,8 @@ LIMIT 5;
 
 ### DÉMONSTRATION 16 : Recherche avec Codes et Numéros
 
-**Description** : Les codes et numéros (numéros de chèque, codes transaction, etc.) nécessitent une recherche exacte. L'index SAI permet de rechercher ces codes efficacement, même s'ils sont intégrés dans un libellé textuel.
+**Description** : Les codes et numéros (numéros de chèque, codes transaction, etc.) nécessitent une recherche exacte.
+L'index SAI permet de rechercher ces codes efficacement, même s'ils sont intégrés dans un libellé textuel.
 
 **Résultat attendu** : Opérations contenant le numéro de chèque '1234567890'
 
@@ -1117,7 +1149,8 @@ LIMIT 5;
 
 ### DÉMONSTRATION 17 : Recherche avec Abréviations
 
-**Description** : Les abréviations (DAB, SEPA, CB, etc.) sont des termes techniques courants dans les libellés bancaires. La recherche multi-termes permet de trouver des opérations contenant plusieurs abréviations simultanément.
+**Description** : Les abréviations (DAB, SEPA, CB, etc.) sont des termes techniques courants dans les libellés
+bancaires. La recherche multi-termes permet de trouver des opérations contenant plusieurs abréviations simultanément.
 
 **Résultat attendu** : Opérations contenant à la fois 'DAB' ET 'SEPA' (abréviations)
 
@@ -1167,7 +1200,8 @@ LIMIT 5;
 
 ### DÉMONSTRATION 18 : Recherche avec Localisation Précise
 
-**Description** : Les recherches de localisation précise nécessitent plusieurs termes (ville, arrondissement, etc.). La recherche multi-termes permet de trouver des opérations contenant tous ces termes de localisation simultanément.
+**Description** : Les recherches de localisation précise nécessitent plusieurs termes (ville, arrondissement, etc.). La
+recherche multi-termes permet de trouver des opérations contenant tous ces termes de localisation simultanément.
 
 **Résultat attendu** : Opérations contenant 'paris', '15eme' ET '16eme' (localisation précise)
 
@@ -1219,7 +1253,9 @@ LIMIT 5;
 
 ### DÉMONSTRATION 19 : Recherche avec Termes Techniques
 
-**Description** : Les termes techniques (contactless, instantané, etc.) sont des mots spécialisés qui nécessitent une recherche précise. La recherche multi-termes permet de trouver des opérations contenant plusieurs termes techniques simultanément.
+**Description** : Les termes techniques (contactless, instantané, etc.) sont des mots spécialisés qui nécessitent une
+recherche précise. La recherche multi-termes permet de trouver des opérations contenant plusieurs termes techniques
+simultanément.
 
 **Résultat attendu** : Opérations contenant 'contactless' ET 'instantané' (termes techniques)
 
@@ -1269,9 +1305,12 @@ LIMIT 5;
 
 ### DÉMONSTRATION 20 : Recherche avec Combinaison Complexe
 
-**Description** : Les recherches les plus complexes combinent tous les types de critères : full-text search multi-termes, filtres exacts (catégorie, type), filtres numériques (montant), filtres de plage (date). HCD optimise automatiquement l'utilisation de tous les index disponibles.
+**Description** : Les recherches les plus complexes combinent tous les types de critères : full-text search
+multi-termes, filtres exacts (catégorie, type), filtres numériques (montant), filtres de plage (date). HCD optimise
+automatiquement l'utilisation de tous les index disponibles.
 
-**Résultat attendu** : Opérations contenant 'virement' ET 'permanent' avec cat_auto='VIREMENT', type_operation='VIREMENT', montant < 0 et date >= 2023-01-01
+**Résultat attendu** : Opérations contenant 'virement' ET 'permanent' avec cat_auto='VIREMENT',
+type_operation='VIREMENT', montant < 0 et date >= 2023-01-01
 
 **Temps d'exécution** : 0.620s
 

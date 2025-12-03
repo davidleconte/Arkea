@@ -59,7 +59,9 @@
 
 ### Requête 1 : Ciblage par Date Précise (STARTROW/STOPROW équivalent)
 
-**Description** : Cette requête démontre l'équivalent du STARTROW/STOPROW HBase pour un ciblage précis par plage de dates. Elle récupère toutes les opérations d'un compte spécifique pour une plage de dates précise (20-25 novembre 2024), triées par date décroissante et numéro d'opération croissant.
+**Description** : Cette requête démontre l'équivalent du STARTROW/STOPROW HBase pour un ciblage précis par plage de
+dates. Elle récupère toutes les opérations d'un compte spécifique pour une plage de dates précise (20-25 novembre 2024),
+triées par date décroissante et numéro d'opération croissant.
 
 **Équivalent HBase** : SCAN avec STARTROW/STOPROW sur date
 
@@ -77,7 +79,9 @@ LIMIT 10;
 
 **Résultat attendu** : Opérations du compte 1/5913101072 pour la plage 20-25 novembre 2024, triées par date décroissante
 
-**Valeur ajoutée SAI** : Index sur date_op (clustering key) permet une recherche rapide sans scan complet. La requête utilise directement l'index clustering pour filtrer par plage de dates, ce qui est beaucoup plus efficace qu'un scan complet de la partition.
+**Valeur ajoutée SAI** : Index sur date_op (clustering key) permet une recherche rapide sans scan complet. La requête
+utilise directement l'index clustering pour filtrer par plage de dates, ce qui est beaucoup plus efficace qu'un scan
+complet de la partition.
 
 - **Lignes retournées** : 6
 - **Temps d'exécution** : 0.60303s
@@ -96,7 +100,9 @@ LIMIT 10;
 
 ### Requête 2 : Ciblage par Date + Numéro Opération (STARTROW/STOPROW complet)
 
-**Description** : Cette requête démontre un ciblage précis complet en utilisant à la fois la date et le numéro d'opération. Elle récupère les opérations d'un compte spécifique pour une date précise avec une plage de numéros d'opération, démontrant l'équivalent complet du STARTROW/STOPROW HBase.
+**Description** : Cette requête démontre un ciblage précis complet en utilisant à la fois la date et le numéro
+d'opération. Elle récupère les opérations d'un compte spécifique pour une date précise avec une plage de numéros
+d'opération, démontrant l'équivalent complet du STARTROW/STOPROW HBase.
 
 **Équivalent HBase** : SCAN avec STARTROW/STOPROW complet (date + numero_op)
 
@@ -112,9 +118,12 @@ ORDER BY date_op DESC, numero_op ASC
 LIMIT 10;
 ```
 
-**Résultat attendu** : Opérations du compte 1/5913101072 pour la date 2024-11-24 23:00:00 avec numero_op entre 1000 et 1100, triées par date décroissante
+**Résultat attendu** : Opérations du compte 1/5913101072 pour la date 2024-11-24 23:00:00 avec numero_op entre 1000 et
+1100, triées par date décroissante
 
-**Valeur ajoutée SAI** : Index sur clustering keys (date_op, numero_op) optimise la recherche précise. La requête utilise les deux index clustering simultanément pour filtrer efficacement par date et numéro d'opération, évitant un scan complet de la partition.
+**Valeur ajoutée SAI** : Index sur clustering keys (date_op, numero_op) optimise la recherche précise. La requête
+utilise les deux index clustering simultanément pour filtrer efficacement par date et numéro d'opération, évitant un
+scan complet de la partition.
 
 - **Lignes retournées** : 1
 - **Temps d'exécution** : 0.57198s
@@ -128,7 +137,10 @@ LIMIT 10;
 
 ### Requête 3 : Ciblage avec SAI (Date + Full-Text Search)
 
-**Description** : Cette requête démontre la valeur ajoutée des index SAI en combinant un ciblage précis par date (plage) avec une recherche full-text (libelle). Elle montre comment SAI permet d'optimiser les requêtes complexes avec plusieurs filtres simultanés. Note: En CQL, on ne peut pas utiliser une plage sur numero_op si date_op utilise une plage (non-EQ), donc on utilise uniquement date_op avec full-text.
+**Description** : Cette requête démontre la valeur ajoutée des index SAI en combinant un ciblage précis par date (plage)
+avec une recherche full-text (libelle). Elle montre comment SAI permet d'optimiser les requêtes complexes avec plusieurs
+filtres simultanés. Note: En CQL, on ne peut pas utiliser une plage sur numero_op si date_op utilise une plage (non-EQ),
+donc on utilise uniquement date_op avec full-text.
 
 **Équivalent HBase** : SCAN avec STARTROW/STOPROW + filtre texte côté client
 
@@ -143,9 +155,12 @@ WHERE code_si = '1' AND contrat = '5913101072'
 LIMIT 10;
 ```
 
-**Résultat attendu** : Opérations du compte 1/5913101072 pour la plage 20-25 novembre 2024 contenant 'PRELEVEMENT' dans le libellé (note: ORDER BY non supporté avec index SAI, et numero_op ne peut pas être en plage si date_op est en plage)
+**Résultat attendu** : Opérations du compte 1/5913101072 pour la plage 20-25 novembre 2024 contenant 'PRELEVEMENT' dans
+le libellé (note: ORDER BY non supporté avec index SAI, et numero_op ne peut pas être en plage si date_op est en plage)
 
-**Valeur ajoutée SAI** : SAI combine index date_op (clustering key avec plage) + libelle (full-text SAI) pour une recherche optimisée. Au lieu d'un scan complet suivi d'un filtrage côté client, SAI utilise les deux index simultanément pour une recherche très rapide. Performance : O(log n) avec index vs O(n) sans index.
+**Valeur ajoutée SAI** : SAI combine index date_op (clustering key avec plage) + libelle (full-text SAI) pour une
+recherche optimisée. Au lieu d'un scan complet suivi d'un filtrage côté client, SAI utilise les deux index simultanément
+pour une recherche très rapide. Performance : O(log n) avec index vs O(n) sans index.
 
 - **Lignes retournées** : 1
 - **Temps d'exécution** : 0.562876s
@@ -190,7 +205,8 @@ LIMIT 10;
 ### Valeur Ajoutée SAI
 
 Les index SAI apportent une amélioration significative des performances pour les requêtes avec
-filtres sur les colonnes indexées. La combinaison d'index (clustering keys + full-text SAI) permet d'optimiser les requêtes complexes avec plusieurs filtres simultanés.
+filtres sur les colonnes indexées. La combinaison d'index (clustering keys + full-text SAI) permet d'optimiser les
+requêtes complexes avec plusieurs filtres simultanés.
 
 ### Équivalences HBase → HCD Validées
 

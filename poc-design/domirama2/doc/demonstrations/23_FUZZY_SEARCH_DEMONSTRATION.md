@@ -290,7 +290,8 @@ Utiliser la recherche hybride (Full-Text + Vector) en production :
 
 **Description** : Typo: caractère manquant ('loyr' au lieu de 'loyer')
 **Résultat attendu** : Devrait trouver 'LOYER', 'LOYER IMPAYE', 'LOYER PARIS MAISON', etc.
-**Explication** : La recherche vectorielle capture la similarité sémantique même avec un caractère manquant. Le modèle ByteT5 encode 'loyr' et 'loyer' en vecteurs proches dans l'espace vectoriel.
+**Explication** : La recherche vectorielle capture la similarité sémantique même avec un caractère manquant. Le modèle
+ByteT5 encode 'loyr' et 'loyer' en vecteurs proches dans l'espace vectoriel.
 **Temps d'encodage** : 0.126s
 **Temps d'exécution** : 0.023s
 **Statut** : ✅ Succès
@@ -323,7 +324,8 @@ SELECT libelle, montant, cat_auto
 
 **Description** : Typo: inversion de caractères ('parsi' au lieu de 'paris')
 **Résultat attendu** : Devrait trouver 'PARIS', opérations liées à Paris, 'LOYER PARIS MAISON', etc.
-**Explication** : La recherche vectorielle tolère les inversions de caractères grâce à la similarité sémantique. ByteT5 capture le sens global du mot même avec des caractères inversés.
+**Explication** : La recherche vectorielle tolère les inversions de caractères grâce à la similarité sémantique. ByteT5
+capture le sens global du mot même avec des caractères inversés.
 **Temps d'encodage** : 0.042s
 **Temps d'exécution** : 0.006s
 **Statut** : ✅ Succès
@@ -356,7 +358,8 @@ SELECT libelle, montant, cat_auto
 
 **Description** : Typo: accent manquant ('impay' au lieu de 'impayé')
 **Résultat attendu** : Devrait trouver 'IMPAYE', 'IMPAYE REGULARISATION', 'LOYER IMPAYE REGULARISATION', etc.
-**Explication** : La recherche vectorielle gère les accents manquants via la similarité sémantique. ByteT5 encode 'impay' et 'impayé' en vecteurs similaires.
+**Explication** : La recherche vectorielle gère les accents manquants via la similarité sémantique. ByteT5 encode
+'impay' et 'impayé' en vecteurs similaires.
 **Temps d'encodage** : 0.043s
 **Temps d'exécution** : 0.005s
 **Statut** : ✅ Succès
@@ -389,7 +392,8 @@ SELECT libelle, montant, cat_auto
 
 **Description** : Typo: caractère manquant au milieu ('viremnt' au lieu de 'virement')
 **Résultat attendu** : Devrait trouver 'VIREMENT', 'VIREMENT SEPA', 'VIREMENT PERMANENT', etc.
-**Explication** : La recherche vectorielle tolère les caractères manquants au milieu du mot. ByteT5 capture la structure globale du mot même avec des caractères manquants.
+**Explication** : La recherche vectorielle tolère les caractères manquants au milieu du mot. ByteT5 capture la structure
+globale du mot même avec des caractères manquants.
 **Temps d'encodage** : 0.047s
 **Temps d'exécution** : 0.004s
 **Statut** : ✅ Succès

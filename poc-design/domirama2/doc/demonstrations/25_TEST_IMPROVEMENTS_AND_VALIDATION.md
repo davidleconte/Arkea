@@ -150,7 +150,8 @@ LIMIT 15
 
 ```
 
-**Problème** : Les libellés contenant tous les termes recherchés (ex: "LOYER IMPAYE REGULARISATION") n'étaient pas toujours dans les 15 premiers résultats retournés par le Vector Search.
+**Problème** : Les libellés contenant tous les termes recherchés (ex: "LOYER IMPAYE REGULARISATION") n'étaient pas
+toujours dans les 15 premiers résultats retournés par le Vector Search.
 
 ### Vérification des Données
 
@@ -376,7 +377,8 @@ LIMIT 100
 
 ```
 
-**Justification** : Avec 100 résultats, on a plus de chances de trouver les libellés contenant tous les termes recherchés, même s'ils ne sont pas dans les 15 premiers résultats du Vector Search.
+**Justification** : Avec 100 résultats, on a plus de chances de trouver les libellés contenant tous les termes
+recherchés, même s'ils ne sont pas dans les 15 premiers résultats du Vector Search.
 
 ### Amélioration 4 : Préservation de l'Ordre Vectoriel
 
@@ -478,7 +480,8 @@ scored_results.sort(key=lambda x: (x[0], -x[1]), reverse=True)
 | 4 | PRIME ANNUELLE 2024 | 1181.40 | REVENUS | ⚠️ Résultat Vector Search |
 | 5 | LOYER PARIS MAISON | -1292.48 | HABITATION | ⚠️ Résultat Vector Search |
 
-**Résultat** : ✅ **Le premier résultat est correct** (c'est une recherche mono-terme, donc le filtrage strict ne s'applique pas de la même manière)
+**Résultat** : ✅ **Le premier résultat est correct** (c'est une recherche mono-terme, donc le filtrage strict ne
+s'applique pas de la même manière)
 
 ---
 

@@ -107,7 +107,8 @@
 ### Valeur Ajoutée SAI
 
 Les index SAI apportent une amélioration significative des performances pour les requêtes avec
-filtres sur les colonnes indexées. La combinaison d'index (clustering key + full-text SAI) permet d'optimiser les requêtes complexes avec plusieurs filtres simultanés.
+filtres sur les colonnes indexées. La combinaison d'index (clustering key + full-text SAI) permet d'optimiser les
+requêtes complexes avec plusieurs filtres simultanés.
 
 ### Équivalences HBase → HCD Validées
 
