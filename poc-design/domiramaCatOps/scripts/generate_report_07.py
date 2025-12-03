@@ -8,9 +8,9 @@ import os
 import sys
 
 report_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-script_name = os.environ.get('SCRIPT_NAME', '07_load_category_data_realtime.sh')
-corrected_msg = os.environ.get('REPORT_CORRECTED_MSG', '⚠️  Aucune opération corrigée trouvée')
-auto_msg = os.environ.get('REPORT_AUTO_MSG', '⚠️  Aucune opération avec cat_auto trouvée')
+script_name = os.environ.get("SCRIPT_NAME", "07_load_category_data_realtime.sh")
+corrected_msg = os.environ.get("REPORT_CORRECTED_MSG", "⚠️  Aucune opération corrigée trouvée")
+auto_msg = os.environ.get("REPORT_AUTO_MSG", "⚠️  Aucune opération avec cat_auto trouvée")
 
 report = f"""# 🔧 Démonstration : Chargement Temps Réel - Corrections Client
 
@@ -115,9 +115,9 @@ WHERE code_si = '01' AND contrat = '1234567890'
 
 ### Avantages HCD
 
-✅ **Séparation explicite** : Colonnes dédiées pour batch et client  
-✅ **Traçabilité complète** : `cat_date_user` pour chaque correction  
-✅ **Garantie de non-perte** : Batch et client n'écrasent jamais leurs colonnes  
+✅ **Séparation explicite** : Colonnes dédiées pour batch et client
+✅ **Traçabilité complète** : `cat_date_user` pour chaque correction
+✅ **Garantie de non-perte** : Batch et client n'écrasent jamais leurs colonnes
 ✅ **Time travel possible** : Via `cat_date_user`
 
 ---
@@ -210,19 +210,19 @@ WHERE code_si = '01'
 
 ### Vérification 1 : cat_user mis à jour
 
-**Attendu** : Opérations avec `cat_user` non null (corrigées par client)  
-**Obtenu** : {corrected_msg}  
+**Attendu** : Opérations avec `cat_user` non null (corrigées par client)
+**Obtenu** : {corrected_msg}
 **Statut** : ✅ Validé
 
 ### Vérification 2 : cat_auto préservé
 
-**Attendu** : `cat_auto` non modifié par les UPDATE client  
-**Obtenu** : {auto_msg}  
+**Attendu** : `cat_auto` non modifié par les UPDATE client
+**Obtenu** : {auto_msg}
 **Statut** : ✅ Validé
 
 ### Vérification 3 : Logique de Priorité
 
-**Attendu** : `cat_user` prioritaire sur `cat_auto` si non null  
+**Attendu** : `cat_user` prioritaire sur `cat_auto` si non null
 **Statut** : ✅ Validé
 
 **Explication** :
@@ -236,17 +236,17 @@ WHERE code_si = '01'
 
 Les tests API correction client ont été exécutés avec succès :
 
-✅ **3 exemples d'UPDATE** exécutés  
-✅ **Stratégie multi-version** validée  
-✅ **Équivalences HBase → HCD** démontrées  
+✅ **3 exemples d'UPDATE** exécutés
+✅ **Stratégie multi-version** validée
+✅ **Équivalences HBase → HCD** démontrées
 ✅ **Logique de priorité** validée
 
 ### Points Clés Démontrés
 
-✅ **BATCH écrit UNIQUEMENT** `cat_auto` et `cat_confidence`  
-✅ **CLIENT écrit dans** `cat_user`, `cat_date_user`, `cat_validee`  
-✅ **APPLICATION priorise** `cat_user` si non nul, sinon `cat_auto`  
-✅ **Aucune correction client** ne sera perdue  
+✅ **BATCH écrit UNIQUEMENT** `cat_auto` et `cat_confidence`
+✅ **CLIENT écrit dans** `cat_user`, `cat_date_user`, `cat_validee`
+✅ **APPLICATION priorise** `cat_user` si non nul, sinon `cat_auto`
+✅ **Aucune correction client** ne sera perdue
 ✅ **Traçabilité complète** via `cat_date_user`
 
 ### Prochaines Étapes
@@ -260,5 +260,3 @@ Les tests API correction client ont été exécutés avec succès :
 """
 
 print(report)
-
-

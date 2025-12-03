@@ -72,17 +72,16 @@ WITH OPTIONS = {
 DESCRIBE TABLE operations_by_account;
 
 -- Vérifier l'index invoice
-SELECT index_name, kind, options 
-FROM system_schema.indexes 
-WHERE keyspace_name = 'domiramacatops_poc' 
+SELECT index_name, kind, options
+FROM system_schema.indexes
+WHERE keyspace_name = 'domiramacatops_poc'
   AND table_name = 'operations_by_account'
   AND index_name = 'idx_libelle_embedding_invoice_vector';
 
 -- Compter le nombre total d'index SAI
 SELECT COUNT(*) as total_indexes
-FROM system_schema.indexes 
-WHERE keyspace_name = 'domiramacatops_poc' 
+FROM system_schema.indexes
+WHERE keyspace_name = 'domiramacatops_poc'
   AND table_name = 'operations_by_account'
   AND kind = 'CUSTOM'
 ALLOW FILTERING;
-

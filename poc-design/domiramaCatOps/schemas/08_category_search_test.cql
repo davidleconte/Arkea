@@ -6,7 +6,7 @@
 -- OBJECTIF :
 --   Ce fichier contient une série de tests de recherche par catégorie sur la table
 --   'operations_by_account' en utilisant les index SAI (Storage-Attached Index).
---   
+--
 --   Les tests couvrent :
 --   - Recherche par catégorie automatique (cat_auto)
 --   - Recherche par catégorie client (cat_user)
@@ -145,7 +145,7 @@ LIMIT 10;
 -- TEST 10 : Recherche avec priorité cat_user vs cat_auto
 -- ============================================
 -- Démontre la stratégie multi-version : cat_user prioritaire sur cat_auto
-SELECT code_si, contrat, date_op, numero_op, libelle, 
+SELECT code_si, contrat, date_op, numero_op, libelle,
        cat_auto, cat_user,
        CASE WHEN cat_user IS NOT NULL THEN cat_user ELSE cat_auto END AS categorie_finale
 FROM operations_by_account
@@ -153,5 +153,3 @@ WHERE code_si = '1'
   AND contrat = '100000000'
   AND (cat_auto = 'ALIMENTATION' OR cat_user = 'ALIMENTATION')
 LIMIT 10;
-
-

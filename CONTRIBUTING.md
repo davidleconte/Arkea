@@ -205,25 +205,73 @@ refactor: factoriser configuration dans .poc-config.sh
 ```
 tests/
 ├── unit/              # Tests unitaires
+│   ├── test_portability.sh
+│   ├── test_consistency.sh
+│   ├── test_poc_config.sh
+│   └── test_portable_functions_example.sh
 ├── integration/       # Tests d'intégration
+│   ├── test_poc_structure.sh
+│   └── test_hcd_spark.sh
 ├── e2e/              # Tests end-to-end
-└── fixtures/          # Données de test
+│   └── test_kafka_hcd_pipeline.sh
+├── fixtures/          # Données de test
+└── utils/             # Framework de tests
+    └── test_framework.sh
 ```
+
+### Framework de Tests
+
+Le projet utilise un framework de tests réutilisable (`tests/utils/test_framework.sh`) :
+
+**Fonctions disponibles** :
+
+- `test_suite_start(name)` : Début d'une suite de tests
+- `test_suite_end()` : Fin avec résumé automatique
+- `assert_equal()`, `assert_not_equal()` : Assertions d'égalité
+- `assert_file_exists()`, `assert_dir_exists()` : Vérifications fichiers/répertoires
+- `assert_port_open()`, `assert_command_exists()` : Vérifications système
+- `assert_var_defined()`, `assert_file_contains()` : Vérifications variables/contenu
 
 ### Exigences
 
 - ✅ **Tests unitaires** : Pour chaque nouvelle fonctionnalité
 - ✅ **Tests d'intégration** : Pour les interactions entre composants
+- ✅ **Tests E2E** : Pour les scénarios complets
 - ✅ **Couverture** : Viser 80%+ de couverture
+- ✅ **Framework** : Utiliser `test_framework.sh` pour tous les nouveaux tests
 
 ### Exécution
 
 ```bash
 # Exécuter tous les tests
-make test
-
-# Ou directement
 ./tests/run_all_tests.sh
+
+# Tests unitaires uniquement
+./tests/run_unit_tests.sh
+
+# Tests d'intégration uniquement
+./tests/run_integration_tests.sh
+
+# Tests E2E uniquement
+./tests/run_e2e_tests.sh
+```
+
+### Créer un Nouveau Test
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ARKEA_HOME="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+source "$ARKEA_HOME/tests/utils/test_framework.sh"
+
+test_suite_start "Nom de la suite de tests"
+
+assert_equal "expected" "actual" "Description du test"
+
+test_suite_end
 ```
 
 ---
@@ -236,6 +284,13 @@ make test
 - ✅ **CHANGELOG.md** : Ajouter entrée pour chaque changement
 - ✅ **Documentation inline** : Commenter le code complexe
 - ✅ **Guides** : Mettre à jour les guides affectés
+- ✅ **tests/README.md** : Documenter les nouveaux tests
+
+### Dépendances
+
+- ✅ **requirements.txt** : Ajouter les nouvelles dépendances Python
+- ✅ **requirements-dev.txt** : Ajouter les dépendances de développement
+- ✅ **docs/GUIDE_DEPENDENCIES.md** : Documenter les nouvelles dépendances
 
 ### Format
 

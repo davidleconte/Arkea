@@ -6,7 +6,7 @@
 -- OBJECTIF :
 --   Ce fichier contient une série de tests de filtrage sur colonnes MAP
 --   (équivalent colonnes dynamiques HBase) sur la table 'operations_by_account'.
---   
+--
 --   Les tests couvrent :
 --   - Filtrage par clé MAP (meta_flags['key'])
 --   - Filtrage par valeur MAP (meta_flags CONTAINS 'value')
@@ -121,5 +121,3 @@ WHERE code_si = '1'
   AND contrat = '100000000'
   AND date_op = '2024-01-20 11:00:00'
   AND numero_op = 2;
-
-

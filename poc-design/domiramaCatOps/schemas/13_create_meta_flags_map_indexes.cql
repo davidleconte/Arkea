@@ -56,10 +56,8 @@ USING 'StorageAttachedIndex';
 -- VÉRIFICATION
 -- ============================================
 
-SELECT index_name, kind, options 
-FROM system_schema.indexes 
-WHERE keyspace_name = 'domiramacatops_poc' 
+SELECT index_name, kind, options
+FROM system_schema.indexes
+WHERE keyspace_name = 'domiramacatops_poc'
   AND table_name = 'operations_by_account'
   AND index_name IN ('idx_meta_flags_keys', 'idx_meta_flags_values');
-
-

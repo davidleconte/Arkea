@@ -5,19 +5,21 @@ Teste la recherche floue avec des typos et compare les résultats.
 Adapté pour domiramaCatOps (keyspace: domiramacatops_poc)
 """
 
+import json
 import os
 import sys
+
 import torch
-from transformers import AutoTokenizer, AutoModel
 from cassandra.cluster import Cluster
 from cassandra.query import SimpleStatement
-import json
+from transformers import AutoModel, AutoTokenizer
 
 # Configuration
 MODEL_NAME = "google/byt5-small"
 VECTOR_DIMENSION = 1472
 HF_API_KEY = os.getenv("HF_API_KEY", "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")
 KEYSPACE = "domiramacatops_poc"
+
 
 def load_model():
     """Charge le modèle ByteT5."""
@@ -28,16 +30,18 @@ def load_model():
     print(f"✅ Modèle chargé")
     return tokenizer, model
 
+
 def encode_text(tokenizer, model, text):
     """Encode un texte en vecteur d'embedding."""
     if not text or text.strip() == "":
         return [0.0] * VECTOR_DIMENSION
-    
+
     inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
     with torch.no_grad():
         encoder_outputs = model.encoder(**inputs)
         embeddings = encoder_outputs.last_hidden_state.mean(dim=1)
     return embeddings[0].tolist()
+
 
 def vector_search(session, query_embedding, code_si, contrat, limit=5):
     """Effectue une recherche vectorielle avec ANN."""
@@ -49,7 +53,7 @@ def vector_search(session, query_embedding, code_si, contrat, limit=5):
     ORDER BY libelle_embedding ANN OF {json.dumps(query_embedding)}
     LIMIT {limit}
     """
-    
+
     try:
         statement = SimpleStatement(cql_query)
         results = list(session.execute(statement))
@@ -58,6 +62,7 @@ def vector_search(session, query_embedding, code_si, contrat, limit=5):
         print(f"   ❌ Erreur: {str(e)}")
         return []
 
+
 def main():
     """Fonction principale pour tester la recherche vectorielle."""
     print("=" * 70)
@@ -65,18 +70,18 @@ def main():
     print("  Keyspace: domiramacatops_poc")
     print("=" * 70)
     print()
-    
+
     # Charger le modèle
     tokenizer, model = load_model()
     print()
-    
+
     # Connexion à HCD
     print("📡 Connexion à HCD...")
-    cluster = Cluster(['localhost'], port=9042)
+    cluster = Cluster(["localhost"], port=9042)
     session = cluster.connect(KEYSPACE)
     print("✅ Connecté à HCD")
     print()
-    
+
     # Récupérer un code_si et contrat pour les tests
     sample_query = f"SELECT code_si, contrat FROM {KEYSPACE}.operations_by_account LIMIT 1"
     sample = session.execute(sample_query).one()
@@ -85,42 +90,48 @@ def main():
         session.shutdown()
         cluster.shutdown()
         return
-    
+
     code_si = sample.code_si
     contrat = sample.contrat
     print(f"📋 Tests sur: code_si={code_si}, contrat={contrat}")
     print()
-    
+
     # Tests avec différentes requêtes (avec et sans typos)
     # Recherches ciblées sur des libellés spécifiques
     test_queries = [
         ("LOYER IMPAYE", "Recherche correcte: 'LOYER IMPAYE'"),
         ("loyr impay", "Typo: caractères manquants ('loyr impay' au lieu de 'loyer impayé')"),
         ("LOYER PARIS", "Recherche correcte: 'LOYER PARIS'"),
-        ("loyr parsi", "Typo: caractères manquants/inversés ('loyr parsi' au lieu de 'loyer paris')"),
+        (
+            "loyr parsi",
+            "Typo: caractères manquants/inversés ('loyr parsi' au lieu de 'loyer paris')",
+        ),
         ("VIREMENT IMPAYE", "Recherche correcte: 'VIREMENT IMPAYE'"),
-        ("viremnt impay", "Typo: caractères manquants ('viremnt impay' au lieu de 'virement impayé')"),
+        (
+            "viremnt impay",
+            "Typo: caractères manquants ('viremnt impay' au lieu de 'virement impayé')",
+        ),
         ("CARREFOUR", "Recherche correcte: 'CARREFOUR'"),
         ("carrefur", "Typo: caractère inversé ('carrefur' au lieu de 'carrefour')"),
         ("PAIEMENT CARTE", "Recherche correcte: 'PAIEMENT CARTE'"),
         ("paiemnt cart", "Typo: caractères manquants ('paiemnt cart' au lieu de 'paiement carte')"),
     ]
-    
+
     print("=" * 70)
     print("  📊 Résultats des Tests")
     print("=" * 70)
     print()
-    
+
     for query_text, description in test_queries:
         print(f"🔍 Requête: '{query_text}'")
         print(f"   {description}")
-        
+
         # Générer l'embedding de la requête
         query_embedding = encode_text(tokenizer, model, query_text)
-        
+
         # Effectuer la recherche vectorielle
         results = vector_search(session, query_embedding, code_si, contrat, limit=5)
-        
+
         if results:
             print(f"   📊 Résultats ({len(results)} trouvés):")
             for i, row in enumerate(results, 1):
@@ -134,17 +145,16 @@ def main():
                 print(f"      {i}. {libelle} | {montant} | {cat_display} (conf: {confidence})")
         else:
             print("   ⚠️  Aucun résultat trouvé")
-        
+
         print()
-    
+
     session.shutdown()
     cluster.shutdown()
-    
+
     print("=" * 70)
     print("  ✅ Tests terminés !")
     print("=" * 70)
 
+
 if __name__ == "__main__":
     main()
-
-

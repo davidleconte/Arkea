@@ -1,0 +1,80 @@
+# =============================================================================
+# Requirements Python - Projet ARKEA
+# =============================================================================
+# Date : 2025-12-02
+# Objectif : Dépendances Python pour le projet ARKEA
+# Usage : pip install -r requirements.txt
+# =============================================================================
+
+# =============================================================================
+# Core Dependencies
+# =============================================================================
+
+# Data API HCD (astrapy)
+astrapy>=2.0,<3.0
+
+# Cassandra Driver
+cassandra-driver>=3.28.0
+
+# CQL Shell (pour tests et scripts)
+cqlsh>=6.0.0
+
+# =============================================================================
+# Machine Learning / Embeddings
+# =============================================================================
+
+# PyTorch (pour embeddings)
+torch>=2.0.0
+
+# Transformers (Hugging Face)
+transformers>=4.30.0
+
+# Sentence Transformers (alternative)
+sentence-transformers>=2.2.0
+
+# =============================================================================
+# Data Processing
+# =============================================================================
+
+# Pandas (pour manipulation de données)
+pandas>=2.0.0
+
+# NumPy (pour calculs numériques)
+numpy>=1.24.0
+
+# =============================================================================
+# Testing & Quality
+# =============================================================================
+
+# Pytest (pour tests Python)
+pytest>=7.4.0
+pytest-cov>=4.1.0
+
+# Pre-commit hooks
+pre-commit>=3.4.0
+
+# =============================================================================
+# Utilities
+# =============================================================================
+
+# Requests (pour API HTTP)
+requests>=2.31.0
+
+# PyYAML (pour configuration YAML)
+pyyaml>=6.0
+
+# =============================================================================
+# Development Dependencies (optionnel)
+# =============================================================================
+
+# Black (formatage code)
+black>=23.12.0
+
+# isort (tri imports)
+isort>=5.13.0
+
+# flake8 (linting)
+flake8>=7.0.0
+
+# Markdown linting
+markdownlint-cli>=0.38.0

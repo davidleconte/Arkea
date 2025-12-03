@@ -83,6 +83,7 @@ Le fichier `utils/didactique_functions.sh` contient des fonctions réutilisables
 - `check_schema()` : Vérification du schéma
 
 **Utilisation** :
+
 ```bash
 source utils/didactique_functions.sh
 ```
@@ -101,5 +102,3 @@ Les templates DomiramaCatOps sont adaptés pour :
 ## Dernière Mise à Jour
 
 2025-01-XX : Tous les templates ont été dupliqués et adaptés depuis domirama2 vers domiramaCatOps.
-
-

@@ -123,5 +123,3 @@ USING 'StorageAttachedIndex';
 CREATE CUSTOM INDEX IF NOT EXISTS idx_decisions_actif
 ON decisions_salaires(actif)
 USING 'StorageAttachedIndex';
-
-

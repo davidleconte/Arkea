@@ -22,14 +22,15 @@
 
 ### 🔍 Audits et Analyses Récentes
 
-1. **AUDIT_COMPLET_PROJET_ARKEA_2025_V2.md** ⭐ - Audit complet V2 du projet ARKEA (corrections et enrichissements)
-2. **AUDIT_COMPLET_RACINE_ARKEA_2025.md** ⭐ - Audit complet de la racine ARKEA (corrections et enrichissements)
-3. **EXPLICATION_NETTOYAGE_STRUCTURE.md** ⭐ - Explication détaillée du nettoyage de structure
-4. **AUDIT_DOCUMENTATION_2025.md** ⭐ - Audit complet de la documentation
-5. **AUDIT_PORTABILITE_CROSS_PLATFORM_2025.md** ⭐ - Audit de portabilité cross-platform
-6. **REFERENCE_HCD_DOCUMENTATION.md** - Référence complète HCD 1.2
-7. **ANALYSE_PROPOSITION_IBM_MECE.md** - Analyse proposition MECE IBM
-8. **ANALYSE_INPUTS_CLIENTS_COMPLETE.md** - Analyse détaillée inputs clients
+1. **AUDIT_MCKINSEY_MECE_COMPLET_ARKEA_2025.md** ⭐ - Audit complet McKinsey MECE (8 dimensions, score 91.5/100) **NOUVEAU**
+2. **AUDIT_COMPLET_PROJET_ARKEA_2025_V2.md** ⭐ - Audit complet V2 du projet ARKEA (corrections et enrichissements)
+3. **AUDIT_COMPLET_RACINE_ARKEA_2025.md** ⭐ - Audit complet de la racine ARKEA (corrections et enrichissements)
+4. **EXPLICATION_NETTOYAGE_STRUCTURE.md** ⭐ - Explication détaillée du nettoyage de structure
+5. **AUDIT_DOCUMENTATION_2025.md** ⭐ - Audit complet de la documentation
+6. **AUDIT_PORTABILITE_CROSS_PLATFORM_2025.md** ⭐ - Audit de portabilité cross-platform
+7. **REFERENCE_HCD_DOCUMENTATION.md** - Référence complète HCD 1.2
+8. **ANALYSE_PROPOSITION_IBM_MECE.md** - Analyse proposition MECE IBM
+9. **ANALYSE_INPUTS_CLIENTS_COMPLETE.md** - Analyse détaillée inputs clients
 
 ### 📚 Guides et Documentation
 
@@ -107,6 +108,22 @@
   - Modifications récentes
 
 ### Tests et Résultats
+
+- **IMPLEMENTATION_PRIORITES_1_2_3.md** ⭐ : Récapitulatif de l'implémentation des 3 priorités **NOUVEAU**
+  - Priorité 1 : Tests unitaires et d'intégration
+  - Priorité 2 : Fichiers de dépendances
+  - Priorité 3 : Enrichissement CI/CD
+  - Impact et métriques
+
+- **PLAN_ACTION_PRIORITES_1_ET_3.md** ⭐ : Plan d'action détaillé pour améliorer tests et CI/CD **NOUVEAU**
+  - Plans d'action complets avec exemples
+  - Timeline et ressources
+  - Métriques de succès
+
+- **GUIDE_DEPENDENCIES.md** ⭐ : Guide complet des dépendances **NOUVEAU**
+  - Dépendances Python (requirements.txt)
+  - Dépendances Java
+  - Installation et mise à jour
 
 - **RESULTATS_TEST_KAFKA_HCD.md** : Résultats du test complet
   - Messages produits dans Kafka

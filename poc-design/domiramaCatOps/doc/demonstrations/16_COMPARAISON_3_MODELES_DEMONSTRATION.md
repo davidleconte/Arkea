@@ -23,6 +23,7 @@
 ### Requête 1 : "LOYER IMPAYE"
 
 #### ByteT5-small
+
 - **Latence** : 209.5 ms
 - **Résultats** : 5
 - **Pertinence** : 0/5 (0.0%)
@@ -32,6 +33,7 @@
   3. CB RESTAURANT BRASSERIE PARIS
 
 #### multilingual-e5-large
+
 - **Latence** : 467.2 ms
 - **Résultats** : 5
 - **Pertinence** : 5/5 (100.0%)
@@ -41,6 +43,7 @@
   3. LOYER IMPAYE HABITATION
 
 #### Modèle Facturation
+
 - **Latence** : 60.9 ms
 - **Résultats** : 5
 - **Pertinence** : 5/5 (100.0%)
@@ -56,6 +59,7 @@
 ### Requête 2 : "VIREMENT SALAIRE"
 
 #### ByteT5-small
+
 - **Latence** : 54.9 ms
 - **Résultats** : 5
 - **Pertinence** : 0/5 (0.0%)
@@ -65,6 +69,7 @@
   3. CB RESTAURANT FRANCAIS TRADITIONNEL
 
 #### multilingual-e5-large
+
 - **Latence** : 30.8 ms
 - **Résultats** : 5
 - **Pertinence** : 5/5 (100.0%)
@@ -74,6 +79,7 @@
   3. VIREMENT SALAIRE AOUT 2023
 
 #### Modèle Facturation
+
 - **Latence** : 22.0 ms
 - **Résultats** : 5
 - **Pertinence** : 5/5 (100.0%)
@@ -89,6 +95,7 @@
 ### Requête 3 : "PAIEMENT CARTE"
 
 #### ByteT5-small
+
 - **Latence** : 50.9 ms
 - **Résultats** : 5
 - **Pertinence** : 5/5 (100.0%)
@@ -100,6 +107,7 @@
 **Analyse** : ✅ **ByteT5 trouve des résultats pertinents** - Tous les résultats contiennent "CB" (Carte Bleue), qui est l'équivalent de "PAIEMENT CARTE".
 
 #### multilingual-e5-large
+
 - **Latence** : 33.8 ms
 - **Résultats** : 5
 - **Pertinence** : 0/5 (0.0%)
@@ -109,6 +117,7 @@
   3. TAXE FONCIERE PRELEVEMENT
 
 #### Modèle Facturation
+
 - **Latence** : 22.2 ms
 - **Résultats** : 5
 - **Pertinence** : 0/5 (0.0%)
@@ -124,6 +133,7 @@
 ### Requête 4 : "TAXE FONCIERE"
 
 #### ByteT5-small
+
 - **Latence** : 49.0 ms
 - **Résultats** : 5
 - **Pertinence** : 0/5 (0.0%)
@@ -133,6 +143,7 @@
   3. CB PHARMACIE DE GARDE PARIS
 
 #### multilingual-e5-large
+
 - **Latence** : 48.0 ms
 - **Résultats** : 5
 - **Pertinence** : 5/5 (100.0%)
@@ -142,6 +153,7 @@
   3. TAXE FONCIERE ANNUELLE
 
 #### Modèle Facturation
+
 - **Latence** : 27.7 ms
 - **Résultats** : 5
 - **Pertinence** : 5/5 (100.0%)
@@ -157,6 +169,7 @@
 ### Requête 5 : "ASSURANCE HABITATION"
 
 #### ByteT5-small
+
 - **Latence** : 49.3 ms
 - **Résultats** : 5
 - **Pertinence** : 0/5 (0.0%)
@@ -166,6 +179,7 @@
   3. CB PHARMACIE DE GARDE PARIS
 
 #### multilingual-e5-large
+
 - **Latence** : 56.8 ms
 - **Résultats** : 5
 - **Pertinence** : 5/5 (100.0%)
@@ -175,6 +189,7 @@
   3. ASSURANCE HABITATION ANNUELLE
 
 #### Modèle Facturation
+
 - **Latence** : 26.7 ms
 - **Résultats** : 5
 - **Pertinence** : 5/5 (100.0%)
@@ -224,6 +239,7 @@
 **Pour la plupart des requêtes** : **Utiliser le modèle facturation**
 
 **Avantages** :
+
 - ✅ **Pertinence équivalente à e5-large** (80% vs 80%)
 - ✅ **4x plus rapide** (31.9 ms vs 127.3 ms)
 - ✅ **Spécialisé facturation** - Comprend mieux la terminologie bancaire
@@ -232,6 +248,7 @@
 **Pour "PAIEMENT CARTE" / "CB"** : **Utiliser ByteT5**
 
 **Avantages** :
+
 - ✅ **100% de pertinence** (reconnaît "CB" = Carte Bleue)
 - ✅ **Latence acceptable** (50.9 ms)
 
@@ -262,12 +279,14 @@ else:
 ✅ **Le modèle facturation est recommandé** pour la production :
 
 **Avantages** :
+
 - ✅ Pertinence 80% (équivalente à e5-large)
 - ✅ Latence 4x plus rapide (31.9 ms vs 127.3 ms)
 - ✅ Spécialisé facturation (meilleure compréhension terminologie bancaire)
 - ✅ Meilleur compromis performance/pertinence
 
 **Stratégie recommandée** :
+
 - **Modèle facturation** : Pour la plupart des requêtes (LOYER, VIREMENT, TAXE, ASSURANCE)
 - **ByteT5** : Pour "PAIEMENT CARTE" / "CB" (100% pertinence)
 - **e5-large** : Optionnel (peut être remplacé par facturation)
@@ -278,4 +297,3 @@ else:
 
 **Date de génération** : 2025-11-30  
 **Version** : 1.0
-

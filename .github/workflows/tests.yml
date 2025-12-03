@@ -1,0 +1,263 @@
+name: Tests Automatisés
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    - cron: '0 2 * * *'
+
+jobs:
+  # =============================================================================
+  # Tests Unitaires
+  # =============================================================================
+  unit-tests:
+    name: Tests Unitaires
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bash
+        run: bash --version
+
+      - name: Setup Environment
+        run: |
+          if [ -f .poc-config.sh ]; then
+            source .poc-config.sh || true
+          fi
+          echo "ARKEA_HOME=$(pwd)" >> $GITHUB_ENV
+
+      - name: Make Scripts Executable
+        run: |
+          find tests/ -name "*.sh" -type f -exec chmod +x {} \;
+          find scripts/ -name "*.sh" -type f -exec chmod +x {} \;
+
+      - name: Run Unit Tests
+        run: |
+          if [ -f tests/run_unit_tests.sh ]; then
+            ./tests/run_unit_tests.sh
+          else
+            echo "⚠️ run_unit_tests.sh non trouvé, exécution des tests unitaires directement"
+            find tests/unit/ -name "test_*.sh" -type f -exec bash {} \;
+          fi
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: unit-test-results
+          path: tests/results/
+          retention-days: 7
+
+  # =============================================================================
+  # Tests d'Intégration
+  # =============================================================================
+  integration-tests:
+    name: Tests d'Intégration
+    runs-on: ubuntu-latest
+    needs: unit-tests
+
+    services:
+      cassandra:
+        image: cassandra:4.0
+        ports:
+          - 9042:9042
+        options: >-
+          --health-cmd "cqlsh -e 'SELECT now() FROM system.local'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install cqlsh
+        run: |
+          pip3 install cqlsh
+
+      - name: Setup Environment
+        run: |
+          if [ -f .poc-config.sh ]; then
+            source .poc-config.sh || true
+          fi
+          export HCD_HOST=localhost
+          export HCD_PORT=9042
+          export CASSANDRA_HOST=localhost
+          export CASSANDRA_PORT=9042
+          echo "HCD_HOST=localhost" >> $GITHUB_ENV
+          echo "HCD_PORT=9042" >> $GITHUB_ENV
+
+      - name: Wait for Cassandra
+        run: |
+          echo "Waiting for Cassandra to be ready..."
+          for i in {1..30}; do
+            if cqlsh localhost 9042 -e 'SELECT now() FROM system.local' 2>/dev/null; then
+              echo "✅ Cassandra is ready"
+              break
+            fi
+            echo "Attempt $i/30: Cassandra not ready yet..."
+            sleep 2
+          done
+
+      - name: Make Scripts Executable
+        run: |
+          find tests/ -name "*.sh" -type f -exec chmod +x {} \;
+          find scripts/ -name "*.sh" -type f -exec chmod +x {} \;
+
+      - name: Run Integration Tests
+        run: |
+          if [ -f tests/run_integration_tests.sh ]; then
+            ./tests/run_integration_tests.sh
+          else
+            echo "⚠️ run_integration_tests.sh non trouvé"
+            find tests/integration/ -name "test_*.sh" -type f -exec bash {} \;
+          fi
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: integration-test-results
+          path: tests/results/
+          retention-days: 7
+
+  # =============================================================================
+  # Tests Multi-OS
+  # =============================================================================
+  test-multi-os:
+    name: Tests Multi-OS (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Environment
+        run: |
+          if [ -f .poc-config.sh ]; then
+            source .poc-config.sh || true
+          fi
+          echo "ARKEA_HOME=$(pwd)" >> $GITHUB_ENV
+
+      - name: Make Scripts Executable
+        run: |
+          find tests/ -name "*.sh" -type f -exec chmod +x {} \;
+          find scripts/ -name "*.sh" -type f -exec chmod +x {} \;
+
+      - name: Run Portability Tests
+        run: |
+          if [ -f tests/run_portability_tests.sh ]; then
+            ./tests/run_portability_tests.sh
+          else
+            echo "⚠️ run_portability_tests.sh non trouvé"
+          fi
+
+  # =============================================================================
+  # Tests de Régression
+  # =============================================================================
+  regression-tests:
+    name: Tests de Régression
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # Pour comparer avec commit précédent
+
+      - name: Setup Environment
+        run: |
+          if [ -f .poc-config.sh ]; then
+            source .poc-config.sh || true
+          fi
+          echo "ARKEA_HOME=$(pwd)" >> $GITHUB_ENV
+
+      - name: Check for Regressions
+        run: |
+          echo "🔍 Vérification des régressions..."
+
+          # Vérifier que les scripts principaux existent toujours
+          required_scripts=(
+            "scripts/setup/01_install_hcd.sh"
+            "scripts/setup/02_install_spark_kafka.sh"
+            ".poc-config.sh"
+          )
+
+          for script in "${required_scripts[@]}"; do
+            if [ ! -f "$script" ]; then
+              echo "❌ Script manquant: $script"
+              exit 1
+            fi
+          done
+
+          echo "✅ Aucune régression détectée"
+
+      - name: Benchmark Performance
+        run: |
+          echo "⏱️ Benchmark de performance..."
+          # Mesurer le temps d'exécution des scripts de test
+          if [ -f tests/run_unit_tests.sh ]; then
+            time ./tests/run_unit_tests.sh || true
+          fi
+
+  # =============================================================================
+  # Résumé des Tests
+  # =============================================================================
+  test-summary:
+    name: Résumé des Tests
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests, test-multi-os, regression-tests]
+    if: always()
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Generate Summary
+        run: |
+          echo "## 📊 Résumé des Tests" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Tests Unitaires" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.unit-tests.result }}" == "success" ]; then
+            echo "- ✅ Tests exécutés avec succès" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ❌ Tests échoués" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Tests d'Intégration" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.integration-tests.result }}" == "success" ]; then
+            echo "- ✅ Tests exécutés avec succès" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ❌ Tests échoués" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Tests Multi-OS" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.test-multi-os.result }}" == "success" ]; then
+            echo "- ✅ Tests exécutés avec succès" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ❌ Tests échoués" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Tests de Régression" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.regression-tests.result }}" == "success" ]; then
+            echo "- ✅ Aucune régression détectée" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ❌ Régressions détectées" >> $GITHUB_STEP_SUMMARY
+          fi

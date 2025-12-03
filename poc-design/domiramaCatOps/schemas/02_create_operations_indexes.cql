@@ -120,8 +120,6 @@ USING 'StorageAttachedIndex';
 -- ============================================
 -- Vérifier que tous les index ont été créés correctement
 -- ============================================
-SELECT index_name FROM system_schema.indexes 
-WHERE keyspace_name = 'domiramacatops_poc' 
+SELECT index_name FROM system_schema.indexes
+WHERE keyspace_name = 'domiramacatops_poc'
   AND table_name = 'operations_by_account';
-
-

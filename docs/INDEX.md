@@ -1,7 +1,7 @@
 # 📚 Index de la Documentation
 
 **Date** : 2025-12-02 (Mise à jour)  
-**Total fichiers** : 36 fichiers de documentation actifs
+**Total fichiers** : 38 fichiers de documentation actifs
 
 ---
 
@@ -57,7 +57,9 @@ Les fichiers sont triés du **plus récent au plus ancien** (par date de modific
 
 ### 🔍 Audits
 
-- **AUDIT_COMPLET_PROJET_ARKEA_2025_V2.md** - Audit complet V2 du projet ARKEA (corrections et enrichissements) ⭐ **NOUVEAU**
+- **AUDIT_MCKINSEY_MECE_COMPLET_ARKEA_2025.md** - Audit complet McKinsey MECE du projet ARKEA (8 dimensions, score 91.5/100) ⭐ **NOUVEAU**
+- **AUDIT_MCKINSEY_PROJET_ARKEA_2025.md** - Audit complet McKinsey du projet ARKEA (score 92/100)
+- **AUDIT_COMPLET_PROJET_ARKEA_2025_V2.md** - Audit complet V2 du projet ARKEA (corrections et enrichissements)
 - **AUDIT_COMPLET_RACINE_ARKEA_2025.md** - Audit complet de la racine ARKEA (corrections et enrichissements)
 - **EXPLICATION_NETTOYAGE_STRUCTURE.md** - Explication détaillée du nettoyage de structure
 - **AUDIT_DOCUMENTATION_2025.md** - Audit complet de la documentation
@@ -68,10 +70,13 @@ Les fichiers sont triés du **plus récent au plus ancien** (par date de modific
 
 ### 📋 Plans et Guides
 
-- **GUIDE_CHOIX_POC.md** ⭐ - Guide pour choisir entre BIC, domirama2, domiramaCatOps **NOUVEAU**
-- **GUIDE_COMPARAISON_POCS.md** ⭐ - Comparaison technique détaillée des POCs **NOUVEAU**
-- **GUIDE_CONTRIBUTION_POCS.md** ⭐ - Standards pour contribuer aux POCs **NOUVEAU**
-- **GUIDE_MAINTENANCE.md** ⭐ - Processus de maintenance et archivage **NOUVEAU**
+- **IMPLEMENTATION_PRIORITES_1_2_3.md** ⭐ - Récapitulatif de l'implémentation des 3 priorités **NOUVEAU**
+- **PLAN_ACTION_PRIORITES_1_ET_3.md** ⭐ - Plan d'action détaillé pour améliorer tests et CI/CD
+- **GUIDE_DEPENDENCIES.md** ⭐ - Guide complet des dépendances **NOUVEAU**
+- **GUIDE_CHOIX_POC.md** ⭐ - Guide pour choisir entre BIC, domirama2, domiramaCatOps
+- **GUIDE_COMPARAISON_POCS.md** ⭐ - Comparaison technique détaillée des POCs
+- **GUIDE_CONTRIBUTION_POCS.md** ⭐ - Standards pour contribuer aux POCs
+- **GUIDE_MAINTENANCE.md** ⭐ - Processus de maintenance et archivage
 - **PLAN_ACTION_FACTORISATION_CONFIG.md** - Plan d'action factorisation (implémenté)
 - **GUIDE_CHANGELOG.md** - Guide du changelog
 - **GUIDE_INSTALLATION_SHELLCHECK.md** - Guide d'installation ShellCheck

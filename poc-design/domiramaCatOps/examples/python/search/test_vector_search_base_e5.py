@@ -4,17 +4,18 @@ Module de base pour les tests de recherche vectorielle avec multilingual-e5-larg
 Extension de test_vector_search_base.py pour supporter e5-large.
 """
 
-import os
-import time
-import torch
 import json
-import statistics
 import math
+import os
 import random
-from typing import List, Tuple, Optional, Dict, Any
-from sentence_transformers import SentenceTransformer
+import statistics
+import time
+from typing import Any, Dict, List, Optional, Tuple
+
+import torch
 from cassandra.cluster import Cluster
 from cassandra.query import SimpleStatement
+from sentence_transformers import SentenceTransformer
 
 # Configuration
 MODEL_NAME_E5 = "intfloat/multilingual-e5-large"
@@ -28,6 +29,7 @@ _model_e5 = None
 torch.manual_seed(42)
 random.seed(42)
 
+
 def load_model_e5():
     """Charge le modèle multilingual-e5-large avec cache."""
     global _model_e5
@@ -36,6 +38,7 @@ def load_model_e5():
         _model_e5 = SentenceTransformer(MODEL_NAME_E5)
         print(f"✅ Modèle chargé (dimension: {VECTOR_DIMENSION_E5})")
     return _model_e5
+
 
 def encode_text_e5(model, text: str) -> List[float]:
     """Encode un texte en vecteur d'embedding avec e5-large."""
@@ -47,12 +50,15 @@ def encode_text_e5(model, text: str) -> List[float]:
         if magnitude > 0:
             return [x / magnitude for x in vec]
         return [0.001] * VECTOR_DIMENSION_E5
-    
+
     # Encoder avec e5-large
     embedding = model.encode(text, normalize_embeddings=True)
     return embedding.tolist()
 
-def vector_search_e5(session, query_embedding: List[float], code_si: str, contrat: str, limit: int = 5) -> List[Any]:
+
+def vector_search_e5(
+    session, query_embedding: List[float], code_si: str, contrat: str, limit: int = 5
+) -> List[Any]:
     """Effectue une recherche vectorielle avec ANN en utilisant libelle_embedding_e5."""
     cql_query = f"""
     SELECT libelle, montant, cat_auto, cat_user, cat_confidence, libelle_embedding_e5
@@ -61,7 +67,7 @@ def vector_search_e5(session, query_embedding: List[float], code_si: str, contra
     ORDER BY libelle_embedding_e5 ANN OF {json.dumps(query_embedding)}
     LIMIT {limit}
     """
-    
+
     try:
         statement = SimpleStatement(cql_query)
         results = list(session.execute(statement))
@@ -70,11 +76,13 @@ def vector_search_e5(session, query_embedding: List[float], code_si: str, contra
         print(f"   ❌ Erreur: {str(e)}")
         return []
 
+
 def connect_to_hcd():
     """Connexion à HCD."""
-    cluster = Cluster(['localhost'])
+    cluster = Cluster(["localhost"])
     session = cluster.connect(KEYSPACE)
     return cluster, session
+
 
 def get_test_account(session):
     """Récupère un compte de test."""
@@ -84,6 +92,7 @@ def get_test_account(session):
         return (result[0].code_si, result[0].contrat)
     return None
 
+
 def calculate_cosine_similarity(vec1: List[float], vec2: List[float]) -> float:
     """Calcule la similarité cosinus entre deux vecteurs."""
     dot_product = sum(a * b for a, b in zip(vec1, vec2))
@@ -92,4 +101,3 @@ def calculate_cosine_similarity(vec1: List[float], vec2: List[float]) -> float:
     if magnitude1 == 0 or magnitude2 == 0:
         return 0.0
     return dot_product / (magnitude1 * magnitude2)
-
