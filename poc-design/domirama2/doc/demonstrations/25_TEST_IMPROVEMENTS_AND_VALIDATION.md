@@ -65,12 +65,19 @@ attendus :
 **Résultat attendu** : Devrait trouver 'LOYER IMPAYE' grâce au Vector Search (fallback)
 
 **Résultats obtenus (AVANT) :**
+
 | Rang | Libellé | Montant | Catégorie |
+
 |------|---------|---------|-----------|
+
 | 1 | LOYER PARIS MAISON | -1292.48 | HABITATION |
+
 | 2 | PRIME ANNUELLE 2024 | 1600.60 | REVENUS |
+
 | 3 | PRIME ANNUELLE 2024 | 1956.71 | REVENUS |
+
 | 4 | PRIME ANNUELLE 2024 | 1181.40 | REVENUS |
+
 | 5 | CB UBER EATS PARIS LIVRAISON | -11.31 | RESTAURANT |
 
 ❌ **Problème** : Le premier résultat est "LOYER PARIS MAISON" au lieu de "LOYER IMPAYE
@@ -81,12 +88,19 @@ REGULARISATION"
 **Résultat attendu** : Devrait trouver 'VIREMENT IMPAYE' grâce au Vector Search (fallback)
 
 **Résultats obtenus (AVANT) :**
+
 | Rang | Libellé | Montant | Catégorie |
+
 |------|---------|---------|-----------|
+
 | 1 | VIREMENT SEPA VERS LIVRET A | 939.05 | VIREMENT |
+
 | 2 | PRIME ANNUELLE 2024 | 1600.60 | REVENUS |
+
 | 3 | PRIME ANNUELLE 2024 | 1956.71 | REVENUS |
+
 | 4 | PRIME ANNUELLE 2024 | 1181.40 | REVENUS |
+
 | 5 | LOYER PARIS MAISON | -1292.48 | HABITATION |
 
 ❌ **Problème** : Le premier résultat est "VIREMENT SEPA VERS LIVRET A" au lieu de "VIREMENT IMPAYE"
@@ -96,12 +110,19 @@ REGULARISATION"
 **Résultat attendu** : Devrait trouver 'CARREFOUR' grâce au Vector Search (fallback)
 
 **Résultats obtenus (AVANT) :**
+
 | Rang | Libellé | Montant | Catégorie |
+
 |------|---------|---------|-----------|
+
 | 1 | CB CARREFOUR MARKET RUE DE VAUGIRARD | -60.22 | ALIMENTATION |
+
 | 2 | PRIME ANNUELLE 2024 | 1600.60 | REVENUS |
+
 | 3 | PRIME ANNUELLE 2024 | 1956.71 | REVENUS |
+
 | 4 | PRIME ANNUELLE 2024 | 1181.40 | REVENUS |
+
 | 5 | LOYER PARIS MAISON | -1292.48 | HABITATION |
 
 ⚠️ **Problème partiel** : Le premier résultat est correct ("CB CARREFOUR MARKET"), mais les
@@ -405,11 +426,17 @@ scored_results.sort(key=lambda x: (x[0], -x[1]), reverse=True)
 #### AVANT Améliorations
 
 | Rang | Libellé | Montant | Catégorie | Statut |
+
 |------|---------|---------|-----------|--------|
+
 | 1 | LOYER PARIS MAISON | -1292.48 | HABITATION | ❌ Non pertinent |
+
 | 2 | PRIME ANNUELLE 2024 | 1600.60 | REVENUS | ❌ Non pertinent |
+
 | 3 | PRIME ANNUELLE 2024 | 1956.71 | REVENUS | ❌ Non pertinent |
+
 | 4 | PRIME ANNUELLE 2024 | 1181.40 | REVENUS | ❌ Non pertinent |
+
 | 5 | CB UBER EATS PARIS LIVRAISON | -11.31 | RESTAURANT | ❌ Non pertinent |
 
 **Problème** : Aucun résultat ne contient à la fois "LOYER" et "IMPAYE"
@@ -417,11 +444,17 @@ scored_results.sort(key=lambda x: (x[0], -x[1]), reverse=True)
 #### APRÈS Améliorations
 
 | Rang | Libellé | Montant | Catégorie | Statut |
+
 |------|---------|---------|-----------|--------|
+
 | 1 | LOYER IMPAYE REGULARISATION | 578.48 | HABITATION | ✅ **Pertinent** |
+
 | 2 | LOYER IMPAYE REGULARISATION | -875.43 | HABITATION | ✅ **Pertinent** |
+
 | 3 | LOYER IMPAYE REGULARISATION | -1479.43 | HABITATION | ✅ **Pertinent** |
+
 | 4 | REGULARISATION LOYER IMPAYE | -1333.81 | HABITATION | ✅ **Pertinent** |
+
 | 5 | REGULARISATION LOYER IMPAYE | -1342.50 | HABITATION | ✅ **Pertinent** |
 
 **Résultat** : ✅ **Tous les résultats sont pertinents** et contiennent à la fois "LOYER" et "IMPAYE"
@@ -433,11 +466,17 @@ scored_results.sort(key=lambda x: (x[0], -x[1]), reverse=True)
 #### AVANT Améliorations
 
 | Rang | Libellé | Montant | Catégorie | Statut |
+
 |------|---------|---------|-----------|--------|
+
 | 1 | VIREMENT SEPA VERS LIVRET A | 939.05 | VIREMENT | ❌ Ne contient pas "IMPAYE" |
+
 | 2 | PRIME ANNUELLE 2024 | 1600.60 | REVENUS | ❌ Non pertinent |
+
 | 3 | PRIME ANNUELLE 2024 | 1956.71 | REVENUS | ❌ Non pertinent |
+
 | 4 | PRIME ANNUELLE 2024 | 1181.40 | REVENUS | ❌ Non pertinent |
+
 | 5 | LOYER PARIS MAISON | -1292.48 | HABITATION | ❌ Non pertinent |
 
 **Problème** : Le premier résultat contient "VIREMENT" mais pas "IMPAYE"
@@ -445,11 +484,17 @@ scored_results.sort(key=lambda x: (x[0], -x[1]), reverse=True)
 #### APRÈS Améliorations
 
 | Rang | Libellé | Montant | Catégorie | Statut |
+
 |------|---------|---------|-----------|--------|
+
 | 1 | VIREMENT IMPAYE REFUSE | -19.68 | VIREMENT | ✅ **Pertinent** |
+
 | 2 | VIREMENT IMPAYE REFUSE | -85.94 | VIREMENT | ✅ **Pertinent** |
+
 | 3 | VIREMENT IMPAYE RETOUR | 786.60 | VIREMENT | ✅ **Pertinent** |
+
 | 4 | VIREMENT IMPAYE INSUFFISANCE FONDS | 342.30 | VIREMENT | ✅ **Pertinent** |
+
 | 5 | VIREMENT IMPAYE REMBOURSEMENT | -79.33 | VIREMENT | ✅ **Pertinent** |
 
 **Résultat** : ✅ **Tous les résultats sont pertinents** et contiennent à la fois "VIREMENT" et "IMPAYE"
@@ -461,11 +506,17 @@ scored_results.sort(key=lambda x: (x[0], -x[1]), reverse=True)
 #### AVANT Améliorations
 
 | Rang | Libellé | Montant | Catégorie | Statut |
+
 |------|---------|---------|-----------|--------|
+
 | 1 | CB CARREFOUR MARKET RUE DE VAUGIRARD | -60.22 | ALIMENTATION | ✅ Pertinent |
+
 | 2 | PRIME ANNUELLE 2024 | 1600.60 | REVENUS | ❌ Non pertinent |
+
 | 3 | PRIME ANNUELLE 2024 | 1956.71 | REVENUS | ❌ Non pertinent |
+
 | 4 | PRIME ANNUELLE 2024 | 1181.40 | REVENUS | ❌ Non pertinent |
+
 | 5 | LOYER PARIS MAISON | -1292.48 | HABITATION | ❌ Non pertinent |
 
 **Problème** : Le premier résultat est correct, mais les suivants ne sont pas pertinents
@@ -473,11 +524,17 @@ scored_results.sort(key=lambda x: (x[0], -x[1]), reverse=True)
 #### APRÈS Améliorations
 
 | Rang | Libellé | Montant | Catégorie | Statut |
+
 |------|---------|---------|-----------|--------|
+
 | 1 | CB CARREFOUR MARKET RUE DE VAUGIRARD | -60.22 | ALIMENTATION | ✅ **Pertinent** |
+
 | 2 | PRIME ANNUELLE 2024 | 1600.60 | REVENUS | ⚠️ Résultat Vector Search |
+
 | 3 | PRIME ANNUELLE 2024 | 1956.71 | REVENUS | ⚠️ Résultat Vector Search |
+
 | 4 | PRIME ANNUELLE 2024 | 1181.40 | REVENUS | ⚠️ Résultat Vector Search |
+
 | 5 | LOYER PARIS MAISON | -1292.48 | HABITATION | ⚠️ Résultat Vector Search |
 
 **Résultat** : ✅ **Le premier résultat est correct** (c'est une recherche mono-terme, donc le filtrage strict ne
@@ -492,25 +549,37 @@ s'applique pas de la même manière)
 #### TEST 2 : 'loyr impay'
 
 | Métrique | AVANT | APRÈS | Évolution |
+
 |----------|-------|-------|-----------|
+
 | Temps d'encodage | 0.049s | 0.053s | +8% (acceptable) |
+
 | Temps d'exécution | 0.010s | 0.016s | +60% (dû au LIMIT 100) |
+
 | **Total** | **0.059s** | **0.069s** | **+17%** |
 
 #### TEST 4 : 'viremnt impay'
 
 | Métrique | AVANT | APRÈS | Évolution |
+
 |----------|-------|-------|-----------|
+
 | Temps d'encodage | 0.049s | 0.053s | +8% (acceptable) |
+
 | Temps d'exécution | 0.011s | 0.009s | -18% (variable) |
+
 | **Total** | **0.060s** | **0.062s** | **+3%** |
 
 #### TEST 6 : 'carrefur'
 
 | Métrique | AVANT | APRÈS | Évolution |
+
 |----------|-------|-------|-----------|
+
 | Temps d'encodage | 0.049s | 0.059s | +20% (variable) |
+
 | Temps d'exécution | 0.006s | 0.022s | +267% (dû au LIMIT 100) |
+
 | **Total** | **0.055s** | **0.081s** | **+47%** |
 
 ### Analyse des Performances
@@ -535,12 +604,19 @@ pertinence
 ### Résumé des Tests
 
 | Test | Requête | Type | Résultat AVANT | Résultat APRÈS | Statut |
+
 |------|---------|------|----------------|----------------|--------|
+
 | 1 | 'LOYER IMPAYE' | Correcte | ✅ Pertinent | ✅ Pertinent | ✅ OK |
+
 | 2 | 'loyr impay' | Typos | ❌ Non pertinent | ✅ **Pertinent** | ✅ **CORRIGÉ** |
+
 | 3 | 'VIREMENT IMPAYE' | Correcte | ✅ Pertinent | ✅ Pertinent | ✅ OK |
+
 | 4 | 'viremnt impay' | Typos | ❌ Non pertinent | ✅ **Pertinent** | ✅ **CORRIGÉ** |
+
 | 5 | 'CARREFOUR' | Correcte | ✅ Pertinent | ✅ Pertinent | ✅ OK |
+
 | 6 | 'carrefur' | Typo | ⚠️ Partiel | ✅ **Pertinent** | ✅ **AMÉLIORÉ** |
 
 ### Taux de Réussite

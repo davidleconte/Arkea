@@ -46,11 +46,9 @@
 | 2024-11 | 2024-11-01 | 2024-12-01 | 10029 | 10029 | ✅ OK |
 | 2024-12 | 2024-12-01 | 2025-01-01 | 10029 | 10029 | ✅ OK |
 
-
 ---
 
 ## 📊 Résultats par Fenêtre
-
 
 ### Fenêtre 2024-11
 
@@ -61,7 +59,6 @@
 - **Répertoire** : /tmp/exports/domirama/incremental/2024-11
 - **Statut** : ✅ Export réussi
 
-
 ### Fenêtre 2024-12
 
 - **Période** : 2024-12-01 → 2025-01-01
@@ -70,7 +67,6 @@
 - **Cohérence** : ✅ Cohérent
 - **Répertoire** : /tmp/exports/domirama/incremental/2024-12
 - **Statut** : ✅ Export réussi
-
 
 ---
 

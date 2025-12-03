@@ -143,21 +143,21 @@ problème du type VECTOR non supporté par Spark Cassandra Connector.
 
 ---
 
-## ⚠️ Gestion des Tombstones
+## ⚠️ Gestion des Tombstones (suite)
 
-### Détection
+### Détection (suite)
 
 - **Tombstones scannés** : 1024
 - **Seuil d'avertissement** : 1000
 - **Statut** : ⚠️  Seuil dépassé
 
-### Impact
+### Impact (suite)
 
 - **Performance** : Potentiellement dégradée
 - **Export** : Les tombstones sont automatiquement filtrés par Spark Cassandra Connector
 - **Données** : Aucun tombstone exporté (comportement attendu)
 
-### Actions Recommandées
+### Actions Recommandées (suite)
 
 1. **Compaction manuelle** (si accès nodetool) :
 
