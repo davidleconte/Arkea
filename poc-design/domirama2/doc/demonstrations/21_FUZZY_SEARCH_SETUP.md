@@ -1,7 +1,7 @@
 # 🔍 Démonstration : Configuration Fuzzy Search avec ByteT5 - POC Domirama2
 
-**Date** : 2025-11-26 17:51:00  
-**Script** : `21_setup_fuzzy_search_v2_didactique.sh`  
+**Date** : 2025-11-26 17:51:00
+**Script** : `21_setup_fuzzy_search_v2_didactique.sh`
 **Objectif** : Configurer la recherche floue avec colonne vectorielle et index SAI vectoriel
 
 ---
@@ -23,12 +23,15 @@
 Les recherches avec typos complexes ne fonctionnent pas avec les index standard :
 
 **Scénario 1** : Un utilisateur cherche 'LOYER' mais tape 'LOYR' (caractère 'e' manquant)
+
 - Résultat avec index standard : ❌ Aucun résultat trouvé
 
 **Scénario 2** : Un utilisateur cherche 'CARREFOUR' mais tape 'KARREFOUR' (faute)
+
 - Résultat avec index N-Gram : ⚠️  Peut trouver, mais pas toujours
 
 **Problème** : Les index full-text (standard, N-Gram) ont des limitations :
+
 - Index standard : Recherche exacte (après stemming/accents)
 - Index N-Gram : Recherche partielle mais limitée aux préfixes
 - Aucun index ne gère bien les typos complexes (faute, inversion, etc.)
@@ -53,6 +56,7 @@ LIMIT 5;
 ```
 
 **Avantages :**
+
 - ✅ Tolère les typos complexes (faute, inversion, caractères manquants)
 - ✅ Capture la similarité sémantique (synonymes, variations)
 - ✅ Multilingue (ByteT5 supporte plusieurs langues)
@@ -69,10 +73,10 @@ LIMIT 5;
 
 ### Améliorations HCD
 
-✅ **Type VECTOR natif** (vs système ML externe)  
-✅ **Index SAI vectoriel intégré** (vs Elasticsearch externe)  
-✅ **Pas de synchronisation** (vs HBase + Elasticsearch + ML)  
-✅ **Performance optimale** (index co-localisé avec données)  
+✅ **Type VECTOR natif** (vs système ML externe)
+✅ **Index SAI vectoriel intégré** (vs Elasticsearch externe)
+✅ **Pas de synchronisation** (vs HBase + Elasticsearch + ML)
+✅ **Performance optimale** (index co-localisé avec données)
 ✅ **Support ANN natif** (Approximate Nearest Neighbor)
 
 ---
@@ -82,6 +86,7 @@ LIMIT 5;
 ### Résultat Attendu
 
 Colonne 'libelle_embedding' (VECTOR<FLOAT, 1472>) ajoutée à la table 'operations_by_account' :
+
 - Type : VECTOR<FLOAT, 1472> (vecteur de 1472 dimensions)
 - Dimensions : 1472 (taille des embeddings ByteT5-small)
 - Valeur par défaut : NULL (pour données existantes)
@@ -126,6 +131,7 @@ ALTER TABLE operations_by_account ADD libelle_embedding VECTOR<FLOAT, 1472>;
 ### Résultat Attendu
 
 Index 'idx_libelle_embedding_vector' créé sur la colonne 'libelle_embedding' :
+
 - Type : Index SAI vectoriel (Storage-Attached Index)
 - Usage : Recherche par similarité (ANN - Approximate Nearest Neighbor)
 - Performance : Recherche rapide même sur millions de vecteurs
@@ -166,7 +172,8 @@ USING 'StorageAttachedIndex';
 
 - L'indexation se fait en arrière-plan (peut prendre quelques minutes)
 - Attendre 30-60 secondes avant de tester les recherches
-- Vérifier l'état de l'index : `SELECT * FROM system_views.indexes WHERE index_name = 'idx_libelle_embedding_vector';`
+- Vérifier l'état de l'index : `SELECT * FROM system_views.indexes WHERE index_name =
+'idx_libelle_embedding_vector';`
 
 ---
 
@@ -183,9 +190,11 @@ USING 'StorageAttachedIndex';
 ### Indexation
 
 ⏳ Indexation en cours (peut prendre quelques minutes)
+
 - Les index SAI sont construits en arrière-plan
 - Attendre 30-60 secondes avant de tester les recherches
-- Vérifier l'état : `SELECT * FROM system_views.indexes WHERE index_name = 'idx_libelle_embedding_vector';`
+- Vérifier l'état : `SELECT * FROM system_views.indexes WHERE index_name =
+'idx_libelle_embedding_vector';`
 
 ---
 
@@ -193,32 +202,35 @@ USING 'StorageAttachedIndex';
 
 ### Résumé de la Configuration
 
-✅ Colonne 'libelle_embedding' (VECTOR<FLOAT, 1472>) ajoutée  
-✅ Index 'idx_libelle_embedding_vector' créé  
-✅ Support de la recherche par similarité (ANN)  
+✅ Colonne 'libelle_embedding' (VECTOR<FLOAT, 1472>) ajoutée
+✅ Index 'idx_libelle_embedding_vector' créé
+✅ Support de la recherche par similarité (ANN)
 ✅ Tolérance aux typos complexes et variations linguistiques
 
 ### Avantages de la Recherche Vectorielle
 
-✅ Tolère les typos complexes (faute, inversion, caractères manquants)  
-✅ Capture la similarité sémantique (synonymes, variations)  
-✅ Multilingue (ByteT5 supporte plusieurs langues)  
-✅ Robuste aux variations linguistiques  
+✅ Tolère les typos complexes (faute, inversion, caractères manquants)
+✅ Capture la similarité sémantique (synonymes, variations)
+✅ Multilingue (ByteT5 supporte plusieurs langues)
+✅ Robuste aux variations linguistiques
 ✅ Performance optimale (index co-localisé avec données)
 
 ### Prochaines Étapes
 
 1. **Installer les dépendances Python** :
+
    ```bash
    pip install transformers torch
    ```
 
-2. **Générer les embeddings pour les données existantes** :
+1. **Générer les embeddings pour les données existantes** :
+
    ```bash
    ./22_generate_embeddings.sh
    ```
 
-3. **Tester la recherche floue** :
+1. **Tester la recherche floue** :
+
    ```bash
    ./23_test_fuzzy_search.sh
    ```

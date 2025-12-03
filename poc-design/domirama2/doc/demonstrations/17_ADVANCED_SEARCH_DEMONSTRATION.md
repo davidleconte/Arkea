@@ -20,23 +20,38 @@
 
 ### Configuration
 
-SAI (Storage-Attached Index) permet différents types de recherches selon la configuration de l'index.
+SAI (Storage-Attached Index) permet différents types de recherches selon la configuration de l'index
 
 **Configuration dans le schéma** :
+
 ```cql
+
 CREATE CUSTOM INDEX idx_libelle_fulltext_advanced
+
 ON operations_by_account(libelle)
+
 USING 'StorageAttachedIndex'
+
 WITH OPTIONS = {
+
   'index_analyzer': '{
+
     "tokenizer": {"name": "standard"},
+
     "filters": [
+
       {"name": "lowercase"},
+
       {"name": "asciiFolding"},
+
       {"name": "frenchLightStem"}
+
     ]
+
   }'
+
 };
+
 ```
 
 ---
@@ -55,7 +70,6 @@ WITH OPTIONS = {
 
 ## 📝 Détails des 20 Tests
 
-
 ### TEST 1 : Recherche avec stemming français (idx_libelle_fulltext)
 
 **Description** : Trouve "loyers", "loyer", "loyé" grâce au stemming
@@ -69,12 +83,19 @@ WITH OPTIONS = {
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT code_si, contrat, libelle, montant, cat_auto
+
 FROM operations_by_account
+
 WHERE code_si = '1'
+
   AND contrat = '5913101072'
+
   AND libelle : 'loyers'  -- Pluriel → trouve "LOYER"
+
 LIMIT 5
+
 ```
 
 **Résultats obtenus** : 5 ligne(s)
@@ -82,11 +103,17 @@ LIMIT 5
 **Aperçu des résultats :**
 
 ```
+
        1 | 5913101072 | LOYER IMPAYE REGULARISATION |   578.480000000000000000 | HABITATION
+
        1 | 5913101072 | LOYER IMPAYE REGULARISATION |  -875.430000000000000000 | HABITATION
+
        1 | 5913101072 |          LOYER PARIS MAISON | -1292.480000000000000000 | HABITATION
+
        1 | 5913101072 | LOYER IMPAYE REGULARISATION | -1479.430000000000000000 | HABITATION
+
        1 | 5913101072 | REGULARISATION LOYER IMPAYE | -1333.810000000000000000 | HABITATION
+
 ```
 
 ---
@@ -104,12 +131,19 @@ LIMIT 5
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT code_si, contrat, libelle, montant
+
 FROM operations_by_account
+
 WHERE code_si = '1'
+
   AND contrat = '5913101072'
+
   AND libelle : 'CARREFOUR'  -- Exact match
+
 LIMIT 5
+
 ```
 
 **Résultats obtenus** : 5 ligne(s)
@@ -117,11 +151,17 @@ LIMIT 5
 **Aperçu des résultats :**
 
 ```
+
        1 | 5913101072 |            CB CARREFOUR MARKET PARIS |                 -28.90
+
        1 | 5913101072 |    RETRAIT DAB CARREFOUR PARIS 15EME |                 -60.00
+
        1 | 5913101072 |    CARTE CARREFOUR HYPERMARCHE LILLE |                -125.50
+
        1 | 5913101072 |            CB CARREFOUR MARKET PARIS |                 -28.90
+
        1 | 5913101072 | CB CARREFOUR MARKET RUE DE VAUGIRARD | -60.220000000000000000
+
 ```
 
 ---
@@ -139,12 +179,19 @@ LIMIT 5
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT code_si, contrat, libelle, montant
+
 FROM operations_by_account
+
 WHERE code_si = '1'
+
   AND contrat = '5913101072'
+
   AND libelle : 'PAIEMENT PAR CARTE BANCAIRE'
+
 LIMIT 5
+
 ```
 
 **Résultats obtenus** : 1 ligne(s)
@@ -152,7 +199,9 @@ LIMIT 5
 **Aperçu des résultats :**
 
 ```
+
        1 | 5913101072 | PAIEMENT PAR CARTE BANCAIRE |  -45.50
+
 ```
 
 ---
@@ -174,12 +223,19 @@ LIMIT 5
 **Requête initiale (libelle) :**
 
 ```cql
+
 SELECT code_si, contrat, libelle, montant
+
 FROM operations_by_account
+
 WHERE code_si = '1'
+
   AND contrat = '5913101072'
+
   AND libelle : 'carref'  -- Partiel → aucun résultat, déclenche fall-back sur libelle_tokens
+
 LIMIT 5
+
 ```
 
 **Résultat** : Aucun résultat (recherche partielle non supportée sur libelle)
@@ -187,12 +243,19 @@ LIMIT 5
 **Requête fall-back (libelle_tokens CONTAINS) :**
 
 ```cql
+
 SELECT code_si, contrat, libelle, montant
+
 FROM operations_by_account
+
 WHERE code_si = '1'
+
   AND contrat = '5913101072'
+
   AND libelle_tokens CONTAINS 'carref'  -- Partiel → aucun résultat, déclenche fall-back sur libelle_tokens
+
 LIMIT 5
+
 ```
 
 **Résultat fall-back** : Résultats trouvés ✅ (vraie recherche partielle via collection)
@@ -202,12 +265,19 @@ LIMIT 5
 **Aperçu des résultats après fall-back :**
 
 ```
+
  code_si | contrat    | libelle                           | montant
+
 ---------+------------+-----------------------------------+---------
+
        1 | 5913101072 |         CB CARREFOUR MARKET PARIS |  -28.90
+
        1 | 5913101072 | RETRAIT DAB CARREFOUR PARIS 15EME |  -60.00
+
        1 | 5913101072 | CARTE CARREFOUR HYPERMARCHE LILLE | -125.50
+
        1 | 5913101072 |         CB CARREFOUR MARKET PARIS |  -28.90
+
 ```
 
 ---
@@ -225,14 +295,23 @@ LIMIT 5
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT code_si, contrat, libelle, montant, cat_auto
+
 FROM operations_by_account
+
 WHERE code_si = '1'
+
   AND contrat = '5913101072'
+
   AND libelle : 'virement'
+
   AND libelle : 'permanent'
+
   AND libelle : 'mensuel'
+
 LIMIT 5
+
 ```
 
 **Résultats obtenus** : 1 ligne(s)
@@ -240,7 +319,9 @@ LIMIT 5
 **Aperçu des résultats :**
 
 ```
+
        1 | 5913101072 | VIREMENT PERMANENT MENSUEL VERS LIVRET A | -200.00 |  EPARGNE
+
 ```
 
 ---
@@ -258,13 +339,21 @@ LIMIT 5
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT code_si, contrat, libelle, montant
+
 FROM operations_by_account
+
 WHERE code_si = '1'
+
   AND contrat = '5913101072'
+
   AND libelle : 'banque'
+
   AND libelle : 'paris'
+
 LIMIT 5
+
 ```
 
 **Résultats obtenus** : 1 ligne(s)
@@ -272,7 +361,9 @@ LIMIT 5
 **Aperçu des résultats :**
 
 ```
+
        1 | 5913101072 | FRAIS BANQUE DE PARIS AGENCE CENTRALE |  -15.00
+
 ```
 
 ---
@@ -290,13 +381,21 @@ LIMIT 5
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT code_si, contrat, libelle, montant
+
 FROM operations_by_account
+
 WHERE code_si = '1'
+
   AND contrat = '5913101072'
+
   AND libelle : 'impayé'  -- Avec accent
+
   AND libelle : 'régularisation'  -- Avec accent
+
 LIMIT 5
+
 ```
 
 **Résultats obtenus** : 5 ligne(s)
@@ -304,11 +403,17 @@ LIMIT 5
 **Aperçu des résultats :**
 
 ```
+
        1 | 5913101072 | VIREMENT IMPAYE REGULARISATION |   -15.450000000000000000
+
        1 | 5913101072 |    LOYER IMPAYE REGULARISATION |   578.480000000000000000
+
        1 | 5913101072 | VIREMENT IMPAYE REGULARISATION |   -28.580000000000000000
+
        1 | 5913101072 |    LOYER IMPAYE REGULARISATION |  -875.430000000000000000
+
        1 | 5913101072 |    LOYER IMPAYE REGULARISATION | -1479.430000000000000000
+
 ```
 
 ---
@@ -322,14 +427,23 @@ LIMIT 5
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT code_si, contrat, libelle, montant, cat_auto
+
 FROM operations_by_account
+
 WHERE code_si = '1'
+
   AND contrat = '5913101072'
+
   AND libelle : 'prelevement'
+
   AND libelle : 'automatique'
+
   AND libelle : 'facture'
+
 LIMIT 5
+
 ```
 
 **Résultats obtenus** : 1 ligne(s)
@@ -337,7 +451,9 @@ LIMIT 5
 **Aperçu des résultats :**
 
 ```
+
        1 | 5913101072 | PRELEVEMENT AUTOMATIQUE FACTURE EDF NOVEMBRE |  -85.30 |  ENERGIE
+
 ```
 
 ---
@@ -351,14 +467,23 @@ LIMIT 5
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT code_si, contrat, libelle, montant, cat_auto
+
 FROM operations_by_account
+
 WHERE code_si = '1'
+
   AND contrat = '5913101072'
+
   AND libelle : 'loyer'
+
   AND libelle : 'paris'
+
   AND montant < -1000
+
 LIMIT 5
+
 ```
 
 **Résultats obtenus** : 1 ligne(s)
@@ -366,7 +491,9 @@ LIMIT 5
 **Aperçu des résultats :**
 
 ```
+
        1 | 5913101072 | LOYER PARIS MAISON | -1292.480000000000000000 | HABITATION
+
 ```
 
 ---
@@ -380,14 +507,23 @@ LIMIT 5
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT code_si, contrat, libelle, montant, cat_auto
+
 FROM operations_by_account
+
 WHERE code_si = '1'
+
   AND contrat = '5913101072'
+
   AND libelle : 'virement'
+
   AND libelle : 'impaye'
+
   AND cat_auto = 'VIREMENT'
+
 LIMIT 5
+
 ```
 
 **Résultats obtenus** : 5 ligne(s)
@@ -395,11 +531,17 @@ LIMIT 5
 **Aperçu des résultats :**
 
 ```
+
        1 | 5913101072 |     VIREMENT IMPAYE REGULARISATION | -15.450000000000000000 | VIREMENT
+
        1 | 5913101072 |     VIREMENT IMPAYE REGULARISATION | -28.580000000000000000 | VIREMENT
+
        1 | 5913101072 | VIREMENT IMPAYE INSUFFISANCE FONDS | 342.300000000000000000 | VIREMENT
+
        1 | 5913101072 |             VIREMENT IMPAYE REFUSE | -19.680000000000000000 | VIREMENT
+
        1 | 5913101072 |             VIREMENT IMPAYE RETOUR | 786.600000000000000000 | VIREMENT
+
 ```
 
 ---
@@ -413,13 +555,21 @@ LIMIT 5
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT code_si, contrat, libelle, montant, type_operation
+
 FROM operations_by_account
+
 WHERE code_si = '1'
+
   AND contrat = '5913101072'
+
   AND libelle : 'prelevement'
+
   AND type_operation = 'PRELEVEMENT'
+
 LIMIT 5
+
 ```
 
 **Résultats obtenus** : 5 ligne(s)
@@ -427,11 +577,17 @@ LIMIT 5
 **Aperçu des résultats :**
 
 ```
+
        1 | 5913101072 |               PRELEVEMENT VEOLIA FACTURE EAU | -87.460000000000000000 |    PRELEVEMENT
+
        1 | 5913101072 | PRELEVEMENT EDF ET ORANGE FACTURES COMBINEES |                -131.40 |    PRELEVEMENT
+
        1 | 5913101072 |         PRELEVEMENT ORANGE FACTURE TELEPHONE |                 -35.90 |    PRELEVEMENT
+
        1 | 5913101072 |          PRELEVEMENT EDF FACTURE ELECTRICITE |                 -95.50 |    PRELEVEMENT
+
        1 | 5913101072 |            PRELEVEMENT FREE FACTURE INTERNET | -38.880000000000000000 |    PRELEVEMENT
+
 ```
 
 ---
@@ -445,14 +601,23 @@ LIMIT 5
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT code_si, contrat, libelle, montant, date_op
+
 FROM operations_by_account
+
 WHERE code_si = '1'
+
   AND contrat = '5913101072'
+
   AND libelle : 'loyer'
+
   AND date_op >= '2024-01-01'
+
   AND date_op < '2025-01-01'
+
 LIMIT 5
+
 ```
 
 **Résultats obtenus** : 3 ligne(s)
@@ -460,9 +625,13 @@ LIMIT 5
 **Aperçu des résultats :**
 
 ```
+
        1 | 5913101072 | LOYER IMPAYE REGULARISATION |   578.480000000000000000 | 2024-08-26 00:00:00.000000+0000
+
        1 | 5913101072 | LOYER IMPAYE REGULARISATION |  -875.430000000000000000 | 2024-02-05 00:00:00.000000+0000
+
        1 | 5913101072 |          LOYER PARIS MAISON | -1292.480000000000000000 | 2024-02-02 00:00:00.000000+0000
+
 ```
 
 ---
@@ -476,16 +645,27 @@ LIMIT 5
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT code_si, contrat, libelle, montant, cat_auto, type_operation
+
 FROM operations_by_account
+
 WHERE code_si = '1'
+
   AND contrat = '5913101072'
+
   AND libelle : 'virement'
+
   AND libelle : 'sepa'
+
   AND cat_auto = 'VIREMENT'
+
   AND type_operation = 'VIREMENT'
+
   AND montant > 0
+
 LIMIT 5
+
 ```
 
 **Résultats obtenus** : 3 ligne(s)
@@ -493,9 +673,13 @@ LIMIT 5
 **Aperçu des résultats :**
 
 ```
+
        1 | 5913101072 |           VIREMENT SEPA VERS PEL | 354.180000000000000000 | VIREMENT |       VIREMENT
+
        1 | 5913101072 |      VIREMENT SEPA VERS LIVRET A | 939.050000000000000000 | VIREMENT |       VIREMENT
+
        1 | 5913101072 | VIREMENT SEPA VERS ASSURANCE VIE | 160.130000000000000000 | VIREMENT |       VIREMENT
+
 ```
 
 ---
@@ -513,12 +697,19 @@ LIMIT 5
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT code_si, contrat, libelle, montant
+
 FROM operations_by_account
+
 WHERE code_si = '1'
+
   AND contrat = '5913101072'
+
   AND libelle : 'prelevements'  -- Pluriel → trouve "PRELEVEMENT"
+
 LIMIT 5
+
 ```
 
 **Résultats obtenus** : 5 ligne(s)
@@ -526,11 +717,17 @@ LIMIT 5
 **Aperçu des résultats :**
 
 ```
+
        1 | 5913101072 |               PRELEVEMENT VEOLIA FACTURE EAU | -87.460000000000000000
+
        1 | 5913101072 | PRELEVEMENT EDF ET ORANGE FACTURES COMBINEES |                -131.40
+
        1 | 5913101072 |         PRELEVEMENT ORANGE FACTURE TELEPHONE |                 -35.90
+
        1 | 5913101072 |          PRELEVEMENT EDF FACTURE ELECTRICITE |                 -95.50
+
        1 | 5913101072 |            PRELEVEMENT FREE FACTURE INTERNET | -38.880000000000000000
+
 ```
 
 ---
@@ -548,13 +745,21 @@ LIMIT 5
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT code_si, contrat, libelle, montant
+
 FROM operations_by_account
+
 WHERE code_si = '1'
+
   AND contrat = '5913101072'
+
   AND libelle : 'EDF'
+
   AND libelle : 'ORANGE'
+
 LIMIT 5
+
 ```
 
 **Résultats obtenus** : 1 ligne(s)
@@ -562,7 +767,9 @@ LIMIT 5
 **Aperçu des résultats :**
 
 ```
+
        1 | 5913101072 | PRELEVEMENT EDF ET ORANGE FACTURES COMBINEES | -131.40
+
 ```
 
 ---
@@ -576,12 +783,19 @@ LIMIT 5
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT code_si, contrat, libelle, montant
+
 FROM operations_by_account
+
 WHERE code_si = '1'
+
   AND contrat = '5913101072'
+
   AND libelle : '1234567890'  -- Numéro de chèque
+
 LIMIT 5
+
 ```
 
 **Résultats obtenus** : 1 ligne(s)
@@ -589,7 +803,9 @@ LIMIT 5
 **Aperçu des résultats :**
 
 ```
+
        1 | 5913101072 | CHEQUE 1234567890 EMIS PARIS | -150.00
+
 ```
 
 ---
@@ -603,13 +819,21 @@ LIMIT 5
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT code_si, contrat, libelle, montant
+
 FROM operations_by_account
+
 WHERE code_si = '1'
+
   AND contrat = '5913101072'
+
   AND libelle : 'DAB'
+
   AND libelle : 'SEPA'
+
 LIMIT 5
+
 ```
 
 **Résultats obtenus** : 1 ligne(s)
@@ -617,7 +841,9 @@ LIMIT 5
 **Aperçu des résultats :**
 
 ```
+
        1 | 5913101072 | RETRAIT DAB SEPA PARIS 15EME |  -50.00
+
 ```
 
 ---
@@ -631,14 +857,23 @@ LIMIT 5
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT code_si, contrat, libelle, montant
+
 FROM operations_by_account
+
 WHERE code_si = '1'
+
   AND contrat = '5913101072'
+
   AND libelle : 'paris'
+
   AND libelle : '15eme'
+
   AND libelle : '16eme'
+
 LIMIT 5
+
 ```
 
 **Résultats obtenus** : 1 ligne(s)
@@ -646,7 +881,9 @@ LIMIT 5
 **Aperçu des résultats :**
 
 ```
+
        1 | 5913101072 | CB RESTAURANT PARIS 15EME PUIS CINEMA PARIS 16EME |  -45.00
+
 ```
 
 ---
@@ -660,13 +897,21 @@ LIMIT 5
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT code_si, contrat, libelle, montant
+
 FROM operations_by_account
+
 WHERE code_si = '1'
+
   AND contrat = '5913101072'
+
   AND libelle : 'contactless'
+
   AND libelle : 'instantané'
+
 LIMIT 5
+
 ```
 
 **Résultats obtenus** : 1 ligne(s)
@@ -674,7 +919,9 @@ LIMIT 5
 **Aperçu des résultats :**
 
 ```
+
        1 | 5913101072 | PAIEMENT CONTACTLESS INSTANTANE PARIS METRO |   -2.10
+
 ```
 
 ---
@@ -688,17 +935,29 @@ LIMIT 5
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT code_si, contrat, libelle, montant, cat_auto, type_operation, date_op
+
 FROM operations_by_account
+
 WHERE code_si = '1'
+
   AND contrat = '5913101072'
+
   AND libelle : 'virement'
+
   AND libelle : 'permanent'
+
   AND cat_auto = 'VIREMENT'
+
   AND type_operation = 'VIREMENT'
+
   AND montant < 0
+
   AND date_op >= '2023-01-01'
+
 LIMIT 10
+
 ```
 
 **Résultats obtenus** : 2 ligne(s)
@@ -706,8 +965,11 @@ LIMIT 10
 **Aperçu des résultats :**
 
 ```
+
        1 | 5913101072 |      VIREMENT PERMANENT VERS LIVRET A | -250.00 | VIREMENT |       VIREMENT | 2023-12-31 23:00:00.000000+0000
+
        1 | 5913101072 | VIREMENT PERMANENT VERS ASSURANCE VIE | -300.00 | VIREMENT |       VIREMENT | 2023-11-30 23:00:00.000000+0000
+
 ```
 
 ---
@@ -748,25 +1010,32 @@ Certains tests peuvent retourner aucun résultat pour différentes raisons :
 #### 1. **Index Inexistant (Tests 3, 4, 6)**
 
 **Test 3** : Recherche de phrase complète avec idx_libelle_keyword
+
 - **Cause** : L'index idx_libelle_keyword n'existe pas. SAI ne permet qu'un seul index par colonne.
 - **Index existant** : idx_libelle_fulltext_advanced (avec stemming, asciifolding, lowercase)
-- **Solution** : Utiliser l'index existant avec une recherche adaptée, ou créer un index keyword sur une colonne dérivée.
+- **Solution** : Utiliser l'index existant avec une recherche adaptée, ou créer un index keyword sur
+une colonne dérivée.
 
 **Test 4** : Recherche partielle N-Gram avec idx_libelle_ngram
+
 - **Cause** : L'index idx_libelle_ngram n'existe pas sur libelle.
 - **Index existant** : idx_libelle_prefix_ngram sur libelle_prefix (colonne dérivée)
-- **Solution** : Utiliser libelle_prefix : 'carref' ou créer un index N-Gram sur libelle (nécessite colonne dérivée).
+- **Solution** : Utiliser libelle_prefix : 'carref' ou créer un index N-Gram sur libelle (nécessite
+colonne dérivée).
 
 **Test 6** : Recherche avec stop words avec idx_libelle_french
+
 - **Cause** : L'index idx_libelle_french n'existe pas.
 - **Index existant** : idx_libelle_fulltext_advanced (sans stop words)
-- **Solution** : Utiliser l'index existant (les stop words peuvent être gérés côté application) ou créer un index avec analyzer français complet.
+- **Solution** : Utiliser l'index existant (les stop words peuvent être gérés côté application) ou
+créer un index avec analyzer français complet.
 
 #### 2. **Données Manquantes (Tests 5, 8, 15, 16, 17, 18, 19, 20)**
 
 Ces tests échouaient car les libellés correspondants n'existaient pas dans la table.
 
 **Solution appliquée** : Ajout de données via scripts/add_missing_test_data.cql :
+
 - Test 5 : VIREMENT PERMANENT MENSUEL VERS LIVRET A
 - Test 8 : PRELEVEMENT AUTOMATIQUE FACTURE EDF NOVEMBRE
 - Test 15 : PRELEVEMENT EDF FACTURE ELECTRICITE et PRELEVEMENT ORANGE FACTURE TELEPHONE
@@ -780,13 +1049,17 @@ Ces tests échouaient car les libellés correspondants n'existaient pas dans la 
 
 ### Limitations SAI Identifiées
 
-1. **Un seul index par colonne** : SAI ne permet qu'un seul index par colonne. Pour différents types de recherches (exact, keyword, ngram), il faut soit :
+1. **Un seul index par colonne** : SAI ne permet qu'un seul index par colonne. Pour différents types
+de recherches (exact, keyword, ngram), il faut soit :
+
    - Utiliser des colonnes dérivées avec des index séparés
    - Utiliser un index multi-capacités (comme idx_libelle_fulltext_advanced)
 
-2. **Recherche partielle** : La recherche partielle (N-Gram) nécessite un index spécifique ou une colonne dérivée.
+1. **Recherche partielle** : La recherche partielle (N-Gram) nécessite un index spécifique ou une
+colonne dérivée.
 
-3. **Stop words** : Les stop words français ne sont pas gérés nativement par l'index idx_libelle_fulltext_advanced. Ils peuvent être gérés côté application.
+1. **Stop words** : Les stop words français ne sont pas gérés nativement par l'index
+idx_libelle_fulltext_advanced. Ils peuvent être gérés côté application.
 
 ---
 
@@ -794,20 +1067,20 @@ Ces tests échouaient car les libellés correspondants n'existaient pas dans la 
 
 Les tests Full-Text Search avancés ont été exécutés avec succès :
 
-✅ **$TOTAL_TESTS tests de recherche avancés** exécutés  
-✅ **$SUCCESS_COUNT tests réussis**  
-✅ **$TOTAL_RESULTS résultats obtenus** au total  
-✅ **Types de recherches validés** : stemming, exact, phrase, partielle  
-✅ **Recherches multi-termes validées**  
+✅ **$TOTAL_TESTS tests de recherche avancés** exécutés
+✅ **$SUCCESS_COUNT tests réussis**
+✅ **$TOTAL_RESULTS résultats obtenus** au total
+✅ **Types de recherches validés** : stemming, exact, phrase, partielle
+✅ **Recherches multi-termes validées**
 ✅ **Recherches combinées validées** : full-text + filtres
 
 ### Points Clés Démontrés
 
-✅ **Recherche avec stemming** : Pluriel/singulier  
-✅ **Recherche exacte** : Noms propres, codes  
-✅ **Recherche de phrase** : Phrases complètes  
-✅ **Recherche partielle** : N-Gram, typos  
-✅ **Recherche avec stop words** : Français avancé  
+✅ **Recherche avec stemming** : Pluriel/singulier
+✅ **Recherche exacte** : Noms propres, codes
+✅ **Recherche de phrase** : Phrases complètes
+✅ **Recherche partielle** : N-Gram, typos
+✅ **Recherche avec stop words** : Français avancé
 ✅ **Recherches combinées** : Full-text + filtres
 
 ---

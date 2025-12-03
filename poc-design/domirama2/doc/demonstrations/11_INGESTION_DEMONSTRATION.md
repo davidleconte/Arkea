@@ -1,7 +1,7 @@
 # 📥 Démonstration : Chargement des Données Domirama2
 
-**Date** : 2025-11-26 12:26:29  
-**Script** : 11_load_domirama2_data_fixed_v2_didactique.sh  
+**Date** : 2025-11-26 12:26:29
+**Script** : 11_load_domirama2_data_fixed_v2_didactique.sh
 **Objectif** : Démontrer le chargement de données dans HCD via Spark
 
 ---
@@ -22,12 +22,14 @@
 ### Stratégie Multi-Version (Conforme IBM)
 
 **Principe** :
+
 - Le BATCH écrit UNIQUEMENT `cat_auto` et `cat_confidence`
 - Le CLIENT écrit dans `cat_user`, `cat_date_user`, `cat_validee`
 - L'APPLICATION priorise `cat_user` si non nul, sinon `cat_auto`
 - Cette séparation garantit qu'aucune correction client ne sera perdue
 
 **Colonnes écrites par le BATCH** :
+
 - ✅ `cat_auto` : Catégorie automatique (batch)
 - ✅ `cat_confidence` : Score de confiance (0.0 à 1.0)
 - ❌ `cat_user` : NULL (batch ne touche jamais)
@@ -37,7 +39,9 @@
 ### Format de Données Source
 
 - **Format** : CSV
-- **Fichier** : `/Users/david.leconte/Documents/Arkea/poc-design/domirama2/data/operations_sample.csv`
+- **Fichier** : `/Users/david.leconte/Documents/Arkea/poc-design/domirama2/data/operations_sample
+csv`
+
 - **Colonnes** : code_si, contrat, date_iso, seq, libelle, montant, etc.
 
 ---
@@ -110,18 +114,21 @@ println(s"✅ $countBefore opérations transformées")
 ### Explication des Transformations
 
 **Clés de Partition et Clustering** :
+
 - `code_si` : Cast en string (partition key)
 - `contrat` : Cast en string (partition key)
 - `date_op` : Conversion timestamp depuis date_iso (clustering key DESC)
 - `numero_op` : Cast en int depuis seq (clustering key ASC)
 
 **Colonnes Principales** :
+
 - `op_id` : UUID généré pour chaque opération
 - `libelle` : Libellé de l'opération (recherche full-text)
 - `montant` : Montant en decimal(10,2)
 - `devise` : Devise (EUR par défaut si null)
 
 **Colonnes de Catégorisation (Stratégie Batch)** :
+
 - `cat_auto` : Catégorie automatique depuis categorie_auto (batch écrit)
 - `cat_confidence` : Score de confiance depuis cat_confidence (batch écrit)
 - `cat_user` : NULL (batch ne touche jamais)
@@ -178,9 +185,9 @@ spark.stop()
 
 Le chargement des données a été effectué avec succès :
 
-✅ **Fichier source** : /Users/david.leconte/Documents/Arkea/poc-design/domirama2/data/operations_sample.csv  
-✅ **Opérations chargées** : 10010  
-✅ **Stratégie batch validée** : cat_user est null  
+✅ **Fichier source** : /Users/david.leconte/Documents/Arkea/poc-design/domirama2/data/operations_sample.csv
+✅ **Opérations chargées** : 10010
+✅ **Stratégie batch validée** : cat_user est null
 ✅ **Stratégie multi-version** : Conforme IBM
 
 ### Prochaines Étapes

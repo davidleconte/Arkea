@@ -1,7 +1,7 @@
 # 🎯 Démonstration Complète : POC Domirama2 - Full-Text Search
 
-**Date** : 2025-11-26 17:34:34  
-**Script** : `18_demonstration_complete_v2_didactique.sh`  
+**Date** : 2025-11-26 17:34:34
+**Script** : `18_demonstration_complete_v2_didactique.sh`
 **Objectif** : Démontrer toutes les fonctionnalités de recherche full-text avec index SAI avancés
 
 ---
@@ -28,12 +28,14 @@
 Démontrer que HCD peut remplacer l'architecture HBase actuelle :
 
 **Architecture Actuelle (HBase)** :
+
 - Stockage : HBase (RowKey, Column Families)
 - Recherche : Elasticsearch (index externe)
 - Synchronisation : HBase → Elasticsearch (asynchrone)
 - ML : Système externe (embeddings)
 
 **Architecture Cible (HCD)** :
+
 - Stockage : HCD (Partition Keys, Clustering Keys)
 - Recherche : SAI intégré (Storage-Attached Index)
 - Synchronisation : Automatique (co-localisé)
@@ -52,10 +54,10 @@ Démontrer que HCD peut remplacer l'architecture HBase actuelle :
 
 ### Améliorations HCD
 
-✅ **Schéma fixe et typé** (vs schéma flexible HBase)  
-✅ **Index intégrés** (vs Elasticsearch externe)  
-✅ **Support vectoriel natif** (vs ML externe)  
-✅ **Stratégie multi-version native**  
+✅ **Schéma fixe et typé** (vs schéma flexible HBase)
+✅ **Index intégrés** (vs Elasticsearch externe)
+✅ **Support vectoriel natif** (vs ML externe)
+✅ **Stratégie multi-version native**
 ✅ **Performance optimale** (index co-localisé)
 
 ---
@@ -65,27 +67,49 @@ Démontrer que HCD peut remplacer l'architecture HBase actuelle :
 ### Architecture du POC Domirama2
 
 ```
+
 ┌─────────────────────────────────────────────────────────┐
+
 │                    HCD (Hyper-Converged Database)        │
+
 ├─────────────────────────────────────────────────────────┤
+
 │ Keyspace : domirama2_poc                               │
+
 │                                                         │
+
 │ Table : operations_by_account                           │
+
 │   ├─ Partition Keys : (code_si, contrat)               │
+
 │   ├─ Clustering Keys : (date_op DESC, numero_op ASC)   │
+
 │   └─ Colonnes :                                        │
+
 │       ├─ libelle (TEXT)                                │
+
 │       ├─ libelle_prefix (TEXT)                         │
+
 │       ├─ libelle_tokens (SET<TEXT>)                     │
+
 │       ├─ libelle_embedding (VECTOR)                    │
+
 │       └─ ... (autres colonnes)                         │
+
 │                                                         │
+
 │ Index SAI (Storage-Attached Index) :                   │
+
 │   ├─ idx_libelle_fulltext_advanced                     │
+
 │   ├─ idx_libelle_prefix_ngram                          │
+
 │   ├─ idx_libelle_tokens                                │
+
 │   └─ idx_libelle_embedding_vector                      │
+
 └─────────────────────────────────────────────────────────┘
+
 ```
 
 ### Flux de Données
@@ -125,9 +149,11 @@ Cette démonstration orchestre plusieurs étapes dans un ordre précis :
 
 ## 📋 Résumé Exécutif
 
-Cette démonstration complète orchestre plusieurs étapes et exécute **20 démonstrations** (10 pédagogiques + 10 avancées) pour valider toutes les fonctionnalités de recherche full-text dans HCD.
+Cette démonstration complète orchestre plusieurs étapes et exécute **20 démonstrations** (10
+pédagogiques + 10 avancées) pour valider toutes les fonctionnalités de recherche full-text dans HCD.
 
 **Résultats** :
+
 - ✅ **20** démonstrations réussies
 - ⚠️  **0** démonstrations échouées (certaines attendues pour démontrer les limites)
 - 📊 **55** résultats au total
@@ -138,26 +164,42 @@ Cette démonstration complète orchestre plusieurs étapes et exécute **20 dém
 
 ### Configuration
 
-SAI (Storage-Attached Index) permet différents types de recherches selon la configuration de l'index.
+SAI (Storage-Attached Index) permet différents types de recherches selon la configuration de l'index
 
 **Configuration dans le schéma** :
+
 ```cql
+
 CREATE CUSTOM INDEX idx_libelle_fulltext_advanced
+
 ON operations_by_account(libelle)
+
 USING 'StorageAttachedIndex'
+
 WITH OPTIONS = {
+
   'index_analyzer': '{
+
     "tokenizer": {"name": "standard"},
+
     "filters": [
+
       {"name": "lowercase"},
+
       {"name": "asciiFolding"},
+
       {"name": "frenchLightStem"}
+
     ]
+
   }'
+
 };
+
 ```
 
 **Colonnes et index disponibles** :
+
 - libelle (TEXT) → idx_libelle_fulltext_advanced (stemming, accents, casse)
 - libelle_prefix (TEXT) → idx_libelle_prefix_ngram (N-Gram pour recherche partielle)
 - libelle_tokens (SET<TEXT>) → idx_libelle_tokens (CONTAINS pour vraie recherche partielle)
@@ -182,11 +224,13 @@ WITH OPTIONS = {
 ## 🔄 Orchestration
 
 ### Étape 1 : Vérification de l'environnement
+
 - ✅ HCD démarré
 - ✅ Java 11 configuré
 - ✅ Scripts dépendants présents
 
 ### Étape 2 : Configuration du schéma complet
+
 - ✅ Schéma de base créé via script 10_setup_domirama2_poc.sh
 - ✅ Index SAI avancés créés via script 16_setup_advanced_indexes.sh
 - ✅ Colonne libelle_prefix ajoutée (recherche partielle N-Gram)
@@ -195,12 +239,14 @@ WITH OPTIONS = {
 - ✅ Tous les index SAI configurés (fulltext, ngram, collection, vector)
 
 ### Étape 3 : Chargement des données
+
 - ✅ Données chargées via script 11_load_domirama2_data_parquet.sh
 - ✅ 10 000 opérations dans HCD
 - ✅ Données de test ajoutées via add_missing_test_data.cql
 - ✅ Toutes les colonnes (libelle_prefix, libelle_tokens) remplies
 
 ### Étape 4 : Attente de l'indexation
+
 - ✅ Indexation SAI terminée (30 secondes)
 
 ---
@@ -220,13 +266,21 @@ WITH OPTIONS = {
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT
- libelle, montant, cat_auto 
-FROM operations_by_account 
-WHERE code_si = '1' 
-  AND contrat = '5913101072' 
-  AND libelle : 'loyer' 
+
+ libelle, montant, cat_auto
+
+FROM operations_by_account
+
+WHERE code_si = '1'
+
+  AND contrat = '5913101072'
+
+  AND libelle : 'loyer'
+
 LIMIT 5;
+
 ```
 
 **Explication** :
@@ -240,11 +294,17 @@ LIMIT 5;
 **Aperçu des résultats :**
 
 ```
+
  LOYER IMPAYE REGULARISATION |   578.480000000000000000 | HABITATION
+
  LOYER IMPAYE REGULARISATION |  -875.430000000000000000 | HABITATION
+
           LOYER PARIS MAISON | -1292.480000000000000000 | HABITATION
+
  LOYER IMPAYE REGULARISATION | -1479.430000000000000000 | HABITATION
+
  REGULARISATION LOYER IMPAYE | -1333.810000000000000000 | HABITATION
+
 ```
 
 ---
@@ -262,13 +322,21 @@ LIMIT 5;
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT
- libelle, montant 
-FROM operations_by_account 
-WHERE code_si = '1' 
-  AND contrat = '5913101072' 
-  AND libelle : 'loyers' 
+
+ libelle, montant
+
+FROM operations_by_account
+
+WHERE code_si = '1'
+
+  AND contrat = '5913101072'
+
+  AND libelle : 'loyers'
+
 LIMIT 5;
+
 ```
 
 **Explication** :
@@ -282,11 +350,17 @@ LIMIT 5;
 **Aperçu des résultats :**
 
 ```
+
  LOYER IMPAYE REGULARISATION |   578.480000000000000000
+
  LOYER IMPAYE REGULARISATION |  -875.430000000000000000
+
           LOYER PARIS MAISON | -1292.480000000000000000
+
  LOYER IMPAYE REGULARISATION | -1479.430000000000000000
+
  REGULARISATION LOYER IMPAYE | -1333.810000000000000000
+
 ```
 
 ---
@@ -304,13 +378,21 @@ LIMIT 5;
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT
- libelle, montant 
-FROM operations_by_account 
-WHERE code_si = '1' 
-  AND contrat = '5913101072' 
-  AND libelle : 'impayé' 
+
+ libelle, montant
+
+FROM operations_by_account
+
+WHERE code_si = '1'
+
+  AND contrat = '5913101072'
+
+  AND libelle : 'impayé'
+
 LIMIT 5;
+
 ```
 
 **Explication** :
@@ -324,11 +406,17 @@ LIMIT 5;
 **Aperçu des résultats :**
 
 ```
+
      VIREMENT IMPAYE REGULARISATION |  -15.450000000000000000
+
         LOYER IMPAYE REGULARISATION |  578.480000000000000000
+
      VIREMENT IMPAYE REGULARISATION |  -28.580000000000000000
+
         LOYER IMPAYE REGULARISATION | -875.430000000000000000
+
  VIREMENT IMPAYE INSUFFISANCE FONDS |  342.300000000000000000
+
 ```
 
 ---
@@ -346,14 +434,23 @@ LIMIT 5;
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT
- libelle, montant, cat_auto 
-FROM operations_by_account 
-WHERE code_si = '1' 
-  AND contrat = '5913101072' 
-  AND libelle : 'loyer' 
-  AND libelle : 'paris' 
+
+ libelle, montant, cat_auto
+
+FROM operations_by_account
+
+WHERE code_si = '1'
+
+  AND contrat = '5913101072'
+
+  AND libelle : 'loyer'
+
+  AND libelle : 'paris'
+
 LIMIT 5;
+
 ```
 
 **Explication** :
@@ -367,7 +464,9 @@ LIMIT 5;
 **Aperçu des résultats :**
 
 ```
+
  LOYER PARIS MAISON | -1292.480000000000000000 | HABITATION
+
 ```
 
 ---
@@ -385,14 +484,23 @@ LIMIT 5;
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT
- libelle, montant, type_operation 
-FROM operations_by_account 
-WHERE code_si = '1' 
-  AND contrat = '5913101072' 
-  AND libelle : 'virement' 
-  AND libelle : 'impaye' 
+
+ libelle, montant, type_operation
+
+FROM operations_by_account
+
+WHERE code_si = '1'
+
+  AND contrat = '5913101072'
+
+  AND libelle : 'virement'
+
+  AND libelle : 'impaye'
+
 LIMIT 5;
+
 ```
 
 **Explication** :
@@ -406,11 +514,17 @@ LIMIT 5;
 **Aperçu des résultats :**
 
 ```
+
      VIREMENT IMPAYE REGULARISATION | -15.450000000000000000 |       VIREMENT
+
      VIREMENT IMPAYE REGULARISATION | -28.580000000000000000 |       VIREMENT
+
  VIREMENT IMPAYE INSUFFISANCE FONDS | 342.300000000000000000 |       VIREMENT
+
              VIREMENT IMPAYE REFUSE | -19.680000000000000000 |       VIREMENT
+
              VIREMENT IMPAYE RETOUR | 786.600000000000000000 |       VIREMENT
+
 ```
 
 ---
@@ -428,15 +542,25 @@ LIMIT 5;
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT
- libelle, montant, cat_auto 
-FROM operations_by_account 
-WHERE code_si = '1' 
-  AND contrat = '5913101072' 
-  AND libelle : 'loyer' 
-  AND libelle : 'paris' 
-  AND montant < -1000 
+
+ libelle, montant, cat_auto
+
+FROM operations_by_account
+
+WHERE code_si = '1'
+
+  AND contrat = '5913101072'
+
+  AND libelle : 'loyer'
+
+  AND libelle : 'paris'
+
+  AND montant < -1000
+
 LIMIT 5;
+
 ```
 
 **Explication** :
@@ -450,7 +574,9 @@ LIMIT 5;
 **Aperçu des résultats :**
 
 ```
+
  LOYER PARIS MAISON | -1292.480000000000000000 | HABITATION
+
 ```
 
 ---
@@ -468,13 +594,21 @@ LIMIT 5;
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT
- libelle, montant 
-FROM operations_by_account 
-WHERE code_si = '1' 
-  AND contrat = '5913101072' 
-  AND libelle : 'loyr' 
+
+ libelle, montant
+
+FROM operations_by_account
+
+WHERE code_si = '1'
+
+  AND contrat = '5913101072'
+
+  AND libelle : 'loyr'
+
 LIMIT 5;
+
 ```
 
 **Explication** :
@@ -487,7 +621,9 @@ LIMIT 5;
 **Aperçu des résultats :**
 
 ```
+
 Aucun résultat trouvé
+
 ```
 
 ---
@@ -505,13 +641,21 @@ Aucun résultat trouvé
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT
- libelle, montant 
-FROM operations_by_account 
-WHERE code_si = '1' 
-  AND contrat = '5913101072' 
-  AND libelle : 'parsi' 
+
+ libelle, montant
+
+FROM operations_by_account
+
+WHERE code_si = '1'
+
+  AND contrat = '5913101072'
+
+  AND libelle : 'parsi'
+
 LIMIT 5;
+
 ```
 
 **Explication** :
@@ -524,7 +668,9 @@ LIMIT 5;
 **Aperçu des résultats :**
 
 ```
+
 Aucun résultat trouvé
+
 ```
 
 ---
@@ -542,13 +688,21 @@ Aucun résultat trouvé
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT
- libelle, montant 
-FROM operations_by_account 
-WHERE code_si = '1' 
-  AND contrat = '5913101072' 
-  AND libelle : 'loy' 
+
+ libelle, montant
+
+FROM operations_by_account
+
+WHERE code_si = '1'
+
+  AND contrat = '5913101072'
+
+  AND libelle : 'loy'
+
 LIMIT 5;
+
 ```
 
 **Explication** :
@@ -561,11 +715,17 @@ LIMIT 5;
 **Aperçu des résultats :**
 
 ```
+
  LOYER IMPAYE REGULARISATION |   578.480000000000000000
+
  LOYER IMPAYE REGULARISATION |  -875.430000000000000000
+
           LOYER PARIS MAISON | -1292.480000000000000000
+
  LOYER IMPAYE REGULARISATION | -1479.430000000000000000
+
  REGULARISATION LOYER IMPAYE | -1333.810000000000000000
+
 ```
 
 ---
@@ -583,13 +743,21 @@ LIMIT 5;
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT
- libelle, montant 
-FROM operations_by_account 
-WHERE code_si = '1' 
-  AND contrat = '5913101072' 
-  AND libelle : 'loyers' 
+
+ libelle, montant
+
+FROM operations_by_account
+
+WHERE code_si = '1'
+
+  AND contrat = '5913101072'
+
+  AND libelle : 'loyers'
+
 LIMIT 5;
+
 ```
 
 **Explication** :
@@ -603,11 +771,17 @@ LIMIT 5;
 **Aperçu des résultats :**
 
 ```
+
  LOYER IMPAYE REGULARISATION |   578.480000000000000000
+
  LOYER IMPAYE REGULARISATION |  -875.430000000000000000
+
           LOYER PARIS MAISON | -1292.480000000000000000
+
  LOYER IMPAYE REGULARISATION | -1479.430000000000000000
+
  REGULARISATION LOYER IMPAYE | -1333.810000000000000000
+
 ```
 
 ---
@@ -625,14 +799,23 @@ LIMIT 5;
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT
- libelle, montant, type_operation 
-FROM operations_by_account 
-WHERE code_si = '1' 
-  AND contrat = '5913101072' 
-  AND libelle : 'prelevement' 
-  AND type_operation = 'PRELEVEMENT' 
+
+ libelle, montant, type_operation
+
+FROM operations_by_account
+
+WHERE code_si = '1'
+
+  AND contrat = '5913101072'
+
+  AND libelle : 'prelevement'
+
+  AND type_operation = 'PRELEVEMENT'
+
 LIMIT 5;
+
 ```
 
 **Explication** :
@@ -646,11 +829,17 @@ LIMIT 5;
 **Aperçu des résultats :**
 
 ```
+
                PRELEVEMENT VEOLIA FACTURE EAU | -87.460000000000000000 |    PRELEVEMENT
+
  PRELEVEMENT EDF ET ORANGE FACTURES COMBINEES |                -131.40 |    PRELEVEMENT
+
          PRELEVEMENT ORANGE FACTURE TELEPHONE |                 -35.90 |    PRELEVEMENT
+
           PRELEVEMENT EDF FACTURE ELECTRICITE |                 -95.50 |    PRELEVEMENT
+
             PRELEVEMENT FREE FACTURE INTERNET | -38.880000000000000000 |    PRELEVEMENT
+
 ```
 
 ---
@@ -668,15 +857,25 @@ LIMIT 5;
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT
- libelle, montant, date_op 
-FROM operations_by_account 
-WHERE code_si = '1' 
-  AND contrat = '5913101072' 
-  AND libelle : 'loyer' 
-  AND date_op >= '2024-01-01' 
-  AND date_op < '2025-01-01' 
+
+ libelle, montant, date_op
+
+FROM operations_by_account
+
+WHERE code_si = '1'
+
+  AND contrat = '5913101072'
+
+  AND libelle : 'loyer'
+
+  AND date_op >= '2024-01-01'
+
+  AND date_op < '2025-01-01'
+
 LIMIT 5;
+
 ```
 
 **Explication** :
@@ -690,9 +889,13 @@ LIMIT 5;
 **Aperçu des résultats :**
 
 ```
+
  LOYER IMPAYE REGULARISATION |   578.480000000000000000 | 2024-08-26 00:00:00.000000+0000
+
  LOYER IMPAYE REGULARISATION |  -875.430000000000000000 | 2024-02-05 00:00:00.000000+0000
+
           LOYER PARIS MAISON | -1292.480000000000000000 | 2024-02-02 00:00:00.000000+0000
+
 ```
 
 ---
@@ -710,17 +913,29 @@ LIMIT 5;
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT
- libelle, montant, cat_auto, type_operation 
-FROM operations_by_account 
-WHERE code_si = '1' 
-  AND contrat = '5913101072' 
-  AND libelle : 'virement' 
-  AND libelle : 'sepa' 
-  AND cat_auto = 'VIREMENT' 
-  AND type_operation = 'VIREMENT' 
-  AND montant > 0 
+
+ libelle, montant, cat_auto, type_operation
+
+FROM operations_by_account
+
+WHERE code_si = '1'
+
+  AND contrat = '5913101072'
+
+  AND libelle : 'virement'
+
+  AND libelle : 'sepa'
+
+  AND cat_auto = 'VIREMENT'
+
+  AND type_operation = 'VIREMENT'
+
+  AND montant > 0
+
 LIMIT 5;
+
 ```
 
 **Explication** :
@@ -735,9 +950,13 @@ LIMIT 5;
 **Aperçu des résultats :**
 
 ```
+
            VIREMENT SEPA VERS PEL | 354.180000000000000000 | VIREMENT |       VIREMENT
+
       VIREMENT SEPA VERS LIVRET A | 939.050000000000000000 | VIREMENT |       VIREMENT
+
  VIREMENT SEPA VERS ASSURANCE VIE | 160.130000000000000000 | VIREMENT |       VIREMENT
+
 ```
 
 ---
@@ -755,13 +974,21 @@ LIMIT 5;
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT
- libelle, montant 
-FROM operations_by_account 
-WHERE code_si = '1' 
-  AND contrat = '5913101072' 
-  AND libelle : 'prelevements' 
+
+ libelle, montant
+
+FROM operations_by_account
+
+WHERE code_si = '1'
+
+  AND contrat = '5913101072'
+
+  AND libelle : 'prelevements'
+
 LIMIT 5;
+
 ```
 
 **Explication** :
@@ -775,11 +1002,17 @@ LIMIT 5;
 **Aperçu des résultats :**
 
 ```
+
                PRELEVEMENT VEOLIA FACTURE EAU | -87.460000000000000000
+
  PRELEVEMENT EDF ET ORANGE FACTURES COMBINEES |                -131.40
+
          PRELEVEMENT ORANGE FACTURE TELEPHONE |                 -35.90
+
           PRELEVEMENT EDF FACTURE ELECTRICITE |                 -95.50
+
             PRELEVEMENT FREE FACTURE INTERNET | -38.880000000000000000
+
 ```
 
 ---
@@ -797,14 +1030,23 @@ LIMIT 5;
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT
- libelle, montant 
-FROM operations_by_account 
-WHERE code_si = '1' 
-  AND contrat = '5913101072' 
-  AND libelle : 'EDF' 
-  AND libelle : 'ORANGE' 
+
+ libelle, montant
+
+FROM operations_by_account
+
+WHERE code_si = '1'
+
+  AND contrat = '5913101072'
+
+  AND libelle : 'EDF'
+
+  AND libelle : 'ORANGE'
+
 LIMIT 5;
+
 ```
 
 **Explication** :
@@ -818,7 +1060,9 @@ LIMIT 5;
 **Aperçu des résultats :**
 
 ```
+
  PRELEVEMENT EDF ET ORANGE FACTURES COMBINEES | -131.40
+
 ```
 
 ---
@@ -836,13 +1080,21 @@ LIMIT 5;
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT
- libelle, montant 
-FROM operations_by_account 
-WHERE code_si = '1' 
-  AND contrat = '5913101072' 
-  AND libelle : '1234567890' 
+
+ libelle, montant
+
+FROM operations_by_account
+
+WHERE code_si = '1'
+
+  AND contrat = '5913101072'
+
+  AND libelle : '1234567890'
+
 LIMIT 5;
+
 ```
 
 **Explication** :
@@ -856,7 +1108,9 @@ LIMIT 5;
 **Aperçu des résultats :**
 
 ```
+
  CHEQUE 1234567890 EMIS PARIS | -150.00
+
 ```
 
 ---
@@ -874,14 +1128,23 @@ LIMIT 5;
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT
- libelle, montant 
-FROM operations_by_account 
-WHERE code_si = '1' 
-  AND contrat = '5913101072' 
-  AND libelle : 'DAB' 
-  AND libelle : 'SEPA' 
+
+ libelle, montant
+
+FROM operations_by_account
+
+WHERE code_si = '1'
+
+  AND contrat = '5913101072'
+
+  AND libelle : 'DAB'
+
+  AND libelle : 'SEPA'
+
 LIMIT 5;
+
 ```
 
 **Explication** :
@@ -895,7 +1158,9 @@ LIMIT 5;
 **Aperçu des résultats :**
 
 ```
+
  RETRAIT DAB SEPA PARIS 15EME |  -50.00
+
 ```
 
 ---
@@ -913,15 +1178,25 @@ LIMIT 5;
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT
- libelle, montant 
-FROM operations_by_account 
-WHERE code_si = '1' 
-  AND contrat = '5913101072' 
-  AND libelle : 'paris' 
-  AND libelle : '15eme' 
-  AND libelle : '16eme' 
+
+ libelle, montant
+
+FROM operations_by_account
+
+WHERE code_si = '1'
+
+  AND contrat = '5913101072'
+
+  AND libelle : 'paris'
+
+  AND libelle : '15eme'
+
+  AND libelle : '16eme'
+
 LIMIT 5;
+
 ```
 
 **Explication** :
@@ -935,7 +1210,9 @@ LIMIT 5;
 **Aperçu des résultats :**
 
 ```
+
  CB RESTAURANT PARIS 15EME PUIS CINEMA PARIS 16EME |  -45.00
+
 ```
 
 ---
@@ -953,14 +1230,23 @@ LIMIT 5;
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT
- libelle, montant 
-FROM operations_by_account 
-WHERE code_si = '1' 
-  AND contrat = '5913101072' 
-  AND libelle : 'contactless' 
-  AND libelle : 'instantané' 
+
+ libelle, montant
+
+FROM operations_by_account
+
+WHERE code_si = '1'
+
+  AND contrat = '5913101072'
+
+  AND libelle : 'contactless'
+
+  AND libelle : 'instantané'
+
 LIMIT 5;
+
 ```
 
 **Explication** :
@@ -974,7 +1260,9 @@ LIMIT 5;
 **Aperçu des résultats :**
 
 ```
+
  PAIEMENT CONTACTLESS INSTANTANE PARIS METRO |   -2.10
+
 ```
 
 ---
@@ -992,18 +1280,31 @@ LIMIT 5;
 **Requête CQL exécutée :**
 
 ```cql
+
 SELECT
- libelle, montant, cat_auto, type_operation, date_op 
-FROM operations_by_account 
-WHERE code_si = '1' 
-  AND contrat = '5913101072' 
-  AND libelle : 'virement' 
-  AND libelle : 'permanent' 
-  AND cat_auto = 'VIREMENT' 
-  AND type_operation = 'VIREMENT' 
-  AND montant < 0 
-  AND date_op >= '2023-01-01' 
+
+ libelle, montant, cat_auto, type_operation, date_op
+
+FROM operations_by_account
+
+WHERE code_si = '1'
+
+  AND contrat = '5913101072'
+
+  AND libelle : 'virement'
+
+  AND libelle : 'permanent'
+
+  AND cat_auto = 'VIREMENT'
+
+  AND type_operation = 'VIREMENT'
+
+  AND montant < 0
+
+  AND date_op >= '2023-01-01'
+
 LIMIT 10;
+
 ```
 
 **Explication** :
@@ -1019,8 +1320,11 @@ LIMIT 10;
 **Aperçu des résultats :**
 
 ```
+
       VIREMENT PERMANENT VERS LIVRET A | -250.00 | VIREMENT |       VIREMENT | 2023-12-31 23:00:00.000000+0000
+
  VIREMENT PERMANENT VERS ASSURANCE VIE | -300.00 | VIREMENT |       VIREMENT | 2023-11-30 23:00:00.000000+0000
+
 ```
 
 ---
@@ -1041,7 +1345,7 @@ LIMIT 10;
   - Concepts de base (full-text, stemming, asciifolding)
   - Limites (typos, inversions)
   - Solutions (préfixe, stemming)
-  
+
 - **Démonstrations avancées (11-20)** : 10
   - Filtres (type, date, montant, catégorie)
   - Multi-critères complexes
@@ -1053,6 +1357,7 @@ LIMIT 10;
 ## ✅ Capacités Démontrées
 
 ### Fonctionnalités de Base
+
 - ✅ Full-text search avec index SAI
 - ✅ Stemming français (pluriel/singulier)
 - ✅ Asciifolding (accents)
@@ -1060,6 +1365,7 @@ LIMIT 10;
 - ✅ Case-insensitive (insensible à la casse)
 
 ### Fonctionnalités Avancées
+
 - ✅ Combinaisons avec filtres (catégorie, type, montant, date)
 - ✅ Recherche avec noms propres (EDF, ORANGE)
 - ✅ Recherche avec codes et numéros
@@ -1069,10 +1375,12 @@ LIMIT 10;
 - ✅ Recherche complexe multi-critères
 
 ### Limites Identifiées
+
 - ⚠️  Typos (caractères manquants) : L'index standard ne gère pas automatiquement
 - ⚠️  Inversions de caractères : L'index standard ne gère pas automatiquement
 
 ### Solutions Implémentées
+
 - ✅ Recherche par préfixe (libelle_prefix avec N-Gram)
 - ✅ Recherche partielle vraie (libelle_tokens avec CONTAINS)
 - ✅ Stemming pour variations grammaticales
@@ -1082,13 +1390,19 @@ LIMIT 10;
 
 ## 💡 Points Clés
 
-1. **Opérateur ':' pour full-text search** : Permet de rechercher des termes dans une colonne indexée SAI
-2. **Stemming français** : Gère automatiquement les variations grammaticales (pluriel/singulier)
-3. **Asciifolding** : Recherche insensible aux accents
-4. **Recherche multi-termes** : L'opérateur AND est implicite entre plusieurs ':' sur la même colonne
-5. **Combinaison avec filtres** : HCD utilise plusieurs index simultanément pour une performance optimale
-6. **Recherche partielle** : Trois stratégies disponibles (libelle, libelle_prefix, libelle_tokens)
-7. **Performance** : Tous les tests s'exécutent en moins de 1 seconde grâce aux index SAI
+1. **Opérateur ':' pour full-text search** : Permet de rechercher des termes dans une colonne
+indexée SAI
+
+1. **Stemming français** : Gère automatiquement les variations grammaticales (pluriel/singulier)
+2. **Asciifolding** : Recherche insensible aux accents
+3. **Recherche multi-termes** : L'opérateur AND est implicite entre plusieurs ':' sur la même
+colonne
+
+1. **Combinaison avec filtres** : HCD utilise plusieurs index simultanément pour une performance
+optimale
+
+1. **Recherche partielle** : Trois stratégies disponibles (libelle, libelle_prefix, libelle_tokens)
+2. **Performance** : Tous les tests s'exécutent en moins de 1 seconde grâce aux index SAI
 
 ---
 
@@ -1096,19 +1410,19 @@ LIMIT 10;
 
 ### Index Disponibles
 
-- **Index SAI standard (libelle)** : 
+- **Index SAI standard (libelle)** :
   - Gère : stemming, accents, casse
   - Utilisation : Recherches précises avec variations grammaticales
-  
-- **Index SAI N-Gram (libelle_prefix)** : 
+
+- **Index SAI N-Gram (libelle_prefix)** :
   - Gère : recherche par préfixe
   - Utilisation : Recherches tolérantes aux typos (préfixe)
-  
-- **Index SAI Collection (libelle_tokens)** : 
+
+- **Index SAI Collection (libelle_tokens)** :
   - Gère : vraie recherche partielle avec CONTAINS
   - Utilisation : Recherches partielles vraies (ex: "carref" trouve "CARREFOUR")
-  
-- **Index SAI Vector (libelle_embedding)** : 
+
+- **Index SAI Vector (libelle_embedding)** :
   - Gère : fuzzy search par similarité sémantique
   - Utilisation : Recherches avec typos avancées (ByteT5)
 
@@ -1122,6 +1436,7 @@ LIMIT 10;
 - ✅ Fuzzy search via similarité cosinus sur embeddings
 
 **Utilisation recommandée** :
+
 - libelle : Recherches précises avec stemming français
 - libelle_prefix : Recherches tolérantes aux typos (préfixe)
 - libelle_tokens : Recherches partielles vraies (CONTAINS)
@@ -1131,10 +1446,13 @@ LIMIT 10;
 
 ## 🎯 Conclusion
 
-Cette démonstration complète valide toutes les fonctionnalités de recherche full-text dans HCD pour le POC Domirama2 :
+Cette démonstration complète valide toutes les fonctionnalités de recherche full-text dans HCD pour
+le POC Domirama2 :
 
 - ✅ **20 démonstrations** exécutées avec succès
-- ✅ **Tous les types de recherches** testés (stemming, exact, phrase, partielle, multi-termes, filtres)
+- ✅ **Tous les types de recherches** testés (stemming, exact, phrase, partielle, multi-termes,
+filtres)
+
 - ✅ **Toutes les colonnes et index** configurés et fonctionnels
 - ✅ **Performance optimale** : toutes les requêtes s'exécutent en moins de 1 seconde
 - ✅ **Solutions complètes** : tolérance aux erreurs via plusieurs stratégies

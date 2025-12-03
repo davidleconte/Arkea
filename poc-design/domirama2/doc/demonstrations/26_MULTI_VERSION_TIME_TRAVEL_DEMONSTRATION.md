@@ -25,9 +25,11 @@
 
 Cette démonstration prouve que la logique multi-version garantit :
 
-1. ✅ **Aucune perte de mise à jour client** : Les corrections client ne sont jamais écrasées par le batch
-2. ✅ **Time travel** : Les données peuvent être récupérées selon les dates choisies
-3. ✅ **Priorité client > batch** : cat_user est prioritaire sur cat_auto si non nul
+1. ✅ **Aucune perte de mise à jour client** : Les corrections client ne sont jamais écrasées par le
+batch
+
+1. ✅ **Time travel** : Les données peuvent être récupérées selon les dates choisies
+2. ✅ **Priorité client > batch** : cat_user est prioritaire sur cat_auto si non nul
 
 ### Contexte Métier
 
@@ -37,6 +39,7 @@ Dans le système Domirama, deux sources peuvent catégoriser une opération :
 - **Client** : Correction manuelle par l'utilisateur (écrit dans \`cat_user\`)
 
 Le défi est de garantir que :
+
 - Les corrections client ne sont jamais perdues lors des ré-exécutions du batch
 - L'application peut déterminer quelle catégorie était valide à une date donnée
 - La priorité client > batch est respectée
@@ -53,12 +56,12 @@ Le défi est de garantir que :
    - \`cat_auto\` : Catégorie automatique
    - \`cat_confidence\` : Score de confiance (0.0 à 1.0)
 
-2. **Client** écrit dans :
+1. **Client** écrit dans :
    - \`cat_user\` : Catégorie corrigée par le client
    - \`cat_date_user\` : Date de correction client
    - \`cat_validee\` : Indique si la catégorie client est validée
 
-3. **Application** applique la logique de priorité :
+1. **Application** applique la logique de priorité :
 
 ### Points Clés
 
@@ -84,26 +87,43 @@ Le défi est de garantir que :
 ### Logique de Priorité
 
 ```python
+
 def get_category(cat_auto, cat_user, cat_date_user):
+
     """Retourne la catégorie valide selon la logique de priorité."""
+
     if cat_user and cat_date_user:
+
         return cat_user  # Priorité au client
+
     else:
+
         return cat_auto  # Fallback sur batch
+
 ```
 
 ### Time Travel
 
 ```python
+
 def get_category_at_date(cat_auto, cat_user, cat_date_user, query_date):
+
     """Retourne la catégorie valide à une date donnée."""
+
     if cat_user and cat_date_user:
+
         if cat_date_user <= query_date:
+
             return cat_user  # Correction client déjà en place
+
         else:
+
             return cat_auto  # Correction client pas encore faite
+
     else:
+
         return cat_auto  # Aucune correction client
+
 ```
 
 ---
@@ -112,15 +132,14 @@ def get_category_at_date(cat_auto, cat_user, cat_date_user, query_date):
 
 Le script Python exécute 10 étapes de démonstration :
 
-
 ### Étape 1 : Nettoyage des données de test existantes
+
 --------------------------------------------------------------------------------
    ✅ Données de test nettoyées
 
 **Description** : Nettoyage des données de test existantes pour garantir un état propre avant de commencer la démonstration
 
 **Explication détaillée** : Cette étape garantit que nous partons d'un état propre. Toute donnée de test précédente est supprimée pour éviter toute interférence.
-
 
 **Résultat attendu** : Voir description ci-dessus
 
@@ -131,6 +150,7 @@ Le script Python exécute 10 étapes de démonstration :
 ---
 
 ### Étape 2 : Insertion initiale par BATCH (cat_auto uniquement)
+
 --------------------------------------------------------------------------------
    📅 Date: 2024-01-15 10:00:00
    🏷️  Catégorie batch: 'ALIMENTATION' (confidence: 0.85)
@@ -146,7 +166,6 @@ Le script Python exécute 10 étapes de démonstration :
 
 **Explication détaillée** : Le batch exécute sa catégorisation automatique. À ce stade, seule cat_auto est remplie. cat_user, cat_date_user et cat_validee sont NULL/false.
 
-
 **État des données après cette étape :**
 
 | Colonne | Valeur | Description |
@@ -157,16 +176,13 @@ Le script Python exécute 10 étapes de démonstration :
 |  | None | Date de correction client |
 |  | False | Catégorie validée |
 
-
 **Dates mentionnées :**
 
 - 2024-01-15 10:00:00
 
-
 **Catégories mentionnées :**
 
 - ALIMENTATION
-
 
 **Résultat attendu** : Voir description ci-dessus
 
@@ -177,6 +193,7 @@ Le script Python exécute 10 étapes de démonstration :
 ---
 
 ### Étape 3 : Correction CLIENT (cat_user) - 2024-01-16 14:30:00
+
 --------------------------------------------------------------------------------
    👤 Client corrige la catégorie en 'RESTAURANT'
    📅 Date de correction: 2024-01-16 14:30:00
@@ -194,7 +211,6 @@ Le script Python exécute 10 étapes de démonstration :
 
 **Explication détaillée** : L'utilisateur corrige la catégorie. cat_user est maintenant rempli avec 'RESTAURANT' et cat_date_user contient la date de correction. cat_auto reste inchangé (conservé).
 
-
 **État des données après cette étape :**
 
 | Colonne | Valeur | Description |
@@ -205,11 +221,9 @@ Le script Python exécute 10 étapes de démonstration :
 |  | 2024-01-16 13:30:00 | Date de correction client |
 |  | True | Catégorie validée |
 
-
 **Dates mentionnées :**
 
 - 2024-01-16 14:30:00
-
 
 **Résultat attendu** : Voir description ci-dessus
 
@@ -220,6 +234,7 @@ Le script Python exécute 10 étapes de démonstration :
 ---
 
 ### Étape 4 : Ré-écriture BATCH (cat_auto) - 2024-01-20 08:00:00
+
 --------------------------------------------------------------------------------
    ⚠️  SCÉNARIO CRITIQUE: Le batch ré-écrit cat_auto
    🏷️  Nouvelle catégorie batch: 'SUPERMARCHE' (confidence: 0.92)
@@ -239,7 +254,6 @@ Le script Python exécute 10 étapes de démonstration :
 
 **Explication détaillée** : SCÉNARIO CRITIQUE : Le batch ré-exécute sa catégorisation et met à jour cat_auto. La vérification CRITIQUE est que cat_user, cat_date_user et cat_validee sont CONSERVÉS et non écrasés.
 
-
 **État des données après cette étape :**
 
 | Colonne | Valeur | Description |
@@ -250,11 +264,9 @@ Le script Python exécute 10 étapes de démonstration :
 |  | 2024-01-16 13:30:00 | Date de correction client |
 |  | True | Catégorie validée |
 
-
 **Dates mentionnées :**
 
 - 2024-01-20 08:00:00
-
 
 **Résultat attendu** : Voir description ci-dessus
 
@@ -265,6 +277,7 @@ Le script Python exécute 10 étapes de démonstration :
 ---
 
 ### Étape 5 : TIME TRAVEL: Quelle catégorie était valide à différentes dates?
+
 --------------------------------------------------------------------------------
 
    🕐 Time Travel - Catégories valides à différentes dates:
@@ -294,14 +307,12 @@ Le script Python exécute 10 étapes de démonstration :
 
 **Explication détaillée** : Le time travel permet de déterminer quelle catégorie était valide à une date donnée. Si cat_date_user <= date_requête, alors cat_user était déjà en place. Sinon, seule cat_auto était disponible.
 
-
 **Catégories mentionnées :**
 
 - 📅 2024-01-15 12:00 (après insertion batch):
 - SUPERMARCHE
 - RESTAURANT
 - RESTAURANT
-
 
 **Résultat attendu** : Voir description ci-dessus
 
@@ -312,6 +323,7 @@ Le script Python exécute 10 étapes de démonstration :
 ---
 
 ### Étape 6 : Test de NON-ÉCRASEMENT: Batch ne touche JAMAIS cat_user
+
 --------------------------------------------------------------------------------
    ⚠️  Tentative d'écrasement (simulation d'erreur):
    🚫 Le batch essaie d'écrire cat_user (NE DEVRAIT PAS ARRIVER)
@@ -323,7 +335,6 @@ Le script Python exécute 10 étapes de démonstration :
 
 **Explication détaillée** : Cette étape simule une erreur où le batch tenterait d'écraser cat_user. En production, cela ne devrait JAMAIS arriver, mais cette démonstration montre comment le détecter.
 
-
 **Résultat attendu** : Voir description ci-dessus
 
 **Résultat obtenu** : ✅ Validé
@@ -333,6 +344,7 @@ Le script Python exécute 10 étapes de démonstration :
 ---
 
 ### Étape 7 : Restauration de l'état correct
+
 --------------------------------------------------------------------------------
    🔄 Restauration de la correction client...
    ✅ État restauré
@@ -340,7 +352,6 @@ Le script Python exécute 10 étapes de démonstration :
 **Description** : Restauration de l'état correct après le test de non-écrasement pour continuer la démonstration
 
 **Explication détaillée** : Après le test de non-écrasement, on restaure l'état correct pour continuer la démonstration avec des données cohérentes.
-
 
 **Résultat attendu** : Voir description ci-dessus
 
@@ -351,6 +362,7 @@ Le script Python exécute 10 étapes de démonstration :
 ---
 
 ### Étape 8 : Démonstration de la Logique de Priorité (Application)
+
 --------------------------------------------------------------------------------
 
    📋 Logique de priorité pour l'application:
@@ -371,11 +383,9 @@ Le script Python exécute 10 étapes de démonstration :
 
 **Explication détaillée** : La logique de priorité côté application détermine quelle catégorie utiliser : cat_user si non NULL, sinon cat_auto. Cette logique garantit que les corrections client sont toujours prioritaires.
 
-
 **Catégories mentionnées :**
 
 - RESTAURANT
-
 
 **Résultat attendu** : Voir description ci-dessus
 
@@ -386,6 +396,7 @@ Le script Python exécute 10 étapes de démonstration :
 ---
 
 ### Étape 9 : Test avec Plusieurs Corrections Client (Historique)
+
 --------------------------------------------------------------------------------
    📝 Scénario: Client corrige plusieurs fois
    📅 Correction 1: 2024-01-16 14:30 → 'RESTAURANT'
@@ -402,7 +413,6 @@ Le script Python exécute 10 étapes de démonstration :
 
 **Explication détaillée** : Cette étape simule un scénario où le client corrige plusieurs fois. Cassandra ne garde qu'une version, donc seule la dernière correction est visible. Pour l'historique complet, il faudrait une table séparée.
 
-
 **État des données après cette étape :**
 
 | Colonne | Valeur | Description |
@@ -413,7 +423,6 @@ Le script Python exécute 10 étapes de démonstration :
 |  | 2024-01-25 09:15:00 | Date de correction client |
 |  | N/A | Catégorie validée |
 
-
 **Résultat attendu** : Voir description ci-dessus
 
 **Résultat obtenu** : ✅ Validé
@@ -423,6 +432,7 @@ Le script Python exécute 10 étapes de démonstration :
 ---
 
 ### Étape 10 : Time Travel Final avec Dernière Correction
+
 --------------------------------------------------------------------------------
 
    🕐 Time Travel Final - Catégories valides:
@@ -444,11 +454,9 @@ Le script Python exécute 10 étapes de démonstration :
 
 **Explication détaillée** : Test final du time travel avec toutes les corrections appliquées. Démontre que la logique fonctionne correctement même avec plusieurs corrections successives.
 
-
 **Catégories mentionnées :**
 
 - 📅 2024-01-15 12:00:
-
 
 **Résultat attendu** : Voir description ci-dessus
 
@@ -464,7 +472,8 @@ Le script Python exécute 10 étapes de démonstration :
 
 ### Principe du Time Travel
 
-Le **Time Travel** permet de déterminer quelle catégorie était valide à une date donnée dans le passé. Cette fonctionnalité est essentielle pour :
+Le **Time Travel** permet de déterminer quelle catégorie était valide à une date donnée dans le
+passé. Cette fonctionnalité est essentielle pour :
 
 - ✅ **Audit** : Voir l'historique des catégorisations
 - ✅ **Conformité** : Déterminer quelle catégorie était valide à une date légale donnée
@@ -475,16 +484,15 @@ Le **Time Travel** permet de déterminer quelle catégorie était valide à une 
 La logique de time travel fonctionne comme suit :
 
 1. **Si  existe ET  existe** :
-   - Si  : La correction client était déjà en place → utiliser 
-   - Si  : La correction client n'était pas encore faite → utiliser 
+   - Si  : La correction client était déjà en place → utiliser
+   - Si  : La correction client n'était pas encore faite → utiliser
 
-2. **Sinon** (pas de correction client) :
+1. **Sinon** (pas de correction client) :
    - Utiliser  (catégorie batch)
 
 ### Tests de Time Travel
 
 Les tests suivants démontrent que la catégorie valide dépend de la date de requête :
-
 
 #### Test 1 : Time Travel à la date 2024-01-15 12:00
 
@@ -500,7 +508,6 @@ Les tests suivants démontrent que la catégorie valide dépend de la date de re
 - ✅  > date de requête (ou NULL)
 - ✅ Donc  est utilisé (fallback batch)
 
-
 #### Test 2 : Time Travel à la date 2024-01-16 15:00
 
 **Date de requête** : 2024-01-16 15:00
@@ -514,7 +521,6 @@ Les tests suivants démontrent que la catégorie valide dépend de la date de re
 - ✅ Aucune correction client n'était encore faite à cette date
 - ✅  > date de requête (ou NULL)
 - ✅ Donc  est utilisé (fallback batch)
-
 
 #### Test 3 : Time Travel à la date 2024-01-20 09:00
 
@@ -530,7 +536,6 @@ Les tests suivants démontrent que la catégorie valide dépend de la date de re
 - ✅  > date de requête (ou NULL)
 - ✅ Donc  est utilisé (fallback batch)
 
-
 #### Test 4 : Time Travel à la date 2024-01-25 11:00
 
 **Date de requête** : 2024-01-25 11:00
@@ -544,7 +549,6 @@ Les tests suivants démontrent que la catégorie valide dépend de la date de re
 - ✅ La correction client était déjà en place à cette date
 - ✅  <= date de requête
 - ✅ Donc  est utilisé (priorité client)
-
 
 #### Test 5 : Time Travel à la date 2024-01-15 12:00 (après insertion batch)
 
@@ -562,44 +566,41 @@ Les tests suivants démontrent que la catégorie valide dépend de la date de re
 
 **Détails supplémentaires** :
 
-
-
 ---
 
 ## ✅ Validations
 
-
 1. ✅ Données de test nettoyées
 
-2. ✅ Opération insérée par batch
+1. ✅ Opération insérée par batch
 
-3. ✅ Correction client appliquée
+1. ✅ Correction client appliquée
 
-4. ✅ Vérification: cat_user prioritaire sur cat_auto
+1. ✅ Vérification: cat_user prioritaire sur cat_auto
 
-5. ✅ Batch a mis à jour cat_auto
+1. ✅ Batch a mis à jour cat_auto
 
-6. ✅ Vérification CRITIQUE: cat_user n'a PAS été écrasé par le batch
+1. ✅ Vérification CRITIQUE: cat_user n'a PAS été écrasé par le batch
 
-7. ✅ État restauré
+1. ✅ État restauré
 
-8. ✅ La logique de priorité fonctionne correctement
+1. ✅ La logique de priorité fonctionne correctement
 
-9. ✅ Tests de Logique Multi-Version:
+1. ✅ Tests de Logique Multi-Version:
 
-10. ✅ Les mises à jour client ne sont jamais perdues
+1. ✅ Les mises à jour client ne sont jamais perdues
 
-11. ✅ Le batch ne touche jamais cat_user (stratégie respectée)
+1. ✅ Le batch ne touche jamais cat_user (stratégie respectée)
 
-12. ✅ Time travel fonctionne correctement
+1. ✅ Time travel fonctionne correctement
 
-13. ✅ Priorité client > batch respectée
+1. ✅ Priorité client > batch respectée
 
-14. ✅ cat_date_user permet la traçabilité
+1. ✅ cat_date_user permet la traçabilité
 
-15. ✅ Avantages de la stratégie multi-version:
+1. ✅ Avantages de la stratégie multi-version:
 
-16. ✅ TEST MULTI-VERSION AVEC TIME TRAVEL TERMINÉ
+1. ✅ TEST MULTI-VERSION AVEC TIME TRAVEL TERMINÉ
 
 ---
 
@@ -628,19 +629,21 @@ Les tests suivants démontrent que la catégorie valide dépend de la date de re
 
 La démonstration prouve que la logique multi-version garantit :
 
-1. ✅ **Aucune perte de données client** : Les corrections client ne sont jamais écrasées par le batch
+1. ✅ **Aucune perte de données client** : Les corrections client ne sont jamais écrasées par le
+batch
+
    - **Preuve** : Étape 4 démontre que même après ré-écriture batch, cat_user est conservé
    - **Validation** : cat_user, cat_date_user et cat_validee restent intacts après mise à jour batch
 
-2. ✅ **Time travel fonctionnel** : La catégorie valide peut être déterminée selon la date de requête
+1. ✅ **Time travel fonctionnel** : La catégorie valide peut être déterminée selon la date de requête
    - **Preuve** : Étape 5 et 10 démontrent que la logique time travel fonctionne correctement
    - **Validation** : Les tests de time travel retournent les bonnes catégories selon les dates
 
-3. ✅ **Priorité respectée** : cat_user est toujours prioritaire sur cat_auto si non nul
+1. ✅ **Priorité respectée** : cat_user est toujours prioritaire sur cat_auto si non nul
    - **Preuve** : Étape 8 démontre que la logique de priorité fonctionne correctement
    - **Validation** : cat_user est toujours utilisé si présent, même si cat_auto est mis à jour
 
-4. ✅ **Traçabilité** : cat_date_user permet de savoir quand la correction client a été faite
+1. ✅ **Traçabilité** : cat_date_user permet de savoir quand la correction client a été faite
    - **Preuve** : cat_date_user est conservé et permet le time travel
    - **Validation** : Les dates de correction sont correctement stockées et utilisées
 
@@ -703,6 +706,7 @@ La démonstration prouve que la logique multi-version garantit :
 **Scénario** : Déterminer quelle catégorie était valide à différentes dates.
 
 **Résultat** : La logique time travel retourne correctement :
+
 - Avant correction client :  (batch)
 - Après correction client :  (client)
 
@@ -760,6 +764,7 @@ La démonstration prouve que la logique multi-version garantit :
 **✅ Démonstration terminée avec succès !**
 
 Cette démonstration prouve de manière exhaustive que la logique multi-version garantit :
+
 - ✅ Aucune perte de correction client
 - ✅ Time travel fonctionnel
 - ✅ Priorité client > batch respectée

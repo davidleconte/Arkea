@@ -1,7 +1,7 @@
 # 🔍 Démonstration : Recherche Hybride (Full-Text + Vector Search)
 
-**Date** : 2025-11-26 20:09:35  
-**Script** : `25_test_hybrid_search_v2_didactique.sh`  
+**Date** : 2025-11-26 20:09:35
+**Script** : `25_test_hybrid_search_v2_didactique.sh`
 **Objectif** : Démontrer la recherche hybride qui combine Full-Text Search (SAI) et Vector Search (ByteT5)
 
 ---
@@ -24,11 +24,13 @@
 ### Contexte HBase → HCD
 
 **HBase :**
+
 - ❌ Pas de recherche hybride native
 - ❌ Solr in-memory pour full-text uniquement
 - ❌ Pas de recherche vectorielle
 
 **HCD :**
+
 - ✅ Full-Text Search (SAI) : Index persistant intégré
 - ✅ Vector Search (ByteT5) : Type VECTOR natif
 - ✅ Recherche hybride : Combinaison des deux approches
@@ -37,22 +39,37 @@
 ### Index Full-Text (SAI)
 
 ```cql
+
 CREATE CUSTOM INDEX idx_libelle_fulltext
+
 ON operations_by_account(libelle)
+
 USING 'StorageAttachedIndex'
+
 WITH OPTIONS = {
+
   'index_analyzer': '{
+
     "tokenizer": {"name": "standard"},
+
     "filters": [
+
       {"name": "lowercase"},
+
       {"name": "frenchLightStem"},
+
       {"name": "asciiFolding"}
+
     ]
+
   }'
+
 };
+
 ```
 
 **Explication :**
+
 - Index SAI full-text sur la colonne libelle
 - Analyzer français : stemming, asciifolding, lowercase
 - Utilisé pour filtrer les résultats pertinents
@@ -60,15 +77,23 @@ WITH OPTIONS = {
 ### Colonne VECTOR et Index Vectoriel
 
 ```cql
+
 ALTER TABLE operations_by_account
+
 ADD libelle_embedding VECTOR<FLOAT, 1472>;
 
+
+
 CREATE CUSTOM INDEX idx_libelle_embedding_vector
+
 ON operations_by_account(libelle_embedding)
+
 USING 'StorageAttachedIndex';
+
 ```
 
 **Explication :**
+
 - Colonne VECTOR<FLOAT, 1472> : Embeddings ByteT5
 - Index SAI vectoriel : Recherche par similarité (ANN)
 - Utilisé pour trier par similarité sémantique
@@ -96,7 +121,8 @@ USING 'StorageAttachedIndex';
 
 ### Principe
 
-Les embeddings sont des représentations vectorielles des textes qui capturent leur signification sémantique. ByteT5 génère des vecteurs de 1472 dimensions pour chaque texte.
+Les embeddings sont des représentations vectorielles des textes qui capturent leur signification
+sémantique. ByteT5 génère des vecteurs de 1472 dimensions pour chaque texte.
 
 ### Processus
 
@@ -107,7 +133,7 @@ Les embeddings sont des représentations vectorielles des textes qui capturent l
 
 ### Exemple de Génération
 
-**Texte** : "LOYER IMPAYE PARIS"  
+**Texte** : "LOYER IMPAYE PARIS"
 **Résultat** : Vecteur de 1472 dimensions généré
 
 ---
@@ -122,13 +148,13 @@ La recherche hybride combine deux approches complémentaires :
    - ✅ Trouve les opérations contenant les termes recherchés
    - ⚠️  Ne trouve pas si typo sévère
 
-2. **Vector Search (ByteT5)** :
+1. **Vector Search (ByteT5)** :
    - ✅ Tri par similarité sémantique
    - ✅ Utilise l'index SAI vectoriel sur libelle_embedding
    - ✅ Tolère les typos grâce à la similarité vectorielle
    - ⚠️  Peut retourner des résultats moins pertinents
 
-3. **Combinaison (Recherche Hybride)** :
+1. **Combinaison (Recherche Hybride)** :
    - ✅ WHERE libelle : 'terme' (Full-Text filtre)
    - ✅ ORDER BY libelle_embedding ANN OF [...] (Vector trie)
    - ✅ Meilleure pertinence : Précision + Tolérance aux typos
@@ -136,11 +162,13 @@ La recherche hybride combine deux approches complémentaires :
 ### Stratégies de Recherche Hybride
 
 **Stratégie 1 : Full-Text + Vector (requêtes correctes)**
+
 - Filtre d'abord avec Full-Text (précision)
 - Trie ensuite par Vector (pertinence)
 - Meilleure pertinence pour requêtes sans typo
 
 **Stratégie 2 : Vector seul avec fallback (requêtes avec typos)**
+
 - Si Full-Text ne trouve rien (typo sévère)
 - Fallback automatique sur Vector seul
 - Filtre côté client pour améliorer la pertinence
@@ -180,133 +208,155 @@ La recherche hybride combine deux approches complémentaires :
    - Résultat attendu : Devrait trouver 'LOYER IMPAYE REGULARISATION'
    - Statut : ✅ (5 résultat(s))
 
-2. **TEST 2** : 'loyr impay' (Recherche avec typos: 'loyr impay')
+1. **TEST 2** : 'loyr impay' (Recherche avec typos: 'loyr impay')
    - Stratégie prévue : Vector seul avec fallback (typos sévères)
    - Stratégie utilisée : Vector seul (fallback)
    - Résultat attendu : Devrait trouver 'LOYER IMPAYE' grâce au Vector Search (fallback)
    - Statut : ✅ (5 résultat(s))
 
-3. **TEST 3** : 'VIREMENT IMPAYE' (Recherche correcte: 'VIREMENT IMPAYE')
+1. **TEST 3** : 'VIREMENT IMPAYE' (Recherche correcte: 'VIREMENT IMPAYE')
    - Stratégie prévue : Full-Text + Vector (précision maximale)
    - Stratégie utilisée : Full-Text + Vector
    - Résultat attendu : Devrait trouver 'VIREMENT IMPAYE REGULARISATION'
    - Statut : ✅ (5 résultat(s))
 
-4. **TEST 4** : 'viremnt impay' (Recherche avec typos: 'viremnt impay')
+1. **TEST 4** : 'viremnt impay' (Recherche avec typos: 'viremnt impay')
    - Stratégie prévue : Vector seul avec fallback (typos sévères)
    - Stratégie utilisée : Vector seul (fallback)
    - Résultat attendu : Devrait trouver 'VIREMENT IMPAYE' grâce au Vector Search (fallback)
    - Statut : ✅ (5 résultat(s))
 
-5. **TEST 5** : 'CARREFOUR' (Recherche correcte: 'CARREFOUR')
+1. **TEST 5** : 'CARREFOUR' (Recherche correcte: 'CARREFOUR')
    - Stratégie prévue : Full-Text + Vector (précision maximale)
    - Stratégie utilisée : Full-Text + Vector
    - Résultat attendu : Devrait trouver des opérations Carrefour
    - Statut : ✅ (5 résultat(s))
 
-6. **TEST 6** : 'carrefur' (Recherche avec typo: 'carrefur')
+1. **TEST 6** : 'carrefur' (Recherche avec typo: 'carrefur')
    - Stratégie prévue : Vector seul avec fallback (typos sévères)
    - Stratégie utilisée : Vector seul (fallback)
    - Résultat attendu : Devrait trouver 'CARREFOUR' grâce au Vector Search (fallback)
    - Statut : ✅ (5 résultat(s))
 
-7. **TEST 7** : 'LOYER impay' (Recherche mixte: 'LOYER' correct + 'impay' typo)
+1. **TEST 7** : 'LOYER impay' (Recherche mixte: 'LOYER' correct + 'impay' typo)
    - Stratégie prévue : Full-Text partiel + Vector (terme avec typo)
    - Stratégie utilisée : Full-Text + Vector
-   - Résultat attendu : Devrait trouver 'LOYER IMPAYE' grâce à Full-Text pour LOYER + Vector pour impay
+   - Résultat attendu : Devrait trouver 'LOYER IMPAYE' grâce à Full-Text pour LOYER + Vector pour
+   impay
+
    - Statut : ✅ (5 résultat(s))
 
-8. **TEST 8** : 'VIREMENT IMPAYE paris' (Recherche mixte: 2 termes corrects + 'paris' typo)
+1. **TEST 8** : 'VIREMENT IMPAYE paris' (Recherche mixte: 2 termes corrects + 'paris' typo)
    - Stratégie prévue : Full-Text partiel + Vector (terme avec typo)
    - Stratégie utilisée : Full-Text + Vector
-   - Résultat attendu : Devrait trouver 'VIREMENT IMPAYE PARIS' grâce à Full-Text pour VIREMENT/IMPAYE + Vector pour paris
+   - Résultat attendu : Devrait trouver 'VIREMENT IMPAYE PARIS' grâce à Full-Text pour
+   VIREMENT/IMPAYE + Vector pour paris
+
    - Statut : ✅ (5 résultat(s))
 
-9. **TEST 9** : 'loyr impay paris' (Recherche 3 termes avec typos: 'loyr' + 'impay' + 'paris')
+1. **TEST 9** : 'loyr impay paris' (Recherche 3 termes avec typos: 'loyr' + 'impay' + 'paris')
    - Stratégie prévue : Vector seul avec fallback (typos multiples)
    - Stratégie utilisée : Vector seul (fallback)
    - Résultat attendu : Devrait trouver 'LOYER IMPAYE PARIS' grâce au Vector Search (fallback)
    - Statut : ✅ (5 résultat(s))
 
-10. **TEST 10** : 'VIREMENT PERMANENT MENSUEL livret' (Recherche 4 termes: 3 corrects + 1 typo possible)
+1. **TEST 10** : 'VIREMENT PERMANENT MENSUEL livret' (Recherche 4 termes: 3 corrects + 1 typo
+possible)
+
    - Stratégie prévue : Full-Text partiel + Vector (terme avec typo ou variation)
    - Stratégie utilisée : Full-Text + Vector
    - Résultat attendu : Devrait trouver 'VIREMENT PERMANENT MENSUEL VERS LIVRET A'
    - Statut : ✅ (5 résultat(s))
 
-11. **TEST 11** : 'loyrs impay' (Recherche avec pluriel typé: 'loyrs' (pluriel de 'loyer' avec typo) + 'impay')
-   - Stratégie prévue : Vector seul avec fallback (variation linguistique + typo)
-   - Stratégie utilisée : Vector seul (fallback)
-   - Résultat attendu : Devrait trouver 'LOYER IMPAYE' grâce au Vector Search (fallback)
-   - Statut : ✅ (5 résultat(s))
+1. **TEST 11** : 'loyrs impay' (Recherche avec pluriel typé: 'loyrs' (pluriel de 'loyer' avec typo)
 
-12. **TEST 12** : 'virements impayes' (Recherche avec pluriels typés: 'virements' + 'impayes')
+- 'impay')
+  - Stratégie prévue : Vector seul avec fallback (variation linguistique + typo)
+  - Stratégie utilisée : Vector seul (fallback)
+  - Résultat attendu : Devrait trouver 'LOYER IMPAYE' grâce au Vector Search (fallback)
+  - Statut : ✅ (5 résultat(s))
+
+1. **TEST 12** : 'virements impayes' (Recherche avec pluriels typés: 'virements' + 'impayes')
    - Stratégie prévue : Vector seul avec fallback (variations linguistiques + typos)
    - Stratégie utilisée : Full-Text + Vector
    - Résultat attendu : Devrait trouver 'VIREMENT IMPAYE' grâce au Vector Search (fallback)
    - Statut : ✅ (5 résultat(s))
 
-13. **TEST 13** : 'loyr impay regularisation paris' (Recherche contextuelle 4 termes avec typos: contexte complet)
+1. **TEST 13** : 'loyr impay regularisation paris' (Recherche contextuelle 4 termes avec typos:
+contexte complet)
+
    - Stratégie prévue : Vector seul avec fallback (contexte avec typos)
    - Stratégie utilisée : Vector seul (fallback)
-   - Résultat attendu : Devrait trouver 'LOYER IMPAYE REGULARISATION PARIS' grâce au Vector Search (fallback)
+   - Résultat attendu : Devrait trouver 'LOYER IMPAYE REGULARISATION PARIS' grâce au Vector Search
+   (fallback)
+
    - Statut : ✅ (5 résultat(s))
 
-14. **TEST 14** : 'loyr paris maison' (Recherche contextuelle 3 termes: 'loyr' typo + contexte géographique)
+1. **TEST 14** : 'loyr paris maison' (Recherche contextuelle 3 termes: 'loyr' typo + contexte
+géographique)
+
    - Stratégie prévue : Vector seul avec fallback (contexte avec typo)
    - Stratégie utilisée : Vector seul (fallback)
    - Résultat attendu : Devrait trouver 'LOYER PARIS MAISON' grâce au Vector Search (fallback)
    - Statut : ✅ (1 résultat(s))
 
-15. **TEST 15** : 'paiement carte' (Recherche avec synonyme: 'paiement' au lieu de 'CB' ou 'CARTE')
+1. **TEST 15** : 'paiement carte' (Recherche avec synonyme: 'paiement' au lieu de 'CB' ou 'CARTE')
    - Stratégie prévue : Full-Text + Vector (synonyme sémantique)
    - Stratégie utilisée : Full-Text + Vector
    - Résultat attendu : Devrait trouver des opérations CB/CARTE grâce à la similarité sémantique
    - Statut : ✅ (2 résultat(s))
 
-16. **TEST 16** : 'paiemnt carte' (Recherche avec synonyme + typo: 'paiemnt' (typo) + 'carte')
+1. **TEST 16** : 'paiemnt carte' (Recherche avec synonyme + typo: 'paiemnt' (typo) + 'carte')
    - Stratégie prévue : Vector seul avec fallback (synonyme + typo)
    - Stratégie utilisée : Vector seul (fallback)
    - Résultat attendu : Devrait trouver des opérations CB/CARTE grâce au Vector Search (fallback)
    - Statut : ✅ (5 résultat(s))
 
-17. **TEST 17** : 'ratp navigo' (Recherche nom propre: 'RATP NAVIGO' (abréviations))
+1. **TEST 17** : 'ratp navigo' (Recherche nom propre: 'RATP NAVIGO' (abréviations))
    - Stratégie prévue : Full-Text + Vector (noms propres)
    - Stratégie utilisée : Full-Text + Vector
    - Résultat attendu : Devrait trouver 'CB RATP NAVIGO MOIS' grâce à Full-Text + Vector
    - Statut : ✅ (4 résultat(s))
 
-18. **TEST 18** : 'sepa viremnt' (Recherche code + typo: 'SEPA' (code) + 'viremnt' (typo))
+1. **TEST 18** : 'sepa viremnt' (Recherche code + typo: 'SEPA' (code) + 'viremnt' (typo))
    - Stratégie prévue : Full-Text partiel + Vector (code + typo)
    - Stratégie utilisée : Full-Text + Vector
-   - Résultat attendu : Devrait trouver 'VIREMENT SEPA' grâce à Full-Text pour SEPA + Vector pour viremnt
+   - Résultat attendu : Devrait trouver 'VIREMENT SEPA' grâce à Full-Text pour SEPA + Vector pour
+   viremnt
+
    - Statut : ✅ (5 résultat(s))
 
-19. **TEST 19** : 'carrefour paris' (Recherche localisation: 'CARREFOUR' + 'PARIS')
+1. **TEST 19** : 'carrefour paris' (Recherche localisation: 'CARREFOUR' + 'PARIS')
    - Stratégie prévue : Full-Text + Vector (localisation)
    - Stratégie utilisée : Full-Text + Vector
    - Résultat attendu : Devrait trouver 'CB CARREFOUR MARKET PARIS' grâce à Full-Text + Vector
    - Statut : ✅ (5 résultat(s))
 
-20. **TEST 20** : 'carrefur parsi' (Recherche localisation avec typos: 'carrefur' + 'parsi')
+1. **TEST 20** : 'carrefur parsi' (Recherche localisation avec typos: 'carrefur' + 'parsi')
    - Stratégie prévue : Vector seul avec fallback (localisation avec typos)
    - Stratégie utilisée : Vector seul (fallback)
-   - Résultat attendu : Devrait trouver 'CB CARREFOUR MARKET PARIS' grâce au Vector Search (fallback)
+   - Résultat attendu : Devrait trouver 'CB CARREFOUR MARKET PARIS' grâce au Vector Search (fallback
+
    - Statut : ✅ (4 résultat(s))
 
-21. **TEST 21** : 'loyr habitation' (Recherche catégorie + libellé typé: 'loyr' + 'habitation')
+1. **TEST 21** : 'loyr habitation' (Recherche catégorie + libellé typé: 'loyr' + 'habitation')
    - Stratégie prévue : Vector seul avec fallback (catégorie + typo)
    - Stratégie utilisée : Vector seul (fallback)
-   - Résultat attendu : Devrait trouver 'LOYER' avec catégorie HABITATION grâce au Vector Search (fallback)
+   - Résultat attendu : Devrait trouver 'LOYER' avec catégorie HABITATION grâce au Vector Search
+   (fallback)
+
    - Statut : ✅ (5 résultat(s))
 
-22. **TEST 22** : 'virement permanent mensuel' (Recherche avec contexte temporel: 'VIREMENT PERMANENT MENSUEL')
+1. **TEST 22** : 'virement permanent mensuel' (Recherche avec contexte temporel: 'VIREMENT PERMANENT
+MENSUEL')
+
    - Stratégie prévue : Full-Text + Vector (contexte temporel)
    - Stratégie utilisée : Full-Text + Vector
-   - Résultat attendu : Devrait trouver 'VIREMENT PERMANENT MENSUEL VERS LIVRET A' grâce à Full-Text + Vector
+   - Résultat attendu : Devrait trouver 'VIREMENT PERMANENT MENSUEL VERS LIVRET A' grâce à Full-Text
+   - Vector
    - Statut : ✅ (5 résultat(s))
 
-23. **TEST 23** : 'paris loyre' (Recherche avec inversion: 'paris' + 'loyre' (inversion de 'loyer'))
+1. **TEST 23** : 'paris loyre' (Recherche avec inversion: 'paris' + 'loyre' (inversion de 'loyer'))
    - Stratégie prévue : Vector seul avec fallback (inversion de caractères)
    - Stratégie utilisée : Full-Text + Vector
    - Résultat attendu : Devrait trouver 'LOYER PARIS' grâce au Vector Search (fallback)
@@ -315,16 +365,25 @@ La recherche hybride combine deux approches complémentaires :
 ### Exemple de Requête Hybride
 
 ```cql
+
 SELECT libelle, montant, cat_auto
+
 FROM operations_by_account
+
 WHERE code_si = '1'
+
   AND contrat = '5913101072'
+
   AND libelle : 'loyer'
+
 ORDER BY libelle_embedding ANN OF [embedding_vector]
+
 LIMIT 5
+
 ```
 
 **Explication :**
+
 - WHERE code_si = ... AND contrat = ... : Cible la partition
 - AND libelle : 'loyer' : Filtre Full-Text (précision)
 - ORDER BY libelle_embedding ANN OF [...] : Tri Vector (pertinence)
@@ -333,14 +392,21 @@ LIMIT 5
 ### Exemple de Requête Vectorielle (Fallback)
 
 ```cql
+
 SELECT libelle, montant, cat_auto
+
 FROM operations_by_account
+
 WHERE code_si = '1' AND contrat = '5913101072'
+
 ORDER BY libelle_embedding ANN OF [embedding_vector]
+
 LIMIT 15
+
 ```
 
 **Explication :**
+
 - WHERE code_si = ... AND contrat = ... : Cible la partition
 - ORDER BY libelle_embedding ANN OF [...] : Tri Vector seul
 - LIMIT 15 : Plus de résultats pour filtrage côté client
@@ -351,13 +417,13 @@ LIMIT 15
 
 ### Résumé de la Démonstration
 
-✅ **PARTIE 1** : DDL - Index Full-Text (SAI) + Colonne VECTOR + Index Vectoriel  
-✅ **PARTIE 2** : Dépendances Python vérifiées/installées  
-✅ **PARTIE 3** : Génération d'embeddings démontrée  
-✅ **PARTIE 4** : Définition et principe de la recherche hybride  
-✅ **PARTIE 5** : Tests - 23 requêtes testées (6 de base + 17 complexes)  
-✅ **Catégories** : 10 catégories de complexité croissante  
-✅ **Stratégies** : Full-Text + Vector, Full-Text partiel + Vector, Fallback Vector seul  
+✅ **PARTIE 1** : DDL - Index Full-Text (SAI) + Colonne VECTOR + Index Vectoriel
+✅ **PARTIE 2** : Dépendances Python vérifiées/installées
+✅ **PARTIE 3** : Génération d'embeddings démontrée
+✅ **PARTIE 4** : Définition et principe de la recherche hybride
+✅ **PARTIE 5** : Tests - 23 requêtes testées (6 de base + 17 complexes)
+✅ **Catégories** : 10 catégories de complexité croissante
+✅ **Stratégies** : Full-Text + Vector, Full-Text partiel + Vector, Fallback Vector seul
 ✅ **Résultats** : Recherche hybride fonctionne avec fallback et gère tous les cas complexes
 
 ### Résultats Réels des Requêtes CQL
@@ -1136,7 +1202,9 @@ SELECT libelle, montant, cat_auto
 ---
 
 # Nettoyer le fichier temporaire après génération du rapport
+
 # Ne pas supprimer maintenant, on en a besoin pour les contrôles de cohérence
+
 # rm -f "/var/folders/_y/y3587t8s1w1_f6735gzv32540000gp/T/tmp.5deKqrtQXI.results.json"
 
 ## 🔍 Contrôles de Cohérence
@@ -1615,7 +1683,8 @@ Cette vérification contrôle que les résultats obtenus contiennent les mots-cl
 **Mots-clés de la requête** : LOYR, IMPAY
 **Mots-clés corrigés (pour typos)** : LOYER, IMPAYE
 
-💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les résultats.
+💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les
+résultats.
 **Résultats obtenus** : 5
 **Résultats pertinents** : 5
 **Validation** : Cohérent
@@ -1660,7 +1729,8 @@ Cette vérification contrôle que les résultats obtenus contiennent les mots-cl
 **Mots-clés de la requête** : VIREMNT, IMPAY
 **Mots-clés corrigés (pour typos)** : VIREMENT, IMPAYE
 
-💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les résultats.
+💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les
+résultats.
 **Résultats obtenus** : 5
 **Résultats pertinents** : 5
 **Validation** : Cohérent
@@ -1705,7 +1775,8 @@ Cette vérification contrôle que les résultats obtenus contiennent les mots-cl
 **Mots-clés de la requête** : CARREFUR
 **Mots-clés corrigés (pour typos)** : CARREFOUR
 
-💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les résultats.
+💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les
+résultats.
 **Résultats obtenus** : 5
 **Résultats pertinents** : 5
 **Validation** : Cohérent
@@ -1729,7 +1800,8 @@ Cette vérification contrôle que les résultats obtenus contiennent les mots-cl
 **Mots-clés de la requête** : LOYER, IMPAY
 **Mots-clés corrigés (pour typos)** : LOYER, IMPAYE
 
-💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les résultats.
+💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les
+résultats.
 **Résultats obtenus** : 5
 **Résultats pertinents** : 5
 **Validation** : Cohérent
@@ -1774,7 +1846,8 @@ Cette vérification contrôle que les résultats obtenus contiennent les mots-cl
 **Mots-clés de la requête** : LOYR, IMPAY, PARIS
 **Mots-clés corrigés (pour typos)** : LOYER, IMPAYE, PARIS
 
-💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les résultats.
+💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les
+résultats.
 **Résultats obtenus** : 5
 **Résultats pertinents** : 5
 **Validation** : Cohérent
@@ -1819,7 +1892,8 @@ Cette vérification contrôle que les résultats obtenus contiennent les mots-cl
 **Mots-clés de la requête** : LOYRS, IMPAY
 **Mots-clés corrigés (pour typos)** : LOYER, IMPAYE
 
-💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les résultats.
+💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les
+résultats.
 **Résultats obtenus** : 5
 **Résultats pertinents** : 5
 **Validation** : Cohérent
@@ -1843,7 +1917,8 @@ Cette vérification contrôle que les résultats obtenus contiennent les mots-cl
 **Mots-clés de la requête** : VIREMENTS, IMPAYES
 **Mots-clés corrigés (pour typos)** : VIREMENT, IMPAYE
 
-💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les résultats.
+💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les
+résultats.
 **Résultats obtenus** : 5
 **Résultats pertinents** : 5
 **Validation** : Cohérent
@@ -1867,7 +1942,8 @@ Cette vérification contrôle que les résultats obtenus contiennent les mots-cl
 **Mots-clés de la requête** : LOYR, IMPAY, REGULARISATION, PARIS
 **Mots-clés corrigés (pour typos)** : LOYER, IMPAYE, REGULARISATION, PARIS
 
-💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les résultats.
+💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les
+résultats.
 **Résultats obtenus** : 5
 **Résultats pertinents** : 5
 **Validation** : Cohérent
@@ -1891,7 +1967,8 @@ Cette vérification contrôle que les résultats obtenus contiennent les mots-cl
 **Mots-clés de la requête** : LOYR, PARIS, MAISON
 **Mots-clés corrigés (pour typos)** : LOYER, PARIS, MAISON
 
-💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les résultats.
+💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les
+résultats.
 **Résultats obtenus** : 1
 **Résultats pertinents** : 1
 **Validation** : Cohérent
@@ -1929,7 +2006,8 @@ Cette vérification contrôle que les résultats obtenus contiennent les mots-cl
 **Mots-clés de la requête** : PAIEMNT, CARTE
 **Mots-clés corrigés (pour typos)** : PAIEMENT, CARTE
 
-💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les résultats.
+💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les
+résultats.
 **Résultats obtenus** : 5
 **Résultats pertinents** : 2
 **Validation** : Cohérent
@@ -1970,7 +2048,8 @@ Cette vérification contrôle que les résultats obtenus contiennent les mots-cl
 **Mots-clés de la requête** : SEPA, VIREMNT
 **Mots-clés corrigés (pour typos)** : SEPA, VIREMENT
 
-💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les résultats.
+💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les
+résultats.
 **Résultats obtenus** : 5
 **Résultats pertinents** : 5
 **Validation** : Cohérent
@@ -2015,7 +2094,8 @@ Cette vérification contrôle que les résultats obtenus contiennent les mots-cl
 **Mots-clés de la requête** : CARREFUR, PARSI
 **Mots-clés corrigés (pour typos)** : CARREFOUR, PARIS
 
-💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les résultats.
+💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les
+résultats.
 **Résultats obtenus** : 4
 **Résultats pertinents** : 3
 **Validation** : Cohérent
@@ -2037,7 +2117,8 @@ Cette vérification contrôle que les résultats obtenus contiennent les mots-cl
 **Mots-clés de la requête** : LOYR, HABITATION
 **Mots-clés corrigés (pour typos)** : LOYER, HABITATION
 
-💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les résultats.
+💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les
+résultats.
 **Résultats obtenus** : 5
 **Résultats pertinents** : 5
 **Validation** : Cohérent
@@ -2082,7 +2163,8 @@ Cette vérification contrôle que les résultats obtenus contiennent les mots-cl
 **Mots-clés de la requête** : PARIS, LOYRE
 **Mots-clés corrigés (pour typos)** : PARIS, LOYER
 
-💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les résultats.
+💡 **Note** : Pour les tests avec typos, on vérifie la présence des mots-clés corrigés dans les
+résultats.
 **Résultats obtenus** : 5
 **Résultats pertinents** : 5
 **Validation** : Cohérent
@@ -2123,21 +2205,22 @@ Cette vérification contrôle les temps d'exécution et d'encodage.
 ✅ **Tous les contrôles sont satisfaisants**
 
 # Nettoyer les fichiers temporaires après génération du rapport
+
 rm -f "/var/folders/_y/y3587t8s1w1_f6735gzv32540000gp/T/tmp.5deKqrtQXI.results.json"
 rm -f "/var/folders/_y/y3587t8s1w1_f6735gzv32540000gp/T/tmp.KaUw36KaxX.coherence.json"
 
 ### Avantages de la Recherche Hybride
 
-✅ **Précision du Full-Text Search** (filtre initial)  
-✅ **Tolérance aux typos du Vector Search** (tri par similarité)  
-✅ **Fallback automatique** si Full-Text ne trouve rien  
-✅ **Meilleure pertinence** que chaque approche seule  
+✅ **Précision du Full-Text Search** (filtre initial)
+✅ **Tolérance aux typos du Vector Search** (tri par similarité)
+✅ **Fallback automatique** si Full-Text ne trouve rien
+✅ **Meilleure pertinence** que chaque approche seule
 ✅ **Adaptatif** : détecte automatiquement les typos
 
 ### Limitations
 
-⚠️  **Nécessite génération d'embeddings** (coût computationnel)  
-⚠️  **Stockage supplémentaire** (1472 floats par libellé)  
+⚠️  **Nécessite génération d'embeddings** (coût computationnel)
+⚠️  **Stockage supplémentaire** (1472 floats par libellé)
 ⚠️  **Latence légèrement supérieure** (génération embedding requête)
 
 ---
@@ -2154,6 +2237,7 @@ La recherche hybride combine avec succès :
 ### Recommandations
 
 Utiliser la recherche hybride pour :
+
 - Requêtes utilisateur avec risque de typos
 - Recherche sémantique (comprend le sens)
 - Meilleure pertinence globale
@@ -2162,5 +2246,5 @@ Utiliser la recherche hybride pour :
 
 **✅ Démonstration terminée avec succès !**
 
-**Script** : `25_test_hybrid_search_v2_didactique.sh`  
+**Script** : `25_test_hybrid_search_v2_didactique.sh`
 **Documentation complémentaire** : `doc/08_README_HYBRID_SEARCH.md`

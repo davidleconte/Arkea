@@ -1,7 +1,7 @@
 # 🔧 Démonstration : Tests API Correction Client Domirama2
 
-**Date** : 2025-11-26 12:55:09  
-**Script** : 13_test_domirama2_api_client_v2_didactique.sh  
+**Date** : 2025-11-26 12:55:09
+**Script** : 13_test_domirama2_api_client_v2_didactique.sh
 **Objectif** : Démontrer la stratégie multi-version pour les corrections client
 
 ---
@@ -22,6 +22,7 @@
 ### Principe
 
 **Stratégie Multi-Version (Conforme IBM)** :
+
 - Le **BATCH** écrit UNIQUEMENT `cat_auto` et `cat_confidence`
 - Le **CLIENT** écrit dans `cat_user`, `cat_date_user`, `cat_validee`
 - L'**APPLICATION** priorise `cat_user` si non nul, sinon `cat_auto`
@@ -30,6 +31,7 @@
 ### Colonnes par Acteur
 
 **Colonnes écrites par le BATCH** :
+
 - ✅ `cat_auto` : Catégorie automatique (batch)
 - ✅ `cat_confidence` : Score de confiance (0.0 à 1.0)
 - ❌ `cat_user` : NULL (batch ne touche jamais)
@@ -37,6 +39,7 @@
 - ❌ `cat_validee` : false (batch ne touche jamais)
 
 **Colonnes écrites par le CLIENT** :
+
 - ✅ `cat_user` : Catégorie corrigée par le client
 - ✅ `cat_date_user` : Date de modification client
 - ✅ `cat_validee` : Acceptation/rejet de la catégorie
@@ -46,6 +49,7 @@
 ### Logique de Priorité
 
 **Application** :
+
 - Si `cat_user IS NOT NULL` → utiliser `cat_user` (correction client)
 - Sinon → utiliser `cat_auto` (catégorie batch)
 - Note : COALESCE n'existe pas en CQL, logique côté application
@@ -53,10 +57,12 @@
 ### Garanties
 
 ✅ **Aucune correction client perdue** :
+
 - Le batch peut réécrire `cat_auto` sans écraser `cat_user`
 - Le client peut corriger `cat_user` sans écraser `cat_auto`
 
 ✅ **Traçabilité complète** :
+
 - `cat_date_user` : Date de chaque correction client
 - `cat_validee` : Acceptation/rejet de la catégorie
 - `cat_auto` préservé : Historique de la catégorie batch
@@ -70,11 +76,13 @@
 #### HBase (Architecture Actuelle)
 
 **Caractéristiques** :
+
 - Temporalité via versions multiples dans une même colonne
 - Logique applicative pour gérer batch vs client
 - Risque de perte de données lors des ré-exécutions
 
 **Exemple** :
+
 ```
 # Mise à jour avec risque d'écrasement
 put 'operations', rowkey, 'categorisation:cat', 'ALIMENTATION'
@@ -84,11 +92,13 @@ put 'operations', rowkey, 'categorisation:cat', 'ALIMENTATION'
 #### HCD (Architecture Proposée)
 
 **Caractéristiques** :
+
 - Colonnes séparées (`cat_auto` vs `cat_user`)
 - Séparation explicite batch/client
 - Garantie de non-perte des corrections client
 
 **Exemple** :
+
 ```cql
 UPDATE operations_by_account
 SET cat_user = 'ALIMENTATION',
@@ -101,9 +111,9 @@ WHERE code_si = '01' AND contrat = '1234567890'
 
 ### Avantages HCD
 
-✅ **Séparation explicite** : Colonnes dédiées pour batch et client  
-✅ **Traçabilité complète** : `cat_date_user` pour chaque correction  
-✅ **Garantie de non-perte** : Batch et client n'écrasent jamais leurs colonnes  
+✅ **Séparation explicite** : Colonnes dédiées pour batch et client
+✅ **Traçabilité complète** : `cat_date_user` pour chaque correction
+✅ **Garantie de non-perte** : Batch et client n'écrasent jamais leurs colonnes
 ✅ **Time travel possible** : Via `cat_date_user`
 
 ---
@@ -135,6 +145,7 @@ WHERE code_si = '01'
 ```
 
 **Explication** :
+
 - `cat_user` : Catégorie corrigée par le client
 - `cat_date_user` : Timestamp de la correction
 - `cat_validee` : true = client accepte
@@ -154,6 +165,7 @@ WHERE code_si = '01'
 ```
 
 **Explication** :
+
 - `cat_validee` : true = client accepte la catégorie batch
 - `cat_user` : reste null (pas de correction)
 - `cat_auto` : utilisé par l'application (priorité normale)
@@ -174,6 +186,7 @@ WHERE code_si = '01'
 ```
 
 **Explication** :
+
 - `cat_user` : Catégorie alternative proposée par le client
 - `cat_validee` : false = client rejette la catégorie batch
 - `cat_auto` : NON MODIFIÉ (préservé du batch)
@@ -196,22 +209,23 @@ WHERE code_si = '01'
 
 ### Vérification 1 : cat_user mis à jour
 
-**Attendu** : Opérations avec `cat_user` non null (corrigées par client)  
-**Obtenu** : ✅ Opération(s) corrigée(s) trouvée(s) (cat_user = '       DIVERS')  
+**Attendu** : Opérations avec `cat_user` non null (corrigées par client)
+**Obtenu** : ✅ Opération(s) corrigée(s) trouvée(s) (cat_user = '       DIVERS')
 **Statut** : ✅ Validé
 
 ### Vérification 2 : cat_auto préservé
 
-**Attendu** : `cat_auto` non modifié par les UPDATE client  
-**Obtenu** : ✅ Opération(s) avec cat_auto trouvée(s) (cat_auto = '(3 rows)')  
+**Attendu** : `cat_auto` non modifié par les UPDATE client
+**Obtenu** : ✅ Opération(s) avec cat_auto trouvée(s) (cat_auto = '(3 rows)')
 **Statut** : ✅ Validé
 
 ### Vérification 3 : Logique de Priorité
 
-**Attendu** : `cat_user` prioritaire sur `cat_auto` si non null  
+**Attendu** : `cat_user` prioritaire sur `cat_auto` si non null
 **Statut** : ✅ Validé
 
 **Explication** :
+
 - Si `cat_user IS NOT NULL` → utiliser `cat_user` (correction client)
 - Sinon → utiliser `cat_auto` (catégorie batch)
 - Note : COALESCE n'existe pas en CQL, logique côté application
@@ -222,17 +236,17 @@ WHERE code_si = '01'
 
 Les tests API correction client ont été exécutés avec succès :
 
-✅ **3 exemples d'UPDATE** exécutés  
-✅ **Stratégie multi-version** validée  
-✅ **Équivalences HBase → HCD** démontrées  
+✅ **3 exemples d'UPDATE** exécutés
+✅ **Stratégie multi-version** validée
+✅ **Équivalences HBase → HCD** démontrées
 ✅ **Logique de priorité** validée
 
 ### Points Clés Démontrés
 
-✅ **BATCH écrit UNIQUEMENT** `cat_auto` et `cat_confidence`  
-✅ **CLIENT écrit dans** `cat_user`, `cat_date_user`, `cat_validee`  
-✅ **APPLICATION priorise** `cat_user` si non nul, sinon `cat_auto`  
-✅ **Aucune correction client** ne sera perdue  
+✅ **BATCH écrit UNIQUEMENT** `cat_auto` et `cat_confidence`
+✅ **CLIENT écrit dans** `cat_user`, `cat_date_user`, `cat_validee`
+✅ **APPLICATION priorise** `cat_user` si non nul, sinon `cat_auto`
+✅ **Aucune correction client** ne sera perdue
 ✅ **Traçabilité complète** via `cat_date_user`
 
 ### Prochaines Étapes

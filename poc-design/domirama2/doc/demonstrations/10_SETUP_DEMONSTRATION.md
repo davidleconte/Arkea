@@ -1,7 +1,7 @@
 # 🏗️ Démonstration : Configuration du Schéma Domirama2
 
-**Date** : 2025-11-26 12:12:50  
-**Script** : 10_setup_domirama2_poc_v2_didactique.sh  
+**Date** : 2025-11-26 12:12:50
+**Script** : 10_setup_domirama2_poc_v2_didactique.sh
 **Objectif** : Démontrer la création complète du schéma HCD pour Domirama2
 
 ---
@@ -34,9 +34,9 @@
 
 ### Améliorations HCD
 
-✅ **Schéma fixe et typé** (vs schéma flexible HBase)  
-✅ **Index intégrés** (vs Elasticsearch externe)  
-✅ **Support vectoriel natif** (vs ML externe)  
+✅ **Schéma fixe et typé** (vs schéma flexible HBase)
+✅ **Index intégrés** (vs Elasticsearch externe)
+✅ **Support vectoriel natif** (vs ML externe)
 ✅ **Stratégie multi-version native** (vs logique applicative HBase)
 
 ---
@@ -75,24 +75,24 @@ CREATE TABLE IF NOT EXISTS operations_by_account (
     -- Partition Keys
     code_si           TEXT,
     contrat           TEXT,
-    
+
     -- Clustering Keys
     date_op           TIMESTAMP,
     numero_op         INT,
-    
+
     -- Colonnes principales
     libelle           TEXT,
     montant           DECIMAL,
     type_operation    TEXT,
     operation_data    BLOB,
-    
+
     -- Colonnes de catégorisation
     cat_auto          TEXT,
     cat_confidence    DECIMAL,
     cat_user          TEXT,
     cat_date_user     TIMESTAMP,
     cat_validee       BOOLEAN,
-    
+
     PRIMARY KEY ((code_si, contrat), date_op, numero_op)
 ) WITH CLUSTERING ORDER BY (date_op DESC, numero_op ASC)
   AND default_time_to_live = 315360000;
@@ -101,14 +101,17 @@ CREATE TABLE IF NOT EXISTS operations_by_account (
 ### Structure
 
 **Partition Keys** : `(code_si, contrat)`
+
 - Déterminent dans quelle partition HCD les données sont stockées
 - Équivalent HBase : Première partie du RowKey
 
 **Clustering Keys** : `(date_op DESC, numero_op ASC)`
+
 - Trient les données dans la partition (tri antichronologique)
 - Équivalent HBase : Deuxième partie du RowKey
 
 **Colonnes de Catégorisation** :
+
 - `cat_auto` : Catégorie automatique (batch)
 - `cat_confidence` : Score de confiance (0.0 à 1.0)
 - `cat_user` : Catégorie modifiée par client
@@ -119,7 +122,7 @@ CREATE TABLE IF NOT EXISTS operations_by_account (
 
 ### Vérification
 
-✅ Table 'operations_by_account' créée  
+✅ Table 'operations_by_account' créée
 ✅ Colonnes de catégorisation : 6/5
 
 ---
@@ -137,7 +140,7 @@ CREATE TABLE IF NOT EXISTS operations_by_account (
 ### Index Full-Text (Analyzer Français)
 
 ```cql
-CREATE CUSTOM INDEX IF NOT EXISTS idx_libelle_fulltext 
+CREATE CUSTOM INDEX IF NOT EXISTS idx_libelle_fulltext
 ON operations_by_account(libelle)
 USING 'StorageAttachedIndex'
 WITH OPTIONS = {
@@ -175,10 +178,10 @@ WITH OPTIONS = {
 
 Le schéma Domirama2 a été créé avec succès :
 
-✅ **Keyspace** : domirama2_poc  
-✅ **Table** : operations_by_account  
-✅ **Colonnes** : Toutes les colonnes nécessaires présentes  
-✅ **Index** : Tous les index SAI créés  
+✅ **Keyspace** : domirama2_poc
+✅ **Table** : operations_by_account
+✅ **Colonnes** : Toutes les colonnes nécessaires présentes
+✅ **Index** : Tous les index SAI créés
 ✅ **Conformité** : 95% conforme à la proposition IBM
 
 ### Prochaines Étapes

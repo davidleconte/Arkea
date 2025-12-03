@@ -20,7 +20,6 @@
 
 ### Préparation Compaction
 
-
 - ⚠️  **Préparation compaction ignorée** (paramètre skip_compaction=true)
 - ⚠️  **ATTENTION** : Des tombstones peuvent être présents dans l'export
 - 📚 **Recommandation** : Relancer sans skip_compaction pour éviter les tombstones
@@ -54,27 +53,26 @@
 
 ### Stratégie
 
-Cette démonstration utilise **DSBulk** au lieu de Spark pour l'export initial, afin d'éviter le problème du type VECTOR non supporté par Spark Cassandra Connector.
+Cette démonstration utilise **DSBulk** au lieu de Spark pour l'export initial, afin d'éviter le
+problème du type VECTOR non supporté par Spark Cassandra Connector.
 
 ### Processus en Deux Étapes
 
 1. **DSBulk exporte HCD → CSV** :
    - Requête CQL avec SELECT explicite (sans )
-   - Filtrage par dates : 
+   - Filtrage par dates :
    - Export vers CSV temporaire
 
-2. **Spark convertit CSV → Parquet** :
+1. **Spark convertit CSV → Parquet** :
    - Lecture du CSV (pas de problème VECTOR car Spark ne lit pas Cassandra)
    - Détection et exclusion de  si présente
-   - Conversion en Parquet avec partitionnement par 
+   - Conversion en Parquet avec partitionnement par
 
 ### Code Exécuté
 
 **DSBulk** :
 
-
 **Spark** :
-
 
 ### Explication
 
@@ -101,13 +99,11 @@ Cette démonstration utilise **DSBulk** au lieu de Spark pour l'export initial, 
 - **Date max** : N/A
 - **Comptes uniques** : N/A
 
-
 ### Fichiers Créés
 
 - **Répertoire** : /tmp/exports/test_json_complete
 - **Compression** : snappy
 - **Partitionnement** : par date_op
-
 
 ---
 
@@ -121,6 +117,29 @@ Cette démonstration utilise **DSBulk** au lieu de Spark pour l'export initial, 
 
 ℹ️  **Colonne libelle_embedding** : Non présente dans le CSV (exclue par la requête DSBulk)
 
+---
+
+## ⚠️ Gestion des Tombstones
+
+### Détection
+
+- **Tombstones scannés** : 1024
+- **Seuil d'avertissement** : 1000
+- **Statut** : ⚠️  Seuil dépassé
+
+### Impact
+
+- **Performance** : Potentiellement dégradée
+- **Export** : Les tombstones sont automatiquement filtrés par Spark Cassandra Connector
+- **Données** : Aucun tombstone exporté (comportement attendu)
+
+### Actions Recommandées
+
+1. **Compaction manuelle** (si accès nodetool) :
+
+1. **Vérification gc_grace_seconds** :
+
+1. **Surveillance** : Surveiller les métriques de compaction
 
 ---
 
@@ -140,49 +159,15 @@ Cette démonstration utilise **DSBulk** au lieu de Spark pour l'export initial, 
 
 ### Actions Recommandées
 
-
 1. **Compaction manuelle** (si accès nodetool) :
-   
 
-2. **Vérification gc_grace_seconds** :
-   
+1. **Vérification gc_grace_seconds** :
 
-3. **Surveillance** : Surveiller les métriques de compaction
+1. **Surveillance** : Surveiller les métriques de compaction
 
-
----
-
-## ⚠️ Gestion des Tombstones
-
-### Détection
-
-- **Tombstones scannés** : 1024
-- **Seuil d'avertissement** : 1000
-- **Statut** : ⚠️  Seuil dépassé
-
-### Impact
-
-- **Performance** : Potentiellement dégradée
-- **Export** : Les tombstones sont automatiquement filtrés par Spark Cassandra Connector
-- **Données** : Aucun tombstone exporté (comportement attendu)
-
-### Actions Recommandées
-
-
-1. **Compaction manuelle** (si accès nodetool) :
-   
-
-2. **Vérification gc_grace_seconds** :
-   
-
-3. **Surveillance** : Surveiller les métriques de compaction
-
-4. **Documentation** : Voir  pour plus de détails
-
+1. **Documentation** : Voir  pour plus de détails
 
 ### Sortie Spark Complète
-
-
 
 ---
 
@@ -194,7 +179,6 @@ Cette démonstration utilise **DSBulk** au lieu de Spark pour l'export initial, 
 - ✅ **Vérification OK** : 0 opérations lues depuis Parquet
 - ✅ **Fichiers créés** : /tmp/exports/test_json_complete
 - ✅ **Compression** : snappy
-
 
 ### Points Clés Démontrés
 

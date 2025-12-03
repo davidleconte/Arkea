@@ -1,7 +1,7 @@
 # 🔍 Démonstration Complète : Fuzzy Search avec Vector Search (ByteT5)
 
-**Date** : 2025-11-26 19:15:04  
-**Script** : `24_demonstration_fuzzy_search_v2_didactique.sh`  
+**Date** : 2025-11-26 19:15:04
+**Script** : `24_demonstration_fuzzy_search_v2_didactique.sh`
 **Objectif** : Démontrer complètement la recherche floue avec embeddings ByteT5
 
 ---
@@ -28,15 +28,19 @@
 Les recherches avec typos complexes ne fonctionnent pas avec les index standard :
 
 **Scénario 1** : Un utilisateur cherche 'LOYER' mais tape 'LOYR' (caractère 'e' manquant)
+
 - Résultat avec index standard : ❌ Aucun résultat trouvé
 
 **Scénario 2** : Un utilisateur cherche 'CARREFOUR' mais tape 'KARREFOUR' (faute)
+
 - Résultat avec index N-Gram : ⚠️  Peut trouver, mais pas toujours
 
 **Scénario 3** : Un utilisateur cherche 'PARIS' mais tape 'PARSI' (inversion)
+
 - Résultat avec index standard : ❌ Aucun résultat trouvé
 
 **Problème** : Les index full-text (standard, N-Gram) ont des limitations :
+
 - Index standard : Recherche exacte (après stemming/accents)
 - Index N-Gram : Recherche partielle mais limitée aux préfixes
 - Aucun index ne gère bien les typos complexes (faute, inversion, etc.)
@@ -61,6 +65,7 @@ LIMIT 5;
 ```
 
 **Avantages :**
+
 - ✅ Tolère les typos complexes (faute, inversion, caractères manquants)
 - ✅ Capture la similarité sémantique (synonymes, variations)
 - ✅ Multilingue (ByteT5 supporte plusieurs langues)
@@ -78,10 +83,10 @@ LIMIT 5;
 
 ### Améliorations HCD
 
-✅ **Type VECTOR natif** (vs système ML externe)  
-✅ **Index SAI vectoriel intégré** (vs Elasticsearch externe)  
-✅ **Pas de synchronisation** (vs HBase + Elasticsearch + ML)  
-✅ **Performance optimale** (index co-localisé avec données)  
+✅ **Type VECTOR natif** (vs système ML externe)
+✅ **Index SAI vectoriel intégré** (vs Elasticsearch externe)
+✅ **Pas de synchronisation** (vs HBase + Elasticsearch + ML)
+✅ **Performance optimale** (index co-localisé avec données)
 ✅ **Support ANN natif** (Approximate Nearest Neighbor)
 
 ---
@@ -91,10 +96,12 @@ LIMIT 5;
 ### Contexte HBase → HCD
 
 **HBase :**
+
 - ❌ Pas de recherche vectorielle native
 - ❌ Nécessiterait intégration externe (Elasticsearch, etc.)
 
 **HCD :**
+
 - ✅ Type VECTOR natif intégré
 - ✅ Index SAI vectoriel pour recherche par similarité (ANN)
 - ✅ Recherche sémantique robuste aux typos
@@ -108,6 +115,7 @@ ADD libelle_embedding VECTOR<FLOAT, 1472>;
 ```
 
 **Explication :**
+
 - Type VECTOR<FLOAT, 1472> : Vecteur de 1472 dimensions (ByteT5-small)
 - Chaque dimension est un FLOAT (nombre décimal)
 - Stocke l'embedding sémantique du libellé
@@ -122,6 +130,7 @@ USING 'StorageAttachedIndex';
 ```
 
 **Explication :**
+
 - Index SAI (Storage-Attached Indexing) : Index intégré à HCD
 - Type vectoriel : Optimisé pour recherche par similarité (ANN)
 - ANN (Approximate Nearest Neighbor) : Trouve les vecteurs les plus proches
@@ -150,7 +159,8 @@ USING 'StorageAttachedIndex';
 
 ### Principe
 
-Les embeddings sont des représentations vectorielles des textes qui capturent leur signification sémantique. ByteT5 génère des vecteurs de 1472 dimensions pour chaque texte.
+Les embeddings sont des représentations vectorielles des textes qui capturent leur signification
+sémantique. ByteT5 génère des vecteurs de 1472 dimensions pour chaque texte.
 
 ### Processus
 
@@ -161,7 +171,7 @@ Les embeddings sont des représentations vectorielles des textes qui capturent l
 
 ### Exemple de Génération
 
-**Texte** : "LOYER IMPAYE PARIS"  
+**Texte** : "LOYER IMPAYE PARIS"
 **Résultat** : Vecteur de 1472 dimensions généré
 
 ---
@@ -181,17 +191,17 @@ Les embeddings sont des représentations vectorielles des textes qui capturent l
    - Résultat attendu : Devrait trouver 'LOYER', 'LOYER IMPAYE', etc.
    - Statut : ✅ (5 résultat(s))
 
-2. **TEST 2** : 'parsi' - Test 2
+1. **TEST 2** : 'parsi' - Test 2
    - Description : Typo: inversion de caractères ('parsi' au lieu de 'paris')
    - Résultat attendu : Devrait trouver 'PARIS', opérations liées à Paris
    - Statut : ✅ (5 résultat(s))
 
-3. **TEST 3** : 'impay' - Test 3
+1. **TEST 3** : 'impay' - Test 3
    - Description : Typo: accent manquant ('impay' au lieu de 'impayé')
    - Résultat attendu : Devrait trouver 'IMPAYE', 'IMPAYE REGULARISATION', etc.
    - Statut : ✅ (5 résultat(s))
 
-4. **TEST 4** : 'viremnt' - Test 4
+1. **TEST 4** : 'viremnt' - Test 4
    - Description : Typo: caractère manquant ('viremnt' au lieu de 'virement')
    - Résultat attendu : Devrait trouver 'VIREMENT', 'VIREMENT SEPA', etc.
    - Statut : ✅ (5 résultat(s))
@@ -208,6 +218,7 @@ LIMIT 5
 ```
 
 **Explication :**
+
 - WHERE code_si = ... AND contrat = ... : Cible la partition
 - ORDER BY libelle_embedding ANN OF [...] : Tri par similarité vectorielle
 - ANN (Approximate Nearest Neighbor) : Trouve les vecteurs les plus proches
@@ -242,6 +253,7 @@ LIMIT 5
 #### Recommandation Principale
 
 Utiliser la recherche hybride (Full-Text + Vector) en production :
+
 - Full-Text pour la précision (filtre initial)
 - Vector pour la tolérance aux typos (tri par similarité)
 - Meilleure pertinence globale
@@ -258,11 +270,11 @@ Utiliser la recherche hybride (Full-Text + Vector) en production :
 
 ### Résumé de la Démonstration
 
-✅ **DDL** : Colonne VECTOR<FLOAT, 1472> et index SAI vectoriel  
-✅ **Dépendances** : Python, transformers, torch, cassandra-driver  
-✅ **Génération** : Embeddings ByteT5 démontrée  
-✅ **DML** : Requêtes avec ORDER BY ... ANN OF [...]  
-✅ **Tests** : 4 requêtes avec typos testées  
+✅ **DDL** : Colonne VECTOR<FLOAT, 1472> et index SAI vectoriel
+✅ **Dépendances** : Python, transformers, torch, cassandra-driver
+✅ **Génération** : Embeddings ByteT5 démontrée
+✅ **DML** : Requêtes avec ORDER BY ... ANN OF [...]
+✅ **Tests** : 4 requêtes avec typos testées
 ✅ **Résultats** : Recherche vectorielle fonctionne
 
 ## 🔍 Contrôles de Cohérence
@@ -365,6 +377,7 @@ Cette vérification contrôle que les résultats obtenus contiennent les mots-cl
 ⚠️  **Non cohérent** : Aucun résultat ne contient les mots-clés attendus
 
 **Causes possibles :**
+
 - La similarité vectorielle n'est pas suffisante pour cette typo
 - Les embeddings ne capturent pas bien la similarité sémantique
 - Les libellés pertinents ne sont pas dans les 5 premiers résultats
@@ -404,6 +417,7 @@ Cette vérification contrôle que les résultats obtenus contiennent les mots-cl
 ⚠️  **Non cohérent** : Aucun résultat ne contient les mots-clés attendus
 
 **Causes possibles :**
+
 - La similarité vectorielle n'est pas suffisante pour cette typo
 - Les embeddings ne capturent pas bien la similarité sémantique
 - Les libellés pertinents ne sont pas dans les 5 premiers résultats
@@ -422,6 +436,7 @@ Cette vérification contrôle que les résultats obtenus contiennent les mots-cl
 ⚠️  **Non cohérent** : Aucun résultat ne contient les mots-clés attendus
 
 **Causes possibles :**
+
 - La similarité vectorielle n'est pas suffisante pour cette typo
 - Les embeddings ne capturent pas bien la similarité sémantique
 - Les libellés pertinents ne sont pas dans les 5 premiers résultats
@@ -584,15 +599,15 @@ SELECT libelle, montant, cat_auto
 
 ### Avantages de la Recherche Vectorielle
 
-✅ **Tolère les typos** (caractères manquants, inversés, remplacés)  
-✅ **Recherche sémantique** (comprend le sens)  
-✅ **Multilingue** (ByteT5)  
+✅ **Tolère les typos** (caractères manquants, inversés, remplacés)
+✅ **Recherche sémantique** (comprend le sens)
+✅ **Multilingue** (ByteT5)
 ✅ **Robuste aux variations de formulation**
 
 ### Limitations
 
-⚠️  **Peut retourner des résultats moins pertinents** que Full-Text  
-⚠️  **Nécessite génération d'embeddings** (coût computationnel)  
+⚠️  **Peut retourner des résultats moins pertinents** que Full-Text
+⚠️  **Nécessite génération d'embeddings** (coût computationnel)
 ⚠️  **Stockage supplémentaire** (1472 floats par libellé)
 
 ---
@@ -608,6 +623,7 @@ La recherche vectorielle avec ByteT5 permet de :
 ### Recommandation
 
 Utiliser la recherche hybride (Full-Text + Vector) pour :
+
 - Full-Text pour la précision (filtre initial)
 - Vector pour la tolérance aux typos (tri par similarité)
 - Meilleure pertinence globale
@@ -616,5 +632,5 @@ Utiliser la recherche hybride (Full-Text + Vector) pour :
 
 **✅ Démonstration complète terminée avec succès !**
 
-**Script** : `24_demonstration_fuzzy_search_v2_didactique.sh`  
+**Script** : `24_demonstration_fuzzy_search_v2_didactique.sh`
 **Script suivant** : `25_test_hybrid_search_v2_didactique.sh` (Recherche hybride)

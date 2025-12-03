@@ -189,11 +189,13 @@ LIMIT 10;
 
 ### Valeur Ajoutée SAI
 
-Les index SAI apportent une amélioration significative des performances pour les requêtes avec filtres sur les colonnes indexées. La combinaison d'index (clustering keys + full-text SAI) permet d'optimiser les requêtes complexes avec plusieurs filtres simultanés.
+Les index SAI apportent une amélioration significative des performances pour les requêtes avec
+filtres sur les colonnes indexées. La combinaison d'index (clustering keys + full-text SAI) permet d'optimiser les requêtes complexes avec plusieurs filtres simultanés.
 
 ### Équivalences HBase → HCD Validées
 
-- ✅ STARTROW/STOPROW HBase → WHERE date_op >= start AND date_op <= end AND numero_op >= start AND numero_op <= end
+- ✅ STARTROW/STOPROW HBase → WHERE date_op >= start AND date_op <= end AND numero_op >= start AND
+numero_op <= end
 - ✅ SCAN avec plages de rowkeys → SELECT ... WHERE clustering_keys BETWEEN ...
 - ✅ Ciblage précis → Filtrage par clustering keys (date_op, numero_op)
 

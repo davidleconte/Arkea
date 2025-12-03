@@ -1,7 +1,7 @@
 # 🔍 Démonstration : Tests de Recherche Domirama2 (SAI)
 
-**Date** : 2025-11-26 12:48:18  
-**Script** : 12_test_domirama2_search_v2_didactique.sh  
+**Date** : 2025-11-26 12:48:18
+**Script** : 12_test_domirama2_search_v2_didactique.sh
 **Objectif** : Démontrer les tests de recherche full-text avec SAI
 
 ---
@@ -24,6 +24,7 @@
 **Utilisation** : Recherche textuelle avec analyse
 
 **Caractéristiques** :
+
 - Utilise l'index SAI full-text avec analyse
 - Analyse le texte (tokenization, stemming, asciifolding)
 - Recherche insensible à la casse
@@ -31,6 +32,7 @@
 - Supporte l'asciifolding (impayé → impaye)
 
 **Exemple** :
+
 ```cql
 SELECT * FROM operations_by_account
 WHERE code_si = '01'
@@ -44,11 +46,13 @@ LIMIT 10;
 **Utilisation** : Filtrage exact sans analyse
 
 **Caractéristiques** :
+
 - Utilise l'index SAI standard (pas d'analyse)
 - Recherche exacte (sensible à la casse)
 - Pas de stemming ni d'asciifolding
 
 **Exemple** :
+
 ```cql
 SELECT * FROM operations_by_account
 WHERE code_si = '01'
@@ -73,6 +77,7 @@ LIMIT 10;
 #### HBase (Architecture Actuelle)
 
 **Workflow** :
+
 1. SCAN HBase avec filtres de base
 2. Envoi des résultats à Solr (système externe)
 3. Recherche full-text dans Solr
@@ -80,6 +85,7 @@ LIMIT 10;
 5. Retour des résultats à l'application
 
 **Architecture** :
+
 ```
 Application → HBase → Solr → HBase → Application
 (3 systèmes, 2 appels réseau)
@@ -88,11 +94,13 @@ Application → HBase → Solr → HBase → Application
 #### HCD (Architecture Proposée)
 
 **Workflow** :
+
 1. Requête CQL directe avec opérateur ':'
 2. Recherche full-text intégrée (SAI)
 3. Retour des résultats complets à l'application
 
 **Architecture** :
+
 ```
 Application → HCD → Application
 (1 système, 1 appel réseau)
@@ -100,9 +108,9 @@ Application → HCD → Application
 
 ### Avantages HCD
 
-✅ **Pas de système externe** : Solr n'est plus nécessaire  
-✅ **Performance améliorée** : Pas de réseau entre systèmes  
-✅ **Simplicité** : Une seule requête CQL  
+✅ **Pas de système externe** : Solr n'est plus nécessaire
+✅ **Performance améliorée** : Pas de réseau entre systèmes
+✅ **Simplicité** : Une seule requête CQL
 ✅ **Cohérence garantie** : Données et index dans la même base
 
 ---
@@ -139,6 +147,7 @@ LIMIT 10;
 ```
 
 **Explication** :
+
 - Opérateur ':' utilise l'index SAI full-text
 - Analyse le texte (lowercase, stemming, asciifolding)
 - Trouve 'LOYER', 'loyers', 'loyer', etc.
@@ -154,6 +163,7 @@ LIMIT 10;
 ```
 
 **Explication** :
+
 - Opérateur '=' utilise l'index SAI standard
 - Recherche exacte (pas d'analyse)
 - Trouve uniquement 'HABITATION' (exact)
@@ -169,6 +179,7 @@ LIMIT 10;
 ```
 
 **Explication** :
+
 - L'analyzer français applique lowercase
 - 'Loyer' (requête) → 'loyer' (index)
 - 'LOYER' (données) → 'loyer' (index)
@@ -185,6 +196,7 @@ LIMIT 10;
 ```
 
 **Explication** :
+
 - L'analyzer français applique le stemming
 - 'loyers' (requête) → 'loyer' (racine)
 - 'LOYER' (données) → 'loyer' (racine)
@@ -209,26 +221,26 @@ LIMIT 10;
 
 ### Test 1 : Recherche 'loyer'
 
-**Attendu** : Opérations contenant 'loyer' (LOYER, loyers, etc.)  
-**Obtenu** : 0 résultat(s)  
+**Attendu** : Opérations contenant 'loyer' (LOYER, loyers, etc.)
+**Obtenu** : 0 résultat(s)
 **Statut** : ✅ Validé
 
 ### Test 4 : Recherche cat_auto = 'HABITATION'
 
-**Attendu** : Opérations avec catégorie exacte 'HABITATION'  
-**Obtenu** : 0 résultat(s)  
+**Attendu** : Opérations avec catégorie exacte 'HABITATION'
+**Obtenu** : 0 résultat(s)
 **Statut** : ✅ Validé
 
 ### Test 10 : Recherche 'Loyer' (insensible à la casse)
 
-**Attendu** : Opérations contenant 'LOYER' (grâce à l'analyzer lowercase)  
-**Obtenu** : 0 résultat(s)  
+**Attendu** : Opérations contenant 'LOYER' (grâce à l'analyzer lowercase)
+**Obtenu** : 0 résultat(s)
 **Statut** : ✅ Validé
 
 ### Test 11 : Recherche 'loyers' (avec stemming)
 
-**Attendu** : Opérations contenant 'LOYER' (grâce au stemming français)  
-**Obtenu** : 0 résultat(s)  
+**Attendu** : Opérations contenant 'LOYER' (grâce au stemming français)
+**Obtenu** : 0 résultat(s)
 **Statut** : ✅ Validé
 
 ---
@@ -237,17 +249,17 @@ LIMIT 10;
 
 Les tests de recherche full-text avec SAI ont été exécutés avec succès :
 
-✅ **12 tests de recherche** exécutés  
-✅ **Opérateurs SAI validés** (':' et '=')  
-✅ **Équivalences HBase → HCD** démontrées  
+✅ **12 tests de recherche** exécutés
+✅ **Opérateurs SAI validés** (':' et '=')
+✅ **Équivalences HBase → HCD** démontrées
 ✅ **Pertinence des résultats** validée
 
 ### Points Clés Démontrés
 
-✅ **Opérateur ':'** : Full-text search avec analyse  
-✅ **Opérateur '='** : Exact match sans analyse  
-✅ **Analyzer français** : Lowercase, stemming, asciifolding  
-✅ **Remplacement de Solr** : Par SAI intégré  
+✅ **Opérateur ':'** : Full-text search avec analyse
+✅ **Opérateur '='** : Exact match sans analyse
+✅ **Analyzer français** : Lowercase, stemming, asciifolding
+✅ **Remplacement de Solr** : Par SAI intégré
 ✅ **Performance améliorée** : Pas de système externe
 
 ### Prochaines Étapes
