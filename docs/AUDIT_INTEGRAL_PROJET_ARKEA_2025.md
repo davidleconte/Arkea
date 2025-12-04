@@ -25,7 +25,8 @@
 
 ### Score Global : **89.5/100** ✅ **Excellent**
 
-Le projet ARKEA démontre un **niveau professionnel excellent** avec une structure solide, une documentation exhaustive, et une qualité de code élevée. Le projet est **prêt pour la production** avec quelques améliorations recommandées.
+Le projet ARKEA démontre un **niveau professionnel excellent** avec une structure solide, une documentation exhaustive,
+et une qualité de code élevée. Le projet est **prêt pour la production** avec quelques améliorations recommandées.
 
 ### Score par Dimension
 
@@ -654,7 +655,8 @@ rm -f poc-design/domirama2/\$\{REPORT_FILE\}
 
 ### Synthèse
 
-Le projet ARKEA démontre un **niveau professionnel excellent** avec un **score de 89.5/100**. Le projet est **prêt pour la production** avec quelques améliorations recommandées.
+Le projet ARKEA démontre un **niveau professionnel excellent** avec un **score de 89.5/100**. Le projet est **prêt pour
+la production** avec quelques améliorations recommandées.
 
 ### Points d'Excellence
 

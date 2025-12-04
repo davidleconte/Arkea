@@ -32,13 +32,18 @@ LOCALHOST_PATTERNS = {
     r"localhost:2181": "${KAFKA_ZOOKEEPER_CONNECT:-localhost:2181}",
     r'"localhost:2181"': '"${KAFKA_ZOOKEEPER_CONNECT:-localhost:2181}"',
     r"'localhost:2181'": "'${KAFKA_ZOOKEEPER_CONNECT:-localhost:2181}'",
-    r"HCD est démarré sur localhost:9042": "HCD est démarré sur ${HCD_HOST:-localhost}:${HCD_PORT:-9042}",
+    r"HCD est démarré sur localhost:9042": (
+        "HCD est démarré sur ${HCD_HOST:-localhost}:${HCD_PORT:-9042}",
+    ),
     r"cassandra sur localhost:9042": "cassandra sur ${HCD_HOST:-localhost}:${HCD_PORT:-9042}",
 }
 
 # Patterns Scala spécifiques
 SCALA_LOCALHOST_PATTERNS = {
-    r"localhost:9042": r'sys.env.getOrElse("HCD_HOST", "localhost") + ":" + sys.env.getOrElse("HCD_PORT", "9042")',
+    r"localhost:9042": (
+        r'sys.env.getOrElse("HCD_HOST", "localhost") + ":" + '
+        r'sys.env.getOrElse("HCD_PORT", "9042")'
+    ),
     r"localhost:9092": r'sys.env.getOrElse("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")',
 }
 

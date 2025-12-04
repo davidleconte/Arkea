@@ -10,7 +10,8 @@ David LECONTE | <david.leconte1@ibm.com> - Mobile : +33614126117
 
 ## 📊 Vue d'Ensemble
 
-Le projet ARKEA démontre la migration HBase → HCD via **3 POCs complémentaires** couvrant l'ensemble des cas d'usage critiques :
+Le projet ARKEA démontre la migration HBase → HCD via **3 POCs complémentaires** couvrant l'ensemble des cas d'usage
+critiques :
 
 | POC | Use Case Principal | Conformité | Statut |
 |-----|-------------------|------------|--------|
@@ -24,7 +25,8 @@ Le projet ARKEA démontre la migration HBase → HCD via **3 POCs complémentair
 
 ### Objectif Métier
 
-**Timeline conseiller** : Fournir aux conseillers une vue historique complète des interactions avec chaque client sur 2 ans.
+**Timeline conseiller** : Fournir aux conseillers une vue historique complète des interactions avec chaque client sur 2
+ans.
 
 ### Attendus Clés
 

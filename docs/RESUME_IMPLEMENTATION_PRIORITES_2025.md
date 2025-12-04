@@ -25,7 +25,8 @@ Les **3 priorités critiques** identifiées dans l'audit intégral ont été **i
 
 ### Objectif
 
-Remplacer les références hardcodées à `/Users/david.leconte/Documents/Arkea` par `${ARKEA_HOME}` pour améliorer la portabilité.
+Remplacer les références hardcodées à `/Users/david.leconte/Documents/Arkea` par `${ARKEA_HOME}` pour améliorer la
+portabilité.
 
 ### Corrections Effectuées
 
@@ -177,7 +178,8 @@ grep -r "/Users/david.leconte/Documents/Arkea" docs/ scripts/ poc-design/*/scrip
 
 ```bash
 # Recherche des références localhost hardcodées restantes
-grep -r "localhost:[0-9]" scripts/ --include="*.sh" --include="*.scala" 2>/dev/null | grep -v "\${" | grep -v "sys.env" | wc -l
+grep -r "localhost:[0-9]" scripts/ --include="*.sh" --include="*.scala" 2>/dev/null | grep -v "\${" | grep -v "sys.env"
+| wc -l
 # Résultat : ~0 occurrences (seulement dans commentaires ou documentation)
 ```
 

@@ -147,7 +147,10 @@ def migrate_script(script_path):
     # Chercher les vérifications pgrep et les améliorer si check_hcd_prerequisites n'est pas présent
     if "check_hcd_prerequisites" not in content and 'pgrep -f "cassandra"' in content:
         # Remplacer la première occurrence de vérification HCD
-        old_check = r'if ! pgrep -f "cassandra" > /dev/null; then\s*\n\s*error "HCD.*?"\s*\n\s*exit 1\s*\n\s*fi'
+        old_check = (
+            r'if ! pgrep -f "cassandra" > /dev/null; then\s*\n\s*error "HCD.*?"\s*\n'
+            r"\s*exit 1\s*\n\s*fi"
+        )
         new_check = """# Vérifier les prérequis HCD
 if ! check_hcd_prerequisites 2>/dev/null; then
     if ! pgrep -f "cassandra" > /dev/null; then
