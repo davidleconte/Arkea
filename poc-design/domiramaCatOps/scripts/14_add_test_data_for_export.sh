@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 14e : Ajout de Données de Test pour Export
 # Ajoute des données pertinentes pour tester les exports

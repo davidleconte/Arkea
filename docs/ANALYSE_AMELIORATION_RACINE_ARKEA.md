@@ -2,7 +2,7 @@
 
 **Date** : 2025-12-01  
 **Objectif** : Analyser la structure de la racine ARKEA et proposer des améliorations  
-**Périmètre** : Répertoire racine `/Users/david.leconte/Documents/Arkea`
+**Périmètre** : Répertoire racine `${ARKEA_HOME}`
 
 ---
 

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 01 : Configuration du Keyspace DomiramaCatOps (Version Didactique)
 # Crée le keyspace domiramacatops_poc
@@ -11,7 +12,7 @@
 # PRÉREQUIS :
 #   - HCD 1.2.3 doit être démarré (exécuter: ./scripts/setup/03_start_hcd.sh depuis la racine)
 #   - Java 11 configuré via jenv (jenv local 11)
-#   - HCD accessible sur localhost:9042
+#   - HCD accessible sur ${HCD_HOST:-localhost}:${HCD_PORT:-9042}
 #
 # UTILISATION :
 #   ./01_setup_domiramaCatOps_keyspace.sh

@@ -22,6 +22,7 @@
 - **Table** : `kafka_events` ✅ Créée
 
 **Structure de la table** :
+
 ```cql
 CREATE TABLE poc_hbase_migration.kafka_events (
     id UUID PRIMARY KEY,
@@ -59,14 +60,16 @@ CREATE TABLE poc_hbase_migration.kafka_events (
 ### Étape 1: Produire des Messages dans Kafka
 
 Dans un terminal :
+
 ```bash
-cd /Users/david.leconte/Documents/Arkea
+cd ${ARKEA_HOME}
 ./kafka-helper.sh kafka-console-producer.sh \
   --bootstrap-server localhost:9092 \
   --topic test-topic
 ```
 
 Puis tapez des messages (un par ligne) :
+
 ```
 Message 1
 Message 2
@@ -78,8 +81,9 @@ Appuyez sur `Ctrl+C` pour quitter.
 ### Étape 2: Lancer le Job Spark Streaming
 
 Dans un autre terminal :
+
 ```bash
-cd /Users/david.leconte/Documents/Arkea
+cd ${ARKEA_HOME}
 export SPARK_HOME=$(pwd)/spark-3.5.1
 export PATH=$SPARK_HOME/bin:$PATH
 jenv local 11
@@ -94,6 +98,7 @@ $SPARK_HOME/bin/spark-shell \
 ```
 
 Le job va :
+
 1. Se connecter à Kafka
 2. Lire les messages du topic `test-topic`
 3. Les transformer
@@ -102,14 +107,16 @@ Le job va :
 ### Étape 3: Vérifier les Données dans HCD
 
 Dans un troisième terminal :
+
 ```bash
-cd /Users/david.leconte/Documents/Arkea/hcd-1.2.3
+cd ${ARKEA_HOME}/hcd-1.2.3
 jenv local 11
 eval "$(jenv init -)"
 ./bin/cqlsh localhost 9042
 ```
 
 Puis dans cqlsh :
+
 ```cql
 USE poc_hbase_migration;
 SELECT * FROM kafka_events;
@@ -132,21 +139,25 @@ HCD (poc_hbase_migration.kafka_events)
 ## 🔍 Vérifications
 
 ### Vérifier que Kafka est démarré
+
 ```bash
 lsof -Pi :9092 -sTCP:LISTEN
 ```
 
 ### Vérifier que HCD est démarré
+
 ```bash
 lsof -Pi :9042 -sTCP:LISTEN
 ```
 
 ### Lister les topics Kafka
+
 ```bash
 ./kafka-helper.sh kafka-topics.sh --list --bootstrap-server localhost:9092
 ```
 
 ### Vérifier le schéma HCD
+
 ```bash
 cd hcd-1.2.3
 jenv local 11
@@ -195,4 +206,3 @@ Assurez-vous d'utiliser **Java 11** (via jenv) pour Spark et HCD.
 - ✅ Configuration complète
 
 **Il ne reste plus qu'à tester le pipeline complet !** 🚀
-

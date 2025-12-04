@@ -46,7 +46,7 @@ Voir aussi : [18_INDEX_USE_CASES_SCRIPTS.md](18_INDEX_USE_CASES_SCRIPTS.md) pour
 ### Commandes d'Exécution
 
 ```bash
-cd /Users/david.leconte/Documents/Arkea/poc-design/domiramaCatOps/scripts
+cd ${ARKEA_HOME}/poc-design/domiramaCatOps/scripts
 
 # 1. Créer le keyspace
 ./01_setup_domiramaCatOps_keyspace.sh
@@ -610,7 +610,7 @@ echo "🎉 Exécution complète terminée avec succès !"
 ps aux | grep cassandra
 
 # Redémarrer HCD si nécessaire
-cd /Users/david.leconte/Documents/Arkea
+cd ${ARKEA_HOME}
 ./scripts/setup/03_start_hcd.sh
 ```
 

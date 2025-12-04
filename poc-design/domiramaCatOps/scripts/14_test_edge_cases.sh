@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 14j : Tests Cas Limites
 # Teste les cas limites : dates NULL, grand volume, formats compression

@@ -103,7 +103,7 @@ interactions.write
   .format("orc")
   .option("compression", "snappy")
   .mode("overwrite")
-  .save("/Users/david.leconte/Documents/Arkea/poc-design/bic/data/export/orc_export")
+  .save("${ARKEA_HOME}/poc-design/bic/data/export/orc_export")
 
 println("✅ Export terminé !")
 spark.stop()
@@ -161,7 +161,7 @@ newInteractions.write
   .format("orc")
   .option("compression", "snappy")
   .mode("append")
-  .save("/Users/david.leconte/Documents/Arkea/poc-design/bic/data/export/orc_export/incremental")
+  .save("${ARKEA_HOME}/poc-design/bic/data/export/orc_export/incremental")
 ```
 
 **Avantage HCD** : Export incrémental plus efficace qu'HBase (index SAI sur date)

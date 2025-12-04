@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script : Préparation et Validation des Données pour 15_test_coherence_multi_tables.sh
 # Vérifie et prépare les données nécessaires pour les tests de cohérence multi-tables

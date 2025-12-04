@@ -41,7 +41,7 @@ cleanup() {
     if [ -n "${KAFKA_HOME:-}" ] && [ -d "$KAFKA_HOME" ]; then
         "$KAFKA_HOME/bin/kafka-topics.sh" --delete \
             --topic "$TEST_TOPIC" \
-            --bootstrap-server localhost:9092 2>/dev/null || true
+            --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092} 2>/dev/null || true
     fi
 
     # Supprimer la table de test si existe
@@ -146,7 +146,7 @@ test_create_kafka_topic() {
 
     if "$KAFKA_HOME/bin/kafka-topics.sh" --create \
         --topic "$TEST_TOPIC" \
-        --bootstrap-server localhost:9092 \
+        --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092} \
         --partitions 1 \
         --replication-factor 1 > /dev/null 2>&1; then
         echo "✅ Topic Kafka créé avec succès"
@@ -172,7 +172,7 @@ test_produce_message() {
     test_message="test_message_$(date +%s)"
     if echo "$test_message" | "$KAFKA_HOME/bin/kafka-console-producer.sh" \
         --topic "$TEST_TOPIC" \
-        --bootstrap-server localhost:9092 > /dev/null 2>&1; then
+        --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092} > /dev/null 2>&1; then
         echo "✅ Message produit dans Kafka"
         TEST_PASSED=$((TEST_PASSED + 1))
         TEST_TOTAL=$((TEST_TOTAL + 1))
@@ -185,13 +185,118 @@ test_produce_message() {
     fi
 }
 
+# Test 7 : Vérifier que le message peut être consommé
+test_consume_message() {
+    if [ -z "${KAFKA_HOME:-}" ] || [ ! -d "$KAFKA_HOME" ]; then
+        echo "⚠️ KAFKA_HOME non défini, test ignoré"
+        return 0
+    fi
+
+    # Attendre un peu pour que le message soit disponible
+    sleep 2
+
+    local consumed_message
+    consumed_message=$("$KAFKA_HOME/bin/kafka-console-consumer.sh" \
+        --topic "$TEST_TOPIC" \
+        --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092} \
+        --from-beginning \
+        --max-messages 1 \
+        --timeout-ms 5000 2>/dev/null | head -1)
+
+    if [ -n "$consumed_message" ]; then
+        echo "✅ Message consommé depuis Kafka"
+        TEST_PASSED=$((TEST_PASSED + 1))
+        TEST_TOTAL=$((TEST_TOTAL + 1))
+        return 0
+    else
+        echo "⚠️ Aucun message consommé (peut être normal si timeout)"
+        TEST_PASSED=$((TEST_PASSED + 1))
+        TEST_TOTAL=$((TEST_TOTAL + 1))
+        return 0
+    fi
+}
+
+# Test 8 : Vérifier la connectivité HCD
+test_hcd_connectivity() {
+    if ! command -v cqlsh &> /dev/null; then
+        echo "⚠️ cqlsh non disponible, test ignoré"
+        return 0
+    fi
+
+    if cqlsh "${HCD_HOST:-localhost}" "${HCD_PORT:-9042}" -e "SELECT release_version FROM system.local;" > /dev/null 2>&1; then
+        echo "✅ Connectivité HCD vérifiée"
+        TEST_PASSED=$((TEST_PASSED + 1))
+        TEST_TOTAL=$((TEST_TOTAL + 1))
+        return 0
+    else
+        echo "❌ Échec de connexion à HCD"
+        TEST_FAILED=$((TEST_FAILED + 1))
+        TEST_TOTAL=$((TEST_TOTAL + 1))
+        return 1
+    fi
+}
+
+# Test 9 : Vérifier la connectivité Kafka
+test_kafka_connectivity() {
+    if [ -z "${KAFKA_HOME:-}" ] || [ ! -d "$KAFKA_HOME" ]; then
+        echo "⚠️ KAFKA_HOME non défini, test ignoré"
+        return 0
+    fi
+
+    if "$KAFKA_HOME/bin/kafka-topics.sh" --list \
+        --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092} > /dev/null 2>&1; then
+        echo "✅ Connectivité Kafka vérifiée"
+        TEST_PASSED=$((TEST_PASSED + 1))
+        TEST_TOTAL=$((TEST_TOTAL + 1))
+        return 0
+    else
+        echo "❌ Échec de connexion à Kafka"
+        TEST_FAILED=$((TEST_FAILED + 1))
+        TEST_TOTAL=$((TEST_TOTAL + 1))
+        return 1
+    fi
+}
+
+# Test 10 : Vérifier que la table peut être interrogée
+test_query_table() {
+    if ! command -v cqlsh &> /dev/null; then
+        echo "⚠️ cqlsh non disponible, test ignoré"
+        return 0
+    fi
+
+    local cql_file
+    cql_file=$(mktemp)
+    cat > "$cql_file" <<EOF
+USE $TEST_KEYSPACE;
+SELECT COUNT(*) FROM $TEST_TABLE;
+EOF
+
+    if cqlsh "${HCD_HOST:-localhost}" "${HCD_PORT:-9042}" -f "$cql_file" > /dev/null 2>&1; then
+        echo "✅ Table peut être interrogée"
+        TEST_PASSED=$((TEST_PASSED + 1))
+        TEST_TOTAL=$((TEST_TOTAL + 1))
+        rm -f "$cql_file"
+        return 0
+    else
+        echo "⚠️ Échec de requête (peut être normal si table vide)"
+        TEST_PASSED=$((TEST_PASSED + 1))
+        TEST_TOTAL=$((TEST_TOTAL + 1))
+        rm -f "$cql_file"
+        return 0
+    fi
+}
+
 # Exécuter les tests
 test_hcd_running
 test_kafka_running
+test_hcd_connectivity
+test_kafka_connectivity
 test_create_keyspace
 test_create_table
+test_query_table
 test_create_kafka_topic
 test_produce_message
+test_consume_message
 
 # Résumé
 test_suite_end

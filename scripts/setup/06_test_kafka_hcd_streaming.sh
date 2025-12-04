@@ -55,7 +55,7 @@ fi
 
 # 3. Vérifier que le topic existe
 info "🔍 Vérification du topic Kafka..."
-KAFKA_BOOTSTRAP="${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}"
+KAFKA_BOOTSTRAP="${KAFKA_BOOTSTRAP_SERVERS:-${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}}"
 if ./kafka-helper.sh kafka-topics.sh --list --bootstrap-server "$KAFKA_BOOTSTRAP" 2>&1 | grep -q "test-topic"; then
     info "✅ Topic test-topic existe"
 else
@@ -75,7 +75,7 @@ info "✅ Données nettoyées"
 
 # 5. Produire des messages de test dans Kafka
 info "📤 Production de messages de test dans Kafka..."
-KAFKA_BOOTSTRAP="${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}"
+KAFKA_BOOTSTRAP="${KAFKA_BOOTSTRAP_SERVERS:-${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}}"
 echo "Message test 1" | ./kafka-helper.sh kafka-console-producer.sh --bootstrap-server "$KAFKA_BOOTSTRAP" --topic test-topic 2>&1 | grep -v "Warnings" || true
 sleep 1
 echo "Message test 2" | ./kafka-helper.sh kafka-console-producer.sh --bootstrap-server "$KAFKA_BOOTSTRAP" --topic test-topic 2>&1 | grep -v "Warnings" || true
@@ -110,7 +110,7 @@ println("✅ Spark Session créée")
 val kafkaDF = spark
   .read
   .format("kafka")
-  .option("kafka.bootstrap.servers", "${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}")
+  .option("kafka.bootstrap.servers", "${KAFKA_BOOTSTRAP_SERVERS:-${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}}")
   .option("subscribe", "test-topic")
   .option("startingOffsets", "earliest")
   .option("endingOffsets", "latest")

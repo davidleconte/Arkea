@@ -61,14 +61,14 @@ domirama2/
 #### 1.1 Créer les répertoires de catégories
 
 ```bash
-cd /Users/david.leconte/Documents/Arkea/poc-design/domirama2/doc
+cd ${ARKEA_HOME}/poc-design/domirama2/doc
 mkdir -p design guides implementation results corrections audits
 ```
 
 #### 1.2 Créer le répertoire scripts
 
 ```bash
-cd /Users/david.leconte/Documents/Arkea/poc-design/domirama2
+cd ${ARKEA_HOME}/poc-design/domirama2
 mkdir -p scripts
 ```
 
@@ -195,7 +195,7 @@ mkdir -p scripts
 #### 3.1 Déplacer tous les scripts .sh vers scripts/
 
 ```bash
-cd /Users/david.leconte/Documents/Arkea/poc-design/domirama2
+cd ${ARKEA_HOME}/poc-design/domirama2
 # Déplacer tous les scripts .sh (sauf ceux dans archive/)
 mv *.sh scripts/ 2>/dev/null || true
 ```
@@ -262,7 +262,7 @@ Créer un script Python pour :
 #!/bin/bash
 # create_structure.sh
 
-cd /Users/david.leconte/Documents/Arkea/poc-design/domirama2
+cd ${ARKEA_HOME}/poc-design/domirama2
 
 # Créer les répertoires de catégories
 mkdir -p doc/{design,guides,implementation,results,corrections,audits}

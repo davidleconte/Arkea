@@ -333,7 +333,7 @@ Créer des colonnes dérivées pour toutes les clés MAP fréquemment utilisées
 set -e
 
 # Charger l'environnement
-INSTALL_DIR="/Users/david.leconte/Documents/Arkea"
+INSTALL_DIR="${ARKEA_HOME}"
 if [ -f "${INSTALL_DIR}/.poc-profile" ]; then
     source "${INSTALL_DIR}/.poc-profile"
 fi

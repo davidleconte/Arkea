@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 22 : Test Complexe P3-01 - Tests de Résilience
 # Gestion erreurs, timeouts, retry, fallback automatique

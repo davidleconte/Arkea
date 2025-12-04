@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 14g : Wrapper Bash pour Export Python
 # Wrapper pour utiliser le script Python d'export

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 07 : Chargement Temps Réel - Corrections Client (Version Didactique)
 # Charge les corrections client avec vérification acceptation/opposition et mise à jour des feedbacks

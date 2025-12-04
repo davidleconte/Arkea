@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 03 : Configuration des Tables Meta-Categories (Version Didactique)
 # Crée les 7 tables HCD pour domirama-meta-categories

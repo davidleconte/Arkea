@@ -240,7 +240,7 @@
 
 **Scripts concernés** :
 
-- Scripts dans `poc-design/*/scripts/` avec références à `/Users/david.leconte` ou `/opt/homebrew`
+- Scripts dans `poc-design/*/scripts/` avec références à `${USER_HOME:-$HOME}` ou `/opt/homebrew`
 
 **Solution** : Utiliser `scripts/utils/93_fix_hardcoded_paths.sh` pour correction automatique
 

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Démonstration Complète : Multi-Version avec Time Travel
 # Version améliorée avec fichiers temporaires

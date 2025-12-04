@@ -38,6 +38,7 @@
 **Problème** : Certains scripts utilisent `cqlsh` sans chemin complet, ce qui peut échouer si cqlsh n'est pas dans le PATH.
 
 **Scripts affectés** :
+
 - `09_test_acceptation_opposition.sh` : Utilise `$CQLSH_BIN` (variable locale)
 - `10_test_regles_personnalisees.sh` : Utilise `$CQLSH_BIN` (variable locale)
 - `11_test_feedbacks_counters.sh` : Utilise `$CQLSH_BIN` (variable locale)
@@ -60,6 +61,7 @@
 **Problème** : Certains scripts n'utilisent pas les fonctions didactiques standardisées (`check_hcd_status`, `check_jenv_java_version`, `execute_cql_query`).
 
 **Scripts affectés** :
+
 - `03_setup_meta_categories_tables.sh` : Vérifications manuelles
 - `05_load_operations_data_parquet.sh` : Vérifications manuelles
 - `05_update_feedbacks_counters.sh` : Pas de fonctions didactiques
@@ -78,6 +80,7 @@
 **Problème** : Incohérence dans l'utilisation de `HCD_HOME` vs `HCD_DIR`.
 
 **Scripts affectés** :
+
 - Scripts récents (19+) : Utilisent `$HCD_HOME` directement
 - Scripts anciens (01-15) : Utilisent `$HCD_DIR` avec fallback
 
@@ -98,7 +101,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../../.poc-profile"
 
 # Configuration
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd )"
-INSTALL_DIR="${INSTALL_DIR:-/Users/david.leconte/Documents/Arkea}"
+INSTALL_DIR="${INSTALL_DIR:-${ARKEA_HOME}}"
 
 # HCD_HOME devrait être défini par .poc-profile
 HCD_DIR="${HCD_HOME:-${INSTALL_DIR}/binaire/hcd-1.2.3}"
@@ -111,6 +114,7 @@ check_jenv_java_version
 ### 2.2 Correction des Chemins cqlsh
 
 **Remplacer** :
+
 - `cqlsh` → `"${HCD_DIR}/bin/cqlsh"`
 - `$CQLSH_BIN` → `"${HCD_DIR}/bin/cqlsh"`
 - `$HCD_HOME/bin/cqlsh` → `"${HCD_DIR}/bin/cqlsh"`
@@ -149,16 +153,19 @@ check_jenv_java_version
 ## ✅ PARTIE 4 : PLAN D'ACTION
 
 ### Étape 1 : Ajouter les Fonctions Manquantes ✅
+
 - [x] Ajouter `check_hcd_status` dans `didactique_functions.sh`
 - [x] Ajouter `check_jenv_java_version` dans `didactique_functions.sh`
 - [x] Ajouter `execute_cql_query` dans `didactique_functions.sh`
 - [x] Ajouter `show_ddl_section` dans `didactique_functions.sh`
 
 ### Étape 2 : Corriger les Scripts Critiques
+
 - [ ] Corriger scripts 19, 21, 22, 24, 25, 26, 27 (fallback HCD_HOME)
 - [ ] Corriger scripts 09, 10, 11, 12, 15 (fonctions didactiques)
 
 ### Étape 3 : Standardiser Tous les Scripts
+
 - [ ] Standardiser source .poc-profile
 - [ ] Standardiser HCD_DIR avec fallback
 - [ ] Standardiser chemins cqlsh
@@ -166,4 +173,3 @@ check_jenv_java_version
 ---
 
 **✅ Audit terminé - Corrections en cours**
-

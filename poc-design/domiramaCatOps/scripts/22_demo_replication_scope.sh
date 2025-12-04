@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 22 : Démonstration REPLICATION_SCOPE Équivalent (Version Didactique)
 # Démontre l'équivalent REPLICATION_SCOPE HBase avec Consistency Levels HCD

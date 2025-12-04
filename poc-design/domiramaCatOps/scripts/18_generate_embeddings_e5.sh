@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 18 : Génération des Embeddings e5-large
 # Génère les embeddings multilingual-e5-large pour les opérations existantes

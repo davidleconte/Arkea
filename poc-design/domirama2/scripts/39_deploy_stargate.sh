@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 39 : Déploiement Stargate pour Data API
 # ============================================

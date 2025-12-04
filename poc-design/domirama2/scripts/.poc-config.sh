@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Configuration POC Domirama2
 # ============================================
@@ -19,15 +20,15 @@
 
 # Répertoire racine du projet Arkea
 # Si non défini, sera détecté automatiquement par setup_paths()
-# ARKEA_HOME="/Users/david.leconte/Documents/Arkea"
+# ARKEA_HOME="${ARKEA_HOME}"
 
 # Répertoire HCD
 # Si non défini, sera détecté automatiquement : ${ARKEA_HOME}/binaire/hcd-1.2.3
-# HCD_DIR="/Users/david.leconte/Documents/Arkea/binaire/hcd-1.2.3"
+# HCD_DIR="${ARKEA_HOME}/binaire/hcd-1.2.3"
 
 # Répertoire Spark
 # Si non défini, sera détecté automatiquement : ${ARKEA_HOME}/binaire/spark-3.5.1
-# SPARK_HOME="/Users/david.leconte/Documents/Arkea/binaire/spark-3.5.1"
+# SPARK_HOME="${ARKEA_HOME}/binaire/spark-3.5.1"
 
 # ============================================
 # CONFIGURATION HCD

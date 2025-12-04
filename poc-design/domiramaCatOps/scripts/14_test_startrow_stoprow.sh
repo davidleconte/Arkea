@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 14c : Test STARTROW/STOPROW Équivalent (Version Didactique)
 # Teste l'export avec filtrage STARTROW/STOPROW équivalent

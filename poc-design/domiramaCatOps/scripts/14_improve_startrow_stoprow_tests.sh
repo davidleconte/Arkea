@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 14k : Amélioration Tests STARTROW/STOPROW (P1)
 # Ajoute des cas de test supplémentaires pour STARTROW/STOPROW

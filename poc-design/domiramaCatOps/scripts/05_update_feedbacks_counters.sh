@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 05b : Mise à Jour des Compteurs Feedbacks
 # Exécute les UPDATE COUNTER pour les feedbacks après chargement batch

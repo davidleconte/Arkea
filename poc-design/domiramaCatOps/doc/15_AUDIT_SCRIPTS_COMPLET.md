@@ -101,7 +101,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../../.poc-profile"
 
 # Configuration
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd )"
-INSTALL_DIR="${INSTALL_DIR:-/Users/david.leconte/Documents/Arkea}"
+INSTALL_DIR="${INSTALL_DIR:-${ARKEA_HOME}}"
 
 # HCD_HOME devrait être défini par .poc-profile
 HCD_DIR="${HCD_HOME:-${INSTALL_DIR}/binaire/hcd-1.2.3}"

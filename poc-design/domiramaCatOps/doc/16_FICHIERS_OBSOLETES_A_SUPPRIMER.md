@@ -176,7 +176,7 @@
 ### Étape 1 : Suppression Immédiate (6 fichiers)
 
 ```bash
-cd /Users/david.leconte/Documents/Arkea/poc-design/domiramaCatOps/doc
+cd ${ARKEA_HOME}/poc-design/domiramaCatOps/doc
 rm -f AUDIT_SCRIPTS.md
 rm -f AUDIT_SCRIPTS_V2.md
 rm -f AUDIT_SCRIPTS_DONNEES.md

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 19 : Configuration Tolérance aux Typos (Version Didactique)
 # Ajout d'une colonne dérivée avec index pour recherche partielle

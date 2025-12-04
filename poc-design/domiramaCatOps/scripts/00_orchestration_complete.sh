@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script d'Orchestration : Exécution Complète POC DomiramaCatOps
 # ============================================
@@ -58,7 +59,7 @@ else
 fi
 
 # Source du profil d'environnement
-INSTALL_DIR="${INSTALL_DIR:-/Users/david.leconte/Documents/Arkea}"
+INSTALL_DIR="${INSTALL_DIR:-${ARKEA_HOME}}"
 if [ -f "${INSTALL_DIR}/.poc-profile" ]; then
     source "${INSTALL_DIR}/.poc-profile"
     # Exporter les variables critiques pour les scripts enfants

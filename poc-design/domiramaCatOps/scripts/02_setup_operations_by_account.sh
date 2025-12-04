@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 02 : Configuration de la Table operations_by_account
 # Crée la table operations_by_account avec toutes les colonnes nécessaires

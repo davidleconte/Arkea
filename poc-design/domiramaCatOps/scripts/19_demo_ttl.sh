@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 19 : Démonstration TTL et Purge Automatique (Version Didactique)
 # Démontre le TTL (Time To Live) et la purge automatique des données

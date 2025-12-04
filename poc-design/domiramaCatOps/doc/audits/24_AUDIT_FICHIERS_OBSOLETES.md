@@ -30,6 +30,7 @@
 ### 1.1 Fichiers Déjà Supprimés (Référence)
 
 Les fichiers suivants ont déjà été identifiés et supprimés dans `16_FICHIERS_OBSOLETES_A_SUPPRIMER.md` :
+
 - `AUDIT_SCRIPTS.md` ✅ Supprimé
 - `AUDIT_SCRIPTS_V2.md` ✅ Supprimé
 - `AUDIT_SCRIPTS_DONNEES.md` ✅ Supprimé
@@ -260,7 +261,7 @@ Ces fichiers documentent des corrections qui ont été appliquées :
 ### Étape 1 : Suppression Immédiate (17 fichiers)
 
 ```bash
-cd /Users/david.leconte/Documents/Arkea/poc-design/domiramaCatOps/doc
+cd ${ARKEA_HOME}/poc-design/domiramaCatOps/doc
 
 # Fichiers corrections script 14 (obsolètes - corrections appliquées)
 rm -f 14_CORRECTIONS_APPLIQUEES.md
@@ -408,6 +409,7 @@ mv 08_MISE_A_JOUR_RECHERCHE_AVANCEE.md archive/
 ### Fichiers Supprimés
 
 #### Étape 1 : Corrections Script 14 (7 fichiers)
+
 1. ✅ `14_RAPPORT_VERIFICATION_FINAL.md`
 2. ✅ `14_VERIFICATION_COMPLETE_TESTS.md`
 3. ✅ `14_RESUME_AMELIORATIONS_IMPLÉMENTEES.md`
@@ -417,6 +419,7 @@ mv 08_MISE_A_JOUR_RECHERCHE_AVANCEE.md archive/
 7. ✅ `14_IMPLEMENTATION_P1_P2.md`
 
 #### Étape 2 : Audits Spécifiques (7 fichiers)
+
 1. ✅ `AUDIT_SCRIPTS_09.md`
 2. ✅ `AUDIT_SCRIPT_10.md`
 3. ✅ `AUDIT_SCRIPT_11.md`
@@ -426,6 +429,7 @@ mv 08_MISE_A_JOUR_RECHERCHE_AVANCEE.md archive/
 7. ✅ `AUDIT_COUVERTURE_SCRIPT_14_INPUTS.md`
 
 #### Étape 3 : Analyses Temporaires (3 fichiers)
+
 1. ✅ `ANALYSE_DONNEES_TEST.md`
 2. ✅ `ANALYSE_COHERENCE_ACCEPTED_AT.md`
 3. ✅ `SOLUTIONS_CONTAINS_KEY_CONTAINS.md`
@@ -433,6 +437,6 @@ mv 08_MISE_A_JOUR_RECHERCHE_AVANCEE.md archive/
 ### Prochaines Étapes
 
 Les fichiers suivants nécessitent encore une évaluation manuelle avant suppression :
+
 - 8 fichiers redondants (évaluation requise)
 - 12 fichiers de travail (archivage ou suppression selon besoin historique)
-

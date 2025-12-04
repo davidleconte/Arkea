@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 22 : Test Complexe P3-02 - Tests de Facettes
 # Groupement par catégorie, date, combiné

@@ -102,7 +102,7 @@ Générer un fichier Parquet contenant **100 interactions** avec une diversité 
 
 ## ✅ Résultats
 
-**Fichier généré** : `/Users/david.leconte/Documents/Arkea/poc-design/bic/data/parquet/interactions_100.parquet`  
+**Fichier généré** : `${ARKEA_HOME}/poc-design/bic/data/parquet/interactions_100.parquet`  
 **Nombre d'interactions** : 101  
 **Taille** : N/A
 

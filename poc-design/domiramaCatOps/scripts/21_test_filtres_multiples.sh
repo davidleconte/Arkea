@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 21 : Test Complexe P2-03 - Recherche avec Filtres Multiples Combinés
 # Test de recherche avec filtres multiples (vector, full-text, date, montant, catégorie)

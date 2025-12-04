@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 25 : Test de la Recherche Hybride
 # Démonstration de la combinaison Full-Text + Vector Search

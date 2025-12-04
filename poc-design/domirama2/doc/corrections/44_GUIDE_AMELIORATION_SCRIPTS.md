@@ -73,7 +73,7 @@ expected() { echo -e "${YELLOW}📋 $1${NC}"; }
 ### 2. Configuration et Vérifications
 
 ```bash
-INSTALL_DIR="/Users/david.leconte/Documents/Arkea"
+INSTALL_DIR="${ARKEA_HOME}"
 HCD_DIR="${INSTALL_DIR}/binaire/hcd-1.2.3"
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 REPORT_FILE="${SCRIPT_DIR}/doc/demonstrations/XX_DEMONSTRATION.md"

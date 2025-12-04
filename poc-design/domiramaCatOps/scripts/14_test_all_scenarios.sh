@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 14d : Tests Complets de Tous les Scénarios (Version Didactique)
 # Exécute tous les tests complexes pour valider le fonctionnement complet

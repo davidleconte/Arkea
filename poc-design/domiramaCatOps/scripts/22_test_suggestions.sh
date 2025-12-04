@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 22 : Test Complexe P3-05 - Tests de Suggestions
 # Suggestions, autocomplétion, scoring, pertinence

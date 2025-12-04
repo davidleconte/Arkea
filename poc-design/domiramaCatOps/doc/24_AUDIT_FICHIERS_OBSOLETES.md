@@ -261,7 +261,7 @@ Ces fichiers documentent des corrections qui ont été appliquées :
 ### Étape 1 : Suppression Immédiate (17 fichiers)
 
 ```bash
-cd /Users/david.leconte/Documents/Arkea/poc-design/domiramaCatOps/doc
+cd ${ARKEA_HOME}/poc-design/domiramaCatOps/doc
 
 # Fichiers corrections script 14 (obsolètes - corrections appliquées)
 rm -f 14_CORRECTIONS_APPLIQUEES.md

@@ -52,7 +52,7 @@ Les événements générés sont conformes au format attendu par le topic Kafka 
 
 ## ✅ Résultats
 
-**Fichier généré** : `/Users/david.leconte/Documents/Arkea/poc-design/bic/data/json/interactions_1000.json`  
+**Fichier généré** : `${ARKEA_HOME}/poc-design/bic/data/json/interactions_1000.json`  
 **Nombre d'événements** : 1000  
 **Format** : JSONL (une ligne JSON par événement)
 

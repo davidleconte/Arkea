@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 14l : Amélioration Fenêtre Glissante (P2)
 # Améliore la fenêtre glissante avec validation et rapports détaillés

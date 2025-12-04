@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 21 : Test Complexe P2-01 - Fenêtre Glissante Complexe
 # Test de fenêtre glissante avec chevauchement, validation cohérence, agrégation

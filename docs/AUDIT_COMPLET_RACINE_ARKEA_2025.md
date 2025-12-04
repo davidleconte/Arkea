@@ -99,7 +99,7 @@
 **Statut** : **À CORRIGER**  
 **Problème** :
 
-- Ligne 22 : `export POC_HOME="${ARKEA_HOME:-/Users/david.leconte/Documents/Arkea}"`
+- Ligne 22 : `export POC_HOME="${ARKEA_HOME:-${ARKEA_HOME}}"`
 - Fallback hardcodé si `.poc-config.sh` n'existe pas
 
 **Impact** :
@@ -127,7 +127,7 @@ export POC_HOME="${ARKEA_HOME}"
 **Statut** : **À CORRIGER**  
 **Problèmes identifiés** :
 
-- Références à `/Users/david.leconte` dans documentation
+- Références à `${USER_HOME:-$HOME}` dans documentation
 - Références à `INSTALL_DIR` hardcodé dans scripts POCs
 - Chemins macOS hardcodés (`/opt/homebrew/...`)
 

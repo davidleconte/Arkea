@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 20 : Test Complexe P1-03 - Recherche Multi-Modèles avec Fusion
 # Test de recherche avec plusieurs modèles simultanément et fusion des résultats

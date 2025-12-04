@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 21 : Démonstration BLOOMFILTER Équivalent (Version Didactique)
 # Démontre l'équivalent BLOOMFILTER HBase avec Index SAI HCD

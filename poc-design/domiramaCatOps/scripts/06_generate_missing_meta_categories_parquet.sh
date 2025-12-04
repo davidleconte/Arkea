@@ -49,7 +49,7 @@ import random
 from datetime import datetime, timedelta
 import uuid
 
-OUTPUT_DIR = "/Users/david.leconte/Documents/Arkea/poc-design/domiramaCatOps/data/meta-categories"
+OUTPUT_DIR = "${ARKEA_HOME}/poc-design/domiramaCatOps/data/meta-categories"
 
 # Utiliser les mêmes codes SI et contrats que les opérations
 CODES_SI = [str(i) for i in range(1, 11)]  # 1 à 10

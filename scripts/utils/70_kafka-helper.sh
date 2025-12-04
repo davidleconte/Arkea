@@ -53,8 +53,8 @@ if [ $# -eq 0 ]; then
     echo "Usage: ./kafka-helper.sh <commande-kafka> [arguments...]"
     echo ""
     echo "Exemples:"
-    echo "  ./kafka-helper.sh kafka-topics.sh --list --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}"
-    echo "  ./kafka-helper.sh kafka-console-producer.sh --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092} --topic test-topic"
+    echo "  ./kafka-helper.sh kafka-topics.sh --list --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS:-${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}}"
+    echo "  ./kafka-helper.sh kafka-console-producer.sh --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS:-${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}} --topic test-topic"
     exit 1
 fi
 

@@ -79,7 +79,7 @@ def replace_localhost(content):
     # Patterns à remplacer
     replacements = [
         (r"localhost\s+9042", r'"$HCD_HOST" "$HCD_PORT"'),
-        (r"localhost:9042", r'"${HCD_HOST}:${HCD_PORT}"'),
+        (r"${HCD_HOST:-localhost}:${HCD_PORT:-9042}", r'"${HCD_HOST}:${HCD_PORT}"'),
         (r"nc -z localhost", r'nc -z "$HCD_HOST"'),
         (r"http://localhost:", r"http://${HCD_HOST}:"),
     ]

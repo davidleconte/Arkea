@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 19 : Génération des Embeddings Facturation
 # Génère les embeddings avec le modèle spécialisé facturation

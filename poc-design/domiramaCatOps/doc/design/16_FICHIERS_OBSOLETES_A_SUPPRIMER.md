@@ -32,6 +32,7 @@
 ### 1. `doc/AUDIT_SCRIPTS.md`
 
 **Raison** :
+
 - ✅ Version initiale de l'audit
 - ✅ Remplacée par `AUDIT_SCRIPTS_V2.md` puis `AUDIT_SCRIPTS_COMPLET.md`
 - ✅ Contenu obsolète, corrections appliquées
@@ -43,6 +44,7 @@
 ### 2. `doc/AUDIT_SCRIPTS_V2.md`
 
 **Raison** :
+
 - ✅ Version intermédiaire de l'audit
 - ✅ Remplacée par `AUDIT_SCRIPTS_COMPLET.md` (plus complet et à jour)
 - ✅ Contenu obsolète, corrections appliquées
@@ -54,6 +56,7 @@
 ### 3. `doc/14_PLAN_CREATION_SCRIPTS.md`
 
 **Raison** :
+
 - ✅ Plan de création des scripts
 - ✅ Tous les scripts mentionnés ont été créés
 - ✅ Document de travail, non nécessaire pour la documentation finale
@@ -68,6 +71,7 @@
 ### 4. `doc/AUDIT_SCRIPTS_DONNEES.md`
 
 **Raison** :
+
 - ✅ Audit spécifique sur la génération de données
 - ✅ Actions terminées (scripts créés, données générées)
 - ✅ Informations consolidées dans `RESUME_ACTIONS_GENERATION_DONNEES.md` (lui-même obsolète)
@@ -79,6 +83,7 @@
 ### 5. `doc/RESUME_ACTIONS_GENERATION_DONNEES.md`
 
 **Raison** :
+
 - ✅ Résumé d'actions passées (génération de données)
 - ✅ Actions terminées, scripts créés
 - ✅ Document de travail, non nécessaire pour la documentation finale
@@ -91,6 +96,7 @@
 ### 6. `doc/08_RECHERCHE_AVANCEE_DOMIRAMA2.md`
 
 **Raison** :
+
 - ✅ Document de référence initial sur l'intégration de la recherche avancée
 - ✅ Remplacé par `09_MISE_A_JOUR_RECHERCHE_AVANCEE.md` (plus complet et à jour)
 - ✅ Informations consolidées dans `10_ANALYSE_RECHERCHE_AVANCEE_8_TABLES.md`
@@ -104,11 +110,13 @@
 ### 7. `doc/AUDIT_COMPLET_DOCUMENTATION_SCRIPTS.md`
 
 **Raison** :
+
 - ⚠️ Audit spécifique sur la documentation vs scripts
 - ⚠️ Peut contenir des informations utiles pour référence
 - ⚠️ Mais peut être redondant avec `AUDIT_SCRIPTS_COMPLET.md`
 
-**Recommandation** : 
+**Recommandation** :
+
 - Si `AUDIT_SCRIPTS_COMPLET.md` couvre le même contenu → **SUPPRIMER**
 - Sinon → **CONSERVER** comme référence
 
@@ -119,11 +127,13 @@
 ### 8. `doc/AUDIT_COMPLET_RECOMMANDATIONS.md`
 
 **Raison** :
+
 - ⚠️ Recommandations détaillées
 - ⚠️ La plupart des recommandations ont été appliquées
 - ⚠️ Peut servir de référence historique
 
 **Recommandation** :
+
 - Si toutes les recommandations sont appliquées → **SUPPRIMER**
 - Sinon → **CONSERVER** pour suivi
 
@@ -166,7 +176,7 @@
 ### Étape 1 : Suppression Immédiate (6 fichiers)
 
 ```bash
-cd /Users/david.leconte/Documents/Arkea/poc-design/domiramaCatOps/doc
+cd ${ARKEA_HOME}/poc-design/domiramaCatOps/doc
 rm -f AUDIT_SCRIPTS.md
 rm -f AUDIT_SCRIPTS_V2.md
 rm -f AUDIT_SCRIPTS_DONNEES.md
@@ -190,6 +200,7 @@ rm -f 08_RECHERCHE_AVANCEE_DOMIRAMA2.md
 **Réduction** : ~18-24% de fichiers en moins
 
 **Bénéfices** :
+
 - ✅ Documentation plus claire et à jour
 - ✅ Moins de confusion entre versions
 - ✅ Maintenance simplifiée
@@ -222,10 +233,10 @@ rm -f 08_RECHERCHE_AVANCEE_DOMIRAMA2.md
 **Réduction** : **33% de fichiers en moins**
 
 **Bénéfices** :
+
 - ✅ Documentation plus claire et à jour
 - ✅ Moins de confusion entre versions
 - ✅ Maintenance simplifiée
 - ✅ Focus sur la documentation active
 
 **✅ Suppression terminée avec succès !**
-

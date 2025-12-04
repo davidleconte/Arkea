@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 16 : Tests Fuzzy Search Complets (Tous les tests supplémentaires)
 # Orchestre tous les tests supplémentaires pour la recherche floue

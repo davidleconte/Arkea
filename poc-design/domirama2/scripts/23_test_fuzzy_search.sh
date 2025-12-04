@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 23 : Tests Fuzzy Search avec Vector Search
 # Démonstration de la recherche floue avec ByteT5 et HCD

@@ -24,7 +24,7 @@
 **Avant** :
 
 - 93 occurrences de chemins hardcodés dans scripts
-- 203 occurrences de `/Users/david.leconte` dans 137 fichiers
+- 203 occurrences de `${USER_HOME:-$HOME}` dans 137 fichiers
 - Support limité à macOS uniquement
 - Chemins Mac hardcodés partout
 
@@ -50,8 +50,8 @@
 
 ### Problèmes Identifiés
 
-1. **93 occurrences** de `INSTALL_DIR="/Users/david.leconte/Documents/Arkea"` hardcodé
-2. **203 occurrences** de `/Users/david.leconte` dans 137 fichiers
+1. **93 occurrences** de `INSTALL_DIR="${ARKEA_HOME}"` hardcodé
+2. **203 occurrences** de `${USER_HOME:-$HOME}` dans 137 fichiers
 3. **298 fichiers** utilisant `HCD_HOME`, `SPARK_HOME`, etc. sans standardisation
 4. **Chemins Mac hardcodés** : `/opt/homebrew/opt/kafka`, `/opt/homebrew/opt/zookeeper`, etc.
 5. **Inconsistance** : Certains scripts utilisent `setup_paths()`, d'autres ont des chemins hardcodés
@@ -83,7 +83,7 @@
 
 | Chemin | Occurrences | Fichiers | Impact |
 |--------|-------------|----------|--------|
-| `/Users/david.leconte/Documents/Arkea` | 93 | Scripts shell | 🔴 Critique |
+| `${ARKEA_HOME}` | 93 | Scripts shell | 🔴 Critique |
 | `/opt/homebrew/opt/kafka` | 3 | `.poc-profile` | 🟡 Moyen |
 | `/opt/homebrew/opt/zookeeper` | 2 | `.poc-profile` | 🟡 Moyen |
 | `/opt/homebrew/opt/openjdk@11` | 5 | `.poc-profile` | 🟡 Moyen |
@@ -392,8 +392,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ARKEA_HOME="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/.." && pwd)}"
 
 # Pattern à rechercher
-HARDCODED_PATTERN='INSTALL_DIR="/Users/david.leconte/Documents/Arkea"'
-HARDCODED_PATTERN_ALT='INSTALL_DIR=.*"/Users/david.leconte'
+HARDCODED_PATTERN='INSTALL_DIR="${ARKEA_HOME}"'
+HARDCODED_PATTERN_ALT='INSTALL_DIR=.*"${USER_HOME:-$HOME}'
 
 # Répertoires à traiter
 DIRS=(
@@ -418,7 +418,7 @@ replace_hardcoded_paths() {
     fi
 
     # Remplacer INSTALL_DIR hardcodé par setup_paths()
-    # Pattern: INSTALL_DIR="/Users/david.leconte/Documents/Arkea"
+    # Pattern: INSTALL_DIR="${ARKEA_HOME}"
     # Remplacer par: setup_paths() (via fonction)
 
     # Créer le nouveau contenu

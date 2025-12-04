@@ -127,7 +127,7 @@ check_hcd_running() {
 # FONCTION : Vérifier que Kafka est Démarré
 # ============================================
 check_kafka_running() {
-    if ! kafka-topics.sh --list --bootstrap-server "${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}" &>/dev/null; then
+    if ! kafka-topics.sh --list --bootstrap-server "${KAFKA_BOOTSTRAP_SERVERS:-${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}}" &>/dev/null; then
         error "Kafka n'est pas démarré ou n'est pas accessible"
         error "Exécutez d'abord: ${ARKEA_HOME}/scripts/setup/04_start_kafka.sh background"
         return 1

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 27 : Démonstration Kafka Réel + Spark Streaming (Version Didactique)
 # Démontre l'ingestion temps réel via Kafka et Spark Structured Streaming
@@ -146,7 +147,7 @@ show_partie "2" "CONFIGURATION KAFKA"
 info "📝 Configuration Kafka Topic :"
 code "# Création du topic Kafka"
 code "kafka-topics.sh --create \\"
-code "  --bootstrap-server localhost:9092 \\"
+code "  --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092} \\"
 code "  --topic $KAFKA_TOPIC \\"
 code "  --partitions 3 \\"
 code "  --replication-factor 1"
@@ -185,7 +186,7 @@ code ""
 code "// 1. Lecture depuis Kafka"
 code "val kafkaDF = spark.readStream"
 code "  .format(\"kafka\")"
-code "  .option(\"kafka.bootstrap.servers\", \"localhost:9092\")"
+code "  .option(\"kafka.bootstrap.servers\", \"${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}\")"
 code "  .option(\"subscribe\", \"$KAFKA_TOPIC\")"
 code "  .option(\"startingOffsets\", \"latest\")"
 code "  .load()"
@@ -224,7 +225,7 @@ code ""
 code "# 1. Configuration Kafka Consumer"
 code "consumer = KafkaConsumer("
 code "    '$KAFKA_TOPIC',"
-code "    bootstrap_servers=['localhost:9092'],"
+code "    bootstrap_servers=['${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}'],"
 code "    group_id='domirama-catops-corrections',"
 code "    enable_auto_commit=False"
 code ")"
@@ -418,7 +419,7 @@ REPORT_CONTENT=$(cat << EOF
 
 \`\`\`bash
 kafka-topics.sh --create \\
-  --bootstrap-server localhost:9092 \\
+  --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092} \\
   --topic $KAFKA_TOPIC \\
   --partitions 3 \\
   --replication-factor 1
@@ -454,7 +455,7 @@ val spark = SparkSession.builder()
 // Lecture depuis Kafka
 val kafkaDF = spark.readStream
   .format("kafka")
-  .option("kafka.bootstrap.servers", "localhost:9092")
+  .option("kafka.bootstrap.servers", "${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}")
   .option("subscribe", "$KAFKA_TOPIC")
   .option("startingOffsets", "latest")
   .load()

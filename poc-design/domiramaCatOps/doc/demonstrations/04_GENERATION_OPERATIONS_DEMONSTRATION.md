@@ -25,6 +25,7 @@ Générer un jeu de données complet contenant **20000 opérations** avec une di
 ### Caractéristiques des Données
 
 **Volume et Diversité** :
+
 - Volume : 20000 opérations
 - 10 codes SI différents
 - 50 contrats par code SI (500 contrats total)
@@ -35,6 +36,7 @@ Générer un jeu de données complet contenant **20000 opérations** avec une di
 - Période : 6 mois (janvier 2024 - juin 2024)
 
 **Recherches Avancées Supportées** :
+
 - ✅ **Full-text search** : Libellés variés avec accents français
 - ✅ **Fuzzy search** : Variations de libellés et typos potentielles
 - ✅ **N-Gram search** : Préfixes variés (CARREFOUR, CARREF, CARRE, CAR)
@@ -42,6 +44,7 @@ Générer un jeu de données complet contenant **20000 opérations** avec une di
 - ✅ **Hybrid search** : Combinaison full-text + vector
 
 **Catégorisation** :
+
 - Catégories automatiques avec scores de confiance variés
 - Distribution réaliste (15% ALIMENTATION, 10% RESTAURANT, etc.)
 - 5% sans catégorie (pour tester les cas null)
@@ -89,7 +92,7 @@ for i in range(20000):
     # ...
 
 # Écriture CSV
-with open('/Users/david.leconte/Documents/Arkea/poc-design/domiramaCatOps/scripts/../data/operations_20000_temp.csv', 'w', newline='') as f:
+with open('${ARKEA_HOME}/poc-design/domiramaCatOps/scripts/../data/operations_20000_temp.csv', 'w', newline='') as f:
     writer = csv.DictWriter(f, fieldnames=operations[0].keys())
     writer.writeheader()
     writer.writerows(operations)
@@ -98,18 +101,21 @@ with open('/Users/david.leconte/Documents/Arkea/poc-design/domiramaCatOps/script
 ### Explication
 
 **Génération Réaliste** :
+
 - Utilisation de libellés réels (CARREFOUR, LECLERC, etc.)
 - Distribution réaliste des catégories (15% ALIMENTATION, etc.)
 - Dates aléatoires sur 6 mois
 - Montants réalistes (débits : -5000 à -5€, crédits : 100 à 10000€)
 
 **Recherches Avancées** :
+
 - Libellés avec accents (é, è, à, ç) pour full-text
 - Variations (CARREFOUR, CARREFUR, CARREFOR) pour fuzzy
 - Préfixes (CARREFOUR, CARREF, CARRE, CAR) pour N-Gram
 - Sémantiquement similaires (SUPERMARCHE, HYPERMARCHE) pour vector
 
 **Catégorisation** :
+
 - Scores de confiance variés (0.0 à 1.0)
 - 70% haute confiance (0.8-1.0)
 - 20% confiance moyenne (0.5-0.8)
@@ -159,29 +165,32 @@ println("💾 Écriture en Parquet...")
 dfTyped.write
   .mode("overwrite")
   .option("compression", "snappy")
-  .parquet("/Users/david.leconte/Documents/Arkea/poc-design/domiramaCatOps/scripts/../data/operations_20000.parquet")
+  .parquet("${ARKEA_HOME}/poc-design/domiramaCatOps/scripts/../data/operations_20000.parquet")
 
-println(s"✅ Parquet généré : /Users/david.leconte/Documents/Arkea/poc-design/domiramaCatOps/scripts/../data/operations_20000.parquet")
+println(s"✅ Parquet généré : ${ARKEA_HOME}/poc-design/domiramaCatOps/scripts/../data/operations_20000.parquet")
 
 // Vérification
-val count = spark.read.parquet("/Users/david.leconte/Documents/Arkea/poc-design/domiramaCatOps/scripts/../data/operations_20000.parquet").count()
+val count = spark.read.parquet("${ARKEA_HOME}/poc-design/domiramaCatOps/scripts/../data/operations_20000.parquet").count()
 println(s"📊 Vérification : $count lignes dans le Parquet")
 ```
 
 ### Explication
 
 **Lecture CSV** :
+
 - `option("header", "true")` : Première ligne = en-têtes
 - `option("inferSchema", "true")` : Inférence automatique des types
 - Lecture optimisée avec Spark
 
 **Conversion des Types** :
+
 - `date_op` : Conversion en Timestamp (format ISO 8601)
 - `numero_op` : Conversion en Integer
 - `montant` : Conversion en Decimal(10, 2)
 - `cat_confidence` : Conversion en Decimal(3, 2)
 
 **Écriture Parquet** :
+
 - `mode("overwrite")` : Permet les rejeux (idempotence)
 - `compression("snappy")` : Compression rapide et efficace
 - Format Parquet : Optimisé pour Spark (3-10x plus rapide que CSV)
@@ -201,7 +210,7 @@ println(s"📊 Vérification : $count lignes dans le Parquet")
 
 | Métrique | Valeur |
 |----------|--------|
-| Fichier Parquet | `/Users/david.leconte/Documents/Arkea/poc-design/domiramaCatOps/scripts/../data/operations_20000.parquet` |
+| Fichier Parquet | `${ARKEA_HOME}/poc-design/domiramaCatOps/scripts/../data/operations_20000.parquet` |
 | Lignes générées | 20000 |
 | Taille | 392K |
 | Fichiers Parquet | 4 |
@@ -232,7 +241,7 @@ println(s"📊 Vérification : $count lignes dans le Parquet")
 ### Résumé de la Génération
 
 ✅ **Opérations générées** : 20000  
-✅ **Fichier Parquet** : `/Users/david.leconte/Documents/Arkea/poc-design/domiramaCatOps/scripts/../data/operations_20000.parquet`  
+✅ **Fichier Parquet** : `${ARKEA_HOME}/poc-design/domiramaCatOps/scripts/../data/operations_20000.parquet`  
 ✅ **Format** : Parquet (compression snappy)  
 ✅ **Taille** : 392K  
 ✅ **Diversité** : Maximale (200+ libellés, 30+ catégories)
@@ -247,7 +256,7 @@ println(s"📊 Vérification : $count lignes dans le Parquet")
 
 ### Prochaines Étapes
 
-1. **Charger les données** : `./05_load_operations_data_parquet.sh /Users/david.leconte/Documents/Arkea/poc-design/domiramaCatOps/scripts/../data/operations_20000.parquet`
+1. **Charger les données** : `./05_load_operations_data_parquet.sh ${ARKEA_HOME}/poc-design/domiramaCatOps/scripts/../data/operations_20000.parquet`
 2. **Générer les embeddings** : `./05_generate_libelle_embedding.sh`
 3. **Générer les meta-categories** : `./04_generate_meta_categories_parquet.sh`
 4. **Exécuter les tests** : Tests de recherche avancée

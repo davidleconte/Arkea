@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 14h : Tests Complets de Tous les Scénarios (Version Python)
 # Exécute tous les tests complexes avec la solution Python

@@ -54,7 +54,7 @@ try {
 } catch {
   case e: Exception =>
     println(s"⚠️  Erreur de connexion: ${e.getMessage}")
-    println("   Vérifiez que HCD est démarré sur localhost:9042")
+    println(s"   Vérifiez que HCD est démarré sur ${sys.env.getOrElse(\"HCD_HOST\", \"localhost\")}:${sys.env.getOrElse(\"HCD_PORT\", \"9042\")}")
 }
 
 println("\n💡 Spark Shell reste ouvert pour exploration")

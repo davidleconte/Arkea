@@ -65,7 +65,7 @@ grep -l '"$HCD_HOST" "$HCD_PORT"' *.sh | wc -l
 ### 4. Chemins Hardcodés
 
 ```bash
-grep -l 'INSTALL_DIR="/Users/david.leconte/Documents/Arkea"' *.sh | grep -v ".bak" | grep -v "migrate"
+grep -l 'INSTALL_DIR="${ARKEA_HOME}"' *.sh | grep -v ".bak" | grep -v "migrate"
 # Résultat : 0 script
 ```
 

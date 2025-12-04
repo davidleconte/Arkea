@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).parent
-INSTALL_DIR = "/Users/david.leconte/Documents/Arkea"
+INSTALL_DIR = "${ARKEA_HOME}"
 
 
 def fix_script(script_path):
@@ -28,7 +28,7 @@ def fix_script(script_path):
             if "INSTALL_DIR=" not in content:
                 content = re.sub(
                     r"(SCRIPT_DIR=.*\n)",
-                    r'\1INSTALL_DIR="${INSTALL_DIR:-/Users/david.leconte/Documents/Arkea}"\n',
+                    r'\1INSTALL_DIR="${INSTALL_DIR:-${ARKEA_HOME}}"\n',
                     content,
                     count=1,
                 )

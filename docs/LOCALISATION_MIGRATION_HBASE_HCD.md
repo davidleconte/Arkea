@@ -19,7 +19,7 @@ contenant des éléments spécifiques.
 
 ### 1. **poc-design/** - Démonstrations de Migration ⭐
 
-**Localisation** : `/Users/david.leconte/Documents/Arkea/poc-design/`
+**Localisation** : `${ARKEA_HOME}/poc-design/`
 
 **Contenu** : 3 POCs de démonstration de migration
 
@@ -44,7 +44,7 @@ contenant des éléments spécifiques.
 
 ### 2. **docs/** - Documentation Migration ⭐
 
-**Localisation** : `/Users/david.leconte/Documents/Arkea/docs/`
+**Localisation** : `${ARKEA_HOME}/docs/`
 
 **Fichiers clés sur la migration** :
 
@@ -65,7 +65,7 @@ contenant des éléments spécifiques.
 
 ### 3. **inputs-ibm/** - Proposition IBM MECE ⭐
 
-**Localisation** : `/Users/david.leconte/Documents/Arkea/inputs-ibm/`
+**Localisation** : `${ARKEA_HOME}/inputs-ibm/`
 
 **Fichier principal** :
 
@@ -81,7 +81,7 @@ contenant des éléments spécifiques.
 
 ### 4. **inputs-clients/** - Exigences Clients
 
-**Localisation** : `/Users/david.leconte/Documents/Arkea/inputs-clients/`
+**Localisation** : `${ARKEA_HOME}/inputs-clients/`
 
 **Fichiers** :
 
@@ -95,7 +95,7 @@ contenant des éléments spécifiques.
 
 ### 5. **scripts/** - Scripts de Migration
 
-**Localisation** : `/Users/david.leconte/Documents/Arkea/scripts/`
+**Localisation** : `${ARKEA_HOME}/scripts/`
 
 **Organisation** :
 

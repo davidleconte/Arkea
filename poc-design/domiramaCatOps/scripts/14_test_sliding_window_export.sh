@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 14b : Export Fenêtre Glissante (Version Didactique)
 # Exporte les données par fenêtres glissantes (mensuelles, hebdomadaires)

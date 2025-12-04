@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 21 : Test Complexe P2-02 - Tests de Scalabilité
 # Test de scalabilité selon volume, index, modèles, et dégradation performance

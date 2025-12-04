@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 14 : Génération Parquet depuis CSV
 # Convertit le CSV en format Parquet optimisé

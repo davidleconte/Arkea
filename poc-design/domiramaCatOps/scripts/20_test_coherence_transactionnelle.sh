@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 20 : Test Complexe P1-04 - Cohérence Transactionnelle Multi-Tables
 # Test de cohérence transactionnelle entre plusieurs tables

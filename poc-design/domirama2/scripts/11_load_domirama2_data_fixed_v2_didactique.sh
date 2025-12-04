@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 11 : Chargement des données Domirama2 (Version Didactique)
 # Charge les données CSV dans HCD via Spark

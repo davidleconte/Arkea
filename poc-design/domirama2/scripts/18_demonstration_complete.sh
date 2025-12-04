@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 18 : Démonstration Complète Domirama2
 # POC Full-Text Search avec Index SAI Avancés

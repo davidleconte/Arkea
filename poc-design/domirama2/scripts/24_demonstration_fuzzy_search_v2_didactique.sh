@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 24 v2 : Démonstration Complète Fuzzy Search (Version Didactique)
 # Orchestre la configuration, génération et tests de la recherche floue

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 40 : Tests des Patterns LIKE avec Wildcards
 # Démonstration de la recherche avec patterns LIKE via CQL API

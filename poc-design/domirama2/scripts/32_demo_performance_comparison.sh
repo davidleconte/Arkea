@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 32 : Comparaison Performance Détaillée (BLOOMFILTER vs SAI)
 # ============================================
@@ -75,7 +76,7 @@ highlight() {
     echo -e "${CYAN}💡 $1${NC}"
 }
 
-CQLSH_BIN="/Users/david.leconte/Documents/Arkea/binaire/hcd-1.2.3/bin/cqlsh"
+CQLSH_BIN="${ARKEA_HOME}/binaire/hcd-1.2.3/bin/cqlsh"
 CQLSH="$CQLSH_BIN "$HCD_HOST" "$HCD_PORT""
 
 echo ""

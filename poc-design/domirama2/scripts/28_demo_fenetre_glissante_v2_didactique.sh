@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 28 : Export Fenêtre Glissante (Version Didactique)
 # Exporte les données depuis HCD vers Parquet via Spark

@@ -8,7 +8,7 @@
 
 ## 📊 Résumé Exécutif
 
-**Répertoire Racine** : `/Users/david.leconte/Documents/Arkea`  
+**Répertoire Racine** : `${ARKEA_HOME}`  
 **Date Audit** : 2025-12-01  
 **Statut** : ✅ **Audit complet terminé**
 

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 17 : Tests Full-Text Search Avancés (Version Didactique)
 # Recherches complexes avec différents types de recherches

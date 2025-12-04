@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Démonstration : Data API HCD via HTTP (curl)
 # ============================================

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 31 (Version Améliorée) : Démonstration BLOOMFILTER Équivalent (SAI)
 # ============================================
@@ -95,7 +96,7 @@ if [ -f "$INSTALL_DIR/.poc-profile" ]; then
     source "$INSTALL_DIR/.poc-profile"
 fi
 
-CQLSH_BIN="/Users/david.leconte/Documents/Arkea/binaire/hcd-1.2.3/bin/cqlsh"
+CQLSH_BIN="${ARKEA_HOME}/binaire/hcd-1.2.3/bin/cqlsh"
 CQLSH="$CQLSH_BIN "$HCD_HOST" "$HCD_PORT""
 
 # Vérifier que HCD est démarré

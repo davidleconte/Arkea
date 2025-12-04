@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 16 : Configuration Index SAI Avancés
 # Création de multiples index avec différents analyzers

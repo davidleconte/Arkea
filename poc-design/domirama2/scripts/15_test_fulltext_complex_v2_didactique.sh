@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 15 : Tests Full-Text Search Complexes (Version Didactique)
 # Recherches multi-termes, accents, variations

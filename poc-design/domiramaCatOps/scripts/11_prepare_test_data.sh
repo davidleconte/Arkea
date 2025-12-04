@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script : Préparation des données de test pour 11_test_feedbacks_counters.sh
 # Insère des données de test cohérentes pour tous les tests

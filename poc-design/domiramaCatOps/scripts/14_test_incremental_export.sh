@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 14 : Export Incrémental Parquet (Version Didactique)
 # Exporte les données depuis HCD vers Parquet via DSBulk + Spark

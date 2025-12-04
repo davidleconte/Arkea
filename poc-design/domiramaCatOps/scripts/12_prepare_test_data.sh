@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script : Préparation des données de test pour 12_test_historique_opposition.sh
 # Insère des données de test cohérentes pour tous les tests d'historique opposition

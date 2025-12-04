@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 40 : Démonstration Complète Data API
 # ============================================

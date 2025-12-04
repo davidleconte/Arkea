@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 38 : Vérification Endpoint Data API
 # ============================================

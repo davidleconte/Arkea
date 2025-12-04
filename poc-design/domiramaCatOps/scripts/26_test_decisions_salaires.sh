@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 26 : Tests Décisions Salaires (Version Didactique)
 # Démontre les fonctionnalités de gestion des décisions salaires

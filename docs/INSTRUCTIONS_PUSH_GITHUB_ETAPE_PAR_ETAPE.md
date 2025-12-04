@@ -84,7 +84,7 @@ gestionnaire de mots de passe, etc.)
 ### 3.1 Ouvrir le Terminal
 
 ```bash
-cd /Users/david.leconte/Documents/Arkea
+cd ${ARKEA_HOME}
 ```
 
 ### 3.2 Ajouter le Remote
@@ -231,7 +231,7 @@ prendre 5-15 minutes selon la connexion.
 
 ```bash
 # 1. Aller dans le répertoire
-cd /Users/david.leconte/Documents/Arkea
+cd ${ARKEA_HOME}
 
 # 2. Ajouter le remote
 git remote add origin https://github.com/davidleconte/Arkea.git

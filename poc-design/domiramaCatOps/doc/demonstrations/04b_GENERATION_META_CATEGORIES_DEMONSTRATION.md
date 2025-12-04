@@ -129,7 +129,7 @@ dfTyped.write
 
 ### Résultats
 
-✅ **7 fichiers Parquet générés** dans `/Users/david.leconte/Documents/Arkea/poc-design/domiramaCatOps/scripts/../data/meta-categories`  
+✅ **7 fichiers Parquet générés** dans `${ARKEA_HOME}/poc-design/domiramaCatOps/scripts/../data/meta-categories`  
 ✅ **Format** : Parquet (compression snappy)  
 ✅ **Types** : Boolean, Timestamp, Long (COUNTER), Integer
 
@@ -162,7 +162,7 @@ dfTyped.write
 
 ### Résumé de la Génération
 
-✅ **7 fichiers Parquet générés** dans `/Users/david.leconte/Documents/Arkea/poc-design/domiramaCatOps/scripts/../data/meta-categories`  
+✅ **7 fichiers Parquet générés** dans `${ARKEA_HOME}/poc-design/domiramaCatOps/scripts/../data/meta-categories`  
 ✅ **Cohérence** : Données cohérentes avec les opérations générées  
 ✅ **Distribution réaliste** : Respect des proportions métier  
 ✅ **Types corrects** : Conversion appropriée pour chaque table

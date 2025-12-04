@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 16 : Génération de Données de Test Pertinentes
 # Génère des opérations avec libellés pertinents pour les tests fuzzy search

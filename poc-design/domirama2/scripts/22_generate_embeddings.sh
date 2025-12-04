@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 22 : Génération des Embeddings ByteT5
 # Génère les embeddings pour tous les libellés existants dans HCD

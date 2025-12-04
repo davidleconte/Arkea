@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 30 : Démonstration Requêtes STARTROW/STOPROW (Version Didactique)
 # Démontre les requêtes en base avec ciblage précis via requêtes CQL directes

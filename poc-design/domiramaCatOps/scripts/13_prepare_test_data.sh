@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script : Préparation des données de test pour 13_test_dynamic_columns.sh
 # Met à jour les colonnes dérivées (meta_source, meta_device, etc.) pour les données existantes

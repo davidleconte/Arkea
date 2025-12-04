@@ -95,7 +95,7 @@ echo ""
 # Test 4 : Chemins hardcodés
 echo "📋 Test 4 : Chemins hardcodés"
 HARDCODED_PATHS=0
-HARDCODED_PATTERNS=("/Users/david.leconte" "/opt/homebrew" "INSTALL_DIR=")
+HARDCODED_PATTERNS=("${USER_HOME:-$HOME}" "/opt/homebrew" "INSTALL_DIR=")
 for pattern in "${HARDCODED_PATTERNS[@]}"; do
     while IFS= read -r file; do
         if [ -f "$file" ] && grep -q "$pattern" "$file" 2>/dev/null; then

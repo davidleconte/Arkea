@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 19 : Test Comparatif des Embeddings
 # Compare ByteT5-small vs multilingual-e5-large

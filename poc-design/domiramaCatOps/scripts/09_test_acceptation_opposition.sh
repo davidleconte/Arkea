@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 09 : Tests Acceptation/Opposition (Version Didactique)
 # Démontre les fonctionnalités acceptation/opposition via requêtes CQL
@@ -111,7 +112,7 @@ echo ""
 
 info "Vérification que HCD est démarré..."
 if ! nc -z "$HCD_HOST" "$HCD_PORT" 2>/dev/null; then
-    error "HCD n'est pas démarré sur localhost:9042"
+    error "HCD n'est pas démarré sur ${HCD_HOST:-localhost}:${HCD_PORT:-9042}"
     error "Exécutez d'abord: ./scripts/setup/03_start_hcd.sh"
     exit 1
 fi

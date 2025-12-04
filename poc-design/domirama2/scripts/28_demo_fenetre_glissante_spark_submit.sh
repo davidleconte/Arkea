@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 28 (Alternative) : Fenêtre Glissante avec spark-submit
 # ============================================

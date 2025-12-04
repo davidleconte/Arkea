@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 27 (Alternative) : Export Incrémental Parquet avec spark-shell
 # ============================================

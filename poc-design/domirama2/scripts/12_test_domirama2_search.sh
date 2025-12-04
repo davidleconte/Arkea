@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 12 : Tests de Recherche Domirama2
 # Exécute les tests de recherche full-text avec SAI

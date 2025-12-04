@@ -114,7 +114,7 @@ echo ""
 echo "📋 Test 5 : Chemins portables"
 if [ -n "${ARKEA_HOME:-}" ]; then
     # Vérifier qu'il n'y a pas de chemins hardcodés
-    if echo "$ARKEA_HOME" | grep -q "/Users/david.leconte"; then
+    if echo "$ARKEA_HOME" | grep -q "${USER_HOME:-$HOME}"; then
         test_function "Pas de chemins hardcodés" "false" "true"
     else
         test_function "Pas de chemins hardcodés" "true" "true"

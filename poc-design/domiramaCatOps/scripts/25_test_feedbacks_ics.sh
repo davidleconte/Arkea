@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 25 : Tests Feedbacks ICS (Version Didactique)
 # Démontre les fonctionnalités compteurs atomiques par ICS (code catégorie)

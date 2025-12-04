@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script : Préparation Compaction pour Éviter Tombstones
 # Objectif : Exécuter tous les prérequis nécessaires avant compaction

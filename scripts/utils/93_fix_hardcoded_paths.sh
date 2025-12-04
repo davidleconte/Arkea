@@ -31,11 +31,11 @@ BACKUP_DIR="${ARKEA_HOME}/.backup_hardcoded_paths_$(date +%Y%m%d_%H%M%S)"
 
 # Patterns de chemins hardcodés à corriger
 declare -A HARDCODED_PATTERNS=(
-    ["/Users/david.leconte/Documents/Arkea"]="\${ARKEA_HOME}"
-    ["/Users/david.leconte"]="\${USER_HOME:-$HOME}"
+    ["${ARKEA_HOME}"]="\${ARKEA_HOME}"
+    ["${USER_HOME:-$HOME}"]="\${USER_HOME:-$HOME}"
     ["/opt/homebrew"]="\${HOMEBREW_PREFIX:-/opt/homebrew}"
-    ["INSTALL_DIR=\"/Users/david.leconte/Documents/Arkea\""]="INSTALL_DIR=\"\${ARKEA_HOME}\""
-    ["INSTALL_DIR=/Users/david.leconte/Documents/Arkea"]="INSTALL_DIR=\${ARKEA_HOME}"
+    ["INSTALL_DIR=\"${ARKEA_HOME}\""]="INSTALL_DIR=\"\${ARKEA_HOME}\""
+    ["INSTALL_DIR=${ARKEA_HOME}"]="INSTALL_DIR=\${ARKEA_HOME}"
 )
 
 # =============================================================================
@@ -232,7 +232,7 @@ fi
 info "${#files_to_fix[@]} fichier(s) à corriger"
 
 # Corriger chaque fichier
-local fixed_count=0
+fixed_count=0
 for file in "${files_to_fix[@]}"; do
     if fix_file "$file"; then
         fixed_count=$((fixed_count + 1))

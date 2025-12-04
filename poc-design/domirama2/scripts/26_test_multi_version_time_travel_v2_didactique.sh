@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 26 : Test Multi-Version avec Time Travel (Version Didactique)
 # Démontre que la logique multi-version garantit :

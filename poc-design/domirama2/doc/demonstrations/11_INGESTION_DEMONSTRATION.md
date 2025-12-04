@@ -39,7 +39,7 @@
 ### Format de Données Source
 
 - **Format** : CSV
-- **Fichier** : `/Users/david.leconte/Documents/Arkea/poc-design/domirama2/data/operations_sample
+- **Fichier** : `${ARKEA_HOME}/poc-design/domirama2/data/operations_sample
 csv`
 
 - **Colonnes** : code_si, contrat, date_iso, seq, libelle, montant, etc.
@@ -51,7 +51,7 @@ csv`
 ### Code Exécuté
 
 ```scala
-val inputPath = "/Users/david.leconte/Documents/Arkea/poc-design/domirama2/data/operations_sample.csv"
+val inputPath = "${ARKEA_HOME}/poc-design/domirama2/data/operations_sample.csv"
 val spark = SparkSession.builder()
   .appName("Domirama2LoaderBatch")
   .config("spark.cassandra.connection.host", "localhost")
@@ -185,7 +185,7 @@ spark.stop()
 
 Le chargement des données a été effectué avec succès :
 
-✅ **Fichier source** : /Users/david.leconte/Documents/Arkea/poc-design/domirama2/data/operations_sample.csv
+✅ **Fichier source** : ${ARKEA_HOME}/poc-design/domirama2/data/operations_sample.csv
 ✅ **Opérations chargées** : 10010
 ✅ **Stratégie batch validée** : cat_user est null
 ✅ **Stratégie multi-version** : Conforme IBM

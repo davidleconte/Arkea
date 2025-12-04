@@ -58,8 +58,8 @@ Contient tous les logiciels installés pour le POC :
 ### Chemins Absolus
 
 ```bash
-HCD_HOME="/Users/david.leconte/Documents/Arkea/binaire/hcd-1.2.3"
-SPARK_HOME="/Users/david.leconte/Documents/Arkea/binaire/spark-3.5.1"
+HCD_HOME="${ARKEA_HOME}/binaire/hcd-1.2.3"
+SPARK_HOME="${ARKEA_HOME}/binaire/spark-3.5.1"
 KAFKA_HOME="/opt/homebrew/opt/kafka"
 ```
 

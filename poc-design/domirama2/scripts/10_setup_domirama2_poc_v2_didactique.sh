@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 10 : Configuration du POC Domirama2 (Version Didactique)
 # Crée le schéma avec toutes les colonnes nécessaires

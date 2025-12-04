@@ -163,7 +163,7 @@ grep -l '"$HCD_HOST" "$HCD_PORT"' *.sh | wc -l
 #!/bin/bash
 set -e
 
-INSTALL_DIR="/Users/david.leconte/Documents/Arkea"
+INSTALL_DIR="${ARKEA_HOME}"
 HCD_DIR="${INSTALL_DIR}/binaire/hcd-1.2.3"
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
@@ -217,7 +217,7 @@ fi
 
 ### 1. Portabilité
 
-**Avant** : Scripts fonctionnent uniquement sur `/Users/david.leconte/Documents/Arkea`  
+**Avant** : Scripts fonctionnent uniquement sur `${ARKEA_HOME}`  
 **Après** : Scripts fonctionnent sur n'importe quel environnement
 
 **Utilisation** :
@@ -292,7 +292,7 @@ command1 | command2 | command3  # Si command2 échoue, script s'arrête
 
 ```bash
 # Vérifier qu'aucun chemin hardcodé ne reste
-grep -r '/Users/david.leconte/Documents/Arkea' *.sh | grep -v '.bak' | wc -l
+grep -r '${ARKEA_HOME}' *.sh | grep -v '.bak' | wc -l
 # Résultat attendu : 0
 
 # Vérifier que tous les scripts utilisent setup_paths

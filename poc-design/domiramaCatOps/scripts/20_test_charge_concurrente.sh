@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 20 : Test Complexe P1-02 - Tests de Charge Concurrente
 # Test de charge concurrente (lecture, écriture, mixte) avec mesure latence/throughput

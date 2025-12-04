@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 21 : Configuration Fuzzy Search avec ByteT5
 # Ajout de la colonne vectorielle et de l'index pour recherche floue

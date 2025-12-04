@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script de Migration : Mise à jour des Scripts Shell
 # ============================================
@@ -101,10 +102,10 @@ fi
         info "  → localhost 9042 remplacé par \$HCD_HOST \$HCD_PORT"
     fi
 
-    if echo "$content" | grep -q "localhost:9042"; then
-        content=$(echo "$content" | sed 's/localhost:9042/$HCD_HOST:$HCD_PORT/g')
+    if echo "$content" | grep -q "${HCD_HOST:-localhost}:${HCD_PORT:-9042}"; then
+        content=$(echo "$content" | sed 's/${HCD_HOST:-localhost}:${HCD_PORT:-9042}/$HCD_HOST:$HCD_PORT/g')
         modified=true
-        info "  → localhost:9042 remplacé par \$HCD_HOST:\$HCD_PORT"
+        info "  → ${HCD_HOST:-localhost}:${HCD_PORT:-9042} remplacé par \$HCD_HOST:\$HCD_PORT"
     fi
 
     # 4. Ajouter vérification HCD si absente

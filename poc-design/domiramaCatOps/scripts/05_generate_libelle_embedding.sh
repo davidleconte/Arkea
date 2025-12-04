@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 05c : Génération des Embeddings ByteT5 (Version Didactique)
 # Génère les embeddings pour tous les libellés dans HCD
@@ -97,7 +98,7 @@ fi
 info "🔍 Vérification que HCD est prêt..."
 
 if ! "${HCD_HOME:-$HCD_DIR}/bin/cqlsh" "$HCD_HOST" "$HCD_PORT" -e 'SELECT cluster_name FROM system.local;' > /dev/null 2>&1; then
-    error "HCD n'est pas prêt ou cqlsh indisponible. Assurez-vous que HCD écoute sur localhost:9042."
+    error "HCD n'est pas prêt ou cqlsh indisponible. Assurez-vous que HCD écoute sur ${HCD_HOST:-localhost}:${HCD_PORT:-9042}."
     exit 1
 fi
 
@@ -287,7 +288,7 @@ def encode_text(tokenizer, model, text):
         return [0.0] * VECTOR_DIMENSION
 
 def main():
-    print("🔗 Connexion à HCD (localhost:9042)...")
+    print("🔗 Connexion à HCD (${HCD_HOST:-localhost}:${HCD_PORT:-9042})...")
     cluster = Cluster(['localhost'], port=9042)
     session = cluster.connect()
     # Use keyspace explicitly

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 05 : Chargement des données Operations (Version Didactique - Parquet)
 # Charge les données Parquet dans HCD via Spark avec application des règles et mise à jour des feedbacks

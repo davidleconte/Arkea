@@ -81,7 +81,7 @@ expected() { echo -e "${YELLOW}📋 $1${NC}"; }
 # ============================================
 # CONFIGURATION
 # ============================================
-INSTALL_DIR="/Users/david.leconte/Documents/Arkea"
+INSTALL_DIR="${ARKEA_HOME}"
 HCD_DIR="${INSTALL_DIR}/binaire/hcd-1.2.3"
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 SCHEMA_FILE="${SCRIPT_DIR}/schemas/XX_create_schema.cql"

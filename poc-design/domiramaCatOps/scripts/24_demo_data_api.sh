@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 24 : Démonstration Data API REST/GraphQL (Version Didactique)
 # Démontre l'utilisation et la valeur ajoutée de la Data API HCD

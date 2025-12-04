@@ -21,7 +21,7 @@ println(s"Version Spark: ${spark.version}")
 
 // Configuration Kafka
 // Utiliser la variable d'environnement ou localhost par défaut
-val kafkaBootstrapServers = sys.env.getOrElse("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
+val kafkaBootstrapServers = sys.env.getOrElse("KAFKA_BOOTSTRAP_SERVERS", "sys.env.getOrElse("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")")
 val kafkaTopic = "test-topic"
 
 println(s"\n📥 Configuration Kafka:")

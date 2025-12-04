@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 29 : Démonstration Requêtes Fenêtre Glissante (Version Didactique)
 # Démontre les requêtes en base avec fenêtre glissante via requêtes CQL directes

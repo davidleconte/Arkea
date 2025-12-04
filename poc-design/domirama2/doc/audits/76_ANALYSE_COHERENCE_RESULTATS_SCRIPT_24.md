@@ -213,7 +213,7 @@ Les tests 1, 3 et 4 retournent principalement "PRIME ANNUELLE 2024" qui n'a aucu
 **Action immédiate** :
 
 ```bash
-cd /Users/david.leconte/Documents/Arkea/poc-design/domirama2
+cd ${ARKEA_HOME}/poc-design/domirama2
 ./22_generate_embeddings.sh
 ```
 

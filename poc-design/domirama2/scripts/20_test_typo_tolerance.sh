@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 20 : Tests Tolérance aux Typos
 # Démonstration de la recherche partielle avec libelle_prefix

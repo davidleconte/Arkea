@@ -210,7 +210,7 @@ Avant de supprimer, vérifier :
 **Commande de suppression** :
 
 ```bash
-cd /Users/david.leconte/Documents/Arkea
+cd ${ARKEA_HOME}
 rm -rf hcd-1.2.3/
 ```
 

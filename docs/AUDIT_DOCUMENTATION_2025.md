@@ -55,7 +55,7 @@
 
 - Date : 2025-11-25 (ancien)
 - Redondant avec `CONFIGURATION_ENVIRONNEMENT.md`
-- Contient chemins hardcodés (`/Users/david.leconte/Documents/Arkea`)
+- Contient chemins hardcodés (`${ARKEA_HOME}`)
 - Informations minimales (36 lignes)
 
 **Action** : **Archiver** dans `docs/archive/` ou **Fusionner** avec `CONFIGURATION_ENVIRONNEMENT.md`
@@ -71,9 +71,9 @@
 **Statut** : **À METTRE À JOUR**  
 **Problèmes** :
 
-- Ligne 20 : `cd /Users/david.leconte/Documents/Arkea` (hardcodé)
-- Ligne 30 : `if [ -f "/Users/david.leconte/Documents/Arkea/.poc-profile" ]` (hardcodé)
-- Ligne 43 : `POC_HOME` = `/Users/david.leconte/Documents/Arkea` (hardcodé)
+- Ligne 20 : `cd ${ARKEA_HOME}` (hardcodé)
+- Ligne 30 : `if [ -f "${ARKEA_HOME}/.poc-profile" ]` (hardcodé)
+- Ligne 43 : `POC_HOME` = `${ARKEA_HOME}` (hardcodé)
 - Ligne 51 : `JAVA17_HOME` = `/opt/homebrew/opt/openjdk@17/...` (macOS uniquement)
 - Ne mentionne pas `.poc-config.sh` (nouveau système de configuration)
 - Ne mentionne pas la portabilité cross-platform
@@ -111,7 +111,7 @@
 **Statut** : **À METTRE À JOUR**  
 **Problèmes** :
 
-- Ligne 42 : `cd /Users/david.leconte/Documents/Arkea` (hardcodé)
+- Ligne 42 : `cd ${ARKEA_HOME}` (hardcodé)
 - Spécifique à macOS (Homebrew)
 - Ne mentionne pas `02_install_kafka_linux.sh` pour Linux
 - Ne mentionne pas la portabilité cross-platform
@@ -188,7 +188,7 @@
 **Problèmes** :
 
 - Date : 2025-12-01 (récent)
-- Ligne 5 : Chemin hardcodé `/Users/david.leconte/Documents/Arkea`
+- Ligne 5 : Chemin hardcodé `${ARKEA_HOME}`
 - Ligne 46 : Mentionne `scripts/` avec seulement `migrate_hardcoded_paths.sh` (dépassé)
 - Ligne 50 : Mentionne `hcd-1.2.3/` à la racine (peut être supprimé maintenant)
 - Ligne 51 : Mentionne `ehB /` (répertoire vide, peut être supprimé)

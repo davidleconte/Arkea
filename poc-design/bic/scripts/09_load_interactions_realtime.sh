@@ -20,7 +20,7 @@ else
     export HCD_HOST="${HCD_HOST:-localhost}"
     export HCD_PORT="${HCD_PORT:-9042}"
     export SPARK_HOME="${SPARK_HOME:-${ARKEA_HOME:-$BIC_DIR/../../..}/binaire/spark-3.5.1}"
-    export KAFKA_BOOTSTRAP_SERVERS="${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}"
+    export KAFKA_BOOTSTRAP_SERVERS="${KAFKA_BOOTSTRAP_SERVERS:-${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}}"
 fi
 
 # Sourcer les fonctions de validation
@@ -452,7 +452,7 @@ object BICStreamingKafka {
     println("📥 Lecture depuis Kafka (topic: bic-event)...")
     val kafkaDF = spark.readStream
       .format("kafka")
-      .option("kafka.bootstrap.servers", "localhost:9092")
+      .option("kafka.bootstrap.servers", "${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}")
       .option("subscribe", "bic-event")
       .option("startingOffsets", "earliest")
       .load()
@@ -575,7 +575,7 @@ println("📥 Lecture depuis Kafka (mode batch pour test)...")
 // Mode batch pour test (comme domiramaCatOps)
 val kafkaDF = spark.read
   .format("kafka")
-  .option("kafka.bootstrap.servers", "localhost:9092")
+  .option("kafka.bootstrap.servers", "${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}")
   .option("subscribe", "bic-event")
   .option("startingOffsets", "earliest")
   .option("endingOffsets", "latest")

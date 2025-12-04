@@ -64,7 +64,7 @@ fi
 - `/opt/homebrew/opt/zookeeper` (2 occurrences)
 - `/opt/homebrew/opt/openjdk@11` (5 occurrences)
 - `/opt/homebrew/opt/openjdk@17` (2 occurrences)
-- `/Users/david.leconte/Documents/Arkea` (31 occurrences dans `scripts/`, 125 dans `poc-design/`)
+- `${ARKEA_HOME}` (31 occurrences dans `scripts/`, 125 dans `poc-design/`)
 
 **Impact** : 🟡 **Moyen** - La plupart sont dans `.poc-config.sh` avec fallback Linux
 
@@ -320,8 +320,8 @@ fi
 
 | Chemin | Occurrences | Fichiers | Plateforme | Impact |
 |--------|-------------|----------|------------|--------|
-| `/Users/david.leconte/Documents/Arkea` | 31 | `scripts/` | macOS | 🔴 Critique |
-| `/Users/david.leconte/Documents/Arkea` | 125 | `poc-design/` | macOS | 🔴 Critique |
+| `${ARKEA_HOME}` | 31 | `scripts/` | macOS | 🔴 Critique |
+| `${ARKEA_HOME}` | 125 | `poc-design/` | macOS | 🔴 Critique |
 | `/opt/homebrew/opt/kafka` | 3 | `.poc-config.sh`, scripts | macOS | 🟡 Moyen |
 | `/opt/homebrew/opt/zookeeper` | 2 | `.poc-config.sh` | macOS | 🟡 Moyen |
 | `/opt/homebrew/opt/openjdk@11` | 5 | `.poc-config.sh`, scripts | macOS | 🟡 Moyen |
@@ -398,7 +398,7 @@ fi
 
 ```bash
 # AVANT
-HCD_DIR="/Users/david.leconte/Documents/Arkea/binaire/hcd-1.2.3"
+HCD_DIR="${ARKEA_HOME}/binaire/hcd-1.2.3"
 
 # APRÈS
 source "$(dirname "$0")/../../.poc-config.sh" || source "${ARKEA_HOME}/.poc-config.sh"

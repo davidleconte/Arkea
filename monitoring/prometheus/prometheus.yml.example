@@ -1,0 +1,48 @@
+# Configuration Prometheus pour ARKEA
+# Copier vers prometheus.yml et adapter selon votre environnement
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'arke-poc'
+    environment: 'development'
+
+# Configuration Alertmanager
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - 'localhost:9093'
+
+# Règles d'alerte
+rule_files:
+  - 'alerts/*.yml'
+
+# Configuration de collecte
+scrape_configs:
+  # Prometheus lui-même
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # HCD/Cassandra
+  - job_name: 'cassandra'
+    static_configs:
+      - targets: ['localhost:7072']  # JMX Exporter
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+
+  # Kafka
+  - job_name: 'kafka'
+    static_configs:
+      - targets: ['localhost:7073']  # JMX Exporter
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+
+  # Spark
+  - job_name: 'spark'
+    static_configs:
+      - targets: ['localhost:4040']  # Spark UI
+    metrics_path: '/metrics'
+    scrape_interval: 30s

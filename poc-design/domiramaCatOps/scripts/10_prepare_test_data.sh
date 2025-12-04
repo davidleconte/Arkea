@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script : Préparation des données de test pour 10_test_regles_personnalisees.sh
 # Insère des données de test cohérentes pour tous les tests

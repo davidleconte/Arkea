@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 17 : Ajout de la colonne vectorielle e5-large
 # Ajoute la colonne libelle_embedding_e5 pour multilingual-e5-large

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 41 : Démonstration Complète Data API avec Podman
 # ============================================

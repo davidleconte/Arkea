@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 21 : Test Complexe P2-05 - Tests d'Agrégations
 # Test d'agrégations temporelles, par catégorie, combinées, et performance

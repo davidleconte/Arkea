@@ -61,7 +61,7 @@ git remote -v
 ### Étape 1 : Ajouter le Remote
 
 ```bash
-cd /Users/david.leconte/Documents/Arkea
+cd ${ARKEA_HOME}
 
 # Ajouter le remote GitHub
 git remote add origin https://github.com/davidleconte/Arkea.git
@@ -258,7 +258,7 @@ echo "binaire/spark-3.5.1/" >> .gitignore
 ### Pour un Nouveau Dépôt GitHub
 
 ```bash
-cd /Users/david.leconte/Documents/Arkea
+cd ${ARKEA_HOME}
 
 # 1. Vérifier l'état
 git status

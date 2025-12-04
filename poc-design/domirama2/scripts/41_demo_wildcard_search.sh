@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 41 : Démonstration Recherche Wildcard Avancée
 # Démonstration complète de la recherche avec wildcards complexes

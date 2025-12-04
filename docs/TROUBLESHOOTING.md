@@ -505,7 +505,7 @@ echo $HCD_HOST
 **Symptômes** :
 
 ```bash
-No such file or directory: /Users/david.leconte/Documents/Arkea/binaire/hcd-1.2.3
+No such file or directory: ${ARKEA_HOME}/binaire/hcd-1.2.3
 ```
 
 **Solutions** :

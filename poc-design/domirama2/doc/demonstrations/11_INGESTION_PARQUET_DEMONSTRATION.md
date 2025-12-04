@@ -40,7 +40,7 @@
 ### Format de Données Source
 
 - **Format** : Parquet (format columnar binaire)
-- **Fichier** : `/Users/david.leconte/Documents/Arkea/poc-design/domirama2/data/operations_10000
+- **Fichier** : `${ARKEA_HOME}/poc-design/domirama2/data/operations_10000
 parquet` (répertoire Parquet)
 
 - **Structure** : Répertoire avec fichiers part-*.parquet
@@ -89,7 +89,7 @@ parquet` (répertoire Parquet)
 ### Code Exécuté
 
 ```scala
-val inputPath = "/Users/david.leconte/Documents/Arkea/poc-design/domirama2/data/operations_10000.parquet"
+val inputPath = "${ARKEA_HOME}/poc-design/domirama2/data/operations_10000.parquet"
 val spark = SparkSession.builder()
   .appName("Domirama2LoaderBatchParquet")
   .config("spark.cassandra.connection.host", "localhost")
@@ -253,7 +253,7 @@ spark.stop()
 
 Le chargement des données Parquet a été effectué avec succès :
 
-✅ **Fichier source** : /Users/david.leconte/Documents/Arkea/poc-design/domirama2/data/operations_10000.parquet
+✅ **Fichier source** : ${ARKEA_HOME}/poc-design/domirama2/data/operations_10000.parquet
 ✅ **Format** : Parquet (columnar binaire)
 ✅ **Opérations chargées** : 10010
 ✅ **Stratégie batch validée** : cat_user est null

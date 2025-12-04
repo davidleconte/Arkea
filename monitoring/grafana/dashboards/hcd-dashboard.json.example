@@ -1,0 +1,63 @@
+{
+  "dashboard": {
+    "title": "HCD Monitoring - ARKEA",
+    "tags": ["hcd", "cassandra", "arke"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 1,
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Latence Requêtes HCD",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "cassandra_client_request_latency",
+            "legendFormat": "Latence"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "ms",
+            "label": "Latence (ms)"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Débit Requêtes HCD",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(cassandra_client_request_throughput[5m])",
+            "legendFormat": "Débit"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "ops",
+            "label": "Requêtes/seconde"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Utilisation Mémoire",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "cassandra_heap_memory_used",
+            "legendFormat": "Mémoire utilisée"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "bytes",
+            "label": "Mémoire"
+          }
+        ]
+      }
+    ]
+  }
+}

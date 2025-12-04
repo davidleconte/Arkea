@@ -139,7 +139,7 @@ source .poc-profile
 
 Tous les scripts utilisent le chemin correct :
 
-- `INSTALL_DIR="/Users/david.leconte/Documents/Arkea"`
+- `INSTALL_DIR="${ARKEA_HOME}"`
 - `HCD_DIR="$INSTALL_DIR/hcd-1.2.3"`
 - `SPARK_HOME="$INSTALL_DIR/spark-3.5.1"`
 

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 04 : Création des Index SAI pour operations_by_account (Version Didactique)
 # Crée tous les index SAI nécessaires pour la recherche avancée

@@ -46,7 +46,7 @@ Un événement par ligne, format JSON :
 val jsonDF = spark.read
   .option("multiline", "false")
   .option("mode", "PERMISSIVE")
-  .json("/Users/david.leconte/Documents/Arkea/poc-design/bic/data/json/interactions_1000.json")
+  .json("${ARKEA_HOME}/poc-design/bic/data/json/interactions_1000.json")
 ```
 
 **Explication** :

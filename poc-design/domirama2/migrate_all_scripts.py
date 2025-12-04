@@ -11,7 +11,6 @@ Usage:
     python3 migrate_all_scripts.py [--dry-run]
 """
 
-import os
 import re
 import shutil
 import sys
@@ -62,14 +61,13 @@ def migrate_script(script_path):
     with open(script_path, "r", encoding="utf-8") as f:
         content = f.read()
 
-    original_content = content
     modified = False
 
     # 1. Remplacer set -e par set -euo pipefail (si pas déjà présent)
     if re.search(r"^set -e$", content, re.MULTILINE) and "set -euo pipefail" not in content:
         content = re.sub(r"^set -e$", "set -euo pipefail", content, flags=re.MULTILINE)
         modified = True
-        info(f"  → set -e remplacé par set -euo pipefail")
+        info("  → set -e remplacé par set -euo pipefail")
 
     # 2. Remplacer les chemins hardcodés INSTALL_DIR
     hardcoded_pattern = r'INSTALL_DIR="/Users/david\.leconte/Documents/Arkea"'
@@ -112,13 +110,13 @@ def migrate_script(script_path):
             content = "\n".join(new_lines)
 
         modified = True
-        info(f"  → Chemins hardcodés remplacés par détection automatique")
+        info("  → Chemins hardcodés remplacés par détection automatique")
 
     # 3. Remplacer localhost 9042 par $HCD_HOST $HCD_PORT
     # Pattern: localhost 9042 (avec ou sans guillemets)
     replacements = [
         (r"localhost 9042", '"$HCD_HOST" "$HCD_PORT"'),
-        (r"localhost:9042", '"$HCD_HOST:$HCD_PORT"'),
+        (r"${HCD_HOST:-localhost}:${HCD_PORT:-9042}", '"$HCD_HOST:$HCD_PORT"'),
         (r'"localhost" 9042', '"$HCD_HOST" "$HCD_PORT"'),
         (r"'localhost' 9042", '"$HCD_HOST" "$HCD_PORT"'),
         (
@@ -165,7 +163,7 @@ fi"""
         if re.search(old_check, content, re.MULTILINE):
             content = re.sub(old_check, new_check, content, flags=re.MULTILINE)
             modified = True
-            info(f"  → Vérification HCD améliorée")
+            info("  → Vérification HCD améliorée")
 
     # Écrire le contenu modifié
     if modified:

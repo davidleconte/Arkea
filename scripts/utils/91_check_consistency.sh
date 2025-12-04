@@ -101,7 +101,7 @@ check_hardcoded_paths() {
 
     # Patterns à rechercher
     local patterns=(
-        "/Users/david.leconte"
+        "${USER_HOME:-$HOME}"
         "/opt/homebrew"
         "INSTALL_DIR="
         "hardcod"

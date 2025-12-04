@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 21 : Test Complexe P2-04 - Tests de Contraintes Métier
 # Test de validation des contraintes métier (règles, temporelles, logiques, intégrité)

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 22 : Test Complexe P3-03 - Tests de Pagination
 # LIMIT, OFFSET, paging_state, navigation

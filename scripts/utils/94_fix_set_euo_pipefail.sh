@@ -13,15 +13,11 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-${0}}")" && pwd)"
 ARKEA_HOME="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-# Charger les fonctions portables si disponibles
-if [ -f "$ARKEA_HOME/scripts/utils/portable_functions.sh" ]; then
-    source "$ARKEA_HOME/scripts/utils/portable_functions.sh"
-else
-    info() { echo -e "\033[0;32m[INFO]\033[0m $1"; }
-    warn() { echo -e "\033[1;33m[WARN]\033[0m $1"; }
-    error() { echo -e "\033[0;31m[ERROR]\033[0m $1"; }
-    section() { echo -e "\n\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m\n\033[0;34m$1\033[0m\n\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━0m\n"; }
-fi
+# Définir les fonctions de base
+info() { echo -e "\033[0;32m[INFO]\033[0m $1"; }
+warn() { echo -e "\033[1;33m[WARN]\033[0m $1"; }
+error() { echo -e "\033[0;31m[ERROR]\033[0m $1"; }
+section() { echo -e "\n\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m\n\033[0;34m$1\033[0m\n\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m\n"; }
 
 # Variables de configuration
 DRY_RUN=false

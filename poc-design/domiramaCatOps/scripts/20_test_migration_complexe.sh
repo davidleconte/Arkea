@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 20 : Test Complexe P1-01 - Migration Incrémentale avec Validation
 # Test de migration complexe avec validation cohérence, gestion doublons, checkpointing

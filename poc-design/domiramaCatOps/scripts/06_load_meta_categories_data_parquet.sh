@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 06 : Chargement des données Meta-Categories (Version Didactique - Parquet)
 # Charge les données Parquet dans les 7 tables HCD meta-categories via Spark

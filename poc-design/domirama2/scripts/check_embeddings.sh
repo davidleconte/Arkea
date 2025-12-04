@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script : Vérification des Embeddings dans la Table
 # Vérifie si les embeddings sont déjà générés dans la table operations_by_account

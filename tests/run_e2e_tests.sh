@@ -31,6 +31,9 @@ mkdir -p "$SCRIPT_DIR/results"
 # Tests E2E disponibles
 E2E_TESTS=(
     "test_kafka_hcd_pipeline.sh"
+    "test_poc_bic_complete.sh"
+    "test_poc_domirama2_complete.sh"
+    "test_poc_domiramaCatOps_complete.sh"
 )
 
 # Exécuter chaque test E2E

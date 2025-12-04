@@ -168,7 +168,7 @@ val query = eventsDF.writeStream
       println(s"✅ Batch $batchId : $count événement(s) écrit(s)")
     }
   }
-  .option("checkpointLocation", "/Users/david.leconte/Documents/Arkea/poc-design/bic/data/checkpoints/kafka_streaming")
+  .option("checkpointLocation", "${ARKEA_HOME}/poc-design/bic/data/checkpoints/kafka_streaming")
   .outputMode("append")
   .trigger(Trigger.ProcessingTime("10 seconds"))
   .start()

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 13 : Tests API Correction Client Domirama2
 # Teste la stratégie multi-version (batch vs client)

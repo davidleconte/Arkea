@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 22 : Test Complexe P3-04 - Tests de Cache
 # Cache embeddings, résultats, invalidation

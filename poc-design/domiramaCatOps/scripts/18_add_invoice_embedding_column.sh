@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ============================================
 # Script 18 : Ajout Colonne Embedding Facturation
 # Ajoute la colonne et l'index pour le modèle spécialisé facturation
