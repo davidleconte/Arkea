@@ -1,0 +1,51 @@
+# CODEOWNERS - Arkea POC Migration HBase → HCD
+# Mis à jour: 2026-03-12
+#
+# Ce fichier définit les propriétaires de code pour les reviews automatiques.
+# Voir: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# =============================================================================
+# Propriétaire par défaut
+# =============================================================================
+
+* @davidleconte
+
+# =============================================================================
+# Scripts et Configuration
+# =============================================================================
+
+/scripts/ @davidleconte
+/.poc-config.sh @davidleconte
+/.poc-profile @davidleconte
+
+# =============================================================================
+# Documentation
+# =============================================================================
+
+/docs/ @davidleconte
+/README.md @davidleconte
+/CONTRIBUTING.md @davidleconte
+/CHANGELOG.md @davidleconte
+/AGENTS.md @davidleconte
+
+# =============================================================================
+# Business & Evidence
+# =============================================================================
+
+/business/ @davidleconte
+/evidence/ @davidleconte
+/SYNTHESE_*.md @davidleconte
+
+# =============================================================================
+# Tests
+# =============================================================================
+
+/tests/ @davidleconte
+/.github/workflows/ @davidleconte
+
+# =============================================================================
+# Sécurité
+# =============================================================================
+
+/.secrets.baseline @davidleconte
+/.pre-commit-config.yaml @davidleconte

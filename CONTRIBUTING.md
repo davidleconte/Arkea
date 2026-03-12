@@ -1,6 +1,6 @@
 # 🤝 Guide de Contribution
 
-**Date** : 2025-12-01  
+**Date** : 2025-12-01
 **Objectif** : Standards et processus de contribution au projet ARKEA
 
 ---
@@ -355,7 +355,7 @@ Description détaillée des changements
 
 Pour toute question :
 
-- 📧 Email : [votre-email]
+- 📧 Email : david.leconte1@ibm.com
 - 💬 Issues GitHub : Créer une issue
 - 📖 Documentation : Voir `docs/`
 
