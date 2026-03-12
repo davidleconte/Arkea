@@ -25,8 +25,7 @@
 ## 4) Sécurité / Remédiation
 
 - [GUIDE_SECURITE_PRODUCTION.md](GUIDE_SECURITE_PRODUCTION.md) — guide sécurité
-- [AUDIT_PROJET_2025_03.md](AUDIT_PROJET_2025_03.md) — plan de remédiation
-- [AUDIT_COMPLET_PROJET_ARKEA_2025_V2.md](AUDIT_COMPLET_PROJET_ARKEA_2025_V2.md) — audit projet de référence
+- [AUDIT_COMPLET_PROJET_ARKEA_2025_V2.md](AUDIT_COMPLET_PROJET_ARKEA_2025_V2.md) — audit complet et plan de remédiation
 
 ## 5) Guides transverses utiles
 

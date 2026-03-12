@@ -1,7 +1,7 @@
 # 🚀 POC Migration HBase → HCD (Hyper-Converged Database)
 
-**Date** : 2025-12-02
-**Version** : 1.4.0
+**Date** : 2026-03-12
+**Version** : 1.4.1
 **Objectif** : Démonstration de faisabilité de la migration HBase vers DataStax HCD
 **IBM | Opportunité ICS 006gR000001hiA5QAI - ARKEA | Ingénieur Avant-Vente** :
 David LECONTE | <david.leconte1@ibm.com> - Mobile : +33614126117
@@ -176,7 +176,7 @@ Toute la documentation est dans le répertoire `docs/` :
 - **ARCHITECTURE_POC_COMPLETE.md** - Architecture technique détaillée
 - **ANALYSE_ETAT_ART_HBASE.md** - Analyse de l'existant
 
-Voir `docs/README.md` pour l'index complet.
+Voir `docs/INDEX.md` pour l'index complet.
 
 ### 👔 Business & Executive Synthesis
 
