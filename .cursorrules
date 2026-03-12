@@ -1,0 +1,39 @@
+# .cursorrules — Contexte LLM pour Cursor/Code Assistants
+# Projet: Arkea POC Migration HBase → HCD
+# Mis à jour: 2026-03-12
+
+## Contexte
+Ce POC démontre la migration HBase → DataStax HCD (Cassandra) avec Spark/Kafka.
+Client: Arkea (institution financière française).
+
+## Stack Technique
+- HCD 1.2.3 (Cassandra 4.0.11)
+- Apache Spark 3.5.1
+- Kafka 4.1.1
+- Python 3.9+ / Scala 2.12
+
+## Fichiers à Ignorer
+- binaire/ (binaires installés)
+- software/ (archives)
+- logs/ (fichiers de log)
+- inputs-clients/, inputs-ibm/ (documents externes)
+
+## Conventions
+- Scripts Bash: cross-platform (macOS/Linux), sourcer .poc-config.sh
+- Nommage: 01-06 (setup), 70-95 (utils)
+- Docs: SYNTHESE_*.md, ANALYSE_*.md, GUIDE_*.md
+
+## Sécurité
+- Ne jamais committer de tokens/credentials
+- Pas de chemins hardcodés (utiliser $PROJECT_ROOT)
+
+## Tests
+- pytest tests/unit/ -v (unitaires)
+- pytest tests/integration/ -v (intégration)
+- ./tests/run_all_tests.sh (complet)
+
+## Documentation
+- README.md: vue d'ensemble
+- docs/INDEX.md: index canonique
+- business/: valeur métier
+- evidence/: preuves techniques

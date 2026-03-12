@@ -36,7 +36,23 @@
 - [GUIDE_CONTRIBUTION_POCS.md](GUIDE_CONTRIBUTION_POCS.md)
 - [GUIDE_MAINTENANCE.md](GUIDE_MAINTENANCE.md)
 
-## 6) Archives documentaires
+## 6) Synthèse & Résultats POC
+
+> **Point d'entrée** : [SYNTHESE_USE_CASES_POC.md](../SYNTHESE_USE_CASES_POC.md) — Vue d'ensemble des use cases PoC
+
+### 👔 Business & Valeur Métier
+
+- [ANALYSE_BENEFICES_ARKEA_MIGRATION_HCD.md](../business/ANALYSE_BENEFICES_ARKEA_MIGRATION_HCD.md) — Analyse détaillée des bénéfices/ROI
+- [DISTINCTION_BENEFICES_VS_IMPACTS_ARKEA.md](../business/DISTINCTION_BENEFICES_VS_IMPACTS_ARKEA.md) — Distinction bénéfices vs impacts
+- [SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md](../business/SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md) — Synthèse des résultats/bénéfices
+
+### 📊 Evidence & Preuves Techniques
+
+- [JUSTIFICATION_RESULTATS_POC_ARKEA.md](../evidence/JUSTIFICATION_RESULTATS_POC_ARKEA.md) — Justification et traçabilité des résultats
+- [SYNTHESE_TESTS_VECTOR_HYBRID_SEARCH_POC_ARKEA.md](../evidence/SYNTHESE_TESTS_VECTOR_HYBRID_SEARCH_POC_ARKEA.md) — Synthèse des tests vector/hybrid search
+- [NOMBRE_EXIGENCES_PAR_USE_CASE_POC_ARKEA.md](../evidence/NOMBRE_EXIGENCES_PAR_USE_CASE_POC_ARKEA.md) — Couverture des exigences par use case
+
+## 7) Archives documentaires
 
 Les audits redondants ont été déplacés ici :
 - [archive/legacy-audits/](archive/legacy-audits/)
