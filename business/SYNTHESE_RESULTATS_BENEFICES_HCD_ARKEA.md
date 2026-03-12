@@ -1,8 +1,8 @@
 # 📊 Synthèse des Résultats HCD et Bénéfices pour ARKEA
 
-**Date** : 2025-12-03  
-**Destinataire** : Direction ARKEA / COMEX IBM France  
-**Format** : Synthèse Exécutive  
+**Date** : 2025-12-03
+**Destinataire** : Direction ARKEA / COMEX IBM France
+**Format** : Synthèse Exécutive
 **IBM | Opportunité ICS 006gR000001hiA5QAI - ARKEA | Ingénieur Avant-Vente** : David LECONTE | <david.leconte1@ibm.com> - Mobile : +33614126117
 
 ---
@@ -676,6 +676,6 @@ Les impacts pour ARKEA sont **transformants** :
 
 ---
 
-**Date de création** : 2025-12-03  
-**Version** : 1.0.0  
+**Date de création** : 2025-12-03
+**Version** : 1.0.0
 **Statut** : ✅ **PRÊT POUR PRÉSENTATION**

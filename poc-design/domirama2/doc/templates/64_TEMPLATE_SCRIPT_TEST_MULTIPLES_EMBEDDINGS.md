@@ -246,7 +246,7 @@ fi
 
 echo ""
 info "📋 Configuration Hugging Face :"
-echo "   Clé API : ${HF_API_KEY:0:10}..."
+echo "   Clé API : $([ -n \"$HF_API_KEY\" ] && echo '[CONFIGURÉE]' || echo '[NON CONFIGURÉE]')"
 success "✅ Configuration OK"
 echo ""
 
@@ -337,7 +337,7 @@ echo ""
 info "📋 Configuration des tests :"
 echo "   - Partition : code_si = '$CODE_SI', contrat = '$CONTRAT'"
 echo "   - Modèle : $MODEL_NAME ($VECTOR_DIMENSION dimensions)"
-echo "   - Clé API Hugging Face : ${HF_API_KEY:0:10}..."
+echo "   - Clé API Hugging Face : $([ -n \"$HF_API_KEY\" ] && echo '[CONFIGURÉE]' || echo '[NON CONFIGURÉE]')"
 echo ""
 
 # Créer un script Python pour les tests

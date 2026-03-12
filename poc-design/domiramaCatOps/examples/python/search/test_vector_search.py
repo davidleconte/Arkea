@@ -17,7 +17,7 @@ from transformers import AutoModel, AutoTokenizer
 # Configuration
 MODEL_NAME = "google/byt5-small"
 VECTOR_DIMENSION = 1472
-HF_API_KEY = os.getenv("HF_API_KEY", "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")
+HF_API_KEY = os.getenv("HF_API_KEY")
 KEYSPACE = "domiramacatops_poc"
 
 
@@ -36,7 +36,9 @@ def encode_text(tokenizer, model, text):
     if not text or text.strip() == "":
         return [0.0] * VECTOR_DIMENSION
 
-    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
+    inputs = tokenizer(
+        text, return_tensors="pt", truncation=True, padding=True, max_length=512
+    )
     with torch.no_grad():
         encoder_outputs = model.encoder(**inputs)
         embeddings = encoder_outputs.last_hidden_state.mean(dim=1)
@@ -83,7 +85,9 @@ def main():
     print()
 
     # Récupérer un code_si et contrat pour les tests
-    sample_query = f"SELECT code_si, contrat FROM {KEYSPACE}.operations_by_account LIMIT 1"
+    sample_query = (
+        f"SELECT code_si, contrat FROM {KEYSPACE}.operations_by_account LIMIT 1"
+    )
     sample = session.execute(sample_query).one()
     if not sample:
         print("⚠️  Aucune opération trouvée")
@@ -100,7 +104,10 @@ def main():
     # Recherches ciblées sur des libellés spécifiques
     test_queries = [
         ("LOYER IMPAYE", "Recherche correcte: 'LOYER IMPAYE'"),
-        ("loyr impay", "Typo: caractères manquants ('loyr impay' au lieu de 'loyer impayé')"),
+        (
+            "loyr impay",
+            "Typo: caractères manquants ('loyr impay' au lieu de 'loyer impayé')",
+        ),
         ("LOYER PARIS", "Recherche correcte: 'LOYER PARIS'"),
         (
             "loyr parsi",
@@ -114,7 +121,10 @@ def main():
         ("CARREFOUR", "Recherche correcte: 'CARREFOUR'"),
         ("carrefur", "Typo: caractère inversé ('carrefur' au lieu de 'carrefour')"),
         ("PAIEMENT CARTE", "Recherche correcte: 'PAIEMENT CARTE'"),
-        ("paiemnt cart", "Typo: caractères manquants ('paiemnt cart' au lieu de 'paiement carte')"),
+        (
+            "paiemnt cart",
+            "Typo: caractères manquants ('paiemnt cart' au lieu de 'paiement carte')",
+        ),
     ]
 
     print("=" * 70)
@@ -142,7 +152,9 @@ def main():
                 confidence = row.cat_confidence if row.cat_confidence else "N/A"
                 # Afficher cat_user si présent, sinon cat_auto
                 cat_display = cat_user if cat_user != "N/A" else cat_auto
-                print(f"      {i}. {libelle} | {montant} | {cat_display} (conf: {confidence})")
+                print(
+                    f"      {i}. {libelle} | {montant} | {cat_display} (conf: {confidence})"
+                )
         else:
             print("   ⚠️  Aucun résultat trouvé")
 

@@ -1,7 +1,7 @@
 # 🔍 Justification des Résultats POC ARKEA - Traçabilité Complète
 
-**Date** : 2025-12-03  
-**Objectif** : Expliquer comment chaque affirmation est justifiée par les résultats concrets du POC  
+**Date** : 2025-12-03
+**Objectif** : Expliquer comment chaque affirmation est justifiée par les résultats concrets du POC
 **Format** : Traçabilité Méthodique
 
 ---
@@ -83,7 +83,7 @@ Ce document explique **méthodiquement** comment chaque affirmation sur les rés
 | **domirama2** | 63 scripts | ✅ Tous validés |
 | **domiramaCatOps** | 74 scripts | ✅ Tous validés |
 
-**Preuve** : `SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` lignes 86, 100, 114
+**Preuve** : `../business/SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` lignes 86, 100, 114
 
 ---
 
@@ -134,7 +134,7 @@ Ce document explique **méthodiquement** comment chaque affirmation sur les rés
 **Après (HCD)** :
 
 - ✅ **Démontré dans POC** : Latence lecture = < 50ms
-- ✅ **Preuve** : `SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 30 : "Latence lecture : 100-500ms → < 50ms"
+- ✅ **Preuve** : `../business/SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 30 : "Latence lecture : 100-500ms → < 50ms"
 - ✅ **Scripts de test** : `12_test_domirama2_search.sh`, `08_test_category_search.sh` validés
 
 **Calcul** :
@@ -160,7 +160,7 @@ Ce document explique **méthodiquement** comment chaque affirmation sur les rés
 **Après (HCD)** :
 
 - ✅ **Démontré dans POC** : Throughput HCD = > 10K ops/s
-- ✅ **Preuve** : `SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 32 : "Throughput écriture : 5K ops/s → > 10K ops/s"
+- ✅ **Preuve** : `../business/SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 32 : "Throughput écriture : 5K ops/s → > 10K ops/s"
 - ✅ **Scripts de test** : `11_load_domirama2_data_parquet.sh`, `05_load_operations_data_parquet.sh` validés
 
 **Calcul** : 10K / 5K = **2x plus rapide**
@@ -184,7 +184,7 @@ Ce document explique **méthodiquement** comment chaque affirmation sur les rés
 **Après (HCD + SAI)** :
 
 - ✅ **Démontré dans POC** : Index SAI persistant, pas de scan
-- ✅ **Preuve** : `SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 33 : "Charge système au login : Scan complet 10 ans → Index SAI persistant : Réduction 70%"
+- ✅ **Preuve** : `../business/SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 33 : "Charge système au login : Scan complet 10 ans → Index SAI persistant : Réduction 70%"
 - ✅ **Scripts de test** : `12_test_domirama2_search.sh` validé
 
 **Justification** :
@@ -215,7 +215,7 @@ Ce document explique **méthodiquement** comment chaque affirmation sur les rés
   - Yarn (orchestration)
   - ZooKeeper (coordination)
   - Solr (indexation externe)
-- ✅ **Source** : `SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 44
+- ✅ **Source** : `../business/SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 44
 
 **Après (HCD)** :
 
@@ -247,7 +247,7 @@ Ce document explique **méthodiquement** comment chaque affirmation sur les rés
 
 **Estimation** :
 
-- ✅ **Source** : `SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 220 : "Maintenance stack : -40% (stack moderne)"
+- ✅ **Source** : `../business/SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 220 : "Maintenance stack : -40% (stack moderne)"
 - ✅ **Justification** : Réduction complexité + stack moderne = réduction coûts maintenance
 
 **Preuve Indirecte** :
@@ -267,7 +267,7 @@ Ce document explique **méthodiquement** comment chaque affirmation sur les rés
 
 **Estimation** :
 
-- ✅ **Source** : `SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 221 : "Infrastructure : -20% (consolidation cluster)"
+- ✅ **Source** : `../business/SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 221 : "Infrastructure : -20% (consolidation cluster)"
 - ✅ **Source IBM** : `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md` ligne 433 : "Réutilisation du matériel"
 
 **Preuve Indirecte** :
@@ -287,7 +287,7 @@ Ce document explique **méthodiquement** comment chaque affirmation sur les rés
 
 **Estimation** :
 
-- ✅ **Source** : `SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 222 : "Support : -30% (support long-terme)"
+- ✅ **Source** : `../business/SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 222 : "Support : -30% (support long-terme)"
 - ✅ **Source IBM** : `inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md` ligne 435 : "On pourra cesser de payer la souscription Hortonworks"
 
 **Preuve Indirecte** :
@@ -326,7 +326,7 @@ Ce document explique **méthodiquement** comment chaque affirmation sur les rés
 **Preuve** :
 
 - ✅ **Démontré** : Architecture HCD cloud-native
-- ✅ **Source** : `SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 47 : "Cloud-native : ✅"
+- ✅ **Source** : `../business/SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 47 : "Cloud-native : ✅"
 - ✅ **Comparaison** : Architecture HBase (legacy) vs HCD (cloud-native) documentée
 
 #### 4.4 Scalable Horizontalement
@@ -334,7 +334,7 @@ Ce document explique **méthodiquement** comment chaque affirmation sur les rés
 **Preuve** :
 
 - ✅ **Démontré** : Architecture HCD distribuée
-- ✅ **Source** : `SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 34 : "Scalabilité : Verticale limitée → Horizontale illimitée"
+- ✅ **Source** : `../business/SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 34 : "Scalabilité : Verticale limitée → Horizontale illimitée"
 - ✅ **Comparaison** : Architecture HBase (verticale) vs HCD (horizontale) documentée
 
 ---
@@ -354,7 +354,7 @@ Ce document explique **méthodiquement** comment chaque affirmation sur les rés
 - ✅ **Démontré dans POC** : Recherche vectorielle native validée
 - ✅ **Scripts** : `22_generate_embeddings.sh`, `23_test_fuzzy_search.sh` (domirama2)
 - ✅ **Scripts** : `05_generate_libelle_embedding.sh`, `16_test_fuzzy_search.sh` (domiramaCatOps)
-- ✅ **Source** : `SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 61 : "Recherche vectorielle : ✅ Native | ✅ Validé"
+- ✅ **Source** : `../business/SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 61 : "Recherche vectorielle : ✅ Native | ✅ Validé"
 
 #### 5.2 Recherche Hybride
 
@@ -363,7 +363,7 @@ Ce document explique **méthodiquement** comment chaque affirmation sur les rés
 - ✅ **Démontré dans POC** : Recherche hybride (full-text + vector) validée
 - ✅ **Scripts** : `25_test_hybrid_search.sh` (domirama2)
 - ✅ **Scripts** : `18_test_hybrid_search.sh` (domiramaCatOps)
-- ✅ **Source** : `SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 62 : "Recherche hybride : ✅ Native | ✅ Validé"
+- ✅ **Source** : `../business/SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 62 : "Recherche hybride : ✅ Native | ✅ Validé"
 
 #### 5.3 Multi-Modèles d'Embeddings
 
@@ -374,7 +374,7 @@ Ce document explique **méthodiquement** comment chaque affirmation sur les rés
   - e5-large
   - invoice
 - ✅ **Scripts** : `17_add_e5_embedding_column.sh`, `18_add_invoice_embedding_column.sh` (domiramaCatOps)
-- ✅ **Source** : `SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 110 : "Multi-modèles : 3 modèles d'embeddings (ByteT5, e5-large, invoice)"
+- ✅ **Source** : `../business/SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 110 : "Multi-modèles : 3 modèles d'embeddings (ByteT5, e5-large, invoice)"
 
 #### 5.4 APIs REST/GraphQL
 
@@ -383,7 +383,7 @@ Ce document explique **méthodiquement** comment chaque affirmation sur les rés
 - ✅ **Démontré dans POC** : Data API REST/GraphQL validée
 - ✅ **Scripts** : `36_setup_data_api.sh`, `37_demo_data_api.sh` (domirama2)
 - ✅ **Scripts** : `24_demo_data_api.sh` (domiramaCatOps)
-- ✅ **Source** : `SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 69 : "API : ✅ REST/GraphQL | ✅ Validé"
+- ✅ **Source** : `../business/SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 69 : "API : ✅ REST/GraphQL | ✅ Validé"
 
 ---
 
@@ -401,7 +401,7 @@ Ce document explique **méthodiquement** comment chaque affirmation sur les rés
 
 - ✅ **Démontré** : Latence recherche < 50ms (vs 2-5s avant)
 - ✅ **Démontré** : Latence lecture < 50ms (vs 100-500ms avant)
-- ✅ **Source** : `SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` lignes 30-31
+- ✅ **Source** : `../business/SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` lignes 30-31
 
 #### 6.2 Meilleure Disponibilité
 
@@ -409,7 +409,7 @@ Ce document explique **méthodiquement** comment chaque affirmation sur les rés
 
 - ✅ **Architecture** : Architecture distribuée résiliente (pas de single point of failure)
 - ✅ **Démontré** : Scripts de test validés avec architecture distribuée
-- ✅ **Source** : `SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 203 : "Architecture distribuée : Pas de single point of failure"
+- ✅ **Source** : `../business/SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 203 : "Architecture distribuée : Pas de single point of failure"
 
 #### 6.3 Recherche Avancée
 
@@ -417,7 +417,7 @@ Ce document explique **méthodiquement** comment chaque affirmation sur les rés
 
 - ✅ **Démontré** : Full-text, fuzzy, vector, hybrid, LIKE/wildcard validés
 - ✅ **Scripts** : Scripts de recherche avancée validés dans tous les POCs
-- ✅ **Source** : `SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 95 : "Recherche avancée : Full-text, fuzzy, vector, hybrid, LIKE/wildcard"
+- ✅ **Source** : `../business/SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 95 : "Recherche avancée : Full-text, fuzzy, vector, hybrid, LIKE/wildcard"
 
 #### 6.4 Productivité Conseillers
 
@@ -425,7 +425,7 @@ Ce document explique **méthodiquement** comment chaque affirmation sur les rés
 
 - ✅ **Latence** : Temps de réponse 40-100x amélioré = productivité améliorée
 - ✅ **Recherche** : Recherche avancée = recherche plus efficace
-- ✅ **Source** : `SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 179 : "Productivité conseillers : Recherche efficace"
+- ✅ **Source** : `../business/SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 179 : "Productivité conseillers : Recherche efficace"
 
 ---
 
@@ -456,7 +456,7 @@ Ce document explique **méthodiquement** comment chaque affirmation sur les rés
 
 **Estimation** :
 
-- ✅ **Source** : `SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 225 : "ROI Estimé : **Positif dès année 2**"
+- ✅ **Source** : `../business/SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 225 : "ROI Estimé : **Positif dès année 2**"
 - ✅ **Justification** : Réduction coûts significative vs investissement initial
 
 **Preuve Indirecte** :
@@ -475,13 +475,13 @@ Ce document explique **méthodiquement** comment chaque affirmation sur les rés
 
 - ✅ **Preuve** : Solr externe remplacé par SAI natif intégré
 - ✅ **Démontré** : Scripts de recherche utilisent SAI natif
-- ✅ **Source** : `SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 234 : "Dépendance Solr : Remplacement par SAI natif"
+- ✅ **Source** : `../business/SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 234 : "Dépendance Solr : Remplacement par SAI natif"
 
 **Scalabilité** :
 
 - ✅ **Preuve** : Scalabilité horizontale illimitée vs verticale limitée
 - ✅ **Démontré** : Architecture HCD distribuée
-- ✅ **Source** : `SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 34 : "Scalabilité : Verticale limitée → Horizontale illimitée"
+- ✅ **Source** : `../business/SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` ligne 34 : "Scalabilité : Verticale limitée → Horizontale illimitée"
 
 ---
 
@@ -554,6 +554,6 @@ Ce document explique **méthodiquement** comment chaque affirmation sur les rés
 
 ---
 
-**Date de création** : 2025-12-03  
-**Version** : 1.0.0  
+**Date de création** : 2025-12-03
+**Version** : 1.0.0
 **Statut** : ✅ **JUSTIFICATION COMPLÈTE ET TRACABLE**

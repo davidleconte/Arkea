@@ -367,7 +367,7 @@ echo ""
 info "📋 Configuration des tests :"
 echo "   - Partition : code_si = '$CODE_SI', contrat = '$CONTRAT'"
 echo "   - Modèle : google/byt5-small (1472 dimensions)"
-echo "   - Clé API Hugging Face : ${HF_API_KEY:0:10}..."
+echo "   - Clé API Hugging Face : $([ -n \"$HF_API_KEY\" ] && echo '[CONFIGURÉE]' || echo '[NON CONFIGURÉE]')"
 echo ""
 
 # Créer un script Python amélioré pour la démonstration
@@ -663,7 +663,7 @@ sed -i '' "s/CONTRAT_PLACEHOLDER/$CONTRAT/g" "$TEMP_SCRIPT"
 sed -i '' "s|RESULTS_FILE_PLACEHOLDER|$TEMP_RESULTS|g" "$TEMP_SCRIPT"
 
 info "🚀 Exécution des tests..."
-info "   Clé API Hugging Face : ${HF_API_KEY:0:10}..."
+info "   Clé API Hugging Face : $([ -n \"$HF_API_KEY\" ] && echo '[CONFIGURÉE]' || echo '[NON CONFIGURÉE]')"
 echo ""
 
 HF_API_KEY="$HF_API_KEY" python3 "$TEMP_SCRIPT"

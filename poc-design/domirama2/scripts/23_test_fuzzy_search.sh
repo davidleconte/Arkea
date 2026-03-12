@@ -235,7 +235,7 @@ sed -i '' "s/CODE_SI/$CODE_SI/g" "$TEMP_SCRIPT"
 sed -i '' "s/CONTRAT/$CONTRAT/g" "$TEMP_SCRIPT"
 
 info "🚀 Exécution des tests..."
-info "   Clé API Hugging Face: ${HF_API_KEY:0:10}..."
+info "   Clé API Hugging Face: $([ -n \"$HF_API_KEY\" ] && echo '[CONFIGURÉE]' || echo '[NON CONFIGURÉE]')"
 HF_API_KEY="$HF_API_KEY" python3 "$TEMP_SCRIPT"
 
 rm -f "$TEMP_SCRIPT"

@@ -1,6 +1,6 @@
 # 📊 Nombre d'Exigences par Use Case - POC ARKEA
 
-**Date** : 2025-12-03  
+**Date** : 2025-12-03
 **Objectif** : Récapitulatif du nombre d'exigences par use case pour chaque POC ARKEA
 
 ---
@@ -248,6 +248,6 @@
 
 ---
 
-**Date de création** : 2025-12-03  
-**Version** : 1.0.0  
+**Date de création** : 2025-12-03
+**Version** : 1.0.0
 **Statut** : ✅ **COMPLET**

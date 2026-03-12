@@ -1,10 +1,10 @@
 # 🚀 POC Migration HBase → HCD (Hyper-Converged Database)
 
-**Date** : 2025-12-02  
-**Version** : 1.4.0  
-**Objectif** : Démonstration de faisabilité de la migration HBase vers DataStax HCD  
+**Date** : 2025-12-02
+**Version** : 1.4.0
+**Objectif** : Démonstration de faisabilité de la migration HBase vers DataStax HCD
 **IBM | Opportunité ICS 006gR000001hiA5QAI - ARKEA | Ingénieur Avant-Vente** :
-David LECONTE | <david.leconte1@ibm.com> - Mobile : +33614126117  
+David LECONTE | <david.leconte1@ibm.com> - Mobile : +33614126117
 **License** : [Apache 2.0](LICENSE)
 
 ---
@@ -177,6 +177,19 @@ Toute la documentation est dans le répertoire `docs/` :
 - **ANALYSE_ETAT_ART_HBASE.md** - Analyse de l'existant
 
 Voir `docs/README.md` pour l'index complet.
+
+### 👔 Business & Executive Synthesis
+
+- [SYNTHESE_USE_CASES_POC.md](SYNTHESE_USE_CASES_POC.md) — Vue d’ensemble des use cases PoC
+- [business/ANALYSE_BENEFICES_ARKEA_MIGRATION_HCD.md](business/ANALYSE_BENEFICES_ARKEA_MIGRATION_HCD.md) — Analyse détaillée des bénéfices/ROI
+- [business/DISTINCTION_BENEFICES_VS_IMPACTS_ARKEA.md](business/DISTINCTION_BENEFICES_VS_IMPACTS_ARKEA.md) — Distinction bénéfices vs impacts
+- [business/SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md](business/SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md) — Synthèse des résultats/bénéfices
+
+### 📊 Results & Evidence
+
+- [evidence/JUSTIFICATION_RESULTATS_POC_ARKEA.md](evidence/JUSTIFICATION_RESULTATS_POC_ARKEA.md) — Justification et traçabilité des résultats
+- [evidence/SYNTHESE_TESTS_VECTOR_HYBRID_SEARCH_POC_ARKEA.md](evidence/SYNTHESE_TESTS_VECTOR_HYBRID_SEARCH_POC_ARKEA.md) — Synthèse des tests vector/hybrid search
+- [evidence/NOMBRE_EXIGENCES_PAR_USE_CASE_POC_ARKEA.md](evidence/NOMBRE_EXIGENCES_PAR_USE_CASE_POC_ARKEA.md) — Couverture des exigences par use case
 
 ---
 

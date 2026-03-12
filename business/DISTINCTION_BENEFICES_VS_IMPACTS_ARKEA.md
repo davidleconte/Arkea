@@ -1,7 +1,7 @@
 # 🔍 Distinction Bénéfices vs Impacts pour ARKEA
 
-**Date** : 2025-12-03  
-**Objectif** : Clarifier la distinction conceptuelle entre bénéfices et impacts pour la migration HBase → HCD  
+**Date** : 2025-12-03
+**Objectif** : Clarifier la distinction conceptuelle entre bénéfices et impacts pour la migration HBase → HCD
 **Format** : Analyse Conceptuelle
 
 ---
@@ -372,6 +372,6 @@
 
 ---
 
-**Date de création** : 2025-12-03  
-**Version** : 1.0.0  
+**Date de création** : 2025-12-03
+**Version** : 1.0.0
 **Statut** : ✅ **DISTINCTION CLARIFIÉE**

@@ -127,7 +127,7 @@ if [ -z "$HF_API_KEY" ]; then
 fi
 
 info "📝 Note: La génération d'embeddings ByteT5 nécessite Python/transformers"
-info "   Clé API Hugging Face: ${HF_API_KEY:0:10}..."
+info "   Clé API Hugging Face: $([ -n \"$HF_API_KEY\" ] && echo '[CONFIGURÉE]' || echo '[NON CONFIGURÉE]')"
 info ""
 
 # Vérifier si le script Python amélioré existe, sinon utiliser l'ancien

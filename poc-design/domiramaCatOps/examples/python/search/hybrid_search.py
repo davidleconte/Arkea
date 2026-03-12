@@ -18,7 +18,7 @@ from transformers import AutoModel, AutoTokenizer
 # Configuration
 MODEL_NAME = "google/byt5-small"
 VECTOR_DIMENSION = 1472
-HF_API_KEY = os.getenv("HF_API_KEY", "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")
+HF_API_KEY = os.getenv("HF_API_KEY")
 KEYSPACE = "domiramacatops_poc"
 
 
@@ -35,7 +35,9 @@ def encode_text(tokenizer, model, text):
     if not text or text.strip() == "":
         return [0.0] * VECTOR_DIMENSION
 
-    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
+    inputs = tokenizer(
+        text, return_tensors="pt", truncation=True, padding=True, max_length=512
+    )
     with torch.no_grad():
         encoder_outputs = model.encoder(**inputs)
         embeddings = encoder_outputs.last_hidden_state.mean(dim=1)
@@ -96,7 +98,9 @@ def hybrid_search(session, query_text, code_si, contrat, limit=10, use_fulltext=
         # Si la recherche hybride échoue (ex: terme non trouvé en full-text),
         # Fallback sur recherche vectorielle pure
         if use_fulltext:
-            return hybrid_search(session, query_text, code_si, contrat, limit, use_fulltext=False)
+            return hybrid_search(
+                session, query_text, code_si, contrat, limit, use_fulltext=False
+            )
         else:
             print(f"   ❌ Erreur: {str(e)}")
             return []
@@ -209,7 +213,9 @@ def main():
     print()
 
     # Récupérer un code_si et contrat pour les tests
-    sample_query = f"SELECT code_si, contrat FROM {KEYSPACE}.operations_by_account LIMIT 1"
+    sample_query = (
+        f"SELECT code_si, contrat FROM {KEYSPACE}.operations_by_account LIMIT 1"
+    )
     sample = session.execute(sample_query).one()
     if not sample:
         print("⚠️  Aucune opération trouvée")

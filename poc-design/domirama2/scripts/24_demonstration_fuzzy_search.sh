@@ -112,7 +112,7 @@ if [ -z "$HF_API_KEY" ]; then
 fi
 
 info "📋 ÉTAPE 3 : Test de génération d'embedding"
-info "   Clé API Hugging Face: ${HF_API_KEY:0:10}..."
+info "   Clé API Hugging Face: $([ -n \"$HF_API_KEY\" ] && echo '[CONFIGURÉE]' || echo '[NON CONFIGURÉE]')"
 info "   Test avec le texte: 'LOYER IMPAYE PARIS'"
 echo ""
 HF_API_KEY="$HF_API_KEY" python3 "$SCRIPT_DIR/examples/python/embeddings/generate_embeddings_bytet5.py" "LOYER IMPAYE PARIS"
