@@ -1,7 +1,7 @@
 # 🎯 Prochaines Étapes - ARKEA
 
-**Date** : 2025-12-02  
-**Statut** : ✅ **3 Priorités Critiques Terminées**  
+**Date** : 2025-12-02
+**Statut** : ✅ **3 Priorités Critiques Terminées**
 **Score actuel** : **~94.0/100** (amélioration de 89.5 → 94.0)
 
 ---
@@ -26,10 +26,10 @@
 
 #### 1. Développer Tests ⭐ **RECOMMANDÉ EN PRIORITÉ**
 
-**Impact** : +5 points (94.0 → 99.0)  
-**Effort** : 5-7 jours  
-**ROI** : Très élevé  
-**Score actuel** : 75/100  
+**Impact** : +5 points (94.0 → 99.0)
+**Effort** : 5-7 jours
+**ROI** : Très élevé
+**Score actuel** : 75/100
 **Score cible** : 90/100
 
 **Actions détaillées** :
@@ -75,10 +75,10 @@
 
 #### 2. Corriger Scripts sans `set -euo pipefail`
 
-**Impact** : +1 point (99.0 → 100.0)  
-**Effort** : 1 jour  
-**ROI** : Élevé  
-**Score actuel** : 92/100  
+**Impact** : +1 point (99.0 → 100.0)
+**Effort** : 1 jour
+**ROI** : Élevé
+**Score actuel** : 92/100
 **Score cible** : 95/100
 
 **Actions** :
@@ -108,10 +108,10 @@
 
 #### 3. Documenter Sécurité Production
 
-**Impact** : +1 point (sécurité)  
-**Effort** : 1-2 jours  
-**ROI** : Moyen  
-**Score actuel** : 88/100  
+**Impact** : +1 point (sécurité)
+**Effort** : 1-2 jours
+**ROI** : Moyen
+**Score actuel** : 88/100
 **Score cible** : 90/100
 
 **Actions** :
@@ -146,8 +146,8 @@
 
 #### 4. Harmoniser Documentation POCs
 
-**Impact** : +0.5 point (cohérence)  
-**Effort** : 2-3 jours  
+**Impact** : +0.5 point (cohérence)
+**Effort** : 2-3 jours
 **ROI** : Faible
 
 **Actions** :
@@ -160,8 +160,8 @@
 
 #### 5. Ajouter Monitoring et Observabilité
 
-**Impact** : +1 point (maintenance)  
-**Effort** : 2-3 jours  
+**Impact** : +1 point (maintenance)
+**Effort** : 2-3 jours
 **ROI** : Moyen
 
 **Actions** :
@@ -338,7 +338,7 @@
 
 ## 📚 Références
 
-- `docs/AUDIT_INTEGRAL_PROJET_ARKEA_2025.md` - Audit complet avec recommandations
+- `docs/archive/legacy-audits/AUDIT_INTEGRAL_PROJET_ARKEA_2025.md` - Audit complet avec recommandations
 - `docs/PLAN_ACTION_PRIORITES_1_ET_3.md` - Plan d'action détaillé tests et CI/CD
 - `docs/RESUME_IMPLEMENTATION_PRIORITES_2025.md` - Résumé implémentation 3 priorités critiques
 - `tests/README.md` - Guide des tests
@@ -360,6 +360,6 @@ Les **prochaines étapes recommandées** sont :
 
 ---
 
-**Date** : 2025-12-02  
-**Version** : 1.0.0  
+**Date** : 2025-12-02
+**Version** : 1.0.0
 **Statut** : ✅ **Prochaines étapes définies**

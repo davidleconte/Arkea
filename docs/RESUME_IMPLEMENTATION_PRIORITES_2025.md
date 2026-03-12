@@ -1,7 +1,7 @@
 # ✅ Résumé de l'Implémentation des 3 Priorités Critiques - ARKEA
 
-**Date** : 2025-12-02  
-**Statut** : ✅ **Terminé**  
+**Date** : 2025-12-02
+**Statut** : ✅ **Terminé**
 **Script utilisé** : `scripts/utils/fix_priorities.py`
 
 ---
@@ -42,9 +42,9 @@ portabilité.
 
 ### Fichiers Principaux Corrigés
 
-- `docs/AUDIT_INTEGRAL_PROJET_ARKEA_2025.md`
+- `docs/archive/legacy-audits/AUDIT_INTEGRAL_PROJET_ARKEA_2025.md`
 - `docs/AUDIT_COMPLET_PROJET_ARKEA_2025_V2.md`
-- `docs/AUDIT_COMPLET_RACINE_ARKEA_2025.md`
+- `docs/archive/legacy-audits/AUDIT_COMPLET_RACINE_ARKEA_2025.md`
 - `poc-design/domiramaCatOps/scripts/*.sh`
 - `poc-design/domirama2/doc/**/*.md`
 - `scripts/utils/93_fix_hardcoded_paths.sh`
@@ -251,6 +251,6 @@ plus **portable**, **configurable**, et **propre**.
 
 ---
 
-**Date** : 2025-12-02  
-**Version** : 1.0.0  
+**Date** : 2025-12-02
+**Version** : 1.0.0
 **Statut** : ✅ **Implémentation terminée**

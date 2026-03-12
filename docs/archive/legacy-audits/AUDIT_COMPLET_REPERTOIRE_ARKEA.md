@@ -1,15 +1,15 @@
 # 🔍 Audit Complet du Répertoire ARKEA
 
-**Date** : 2025-12-01  
-**Version** : 1.0.0  
+**Date** : 2025-12-01
+**Version** : 1.0.0
 **Objectif** : Audit exhaustif du contenu du répertoire ARKEA et analyse de l'utilisation de `poc-design/domirama`
 
 ---
 
 ## 📊 Résumé Exécutif
 
-**Répertoire Racine** : `${ARKEA_HOME}`  
-**Date Audit** : 2025-12-01  
+**Répertoire Racine** : `${ARKEA_HOME}`
+**Date Audit** : 2025-12-01
 **Statut** : ✅ **Audit complet terminé**
 
 ### Structure Principale
@@ -70,8 +70,8 @@ Arkea/
 
 ### 2.1 Contenu du Répertoire
 
-**Répertoire** : `poc-design/domirama/`  
-**Taille** : ~100 KB  
+**Répertoire** : `poc-design/domirama/`
+**Taille** : ~100 KB
 **Date création** : 2025-11-25 (POC initial)
 
 #### Fichiers Présents
@@ -323,6 +323,6 @@ poc-design/
 
 ---
 
-**Date** : 2025-12-01  
-**Version** : 1.0.0  
+**Date** : 2025-12-01
+**Version** : 1.0.0
 **Statut** : ✅ Audit complet terminé

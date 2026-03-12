@@ -1,8 +1,8 @@
 # 🔍 Audit Complet du Projet ARKEA - Version 2
 
-**Date** : 2025-12-02  
-**Objectif** : Audit exhaustif du projet ARKEA après nettoyage initial pour identifier corrections et enrichissements  
-**Version** : 2.0.0  
+**Date** : 2025-12-02
+**Objectif** : Audit exhaustif du projet ARKEA après nettoyage initial pour identifier corrections et enrichissements
+**Version** : 2.0.0
 **Statut** : ✅ **Audit complet**
 
 ---
@@ -244,7 +244,7 @@
 
 #### ⚠️ `.poc-profile` - Fallback hardcodé
 
-**Statut** : **À CORRIGER**  
+**Statut** : **À CORRIGER**
 **Problème** :
 
 - Ligne 22 : `export POC_HOME="${ARKEA_HOME:-${ARKEA_HOME}}"`
@@ -272,7 +272,7 @@ export POC_HOME="${ARKEA_HOME}"
 
 #### ⚠️ ~25 fichiers avec références hardcodées
 
-**Statut** : **À CORRIGER**  
+**Statut** : **À CORRIGER**
 **Problèmes identifiés** :
 
 - Références à `${USER_HOME:-$HOME}` dans documentation
@@ -294,7 +294,7 @@ export POC_HOME="${ARKEA_HOME}"
 
 #### ⚠️ Scripts dans les POCs
 
-**Statut** : **À CORRIGER**  
+**Statut** : **À CORRIGER**
 **Problème** :
 
 - Quelques scripts dans `poc-design/*/scripts/` sans `set -euo pipefail`
@@ -316,7 +316,7 @@ find poc-design -type f -name "*.sh" ! -path "*/archive/*" \
 
 #### ⚠️ Fichiers avec noms incorrects
 
-**Statut** : **À SUPPRIMER**  
+**Statut** : **À SUPPRIMER**
 **Problème** :
 
 - Fichier `=` (nom invalide)
@@ -344,7 +344,7 @@ rm -f binaire/hcd-1.2.3/=
 
 #### ⚠️ Scripts avec `localhost` hardcodé
 
-**Statut** : **À VÉRIFIER**  
+**Statut** : **À VÉRIFIER**
 **Problème** :
 
 - Références à `localhost:9042`, `localhost:9092`, `localhost:2181` dans scripts
@@ -360,7 +360,7 @@ rm -f binaire/hcd-1.2.3/=
 
 #### ⚠️ Guide de choix de POC
 
-**Statut** : **MANQUANT**  
+**Statut** : **MANQUANT**
 **Problème** :
 
 - Pas de guide expliquant les différences entre BIC, domirama2, domiramaCatOps
@@ -378,7 +378,7 @@ rm -f binaire/hcd-1.2.3/=
 
 #### ⚠️ Guide de contribution spécifique aux POCs
 
-**Statut** : **À CRÉER**  
+**Statut** : **À CRÉER**
 **Problème** :
 
 - `CONTRIBUTING.md` général
@@ -396,7 +396,7 @@ rm -f binaire/hcd-1.2.3/=
 
 #### ⚠️ Guide de maintenance
 
-**Statut** : **MANQUANT**  
+**Statut** : **MANQUANT**
 **Problème** :
 
 - Pas de guide pour maintenir le projet
@@ -416,7 +416,7 @@ rm -f binaire/hcd-1.2.3/=
 
 #### ⚠️ Structure des scripts
 
-**Statut** : **À HARMONISER**  
+**Statut** : **À HARMONISER**
 **Problème** :
 
 - BIC : Scripts 01-20 (numérotés)
@@ -434,7 +434,7 @@ rm -f binaire/hcd-1.2.3/=
 
 #### ⚠️ Structure de documentation
 
-**Statut** : **À HARMONISER**  
+**Statut** : **À HARMONISER**
 **Problème** :
 
 - BIC : Structure `doc/` avec sous-répertoires
@@ -454,7 +454,7 @@ rm -f binaire/hcd-1.2.3/=
 
 #### ⚠️ Tests unitaires et d'intégration
 
-**Statut** : **STRUCTURE PRÊTE, TESTS À DÉVELOPPER**  
+**Statut** : **STRUCTURE PRÊTE, TESTS À DÉVELOPPER**
 **Problème** :
 
 - Structure `tests/` existe (unit/, integration/, e2e/)
@@ -484,7 +484,7 @@ rm -f binaire/hcd-1.2.3/=
 
 #### 📝 Script de vérification de cohérence
 
-**Statut** : **À CRÉER**  
+**Statut** : **À CRÉER**
 **Fonctionnalités** :
 
 - Vérifier chemins hardcodés
@@ -498,7 +498,7 @@ rm -f binaire/hcd-1.2.3/=
 
 #### 📝 Script de génération de documentation
 
-**Statut** : **À CRÉER**  
+**Statut** : **À CRÉER**
 **Fonctionnalités** :
 
 - Générer index automatique
@@ -514,7 +514,7 @@ rm -f binaire/hcd-1.2.3/=
 
 #### 📝 Guide de migration entre POCs
 
-**Statut** : **À CRÉER**  
+**Statut** : **À CRÉER**
 **Contenu proposé** :
 
 - Comparaison des 3 POCs (BIC, domirama2, domiramaCatOps)
@@ -528,7 +528,7 @@ rm -f binaire/hcd-1.2.3/=
 
 #### 📝 Guide de comparaison POCs
 
-**Statut** : **À CRÉER**  
+**Statut** : **À CRÉER**
 **Contenu proposé** :
 
 - Tableau comparatif détaillé
@@ -544,7 +544,7 @@ rm -f binaire/hcd-1.2.3/=
 
 #### 📝 Tests de portabilité dans CI
 
-**Statut** : **À ENRICHIR**  
+**Statut** : **À ENRICHIR**
 **Problème** :
 
 - `.github/workflows/test-multi-os.yml` existe mais basique
@@ -864,13 +864,13 @@ Le projet ARKEA est **globalement en excellent état** avec un **score de confor
 - `docs/AUDIT_BONNES_PRATIQUES_RACINE_2025.md` - Audit des bonnes pratiques
 - `docs/ANALYSE_DOUBLON_HCD_1_2_3.md` - Analyse du doublon
 - `docs/ANALYSE_AMELIORATION_RACINE_ARKEA.md` - Analyse d'amélioration
-- `docs/AUDIT_INTEGRAL_PROJET_ARKEA_2025.md` - Audit intégral complet
+- `docs/archive/legacy-audits/AUDIT_INTEGRAL_PROJET_ARKEA_2025.md` - Audit intégral complet
 - `docs/AUDIT_DOCUMENTATION_2025.md` - Audit de la documentation
 - `CONTRIBUTING.md` - Guide de contribution
 - `CHANGELOG.md` - Historique des changements
 
 ---
 
-**Date** : 2025-12-02  
-**Version** : 2.0.0  
+**Date** : 2025-12-02
+**Version** : 2.0.0
 **Statut** : ✅ **Audit complet - Projet en excellent état**

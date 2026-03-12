@@ -1,8 +1,8 @@
 # 🔍 Audit Complet de la Racine ARKEA - 2025
 
-**Date** : 2025-12-02  
-**Objectif** : Audit exhaustif du répertoire ARKEA depuis sa racine pour identifier corrections et enrichissements  
-**Version** : 1.0.0  
+**Date** : 2025-12-02
+**Objectif** : Audit exhaustif du répertoire ARKEA depuis sa racine pour identifier corrections et enrichissements
+**Version** : 1.0.0
 **Statut** : ✅ **Audit complet**
 
 ---
@@ -37,7 +37,7 @@
 
 #### ❌ `hcd-1.2.3/` à la racine
 
-**Statut** : **DOUBLON**  
+**Statut** : **DOUBLON**
 **Problème** :
 
 - Répertoire `hcd-1.2.3/` à la racine
@@ -58,7 +58,7 @@
 
 #### ❌ Répertoire `ehB /` (avec espace)
 
-**Statut** : **ORPHELIN**  
+**Statut** : **ORPHELIN**
 **Problème** :
 
 - Répertoire avec espace dans le nom (`ehB /`)
@@ -76,7 +76,7 @@
 
 #### ⚠️ Fichier `date_requête` (sans extension)
 
-**Statut** : **À VÉRIFIER**  
+**Statut** : **À VÉRIFIER**
 **Problème** :
 
 - Fichier sans extension à la racine
@@ -96,7 +96,7 @@
 
 #### ⚠️ `.poc-profile` - Fallback hardcodé
 
-**Statut** : **À CORRIGER**  
+**Statut** : **À CORRIGER**
 **Problème** :
 
 - Ligne 22 : `export POC_HOME="${ARKEA_HOME:-${ARKEA_HOME}}"`
@@ -124,7 +124,7 @@ export POC_HOME="${ARKEA_HOME}"
 
 #### ⚠️ 30 fichiers avec références hardcodées
 
-**Statut** : **À CORRIGER**  
+**Statut** : **À CORRIGER**
 **Problèmes identifiés** :
 
 - Références à `${USER_HOME:-$HOME}` dans documentation
@@ -146,7 +146,7 @@ export POC_HOME="${ARKEA_HOME}"
 
 #### ⚠️ 6 scripts identifiés
 
-**Statut** : **À CORRIGER**  
+**Statut** : **À CORRIGER**
 **Problème** :
 
 - Scripts dans `binaire/` (3) - **NORMAL** (scripts fournis)
@@ -168,7 +168,7 @@ export POC_HOME="${ARKEA_HOME}"
 
 #### ⚠️ Répertoire `data/` vide ou peu utilisé
 
-**Statut** : **À ENRICHIR**  
+**Statut** : **À ENRICHIR**
 **Problème** :
 
 - Répertoire `data/` à la racine
@@ -186,7 +186,7 @@ export POC_HOME="${ARKEA_HOME}"
 
 #### ⚠️ Répertoire `logs/` avec répertoires `UNLOAD_*`
 
-**Statut** : **À NETTOYER**  
+**Statut** : **À NETTOYER**
 **Problème** :
 
 - Répertoires `UNLOAD_*` dans `logs/`
@@ -204,7 +204,7 @@ export POC_HOME="${ARKEA_HOME}"
 
 #### ⚠️ Fichiers étranges dans `binaire/hcd-1.2.3/`
 
-**Statut** : **À VÉRIFIER**  
+**Statut** : **À VÉRIFIER**
 **Problème** :
 
 - Fichiers `=`, `${REPORT_FILE}`, `$REPORT_FILE` dans `binaire/hcd-1.2.3/`
@@ -223,7 +223,7 @@ export POC_HOME="${ARKEA_HOME}"
 
 #### ⚠️ Guide de migration entre POCs
 
-**Statut** : **MANQUANT**  
+**Statut** : **MANQUANT**
 **Problème** :
 
 - Pas de guide expliquant les différences entre BIC, domirama2, domiramaCatOps
@@ -241,7 +241,7 @@ export POC_HOME="${ARKEA_HOME}"
 
 #### ⚠️ Guide de contribution spécifique aux POCs
 
-**Statut** : **À ENRICHIR**  
+**Statut** : **À ENRICHIR**
 **Problème** :
 
 - `CONTRIBUTING.md` général
@@ -259,7 +259,7 @@ export POC_HOME="${ARKEA_HOME}"
 
 #### ⚠️ Guide de maintenance
 
-**Statut** : **MANQUANT**  
+**Statut** : **MANQUANT**
 **Problème** :
 
 - Pas de guide pour maintenir le projet
@@ -279,7 +279,7 @@ export POC_HOME="${ARKEA_HOME}"
 
 #### ⚠️ Structure des scripts
 
-**Statut** : **À HARMONISER**  
+**Statut** : **À HARMONISER**
 **Problème** :
 
 - BIC : Scripts 01-20 (numérotés)
@@ -297,7 +297,7 @@ export POC_HOME="${ARKEA_HOME}"
 
 #### ⚠️ Structure de documentation
 
-**Statut** : **À HARMONISER**  
+**Statut** : **À HARMONISER**
 **Problème** :
 
 - BIC : Structure `doc/` avec sous-répertoires
@@ -319,7 +319,7 @@ export POC_HOME="${ARKEA_HOME}"
 
 #### 📝 Guide de choix de POC
 
-**Statut** : **À CRÉER**  
+**Statut** : **À CRÉER**
 **Contenu proposé** :
 
 - Comparaison des 3 POCs (BIC, domirama2, domiramaCatOps)
@@ -333,7 +333,7 @@ export POC_HOME="${ARKEA_HOME}"
 
 #### 📝 Guide de comparaison POCs
 
-**Statut** : **À CRÉER**  
+**Statut** : **À CRÉER**
 **Contenu proposé** :
 
 - Tableau comparatif détaillé
@@ -347,7 +347,7 @@ export POC_HOME="${ARKEA_HOME}"
 
 #### 📝 Guide de contribution POCs
 
-**Statut** : **À CRÉER**  
+**Statut** : **À CRÉER**
 **Contenu proposé** :
 
 - Standards pour scripts didactiques
@@ -361,7 +361,7 @@ export POC_HOME="${ARKEA_HOME}"
 
 #### 📝 Guide de maintenance
 
-**Statut** : **À CRÉER**  
+**Statut** : **À CRÉER**
 **Contenu proposé** :
 
 - Processus d'archivage
@@ -377,7 +377,7 @@ export POC_HOME="${ARKEA_HOME}"
 
 #### 🔧 Script de nettoyage
 
-**Statut** : **À CRÉER**  
+**Statut** : **À CRÉER**
 **Fonctionnalités** :
 
 - Nettoyer fichiers temporaires
@@ -391,7 +391,7 @@ export POC_HOME="${ARKEA_HOME}"
 
 #### 🔧 Script de vérification de cohérence
 
-**Statut** : **À CRÉER**  
+**Statut** : **À CRÉER**
 **Fonctionnalités** :
 
 - Vérifier chemins hardcodés
@@ -405,7 +405,7 @@ export POC_HOME="${ARKEA_HOME}"
 
 #### 🔧 Script de génération de documentation
 
-**Statut** : **À CRÉER**  
+**Statut** : **À CRÉER**
 **Fonctionnalités** :
 
 - Générer index automatique
@@ -421,7 +421,7 @@ export POC_HOME="${ARKEA_HOME}"
 
 #### 🧪 Tests de portabilité
 
-**Statut** : **À CRÉER**  
+**Statut** : **À CRÉER**
 **Fonctionnalités** :
 
 - Tester sur macOS
@@ -435,7 +435,7 @@ export POC_HOME="${ARKEA_HOME}"
 
 #### 🧪 Tests de cohérence
 
-**Statut** : **À CRÉER**  
+**Statut** : **À CRÉER**
 **Fonctionnalités** :
 
 - Vérifier structure des POCs

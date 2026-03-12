@@ -1,7 +1,7 @@
 # 📊 État d'Avancement et Prochaines Étapes - ARKEA
 
-**Date** : 2025-12-02  
-**Score Actuel** : **~97.0/100** ✅  
+**Date** : 2025-12-02
+**Score Actuel** : **~97.0/100** ✅
 **Statut** : ✅ **Priorités 1 et 2 Terminées**
 
 ---
@@ -32,8 +32,8 @@
 
 ### Option 1 : Finaliser les Tests (Recommandé) ⭐
 
-**Objectif** : Atteindre 80%+ de couverture de tests  
-**Impact** : +3 points (97.0 → 100.0)  
+**Objectif** : Atteindre 80%+ de couverture de tests
+**Impact** : +3 points (97.0 → 100.0)
 **Effort** : 2-3 jours
 
 #### Actions
@@ -58,8 +58,8 @@
 
 ### Option 2 : Priorité 3 - Améliorations Optionnelles
 
-**Objectif** : Améliorations de cohérence et maintenance  
-**Impact** : +1.5 points (97.0 → 98.5)  
+**Objectif** : Améliorations de cohérence et maintenance
+**Impact** : +1.5 points (97.0 → 98.5)
 **Effort** : 4-6 jours
 
 #### Actions
@@ -78,8 +78,8 @@
 
 ### Option 3 : Tests de Performance
 
-**Objectif** : Ajouter tests de performance  
-**Impact** : Qualité (pas de score direct)  
+**Objectif** : Ajouter tests de performance
+**Impact** : Qualité (pas de score direct)
 **Effort** : 2-3 jours
 
 #### Actions
@@ -214,7 +214,7 @@
 
 ## 📚 Documents de Référence
 
-- `docs/AUDIT_INTEGRAL_PROJET_ARKEA_2025.md` - Audit complet
+- `docs/archive/legacy-audits/AUDIT_INTEGRAL_PROJET_ARKEA_2025.md` - Audit complet
 - `docs/PROCHAINES_ETAPES_2025.md` - Plan d'action initial
 - `docs/RESUME_IMPLEMENTATION_PRIORITE_2_2025.md` - Résumé P2
 - `docs/PLAN_ACTION_PRIORITES_1_ET_3.md` - Plan détaillé tests
@@ -231,6 +231,6 @@ Le projet ARKEA a maintenant un **score de 97.0/100** (Excellent).
 
 ---
 
-**Date** : 2025-12-02  
-**Version** : 1.0.0  
+**Date** : 2025-12-02
+**Version** : 1.0.0
 **Statut** : ✅ **Prochaines étapes définies**
