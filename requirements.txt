@@ -63,18 +63,5 @@ requests>=2.31.0
 # PyYAML (pour configuration YAML)
 pyyaml>=6.0
 
-# =============================================================================
-# Development Dependencies (optionnel)
-# =============================================================================
-
-# Black (formatage code)
-black>=23.12.0
-
-# isort (tri imports)
-isort>=5.13.0
-
-# flake8 (linting)
-flake8>=7.0.0
-
-# Markdown linting
+# Markdown linting (utilisé par pre-commit)
 markdownlint-cli>=0.38.0

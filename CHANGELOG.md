@@ -16,6 +16,29 @@ et ce projet adhère à [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [1.4.1] - 2026-03-12
+
+### Ajouté
+
+#### Documentation & AI Readiness
+
+- **AGENTS.md** - Instructions pour les agents IA (Claude, GPT, Cursor, etc.)
+- **.cursorrules** - Contexte LLM pour assistants de code
+- **.github/PULL_REQUEST_TEMPLATE.md** - Template de PR avec checklists
+- **.github/CODEOWNERS** - Assignation automatique des reviews
+
+### Modifié
+
+- **docs/INDEX.md** - Ajout section §6 Synthèse & Résultats POC (business/evidence)
+- **CONTRIBUTING.md** - Correction placeholder email
+
+### Nettoyé
+
+- **archive/backups/** - Suppression de 72 fichiers .bak (redondants avec git)
+- **requirements.txt** - Dépendances dev déplacées vers requirements-dev.txt
+
+---
+
 ## [1.4.0] - 2025-12-02
 
 ### Ajouté
