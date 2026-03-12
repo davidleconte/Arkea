@@ -106,7 +106,7 @@ if [ -f "$INSTALL_DIR/.poc-profile" ]; then
 fi
 
 if [ -z "$HF_API_KEY" ]; then
-    export HF_API_KEY="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"
+    export HF_API_KEY="${HF_API_KEY:-}"
 fi
 
 CODE_SI="1"
@@ -140,7 +140,7 @@ VECTOR_DIMENSION = 1472
 
 # Charger le modèle ByteT5 avec authentification
 import os
-HF_API_KEY = os.getenv("HF_API_KEY", "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")
+HF_API_KEY = os.getenv("HF_API_KEY")
 
 print("📥 Chargement du modèle ByteT5...")
 tokenizer = AutoTokenizer.from_pretrained(

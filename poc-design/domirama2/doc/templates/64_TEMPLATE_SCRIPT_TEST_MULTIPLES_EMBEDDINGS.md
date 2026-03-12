@@ -1,7 +1,7 @@
 # 📋 Template : Script Shell Didactique pour Tests Multiples avec Embeddings
 
-**Date** : 2025-11-26  
-**Objectif** : Template réutilisable pour créer des scripts de test avec embeddings et tests multiples très didactiques  
+**Date** : 2025-11-26
+**Objectif** : Template réutilisable pour créer des scripts de test avec embeddings et tests multiples très didactiques
 **Type** : Scripts qui testent des fonctionnalités utilisant des embeddings (ByteT5, etc.) avec N tests
 
 ---
@@ -32,7 +32,7 @@ Un script de test avec embeddings didactique doit :
 # OBJECTIF :
 #   Ce script démontre de manière très didactique [fonctionnalité]
 #   qui utilise des embeddings [modèle] pour [objectif].
-#  
+#
 #   Cette version améliorée affiche :
 #   - Le DDL complet (schéma avec embeddings)
 #   - Vérification des dépendances Python
@@ -119,7 +119,7 @@ if [ -f "$INSTALL_DIR/.poc-profile" ]; then
 fi
 
 if [ -z "$HF_API_KEY" ]; then
-    export HF_API_KEY="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"
+    export HF_API_KEY="${HF_API_KEY:-}"
     warn "⚠️  HF_API_KEY non définie dans .poc-profile, utilisation de la clé par défaut."
 fi
 
@@ -357,7 +357,7 @@ from decimal import Decimal
 # Configuration
 MODEL_NAME = "google/byt5-small"
 VECTOR_DIMENSION = 1472
-HF_API_KEY = os.getenv("HF_API_KEY", "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")
+HF_API_KEY = os.getenv("HF_API_KEY")
 CODE_SI = "CODE_SI_PLACEHOLDER"
 CONTRAT = "CONTRAT_PLACEHOLDER"
 

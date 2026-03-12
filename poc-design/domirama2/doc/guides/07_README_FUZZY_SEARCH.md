@@ -190,7 +190,7 @@ Pour améliorer les performances et éviter les limitations de taux lors du tél
 La clé API est déjà configurée dans `.poc-profile` :
 
 ```bash
-export HF_API_KEY="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"
+export HF_API_KEY="${HF_API_KEY:-}"
 ```
 
 Ou chargez le profil complet :

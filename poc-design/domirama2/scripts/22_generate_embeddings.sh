@@ -123,7 +123,7 @@ source .poc-profile 2>/dev/null || true
 
 if [ -z "$HF_API_KEY" ]; then
     warn "⚠️  HF_API_KEY non définie, utilisation de la valeur par défaut"
-    export HF_API_KEY="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"
+    export HF_API_KEY="${HF_API_KEY:-}"
 fi
 
 info "📝 Note: La génération d'embeddings ByteT5 nécessite Python/transformers"

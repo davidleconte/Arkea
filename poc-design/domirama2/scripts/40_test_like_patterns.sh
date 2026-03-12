@@ -159,7 +159,7 @@ if [ -f ".poc-profile" ]; then
 fi
 
 if [ -z "${HF_API_KEY:-}" ]; then
-    export HF_API_KEY="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"
+    export HF_API_KEY="${HF_API_KEY:-}"
     warn "⚠️  HF_API_KEY non définie dans .poc-profile, utilisation de la clé par défaut."
 fi
 

@@ -110,7 +110,7 @@ if [ -f "$INSTALL_DIR/.poc-profile" ]; then
 fi
 
 if [ -z "$HF_API_KEY" ]; then
-    export HF_API_KEY="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"
+    export HF_API_KEY="${HF_API_KEY:-}"
     warn "⚠️  HF_API_KEY non définie dans .poc-profile, utilisation de la clé par défaut."
 fi
 
@@ -312,7 +312,7 @@ from transformers import AutoTokenizer, AutoModel
 
 MODEL_NAME = "google/byt5-small"
 VECTOR_DIMENSION = 1472
-HF_API_KEY = os.getenv("HF_API_KEY", "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")
+HF_API_KEY = os.getenv("HF_API_KEY")
 TEXT = sys.argv[1] if len(sys.argv) > 1 else "LOYER IMPAYE PARIS"
 
 print("📥 Chargement du modèle ByteT5...")
@@ -462,7 +462,7 @@ def decimal_default(obj):
 # Configuration
 MODEL_NAME = "google/byt5-small"
 VECTOR_DIMENSION = 1472
-HF_API_KEY = os.getenv("HF_API_KEY", "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")
+HF_API_KEY = os.getenv("HF_API_KEY")
 CODE_SI = "CODE_SI_PLACEHOLDER"
 CONTRAT = "CONTRAT_PLACEHOLDER"
 

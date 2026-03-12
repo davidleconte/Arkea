@@ -54,7 +54,7 @@ class SearchMetrics:
 # Configuration
 MODEL_NAME = "google/byt5-small"
 VECTOR_DIMENSION = 1472
-HF_API_KEY = os.getenv("HF_API_KEY", "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")
+HF_API_KEY = os.getenv("HF_API_KEY")
 KEYSPACE = "domirama2_poc"
 TABLE_NAME = "operations_by_account"
 
@@ -88,7 +88,9 @@ def build_regex_pattern(query_pattern: str) -> str:
     placeholder = "__WILDCARD__"
 
     # Détecter si le pattern commence ou se termine par un wildcard
-    starts_with_wildcard = query_pattern.startswith("*") or query_pattern.startswith("%")
+    starts_with_wildcard = query_pattern.startswith("*") or query_pattern.startswith(
+        "%"
+    )
     ends_with_wildcard = query_pattern.endswith("*") or query_pattern.endswith("%")
 
     # Remplacer '*' et '%' par le placeholder (les deux sont équivalents)
@@ -199,7 +201,9 @@ def encode_text(tokenizer, model, text: str) -> List[float]:
     if not text or text.strip() == "":
         return [0.0] * VECTOR_DIMENSION
 
-    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
+    inputs = tokenizer(
+        text, return_tensors="pt", truncation=True, padding=True, max_length=512
+    )
 
     with torch.no_grad():
         encoder_outputs = model.encoder(**inputs)
@@ -498,7 +502,10 @@ def multi_field_like_search(
 
     except Exception as e:
         metrics.total_time_ms = (time.time() - start_total) * 1000
-        print(f"❌ Erreur lors de la recherche multi-champs LIKE: {str(e)}", file=sys.stderr)
+        print(
+            f"❌ Erreur lors de la recherche multi-champs LIKE: {str(e)}",
+            file=sys.stderr,
+        )
         if return_metrics:
             return [], metrics
         return [], None

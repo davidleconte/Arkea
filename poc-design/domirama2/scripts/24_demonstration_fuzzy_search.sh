@@ -108,7 +108,7 @@ if [ -f "$INSTALL_DIR/.poc-profile" ]; then
 fi
 
 if [ -z "$HF_API_KEY" ]; then
-    export HF_API_KEY="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"
+    export HF_API_KEY="${HF_API_KEY:-}"
 fi
 
 info "📋 ÉTAPE 3 : Test de génération d'embedding"
