@@ -29,6 +29,7 @@ section() {
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
 }
 
+INSTALL_DIR="${INSTALL_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 cd "$INSTALL_DIR"
 
 echo "=========================================="
@@ -39,10 +40,11 @@ echo ""
 # 1. Vérifier Java
 section "1. Java"
 if command -v jenv &> /dev/null; then
+    PROMPT_COMMAND="${PROMPT_COMMAND:-}"
     eval "$(jenv init -)" 2>/dev/null || true
     cd "$INSTALL_DIR"
     jenv local 11 2>/dev/null || true
-    eval "$(jenv init -)"
+    eval "$(jenv init -)" 2>/dev/null || true
     JAVA_VERSION=$(java -version 2>&1 | head -1)
     if echo "$JAVA_VERSION" | grep -q "11"; then
         info "Java 11 configuré via jenv: $JAVA_VERSION"

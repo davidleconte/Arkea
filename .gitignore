@@ -1,190 +1,59 @@
-# =============================================================================
-# .gitignore pour POC Migration HBase → HCD
-# =============================================================================
-# Date : 2025-12-01
-# =============================================================================
-
-# =============================================================================
-# Logs
-# =============================================================================
-logs/
-*.log
-*.log.*
-
-# =============================================================================
-# Données
-# =============================================================================
-# Répertoires de données générées
-data/
-hcd-data/
-**/data/
-**/data/**
-
-# Fichiers de données générés par les scripts
-*.parquet
-*.parquet/
-**/*.parquet
-**/*.parquet/
-*.csv
-*.json
-*.orc
-*.orc/
-**/*.orc
-**/*.orc/
-*.avro
-*.avro/
-**/*.avro
-**/*.avro/
-
-# Répertoires Parquet (avec _SUCCESS et part-*.parquet)
-**/_SUCCESS
-**/part-*.parquet
-**/part-*.snappy.parquet
-
-# Répertoires de données spécifiques aux POCs
-poc-design/*/data/
-poc-design/*/data/**
-poc-design/*/data/parquet/
-poc-design/*/data/json/
-poc-design/*/data/csv/
-poc-design/*/data/temp/
-poc-design/*/data/tmp/
-poc-design/*/data/export/
-poc-design/*/data/checkpoints/
-poc-design/*/data/checkpoints/**
-
-# Exports batch
-**/export/
-**/exports/
-**/export/**
-**/exports/**
-
-# Checkpoints (Kafka, Spark)
-**/checkpoints/
-**/checkpoints/**
-**/checkpoint/
-**/checkpoint/**
-*.checkpoint
-*.checkpoint/
-
-# Fichiers temporaires
-**/temp/
-**/temp/**
-**/tmp/
-**/tmp/**
-*.tmp
-*.temp
-
-# Archives de données
-*.zip
-*.tar.gz
-*.tgz
-
-# =============================================================================
-# Binaires et Logiciels
-# =============================================================================
-binaire/
-software/
-*.tar.gz
-*.tgz
-*.jar
-
-# =============================================================================
-# Fichiers Temporaires
-# =============================================================================
-*.tmp
-*.bak
-*.swp
-*.swo
-*~
-
-# =============================================================================
-# OS
-# =============================================================================
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-desktop.ini
-
-# =============================================================================
-# IDE
-# =============================================================================
-.idea/
-.vscode/
-*.iml
-*.ipr
-*.iws
-.project
-.classpath
-.settings/
-
-# =============================================================================
 # Python
-# =============================================================================
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
-.Python
-env/
+*.pyo
+*.pyd
+.venv/
 venv/
-ENV/
-.venv
-
-# =============================================================================
-# Java
-# =============================================================================
-*.class
-*.jar
-*.war
-*.ear
-target/
+*.egg-info/
+dist/
 build/
-out/
+.pytest_cache/
+.coverage
+.mypy_cache/
+.ruff_cache/
 
-# =============================================================================
-# Scala
-# =============================================================================
-*.class
-target/
-.metals/
-.bloop/
+# Environments & secrets
+.env
+.env.*
+*.env
+*.pem
+*.key
 
-# =============================================================================
-# Fichiers de Configuration Locaux
-# =============================================================================
-.poc-profile.local
-.poc-config.local
-.env.local
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+*.swp
+*.swo
 
-# =============================================================================
-# Fichiers de Test Temporaires
-# =============================================================================
-test_output/
-test_results/
-*.test
+# Runtime logs and local data
+logs/
+*.log
+hcd-data/
+data/
+tmp/
+temp/
+tests/results/
+tests/coverage/
 
-# =============================================================================
-# Archives et Backups
-# =============================================================================
-*.backup
-*.old
+# Large binaries / local distributions (keep local if needed, never track)
+binaire/
+software/
+*.jar
+*.tgz
+*.tar
+*.tar.gz
+*.zip
+*.gz
+*.bin
+*.dmg
+
+# Legacy backups / archives
+_archive_*/
+_backup_*.tar.gz
 archive/backups/
+**/*.bak
 
-# =============================================================================
-# Fichiers Spécifiques au Projet
-# =============================================================================
-# Répertoire hcd-1.2.3/ à la racine (doublon de binaire/hcd-1.2.3/)
-hcd-1.2.3/
-
-# Répertoires vides ou temporaires
-ehB /
-# Exceptions pour Git LFS (fichiers volumineux nécessaires)
-!software/spark-3.5.1-bin-hadoop3.tgz
-!software/hcd-1.2.3-bin.tar.gz
-!binaire/spark-3.5.1/jars/rocksdbjni-8.3.2.jar
-!binaire/spark-3.5.1/yarn/spark-3.5.1-yarn-shuffle.jar
+# Do not ignore tracked runtime config yet (stability constraint)
+# .poc-config.sh
