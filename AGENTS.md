@@ -146,6 +146,31 @@ pytest tests/integration/ -v
 
 ---
 
+## 🚨 IMPERATIVE: Podman Isolation Rules
+
+**⚠️ CRITICAL - MANDATORY COMPLIANCE**
+
+Before ANY containerization work, read and follow **`PODMAN_RULES.md`**:
+
+| Rule | Description |
+|------|-------------|
+| **RULE 1** | Use existing `podman-wxd` machine - NEVER delete |
+| **RULE 2** | Use `podman` + `podman-compose` - NOT Docker |
+| **RULE 3** | 5-layer isolation (network, volume, resource, port, label) |
+| **RULE 4** | Pre-flight port conflict detection REQUIRED |
+| **RULE 5** | Clean up ONLY ARKEA-labeled resources |
+
+**Port Allocation for ARKEA** (Base: 9100):
+- HCD CQL: `9102` → 9042
+- Spark UI: `9180` → 8080
+- Kafka: `9192` → 9092
+
+**Reference Documentation**:
+- `/Users/david.leconte/Documents/Work/Labs/adal/podman-architecture/PODMAN_ARCHITECTURE.md`
+- `/Users/david.leconte/Documents/Work/Labs/adal/podman-architecture/PODMAN_COMMANDS.md`
+
+---
+
 ## 🚀 Commandes Utiles
 
 ### Via Makefile (Recommandé)

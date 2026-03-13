@@ -1,0 +1,245 @@
+# =============================================================================
+# ARKEA POC - Podman Compose Configuration
+# =============================================================================
+# Date : 2026-03-13
+# Version : 1.0.0
+# Author : David LECONTE (IBM WW|Tiger Team - Watsonx.Data GPS)
+#
+# ⚠️ IMPERATIVE: Read PODMAN_RULES.md before modifying this file
+# - Use podman-compose (NOT docker-compose)
+# - Port range 9100-9199 for ARKEA (avoid conflicts)
+# - All resources labeled with project=arkea
+# =============================================================================
+
+x-arkea-labels: &arkea-labels
+  - "project=arkea"
+
+x-arkea-common: &arkea-common
+  restart: unless-stopped
+  labels: *arkea-labels
+
+services:
+  # ===========================================================================
+  # HCD (Hyper-Converged Database) - Cassandra 4.0.11
+  # ===========================================================================
+  hcd:
+    <<: *arkea-common
+    image: datastax/dse-server:6.8.40
+    container_name: arkea-hcd
+    hostname: arkea-hcd
+    profiles:
+      - full
+      - hcd-only
+    environment:
+      - DS_LICENSE=accept
+      - MAX_HEAP_SIZE=4G
+      - HEAP_NEWSIZE=800M
+      - CASSANDRA_CLUSTER_NAME=ARKEA-POC
+      - CASSANDRA_DC=datacenter1
+      - CASSANDRA_ENDPOINT_SNITCH=SimpleSnitch
+    ports:
+      # IMPERATIVE: Use non-default ports to avoid conflicts
+      - "${HCD_CQL_PORT:-9102}:9042"      # CQL Native Transport
+      - "${HCD_INTRA_NODE:-9100}:7000"    # Intra-node
+      - "${HCD_INTRA_NODE_TLS:-9101}:7001" # Intra-node TLS
+      - "${HCD_SOLR_PORT:-9045}:8983"     # Solr HTTP
+      - "${HCD_GRAPH_PORT:-8182}:8182"    # Graph
+    volumes:
+      - arkea-hcd-data:/var/lib/cassandra
+      - arkea-hcd-logs:/var/log/cassandra
+    networks:
+      - arkea-network
+    healthcheck:
+      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 6G
+        reservations:
+          cpus: '1'
+          memory: 2G
+    security_opt:
+      - label=project:arkea
+
+  # ===========================================================================
+  # Apache Spark 3.5.1
+  # ===========================================================================
+  spark-master:
+    <<: *arkea-common
+    image: bitnami/spark:3.5.1
+    container_name: arkea-spark-master
+    hostname: arkea-spark-master
+    profiles:
+      - full
+      - spark-only
+    environment:
+      - SPARK_MODE=master
+      - SPARK_MASTER_HOST=arkea-spark-master
+      - SPARK_MASTER_PORT=7077
+      - SPARK_MASTER_WEBUI_PORT=8080
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    ports:
+      - "${SPARK_MASTER_PORT:-9177}:7077"  # Spark Master
+      - "${SPARK_UI_PORT:-9180}:8080"      # Web UI
+    volumes:
+      - arkea-spark-data:/opt/spark/work
+      - ./schemas:/opt/spark/schemas:ro
+      - ./poc-design:/opt/spark/poc-design:ro
+    networks:
+      - arkea-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
+    security_opt:
+      - label=project:arkea
+
+  spark-worker:
+    <<: *arkea-common
+    image: bitnami/spark:3.5.1
+    container_name: arkea-spark-worker
+    hostname: arkea-spark-worker
+    profiles:
+      - full
+      - spark-only
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://arkea-spark-master:7077
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2G
+      - SPARK_WORKER_WEBUI_PORT=8081
+    ports:
+      - "${SPARK_WORKER_UI:-9181}:8081"   # Worker Web UI
+    volumes:
+      - arkea-spark-data:/opt/spark/work
+    networks:
+      - arkea-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 3G
+    security_opt:
+      - label=project:arkea
+
+  # ===========================================================================
+  # Apache Kafka 4.1.1 (KRaft mode - no Zookeeper)
+  # ===========================================================================
+  kafka:
+    <<: *arkea-common
+    image: bitnami/kafka:3.7
+    container_name: arkea-kafka
+    hostname: arkea-kafka
+    profiles:
+      - full
+      - kafka-only
+    environment:
+      # KRaft mode configuration
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@arkea-kafka:9093
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://arkea-kafka:9092,EXTERNAL://localhost:${KAFKA_EXTERNAL_PORT:-9194}
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      # Topic defaults
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_CFG_NUM_PARTITIONS=3
+      - KAFKA_CFG_DEFAULT_REPLICATION_FACTOR=1
+    ports:
+      - "${KAFKA_PORT:-9192}:9092"        # Internal broker
+      - "${KAFKA_EXTERNAL_PORT:-9194}:9094" # External access
+      - "${KAFKA_CONTROLLER:-9193}:9093"  # Controller
+    volumes:
+      - arkea-kafka-data:/bitnami/kafka
+    networks:
+      - arkea-network
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
+    security_opt:
+      - label=project:arkea
+
+  # ===========================================================================
+  # Kafka UI (Optional - for management)
+  # ===========================================================================
+  kafka-ui:
+    <<: *arkea-common
+    image: provectuslabs/kafka-ui:latest
+    container_name: arkea-kafka-ui
+    hostname: arkea-kafka-ui
+    profiles:
+      - full
+      - kafka-only
+    depends_on:
+      - kafka
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=ARKEA-POC
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=arkea-kafka:9092
+    ports:
+      - "${KAFKA_UI_PORT:-9190}:8080"
+    networks:
+      - arkea-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    security_opt:
+      - label=project:arkea
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  arkea-network:
+    name: arkea-network
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.89.10.0/24
+          gateway: 10.89.10.1
+    labels: *arkea-labels
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  arkea-hcd-data:
+    name: arkea-hcd-data
+    labels: *arkea-labels
+  arkea-hcd-logs:
+    name: arkea-hcd-logs
+    labels: *arkea-labels
+  arkea-spark-data:
+    name: arkea-spark-data
+    labels: *arkea-labels
+  arkea-kafka-data:
+    name: arkea-kafka-data
+    labels: *arkea-labels
