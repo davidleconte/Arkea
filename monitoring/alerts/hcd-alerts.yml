@@ -1,0 +1,56 @@
+# =============================================================================
+# ARKEA POC - HCD/Cassandra Alert Rules for Prometheus
+# =============================================================================
+# Date    : 2026-03-13
+# Version : 1.0.0
+# Author  : David LECONTE (IBM WW|Tiger Team - Watsonx.Data GPS)
+# Purpose : Production-ready alert rules for HCD/Cassandra monitoring
+# =============================================================================
+
+groups:
+  - name: hcd_alerts
+    interval: 30s
+    rules:
+      # Alert : HCD est down
+      - alert: HCDDown
+        expr: cassandra_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: hcd
+        annotations:
+          summary: "HCD est down"
+          description: "Le nœud HCD/Cassandra est down depuis plus de 1 minute"
+
+      # Alert : Latence élevée
+      - alert: HCDHighLatency
+        expr: cassandra_client_request_latency > 1000
+        for: 5m
+        labels:
+          severity: warning
+          component: hcd
+        annotations:
+          summary: "Latence HCD élevée"
+          description: "La latence des requêtes HCD est supérieure à 1s depuis 5 minutes"
+
+      # Alert : Mémoire élevée
+      - alert: HCDHighMemory
+        expr: (cassandra_heap_memory_used / cassandra_heap_memory_max) * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+          component: hcd
+        annotations:
+          summary: "Utilisation mémoire HCD élevée"
+          description: "L'utilisation mémoire HCD est supérieure à 90%"
+
+      # Alert : Disque plein
+      - alert: HCDDiskFull
+        expr: (cassandra_disk_usage / cassandra_disk_total) * 100 > 90
+        for: 5m
+        labels:
+          severity: critical
+          component: hcd
+        annotations:
+          summary: "Disque HCD presque plein"
+          description: "L'utilisation disque HCD est supérieure à 90%"

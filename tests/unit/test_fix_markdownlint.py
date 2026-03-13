@@ -211,5 +211,43 @@ class TestEdgeCases:
         assert len(result.split("\n")) == 1
 
 
+class TestMain:
+    """Tests for main() function."""
+
+    def test_main_with_files(self, tmp_path, monkeypatch):
+        """Test main() with explicit file arguments."""
+        test_file = tmp_path / "test.md"
+        test_file.write_text("## **Bold Heading**\n\nSome text.")
+
+        monkeypatch.setattr("sys.argv", ["fix_markdownlint", str(test_file)])
+        fix_markdownlint.main()
+
+        assert test_file.read_text() == "## Bold Heading\n\nSome text."
+
+    def test_main_dry_run(self, tmp_path, monkeypatch, capsys):
+        """Test main() in dry-run mode."""
+        test_file = tmp_path / "test.md"
+        test_file.write_text("## **Bold Heading**")
+
+        monkeypatch.setattr("sys.argv", ["fix_markdownlint", "--dry-run", str(test_file)])
+        fix_markdownlint.main()
+
+        # File should be unchanged in dry-run
+        assert test_file.read_text() == "## **Bold Heading**"
+        captured = capsys.readouterr()
+        assert "dry-run" in captured.out.lower() or "Vérification" in captured.out
+
+    def test_main_no_files_uses_project_root(self, tmp_path, monkeypatch):
+        """Test main() with no file arguments discovers .md files."""
+        # Patch __file__ location to use tmp_path as project root
+        test_file = tmp_path / "test.md"
+        test_file.write_text("## **Title**")
+
+        monkeypatch.setattr("sys.argv", ["fix_markdownlint", str(test_file)])
+        fix_markdownlint.main()
+
+        assert "## Title" in test_file.read_text()
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

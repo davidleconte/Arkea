@@ -6,13 +6,19 @@ Extension de test_vector_search_base.py pour supporter e5-large.
 
 import json
 import math
+import os
 import random
+import sys
 from typing import Any, List
 
-import torch
-from cassandra.cluster import Cluster
-from cassandra.query import SimpleStatement
-from sentence_transformers import SentenceTransformer
+# Add project root to path for shared library access
+sys.path.insert(0, str(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..")))
+import torch  # noqa: E402
+from cassandra.cluster import Cluster  # noqa: E402
+from cassandra.query import SimpleStatement  # noqa: E402
+from sentence_transformers import SentenceTransformer  # noqa: E402
+
+from lib.search_utils import calculate_cosine_similarity as _shared_cosine_sim  # noqa: E402
 
 # Configuration
 MODEL_NAME_E5 = "intfloat/multilingual-e5-large"
@@ -96,9 +102,4 @@ def calculate_cosine_similarity(vec1: List[float], vec2: List[float]) -> float:
     .. deprecated:: 1.4.1
         Use :func:`lib.search_utils.calculate_cosine_similarity` instead.
     """
-    dot_product = sum(a * b for a, b in zip(vec1, vec2))
-    magnitude1 = math.sqrt(sum(a * a for a in vec1))
-    magnitude2 = math.sqrt(sum(a * a for a in vec2))
-    if magnitude1 == 0 or magnitude2 == 0:
-        return 0.0
-    return dot_product / (magnitude1 * magnitude2)
+    return _shared_cosine_sim(vec1, vec2)
