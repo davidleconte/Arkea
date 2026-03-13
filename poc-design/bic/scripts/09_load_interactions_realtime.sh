@@ -409,7 +409,7 @@ info "🚀 Exécution réelle du code Spark Streaming..."
 echo ""
 
 SCALA_STREAMING_FILE=$(mktemp /tmp/bic_kafka_streaming_XXXXXX.scala)
-cat > "$SCALA_STREAMING_FILE" << 'SCALA_EOF'
+cat > "$SCALA_STREAMING_FILE" << SCALA_EOF
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
@@ -452,7 +452,7 @@ object BICStreamingKafka {
     println("📥 Lecture depuis Kafka (topic: bic-event)...")
     val kafkaDF = spark.readStream
       .format("kafka")
-      .option("kafka.bootstrap.servers", "${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}")
+      .option("kafka.bootstrap.servers", "$KAFKA_BOOTSTRAP_SERVERS")
       .option("subscribe", "bic-event")
       .option("startingOffsets", "earliest")
       .load()
@@ -502,7 +502,7 @@ object BICStreamingKafka {
             .mode("append")
             .save()
 
-          println(s"✅ Batch $batchId : $count événement(s) écrit(s)")
+          println(s"✅ Batch \$batchId : \$count événement(s) écrit(s)")
         }
       }
       .option("checkpointLocation", "/tmp/bic_checkpoints")
@@ -523,7 +523,7 @@ object BICStreamingKafka {
       .load()
       .count()
 
-    println(s"📊 Total interactions dans HCD : $total")
+    println(s"📊 Total interactions dans HCD : \$total")
     spark.stop()
   }
 }
@@ -535,7 +535,7 @@ if [ -f "$SPARK_HOME/bin/spark-shell" ]; then
 
     # Créer un script Scala complet (comme domiramaCatOps) - Mode batch pour test
     SPARK_SCALA_SCRIPT=$(mktemp)
-    cat > "$SPARK_SCALA_SCRIPT" << 'SPARK_SCALA_EOF'
+    cat > "$SPARK_SCALA_SCRIPT" << SPARK_SCALA_EOF
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
@@ -575,14 +575,14 @@ println("📥 Lecture depuis Kafka (mode batch pour test)...")
 // Mode batch pour test (comme domiramaCatOps)
 val kafkaDF = spark.read
   .format("kafka")
-  .option("kafka.bootstrap.servers", "${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}")
+  .option("kafka.bootstrap.servers", "$KAFKA_BOOTSTRAP_SERVERS")
   .option("subscribe", "bic-event")
   .option("startingOffsets", "earliest")
   .option("endingOffsets", "latest")
   .load()
 
 val msgCount = kafkaDF.count()
-println(s"✅ $msgCount message(s) lu(s) depuis Kafka")
+println(s"✅ \$msgCount message(s) lu(s) depuis Kafka")
 
 if (msgCount > 0) {
   println("🔄 Parsing JSON...")
@@ -616,7 +616,7 @@ if (msgCount > 0) {
     .filter(col("code_efs").isNotNull)
 
   val count = eventsDF.count()
-  println(s"✅ $count événement(s) parsé(s)")
+  println(s"✅ \$count événement(s) parsé(s)")
 
   if (count > 0) {
     println("💾 Écriture dans HCD...")
@@ -629,7 +629,7 @@ if (msgCount > 0) {
       .mode("append")
       .save()
 
-    println(s"✅ $count événement(s) écrit(s) dans HCD")
+    println(s"✅ \$count événement(s) écrit(s) dans HCD")
   }
 }
 
@@ -639,7 +639,7 @@ val total = spark.read
   .load()
   .count()
 
-println(s"📊 Total interactions dans HCD : $total")
+println(s"📊 Total interactions dans HCD : \$total")
 spark.stop()
 SPARK_SCALA_EOF
 
