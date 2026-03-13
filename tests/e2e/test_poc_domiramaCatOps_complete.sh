@@ -13,6 +13,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ARKEA_HOME="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
+# Cleanup on exit
+cleanup() {
+    echo "[CLEANUP] Test domiramaCatOps E2E finished"
+}
+trap cleanup EXIT
+
 # Charger le framework de tests
 source "$ARKEA_HOME/tests/utils/test_framework.sh"
 

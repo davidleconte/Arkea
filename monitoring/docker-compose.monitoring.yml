@@ -1,7 +1,6 @@
 # Monitoring Stack for ARKEA POC
 # Prometheus + Grafana with pre-configured dashboards
-
-version: "3.8"
+# Usage: podman-compose -f monitoring/docker-compose.monitoring.yml up -d
 
 services:
   prometheus:
