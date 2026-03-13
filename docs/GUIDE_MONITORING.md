@@ -1,7 +1,7 @@
 # 📊 Guide de Monitoring - ARKEA
 
-**Date** : 2025-12-02  
-**Version** : 1.0.0  
+**Date** : 2026-03-13
+**Version** : 1.0.0
 **Objectif** : Guide complet pour le monitoring et l'observabilité du projet ARKEA
 
 ---
@@ -279,7 +279,7 @@ receivers:
         from: 'alertmanager@example.com'
         smarthost: 'smtp.example.com:587'
         auth_username: 'alertmanager'
-        auth_password: 'password'
+        auth_password: 'password'  # pragma: allowlist secret
 ```
 
 ---
@@ -384,6 +384,6 @@ check_port 3000 && echo "✅ Grafana démarré" || echo "❌ Grafana non démarr
 
 ---
 
-**Date** : 2025-12-02  
-**Version** : 1.0.0  
+**Date** : 2026-03-13
+**Version** : 1.0.0
 **Statut** : ✅ **Guide complet**

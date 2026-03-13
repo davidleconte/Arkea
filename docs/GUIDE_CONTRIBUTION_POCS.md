@@ -1,7 +1,7 @@
 # 📝 Guide de Contribution aux POCs - ARKEA
 
-**Date** : 2025-12-02  
-**Objectif** : Standards et conventions pour contribuer aux POCs  
+**Date** : 2026-03-13
+**Objectif** : Standards et conventions pour contribuer aux POCs
 **Version** : 1.0.0
 
 ---
@@ -115,8 +115,8 @@ generate_report_header() {
     cat > "$REPORT_FILE" <<EOF
 # 📊 Démonstration : Description
 
-**Date** : $(date +%Y-%m-%d)  
-**Script** : \`NN_description.sh\`  
+**Date** : $(date +%Y-%m-%d)
+**Script** : \`NN_description.sh\`
 **Objectif** : Description de la démonstration
 
 ---
@@ -305,8 +305,8 @@ WITH OPTIONS = {
 ```markdown
 # 📊 Démonstration : Description
 
-**Date** : YYYY-MM-DD  
-**Script** : `NN_description.sh`  
+**Date** : YYYY-MM-DD
+**Script** : `NN_description.sh`
 **Objectif** : Description de la démonstration
 
 ---

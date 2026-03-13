@@ -1,7 +1,7 @@
 # 🔍 Analyse : Doublon hcd-1.2.3/
 
-**Date** : 2025-12-01  
-**Objectif** : Vérifier si `hcd-1.2.3/` à la racine est un doublon de `binaire/hcd-1.2.3/`  
+**Date** : 2026-03-13
+**Objectif** : Vérifier si `hcd-1.2.3/` à la racine est un doublon de `binaire/hcd-1.2.3/`
 **Statut** : ✅ **Analyse complète**
 
 ---
@@ -226,6 +226,6 @@ grep -r "hcd-1.2.3/" scripts/ | grep -v "binaire/hcd-1.2.3"
 
 ---
 
-**Date** : 2025-12-01  
-**Version** : 1.0  
+**Date** : 2026-03-13
+**Version** : 1.0
 **Statut** : ✅ **Analyse complète - Suppression recommandée**

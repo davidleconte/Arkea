@@ -1,6 +1,6 @@
 # 📁 Guide de Structure du Projet ARKEA
 
-**Date** : 2025-12-01  
+**Date** : 2026-03-13
 **Objectif** : Documenter l'organisation complète du projet
 
 ---
@@ -230,5 +230,5 @@ source .poc-config.sh
 
 ---
 
-**Date** : 2025-12-01  
+**Date** : 2026-03-13
 **Version** : 1.0

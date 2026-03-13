@@ -1,7 +1,7 @@
 # 📍 Localisation : Dossier Migration HBase → HCD
 
-**Date** : 2025-12-02  
-**Question** : Où se trouve le dossier dédié à la migration HBase → HCD ?  
+**Date** : 2026-03-13
+**Question** : Où se trouve le dossier dédié à la migration HBase → HCD ?
 **Réponse** : Le projet ARKEA entier est dédié à la migration, organisé en
 plusieurs dossiers
 
@@ -166,4 +166,4 @@ inputs-ibm/PROPOSITION_MECE_MIGRATION_HBASE_HCD.md
 
 ---
 
-**Dernière mise à jour** : 2025-12-02
+**Dernière mise à jour** : 2026-03-13

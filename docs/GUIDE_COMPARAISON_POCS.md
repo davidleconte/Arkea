@@ -1,7 +1,7 @@
 # 📊 Guide de Comparaison Détaillée des POCs - ARKEA
 
-**Date** : 2025-12-02  
-**Objectif** : Comparaison technique détaillée entre BIC, domirama2, et domiramaCatOps  
+**Date** : 2026-03-13
+**Objectif** : Comparaison technique détaillée entre BIC, domirama2, et domiramaCatOps
 **Version** : 1.0.0
 
 ---

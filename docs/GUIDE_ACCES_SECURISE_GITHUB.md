@@ -1,7 +1,7 @@
 # 🔐 Guide : Accès Sécurisé au Dépôt GitHub
 
-**Date** : 2025-12-02  
-**Dépôt** : <https://github.com/davidleconte/Arkea>  
+**Date** : 2026-03-13
+**Dépôt** : <https://github.com/davidleconte/Arkea>
 **Objectif** : Donner accès au dépôt de manière sécurisée selon les besoins
 
 ---
@@ -368,4 +368,4 @@ https://github.com/davidleconte/Arkea/settings/keys
 
 ---
 
-**Dernière mise à jour** : 2025-12-02
+**Dernière mise à jour** : 2026-03-13

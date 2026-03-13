@@ -1,7 +1,7 @@
 # 🔧 Installation de ShellCheck
 
-**Date** : 2025-12-01  
-**Objectif** : Guide d'installation de ShellCheck pour pre-commit  
+**Date** : 2026-03-13
+**Objectif** : Guide d'installation de ShellCheck pour pre-commit
 **Version** : 1.0
 
 ---
@@ -279,6 +279,6 @@ args: [-e, SC1091, -e, SC2086]  # Ignorer plusieurs codes
 
 ---
 
-**Date** : 2025-12-01  
-**Version** : 1.0  
+**Date** : 2026-03-13
+**Version** : 1.0
 **Statut** : ✅ **Documentation complète**

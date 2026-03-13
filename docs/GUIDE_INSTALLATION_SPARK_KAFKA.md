@@ -1,7 +1,7 @@
 # Guide d'Installation : Spark + spark-cassandra-connector + Kafka
 
-**Date** : 2025-12-02 (Mise à jour pour portabilité cross-platform)  
-**Systèmes supportés** : macOS, Linux, Windows (WSL2)  
+**Date** : 2026-03-13 (Mise à jour pour portabilité cross-platform)
+**Systèmes supportés** : macOS, Linux, Windows (WSL2)
 **Objectif** : POC Migration HBase → HCD
 
 ---

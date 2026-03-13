@@ -1,7 +1,7 @@
 # 🔧 Guide de Dépannage - ARKEA
 
-**Date** : 2025-12-01  
-**Objectif** : Solutions aux problèmes courants du projet ARKEA  
+**Date** : 2026-03-13
+**Objectif** : Solutions aux problèmes courants du projet ARKEA
 **Version** : 1.0
 
 ---
@@ -691,6 +691,6 @@ Si le problème persiste :
 
 ---
 
-**Date** : 2025-12-01  
-**Version** : 1.0  
+**Date** : 2026-03-13
+**Version** : 1.0
 **Statut** : ✅ **Documentation complète**

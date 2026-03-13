@@ -1,6 +1,6 @@
 # 🪟 Guide d'Installation Windows - ARKEA
 
-**Date** : 2025-12-01
+**Date** : 2026-03-13
 **Objectif** : Guide complet pour installer et configurer le projet ARKEA sur Windows via WSL2
 **Version** : 1.0
 
@@ -539,6 +539,6 @@ podman run -it ubuntu:20.04 bash
 
 ---
 
-**Date** : 2025-12-01
+**Date** : 2026-03-13
 **Version** : 1.0
 **Statut** : ✅ **Documentation complète**
