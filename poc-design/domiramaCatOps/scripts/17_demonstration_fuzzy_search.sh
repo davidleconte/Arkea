@@ -105,7 +105,8 @@ echo ""
 show_partie "3" "GÉNÉRATION D'EMBEDDINGS"
 
 info "🚀 Vérification des embeddings existants..."
-EMBEDDED_COUNT=$("${HCD_HOME:-$HCD_DIR}/bin/cqlsh "$HCD_HOST" "$HCD_PORT" -e "USE domiramacatops_poc; SELECT COUNT(*) FROM operations_by_account WHERE libelle_embedding IS NOT NULL ALLOW FILTERING;" 2>&1 | grep -v "Warnings" | grep -E "^[[:space:]]*[0-9]+" | head -1 | tr -d ' ' || echo "0")
+HCD_CQLSH="${HCD_HOME:-$HCD_DIR}/bin/cqlsh"
+EMBEDDED_COUNT=$("$HCD_CQLSH" "$HCD_HOST" "$HCD_PORT" -e "USE domiramacatops_poc; SELECT COUNT(*) FROM operations_by_account WHERE libelle_embedding IS NOT NULL ALLOW FILTERING;" 2>&1 | grep -v "Warnings" | grep -E "^[[:space:]]*[0-9]+" | head -1 | tr -d ' ' || echo "0")
 
 if [ -n "$EMBEDDED_COUNT" ] && [ "$EMBEDDED_COUNT" -gt 0 ]; then
     success "✅ $EMBEDDED_COUNT opération(s) avec embeddings générés"

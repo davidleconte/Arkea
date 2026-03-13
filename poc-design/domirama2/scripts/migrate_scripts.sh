@@ -52,6 +52,7 @@ for script in $SCRIPTS; do
     fi
 
     # 2. Remplacer les chemins hardcodés INSTALL_DIR
+    if echo "$content" | grep -q "INSTALL_DIR=\"/Users/david\.leconte"; then
         # Trouver la ligne avec INSTALL_DIR hardcodé
         # Remplacer par le bloc de détection automatique
 
