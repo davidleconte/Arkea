@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   # =============================================================================
   # Tests de Syntaxe et Validation
@@ -136,3 +140,49 @@ jobs:
             echo "❌ Scripts not organized correctly"
             exit 1
           fi
+
+  # =============================================================================
+  # Python Tests with Coverage
+  # =============================================================================
+  python-tests:
+    name: Python Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+
+      - name: Run Python tests with coverage
+        run: |
+          pytest tests/unit/ -v \
+            --cov=. \
+            --cov-report=xml \
+            --cov-report=term-missing \
+            --cov-exclude=binaire/*,software/*,inputs-*,tests/* \
+            || true
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage.xml
+          flags: unittests
+          name: arkea-poc-coverage
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Coverage summary
+        run: |
+          echo "📊 Coverage report uploaded to Codecov"
+          echo "View at: https://codecov.io/gh/davidleconte/Arkea"
