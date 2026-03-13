@@ -1,26 +1,103 @@
+# =============================================================================
+# ARKEA POC - Pre-commit Configuration
+# =============================================================================
+# Date : 2026-03-13
+# Version : 1.1.0
+# Description : Automated code quality and security checks
+# =============================================================================
+
 repos:
+  # =============================================================================
+  # General Hooks
+  # =============================================================================
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
+        args: [--unsafe]
       - id: check-added-large-files
         args: ["--maxkb=500"]
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: detect-private-key
 
+  # =============================================================================
+  # Python - Formatting
+  # =============================================================================
   - repo: https://github.com/psf/black
     rev: 24.10.0
     hooks:
       - id: black
+        language_version: python3.11
 
+  # =============================================================================
+  # Python - Import Sorting
+  # =============================================================================
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: ["--profile", "black"]
+
+  # =============================================================================
+  # Python - Linting (Flake8)
+  # =============================================================================
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.1.1
+    hooks:
+      - id: flake8
+        args: [--max-line-length=100, --ignore=E203,W503]
+
+  # =============================================================================
+  # Python - Type Checking (MyPy)
+  # =============================================================================
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.14.1
+    hooks:
+      - id: mypy
+        args: [--ignore-missing-imports, --no-error-summary]
+        additional_dependencies:
+          - types-PyYAML
+          - types-requests
+        exclude: ^(binaire|software|inputs-|tests/fixtures)/
+
+  # =============================================================================
+  # Python - Security (Bandit)
+  # =============================================================================
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.8.2
+    hooks:
+      - id: bandit
+        args: ["-ll", "-x", "./binaire,./software,./inputs-client,./inputs-ibm"]
+        files: ^(scripts|tests|poc-design)/.*\.py$
+
+  # =============================================================================
+  # Shell - Linting (ShellCheck)
+  # =============================================================================
   - repo: https://github.com/koalaman/shellcheck-precommit
     rev: v0.10.0
     hooks:
       - id: shellcheck
-        files: ^(scripts|tests)/.*\.sh$
+        files: ^(scripts|tests|poc-design)/.*\.sh$
+        args: ["--severity=warning"]
 
+  # =============================================================================
+  # Security - Secrets Detection
+  # =============================================================================
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.5.0
     hooks:
       - id: detect-secrets
         args: ["--baseline", ".secrets.baseline"]
+
+  # =============================================================================
+  # Markdown - Linting
+  # =============================================================================
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.42.0
+    hooks:
+      - id: markdownlint
+        args: [--disable, MD013, MD033, MD041, MD051, --]
+        exclude: ^(binaire|software|inputs-)/

@@ -1,0 +1,125 @@
+# =============================================================================
+# ARKEA POC - Python Project Configuration
+# =============================================================================
+# Date : 2026-03-13
+# Version : 1.0.0
+# Description : Centralized Python tooling configuration
+# =============================================================================
+
+[project]
+name = "arkea-poc"
+version = "1.4.1"
+description = "ARKEA POC - Migration HBase to HCD"
+authors = [{name = "David LECONTE", email = "david.leconte1@ibm.com"}]
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "Proprietary"}
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+    "bandit>=1.7.0",
+    "pre-commit>=3.4.0",
+]
+
+# =============================================================================
+# Black Configuration
+# =============================================================================
+[tool.black]
+line-length = 100
+target-version = ['py39', 'py310', 'py311']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+    | binaire
+    | software
+    | inputs-client
+    | inputs-ibm
+)/
+'''
+
+# =============================================================================
+# isort Configuration
+# =============================================================================
+[tool.isort]
+profile = "black"
+line_length = 100
+known_first_party = ["arkea"]
+skip = [".git", "binaire", "software", "inputs-client", "inputs-ibm"]
+
+# =============================================================================
+# MyPy Configuration
+# =============================================================================
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+exclude = [
+    "binaire/",
+    "software/",
+    "inputs-client/",
+    "inputs-ibm/",
+    "tests/fixtures/",
+]
+
+# =============================================================================
+# Bandit Configuration
+# =============================================================================
+[tool.bandit]
+exclude_dirs = ["binaire", "software", "inputs-client", "inputs-ibm", "tests"]
+severity = "low"
+
+# =============================================================================
+# Coverage Configuration
+# =============================================================================
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "binaire/*",
+    "software/*",
+    "inputs-client/*",
+    "inputs-ibm/*",
+    "tests/*",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+fail_under = 0
+
+# =============================================================================
+# Pytest Configuration (alternative to pytest.ini)
+# =============================================================================
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "unit: Unit tests (no external dependencies)",
+    "integration: Integration tests (require HCD/Kafka)",
+    "e2e: End-to-end tests (full pipeline)",
+    "slow: Slow tests (skip with -m 'not slow')",
+]

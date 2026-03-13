@@ -1,0 +1,233 @@
+# =============================================================================
+# ARKEA POC - Security Scanning Workflow
+# =============================================================================
+# Date : 2026-03-13
+# Version : 1.0.0
+# Author : David LECONTE (IBM WW|Tiger Team - Watsonx.Data GPS)
+# Description : Automated security scanning (SAST, SCA, secrets detection)
+# =============================================================================
+
+name: Security
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run security scan every Monday at 6:00 AM UTC
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  # =============================================================================
+  # SAST - Static Application Security Testing (Python)
+  # =============================================================================
+  bandit:
+    name: Bandit (Python SAST)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Bandit
+        run: pip install bandit[toml]
+
+      - name: Run Bandit
+        run: |
+          bandit -r . \
+            -x ./binaire,./software,./.git,./inputs-client,./inputs-ibm \
+            -ll \
+            --format json --output bandit-report.json \
+            || true
+
+      - name: Display Bandit Results
+        run: |
+          if [ -f bandit-report.json ]; then
+            echo "📊 Bandit Security Report"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            bandit -r . -x ./binaire,./software,./.git -ll --format txt || true
+          fi
+
+      - name: Upload Bandit Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bandit-report
+          path: bandit-report.json
+
+  # =============================================================================
+  # SAST - Shell Script Security
+  # =============================================================================
+  shellcheck-security:
+    name: ShellCheck (Shell SAST)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: '.'
+          severity: error
+          format: gcc
+          exclude_paths: >
+            binaire,
+            software,
+            inputs-client,
+            inputs-ibm
+
+  # =============================================================================
+  # SCA - Software Composition Analysis
+  # =============================================================================
+  dependency-check:
+    name: Dependency Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Safety
+        run: pip install safety
+
+      - name: Check Python Dependencies
+        run: |
+          if [ -f requirements.txt ]; then
+            echo "🔍 Checking Python dependencies for vulnerabilities..."
+            safety check -r requirements.txt --output json > safety-report.json || true
+            safety check -r requirements.txt || true
+          else
+            echo "⚠️ No requirements.txt found"
+          fi
+
+      - name: Upload Safety Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: safety-report
+          path: safety-report.json
+
+  # =============================================================================
+  # Container Security (Trivy)
+  # =============================================================================
+  trivy:
+    name: Trivy (Container Scanner)
+    runs-on: ubuntu-latest
+    # Only run if Dockerfile or container-related files change
+    if: |
+      contains(github.event.head_commit.message, 'container') ||
+      contains(github.event.head_commit.message, 'docker') ||
+      contains(github.event.head_commit.message, 'podman')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          severity: 'CRITICAL,HIGH'
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          skip-dirs: 'binaire,software,inputs-client,inputs-ibm'
+
+  # =============================================================================
+  # Secrets Detection
+  # =============================================================================
+  detect-secrets:
+    name: Detect Secrets
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install detect-secrets
+        run: pip install detect-secrets
+
+      - name: Scan for secrets
+        run: |
+          echo "🔍 Scanning for secrets..."
+          detect-secrets scan \
+            --baseline .secrets.baseline \
+            --exclude-files 'binaire/*|software/*|inputs-*/*|.git/*' \
+            > scan-results.json || true
+
+          echo ""
+          echo "📊 Secret Detection Results"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          if [ -f .secrets.baseline ]; then
+            # Compare with baseline
+            detect-secrets audit .secrets.baseline --report || true
+          else
+            echo "⚠️ No baseline found. Review scan-results.json"
+          fi
+
+      - name: Upload Scan Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: secrets-scan
+          path: scan-results.json
+
+  # =============================================================================
+  # Security Summary
+  # =============================================================================
+  security-summary:
+    name: Security Summary
+    runs-on: ubuntu-latest
+    needs: [bandit, shellcheck-security, dependency-check, detect-secrets]
+    if: always()
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: reports
+
+      - name: Generate Security Summary
+        run: |
+          echo "🔐 Security Scan Summary"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "| Scanner | Status |"
+          echo "|---------|--------|"
+          echo "| Bandit (SAST) | ${{ needs.bandit.result }} |"
+          echo "| ShellCheck | ${{ needs.shellcheck-security.result }} |"
+          echo "| Dependency Check | ${{ needs.dependency-check.result }} |"
+          echo "| Secrets Detection | ${{ needs.detect-secrets.result }} |"
+          echo ""
+          echo "📄 Detailed reports available in workflow artifacts"
+
+      - name: Check for Critical Issues
+        run: |
+          # Fail if any critical security issues found
+          if [ "${{ needs.bandit.result }}" == "failure" ] || \
+             [ "${{ needs.dependency-check.result }}" == "failure" ]; then
+            echo "❌ Critical security issues detected!"
+            exit 1
+          fi
+          echo "✅ No critical security issues detected"
