@@ -183,15 +183,87 @@ generate_combined_report() {
 # =============================================================================
 # Main
 # =============================================================================
+show_help() {
+    cat << EOF
+ARKEA POC - Code Coverage Runner
+
+Usage: $0 [OPTIONS] [TARGET]
+
+Targets:
+    all       Run both shell and Python coverage (default)
+    shell     Run kcov for bash scripts only
+    python    Run pytest-cov for Python only
+
+Options:
+    --dry-run     Show what would be done without executing
+    --help, -h    Show this help message
+
+Examples:
+    $0                  # Run all coverage
+    $0 shell            # Shell coverage only
+    $0 python           # Python coverage only
+    $0 --dry-run        # Preview actions
+
+EOF
+    exit 0
+}
+
 main() {
+    local DRY_RUN=false
+    local target="all"
+
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --dry-run)
+                DRY_RUN=true
+                shift
+                ;;
+            --help|-h)
+                show_help
+                ;;
+            shell|bash|python|pytest|all)
+                target="$1"
+                shift
+                ;;
+            *)
+                echo "Unknown option: $1"
+                show_help
+                ;;
+        esac
+    done
+
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "  ARKEA POC - Code Coverage Runner"
+    if [[ "$DRY_RUN" == true ]]; then
+        echo "  ARKEA POC - Code Coverage Runner (DRY RUN)"
+    else
+        echo "  ARKEA POC - Code Coverage Runner"
+    fi
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
 
-    mkdir -p "$COVERAGE_DIR"
+    if [[ "$DRY_RUN" == true ]]; then
+        echo -e "${YELLOW}[DRY-RUN] Would create coverage directory: ${COVERAGE_DIR}${NC}"
+        case "$target" in
+            "shell"|"bash")
+                echo -e "${YELLOW}[DRY-RUN] Would check kcov installation${NC}"
+                echo -e "${YELLOW}[DRY-RUN] Would run kcov for all shell scripts in lib/${NC}"
+                ;;
+            "python"|"pytest")
+                echo -e "${YELLOW}[DRY-RUN] Would run pytest with --cov flags${NC}"
+                ;;
+            "all"|*)
+                echo -e "${YELLOW}[DRY-RUN] Would run kcov for shell scripts${NC}"
+                echo -e "${YELLOW}[DRY-RUN] Would run pytest-cov for Python${NC}"
+                ;;
+        esac
+        echo -e "${YELLOW}[DRY-RUN] Would generate combined report${NC}"
+        echo ""
+        echo -e "${GREEN}✅ Dry run complete${NC}"
+        return 0
+    fi
 
-    local target="${1:-all}"
+    mkdir -p "$COVERAGE_DIR"
 
     case "$target" in
         "shell"|"bash")

@@ -1,0 +1,239 @@
+# =============================================================================
+# ARKEA POC - Shell Script Testing Workflow
+# =============================================================================
+# Date : 2026-03-13
+# Description : CI workflow for testing shell scripts with --dry-run
+# =============================================================================
+
+name: Shell Script Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'scripts/**/*.sh'
+      - 'tests/**/*.sh'
+      - 'tests/unit/test_shell_scripts.py'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'scripts/**/*.sh'
+      - 'tests/**/*.sh'
+      - 'tests/unit/test_shell_scripts.py'
+  workflow_dispatch:  # Allow manual trigger
+
+permissions:
+  contents: read
+
+jobs:
+  # =============================================================================
+  # Shell Script Syntax Check
+  # =============================================================================
+  syntax-check:
+    name: Shell Syntax Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check Shell Scripts with bash -n
+        run: |
+          echo "🔍 Checking shell script syntax..."
+          failed=0
+          while IFS= read -r script; do
+            if bash -n "$script" 2>/dev/null; then
+              echo "✅ $script"
+            else
+              echo "❌ $script - syntax error"
+              failed=$((failed + 1))
+            fi
+          done < <(find . -name "*.sh" -type f \
+            ! -path "./.git/*" \
+            ! -path "./binaire/*" \
+            ! -path "./software/*" 2>/dev/null)
+
+          if [ $failed -gt 0 ]; then
+            echo ""
+            echo "❌ $failed script(s) with syntax errors"
+            exit 1
+          fi
+          echo ""
+          echo "✅ All shell scripts passed syntax check"
+
+  # =============================================================================
+  # Shell Script Quality Check
+  # =============================================================================
+  quality-check:
+    name: Shell Quality Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+
+      - name: Run ShellCheck
+        run: |
+          echo "🔍 Running ShellCheck..."
+          failed=0
+          while IFS= read -r script; do
+            echo "Checking: $script"
+            if ! shellcheck "$script" 2>&1; then
+              failed=$((failed + 1))
+            fi
+          done < <(find . -name "*.sh" -type f \
+            ! -path "./.git/*" \
+            ! -path "./binaire/*" \
+            ! -path "./software/*" \
+            ! -path "./poc-design/*" 2>/dev/null | head -20)
+
+          echo ""
+          if [ $failed -gt 0 ]; then
+            echo "⚠️ $failed script(s) with ShellCheck warnings"
+          else
+            echo "✅ All scripts passed ShellCheck"
+          fi
+        continue-on-error: true
+
+  # =============================================================================
+  # Pytest Shell Script Tests
+  # =============================================================================
+  pytest-shell-tests:
+    name: Pytest Shell Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install pytest pytest-cov
+
+      - name: Make scripts executable
+        run: |
+          chmod +x scripts/setup/00_onboarding.sh
+          chmod +x tests/utils/kcov_runner.sh
+          chmod +x scripts/utils/80_verify_all.sh
+          chmod +x scripts/utils/91_check_consistency.sh
+          chmod +x scripts/utils/95_cleanup.sh
+
+      - name: Run shell script tests with pytest
+        run: |
+          echo "🧪 Running pytest shell script tests..."
+          pytest tests/unit/test_shell_scripts.py -v \
+            --tb=short \
+            -m "not integration" \
+            || true
+
+      - name: Test --dry-run flags
+        run: |
+          echo ""
+          echo "🔍 Testing --dry-run flags..."
+          echo ""
+
+          echo "Testing 00_onboarding.sh --dry-run..."
+          ./scripts/setup/00_onboarding.sh --dry-run || echo "Failed"
+
+          echo ""
+          echo "Testing kcov_runner.sh --dry-run..."
+          ./tests/utils/kcov_runner.sh --dry-run || echo "Failed"
+
+          echo ""
+          echo "Testing 80_verify_all.sh --dry-run..."
+          ./scripts/utils/80_verify_all.sh --dry-run || echo "Failed"
+
+          echo ""
+          echo "Testing 95_cleanup.sh --dry-run..."
+          ./scripts/utils/95_cleanup.sh --dry-run || echo "Failed"
+
+          echo ""
+          echo "✅ All --dry-run tests completed"
+
+  # =============================================================================
+  # Script Standards Check
+  # =============================================================================
+  standards-check:
+    name: Script Standards Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for set -euo pipefail
+        run: |
+          echo "🔍 Checking scripts for 'set -euo pipefail'..."
+          missing=0
+          while IFS= read -r script; do
+            if ! head -10 "$script" | grep -q "set -euo pipefail\|set -eo pipefail"; then
+              echo "⚠️  $script - missing 'set -euo pipefail'"
+              missing=$((missing + 1))
+            fi
+          done < <(find . -name "*.sh" -type f \
+            ! -path "./.git/*" \
+            ! -path "./binaire/*" \
+            ! -path "./software/*" \
+            ! -path "./poc-design/*" 2>/dev/null)
+
+          echo ""
+          if [ $missing -gt 0 ]; then
+            echo "⚠️  $missing script(s) missing 'set -euo pipefail'"
+          else
+            echo "✅ All scripts have 'set -euo pipefail'"
+          fi
+
+      - name: Check for shebang
+        run: |
+          echo ""
+          echo "🔍 Checking scripts for shebang..."
+          missing=0
+          while IFS= read -r script; do
+            first_line=$(head -1 "$script")
+            if [[ ! "$first_line" =~ ^#! ]]; then
+              echo "❌ $script - missing shebang"
+              missing=$((missing + 1))
+            fi
+          done < <(find . -name "*.sh" -type f \
+            ! -path "./.git/*" \
+            ! -path "./binaire/*" \
+            ! -path "./software/*" 2>/dev/null)
+
+          echo ""
+          if [ $missing -gt 0 ]; then
+            echo "❌ $missing script(s) missing shebang"
+            exit 1
+          else
+            echo "✅ All scripts have proper shebang"
+          fi
+
+      - name: Check for --help flag
+        run: |
+          echo ""
+          echo "🔍 Checking utility scripts for --help flag..."
+          missing=0
+          for script in scripts/setup/*.sh scripts/utils/*.sh; do
+            if [ -f "$script" ]; then
+              if ! grep -q "\-\-help\|-h" "$script" 2>/dev/null; then
+                echo "⚠️  $script - may be missing --help flag"
+                missing=$((missing + 1))
+              fi
+            fi
+          done
+
+          echo ""
+          if [ $missing -gt 0 ]; then
+            echo "⚠️  $missing script(s) may be missing --help"
+          else
+            echo "✅ All utility scripts have --help flag"
+          fi

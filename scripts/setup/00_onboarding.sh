@@ -1,7 +1,7 @@
 #!/bin/bash
 # ARKEA POC Onboarding Script
 # Run this script to set up a complete development environment
-# Usage: ./scripts/setup/00_onboarding.sh [--skip-deps]
+# Usage: ./scripts/setup/00_onboarding.sh [--skip-deps] [--dry-run]
 
 set -euo pipefail
 
@@ -13,17 +13,18 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
 log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
 log_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+log_dry_run() { echo -e "${CYAN}[DRY-RUN]${NC} $1"; }
 
-echo "========================================"
-echo "  ARKEA POC - Development Onboarding"
-echo "========================================"
-echo ""
+# Global flags
+DRY_RUN=false
+SKIP_DEPS=false
 
 # Check OS
 detect_os() {
@@ -36,11 +37,13 @@ detect_os() {
     fi
 }
 
-OS=$(detect_os)
-log_info "Detected OS: $OS"
-
 # Step 1: Check prerequisites
 check_prerequisites() {
+    if [[ "$DRY_RUN" == true ]]; then
+        log_dry_run "Would check prerequisites: git, make, python3"
+        return 0
+    fi
+
     log_info "Checking prerequisites..."
     local missing=()
 
@@ -62,6 +65,11 @@ check_prerequisites() {
 
 # Step 2: Install Python dependencies
 install_python_deps() {
+    if [[ "$DRY_RUN" == true ]]; then
+        log_dry_run "Would create .venv and install requirements.txt"
+        return 0
+    fi
+
     log_info "Setting up Python environment..."
 
     cd "$PROJECT_ROOT"
@@ -86,6 +94,11 @@ install_python_deps() {
 
 # Step 3: Install pre-commit hooks
 install_hooks() {
+    if [[ "$DRY_RUN" == true ]]; then
+        log_dry_run "Would run: pre-commit install"
+        return 0
+    fi
+
     log_info "Installing pre-commit hooks..."
 
     if command -v pre-commit &> /dev/null; then
@@ -98,6 +111,15 @@ install_hooks() {
 
 # Step 4: Configure environment
 configure_env() {
+    if [[ "$DRY_RUN" == true ]]; then
+        if [[ -f ".env.example" ]]; then
+            log_dry_run "Would copy .env.example -> .env"
+        else
+            log_dry_run "No .env.example found, would skip"
+        fi
+        return 0
+    fi
+
     log_info "Configuring environment..."
 
     if [[ -f ".env.example" ]] && [[ ! -f ".env" ]]; then
@@ -110,6 +132,11 @@ configure_env() {
 
 # Step 5: Verify setup
 verify_setup() {
+    if [[ "$DRY_RUN" == true ]]; then
+        log_dry_run "Would run: make status"
+        return 0
+    fi
+
     log_info "Verifying setup..."
 
     cd "$PROJECT_ROOT"
@@ -122,18 +149,79 @@ verify_setup() {
     fi
 }
 
+# Show help
+show_help() {
+    cat << EOF
+ARKEA POC Onboarding Script
+
+Usage: $0 [OPTIONS]
+
+Options:
+    --skip-deps    Skip Python dependency installation
+    --dry-run      Preview actions without executing
+    --help         Show this help message
+
+Examples:
+    $0                    # Full setup
+    $0 --skip-deps        # Skip pip install
+    $0 --dry-run          # Preview changes
+    $0 --dry-run --skip-deps  # Preview without deps
+
+EOF
+    exit 0
+}
+
+# Parse arguments
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --skip-deps)
+                SKIP_DEPS=true
+                shift
+                ;;
+            --dry-run)
+                DRY_RUN=true
+                shift
+                ;;
+            --help|-h)
+                show_help
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                show_help
+                ;;
+        esac
+    done
+}
+
 # Main execution
 main() {
-    local skip_deps=false
+    parse_args "$@"
 
-    if [[ "${1:-}" == "--skip-deps" ]]; then
-        skip_deps=true
+    local OS
+    OS=$(detect_os)
+
+    if [[ "$DRY_RUN" == true ]]; then
+        echo "========================================"
+        echo "  ARKEA POC - DRY RUN MODE"
+        echo "========================================"
+        log_info "Detected OS: $OS"
+        log_info "No changes will be made"
+        echo ""
+    else
+        echo "========================================"
+        echo "  ARKEA POC - Development Onboarding"
+        echo "========================================"
+        echo ""
+        log_info "Detected OS: $OS"
     fi
 
     check_prerequisites
 
-    if [[ "$skip_deps" == false ]]; then
+    if [[ "$SKIP_DEPS" == false ]]; then
         install_python_deps
+    elif [[ "$DRY_RUN" == true ]]; then
+        log_dry_run "Skipping Python deps (--skip-deps)"
     fi
 
     install_hooks
@@ -142,15 +230,22 @@ main() {
 
     echo ""
     echo "========================================"
-    log_success "Onboarding complete! 🎉"
+    if [[ "$DRY_RUN" == true ]]; then
+        log_success "Dry run complete! Run without --dry-run to apply changes."
+    else
+        log_success "Onboarding complete! 🎉"
+    fi
     echo "========================================"
     echo ""
-    echo "Next steps:"
-    echo "  1. Review .env and configure your settings"
-    echo "  2. Run 'make start' to start services"
-    echo "  3. Run 'make test' to verify everything works"
-    echo "  4. Open VS Code and install recommended extensions"
-    echo ""
+
+    if [[ "$DRY_RUN" == false ]]; then
+        echo "Next steps:"
+        echo "  1. Review .env and configure your settings"
+        echo "  2. Run 'make start' to start services"
+        echo "  3. Run 'make test' to verify everything works"
+        echo "  4. Open VS Code and install recommended extensions"
+        echo ""
+    fi
 }
 
 main "$@"
