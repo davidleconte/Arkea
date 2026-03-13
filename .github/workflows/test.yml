@@ -206,3 +206,68 @@ jobs:
         run: |
           echo "📊 Coverage report uploaded to Codecov"
           echo "View at: https://codecov.io/gh/davidleconte/Arkea"
+
+  # =============================================================================
+  # Monitoring Stack Validation
+  # =============================================================================
+  monitoring-check:
+    name: Monitoring Config Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Validate monitoring configs
+        run: |
+          echo "📊 Validating monitoring stack configuration..."
+
+          # Check compose file syntax
+          if [ -f monitoring/docker-compose.monitoring.yml ]; then
+            python3 -c "
+          import yaml, sys
+          with open('monitoring/docker-compose.monitoring.yml') as f:
+              data = yaml.safe_load(f)
+          assert 'services' in data, 'Missing services key'
+          assert 'prometheus' in data['services'], 'Missing prometheus service'
+          assert 'grafana' in data['services'], 'Missing grafana service'
+          print('✅ Compose file structure valid')
+          "
+          else
+            echo "❌ monitoring/docker-compose.monitoring.yml not found"
+            exit 1
+          fi
+
+          # Check Prometheus config
+          if [ -f monitoring/prometheus/prometheus.yml ]; then
+            python3 -c "
+          import yaml
+          with open('monitoring/prometheus/prometheus.yml') as f:
+              data = yaml.safe_load(f)
+          assert 'scrape_configs' in data, 'Missing scrape_configs'
+          print(f'✅ Prometheus config valid ({len(data[\"scrape_configs\"])} scrape targets)')
+          "
+          else
+            echo "❌ monitoring/prometheus/prometheus.yml not found"
+            exit 1
+          fi
+
+          # Check Grafana provisioning
+          for f in \
+            monitoring/grafana/provisioning/datasources/datasources.yml \
+            monitoring/grafana/provisioning/dashboards/dashboards.yml; do
+            if [ -f "$f" ]; then
+              python3 -c "import yaml; yaml.safe_load(open('$f'))"
+              echo "✅ $(basename $f) valid"
+            else
+              echo "❌ $f not found"
+              exit 1
+            fi
+          done
+
+          # Check dashboards exist
+          dashboard_count=$(find monitoring/grafana/dashboards -name "*.json" | wc -l)
+          echo "✅ Found $dashboard_count Grafana dashboard(s)"
+
+          echo ""
+          echo "✅ Monitoring stack configuration validated"

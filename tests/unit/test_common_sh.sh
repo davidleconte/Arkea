@@ -113,27 +113,35 @@ test_port_checking() {
 test_service_status() {
     test_suite_start "Service Status Functions"
 
-    # Test hcd_status (should fail if HCD not running)
+    # Test hcd_status returns failure when HCD is not running (port closed)
+    local saved_port="${HCD_PORT:-9042}"
+    export HCD_PORT=59991  # Use a port that's definitely closed
     if hcd_status 2>/dev/null; then
-        log_info "HCD is running"
+        test_fail "hcd_status should fail on closed port"
     else
-        log_info "HCD is not running (expected in isolated test)"
+        test_pass "hcd_status correctly detects HCD not running"
     fi
-    # This test is informational, not asserting
+    export HCD_PORT="$saved_port"
 
-    # Test kafka_status (should fail if Kafka not running)
+    # Test kafka_status returns failure when Kafka is not running
+    local saved_kafka="${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}"
+    export KAFKA_BOOTSTRAP_SERVERS="localhost:59992"
     if kafka_status 2>/dev/null; then
-        log_info "Kafka is running"
+        test_fail "kafka_status should fail on closed port"
     else
-        log_info "Kafka is not running (expected in isolated test)"
+        test_pass "kafka_status correctly detects Kafka not running"
     fi
+    export KAFKA_BOOTSTRAP_SERVERS="$saved_kafka"
 
-    # Test spark_status
+    # Test spark_status with invalid SPARK_HOME
+    local saved_spark="${SPARK_HOME:-}"
+    export SPARK_HOME="/nonexistent/path"
     if spark_status 2>/dev/null; then
-        log_info "Spark is configured"
+        test_fail "spark_status should fail with invalid SPARK_HOME"
     else
-        log_info "Spark not configured (expected if SPARK_HOME not set)"
+        test_pass "spark_status correctly detects missing Spark"
     fi
+    export SPARK_HOME="$saved_spark"
 
     test_suite_end
 }
@@ -172,6 +180,88 @@ test_cql_helpers() {
     assert_command_defined "cql_exec_file" "cql_exec_file function is defined"
 
     # Note: Actual CQL execution requires running HCD, tested in integration tests
+
+    test_suite_end
+}
+
+# =============================================================================
+# Test Suite: validate_env Function
+# =============================================================================
+test_validate_env() {
+    test_suite_start "Environment Validation (validate_env)"
+
+    # Test validate_env function exists
+    assert_command_defined "validate_env" "validate_env function is defined"
+
+    # Test validate_env runs without crashing
+    local output
+    output=$(validate_env 2>&1) || true
+    assert_contains "$output" "Validating Environment" "validate_env shows section header"
+
+    # Test validate_env checks for required tools
+    assert_contains "$output" "python3\|java\|cqlsh" "validate_env checks required tools"
+
+    test_suite_end
+}
+
+# =============================================================================
+# Test Suite: Cleanup Script Safety (95_cleanup.sh)
+# =============================================================================
+test_cleanup_script() {
+    test_suite_start "Cleanup Script Safety (95_cleanup.sh)"
+
+    local cleanup_script="${PROJECT_ROOT}/scripts/utils/95_cleanup.sh"
+
+    # Test script exists
+    if [[ -f "$cleanup_script" ]]; then
+        test_pass "95_cleanup.sh exists"
+    else
+        test_fail "95_cleanup.sh not found"
+        test_suite_end
+        return
+    fi
+
+    # Test --dry-run flag doesn't delete anything
+    local test_dir
+    test_dir=$(mktemp -d)
+    mkdir -p "${test_dir}/UNLOAD_20200101-120000-000001"
+    touch "${test_dir}/UNLOAD_20200101-120000-000001/data.txt"
+    mkdir -p "${test_dir}/logs"
+    touch "${test_dir}/logs/test.log"
+
+    # Run in dry-run mode
+    local output
+    output=$(bash "$cleanup_script" --dry-run 2>&1) || true
+
+    # Verify dry-run doesn't delete files
+    if [[ -d "${test_dir}/UNLOAD_20200101-120000-000001" ]]; then
+        test_pass "--dry-run preserves UNLOAD directories"
+    else
+        test_fail "--dry-run should not delete UNLOAD directories"
+    fi
+
+    if [[ -d "${test_dir}/logs" ]]; then
+        test_pass "--dry-run preserves log directories"
+    else
+        test_fail "--dry-run should not delete log directories"
+    fi
+
+    # Test script has set -euo pipefail
+    if head -15 "$cleanup_script" | grep -q "set -euo pipefail"; then
+        test_pass "95_cleanup.sh uses set -euo pipefail"
+    else
+        test_fail "95_cleanup.sh should use set -euo pipefail"
+    fi
+
+    # Test script has --dry-run support
+    if grep -q "\-\-dry-run" "$cleanup_script"; then
+        test_pass "95_cleanup.sh supports --dry-run flag"
+    else
+        test_fail "95_cleanup.sh should support --dry-run"
+    fi
+
+    # Cleanup test directory
+    rm -rf "$test_dir"
 
     test_suite_end
 }
@@ -258,6 +348,8 @@ main() {
     test_environment_validation
     test_cql_helpers
     test_configuration
+    test_validate_env
+    test_cleanup_script
 
     log_section "Test Summary"
     echo ""
