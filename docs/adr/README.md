@@ -12,6 +12,9 @@ An Architecture Decision Record (ADR) captures a significant architecture decisi
 |-----|-------|--------|------|
 | [ADR-0001](0001-podman-over-docker.md) | Use Podman instead of Docker | Accepted | 2026-03-13 |
 | [ADR-0002](0002-hcd-over-hbase.md) | Migration from HBase to HCD | Accepted | 2026-03-13 |
+| [ADR-0003](0003-spark-version.md) | Apache Spark Version Selection | Accepted | 2026-03-13 |
+| [ADR-0004](0004-kafka-version.md) | Apache Kafka Version Selection | Accepted | 2026-03-13 |
+| [ADR-0005](0005-python-version.md) | Python Version and Tooling Selection | Accepted | 2026-03-13 |
 
 ## How to Create an ADR
 
