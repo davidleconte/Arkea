@@ -109,45 +109,109 @@ Le projet **ARKEA** est un Proof of Concept (POC) démontrant la faisabilité de
 
 ## 🔄 Flux de Données
 
-### Flux Principal : HBase → HCD
+### Vue d'Ensemble (C4 — Context)
 
-```
-┌─────────┐
-│  HBase  │ (Source existante)
-└────┬────┘
-     │ Export (Parquet/CSV)
-     ▼
-┌─────────┐
-│  Spark  │ (Traitement batch)
-└────┬────┘
-     │ Transformation
-     ▼
-┌─────────┐
-│   HCD   │ (Destination)
-└─────────┘
+```mermaid
+flowchart TB
+    subgraph Clients["👤 Applications Client"]
+        APP["Application\nBancaire"]
+        ADV["Console\nConseiller"]
+    end
+
+    subgraph ARKEA["🏗️ ARKEA Platform"]
+        subgraph Ingestion["⚡ Ingestion Layer"]
+            SP["🔥 Spark 3.5.1\nBatch + Streaming"]
+            KF["📡 Kafka 4.1.1\nEvent Streaming"]
+        end
+
+        subgraph Storage["🗄️ Storage Layer"]
+            HCD["🗄️ HCD 1.2.3\nCassandra 4.0.11"]
+            SAI["🔍 SAI Index\nFull-text · Fuzzy · Vector"]
+        end
+
+        subgraph API["🌐 API Layer"]
+            DA["Data API\nREST / GraphQL"]
+        end
+    end
+
+    subgraph Legacy["❌ Legacy (Migration Source)"]
+        HB[("HBase")]
+    end
+
+    subgraph Monitoring["📊 Observability"]
+        PROM["Prometheus"]
+        GRAF["Grafana"]
+    end
+
+    HB -->|"Export Parquet"| SP
+    KF -->|"Real-time Events"| SP
+    SP -->|"Batch/Stream Write"| HCD
+    HCD --- SAI
+    HCD --- DA
+    DA --> APP
+    DA --> ADV
+    HCD --> PROM
+    PROM --> GRAF
+
+    style Legacy fill:#ffcccc,stroke:#cc0000
+    style ARKEA fill:#e8f5e9,stroke:#2e7d32
+    style Monitoring fill:#e3f2fd,stroke:#1565c0
 ```
 
-### Flux Streaming : Kafka → HCD
+### Flux Principal : HBase → HCD (Batch)
 
-```
-┌─────────┐
-│  Kafka  │ (Topics d'événements)
-└────┬────┘
-     │ Streaming
-     ▼
-┌─────────┐
-│  Spark  │ (Streaming processing)
-└────┬────┘
-     │ Écriture
-     ▼
-┌─────────┐
-│   HCD   │ (Stockage)
-└─────────┘
+```mermaid
+sequenceDiagram
+    participant HB as 🗄️ HBase
+    participant EX as 📦 Export
+    participant SP as 🔥 Spark
+    participant HCD as 🗄️ HCD
+
+    HB->>EX: Export data (Parquet)
+    EX->>SP: Load Parquet files
+    SP->>SP: Transform & validate
+    SP->>HCD: Batch write (spark-cassandra-connector)
+    HCD-->>SP: Acknowledge
+    Note over SP,HCD: Throughput: > 10K ops/s
 ```
 
-### Flux Recherche
+### Flux Streaming : Kafka → HCD (Real-time)
 
+```mermaid
+sequenceDiagram
+    participant APP as 📱 Application
+    participant KF as 📡 Kafka
+    participant SP as 🔥 Spark Streaming
+    participant HCD as 🗄️ HCD
+
+    APP->>KF: Publish event
+    KF->>SP: Consume (structured streaming)
+    SP->>SP: Transform & enrich
+    SP->>HCD: Write (< 100ms latency)
+    HCD-->>APP: Query via Data API
+    Note over KF,HCD: End-to-end: < 500ms
 ```
+
+### Flux Recherche : SAI + Vector Search
+
+```mermaid
+flowchart LR
+    Q["🔍 Query"] --> HCD["🗄️ HCD"]
+    HCD --> SAI{"SAI Engine"}
+    SAI -->|"Full-text"| FT["📝 Text Match\n< 50ms"]
+    SAI -->|"Fuzzy"| FZ["🔤 Fuzzy Match\n< 50ms"]
+    SAI -->|"ANN Vector"| VS["🧠 Vector Search\nCosine Similarity"]
+    FT --> R["📊 Results"]
+    FZ --> R
+    VS --> R
+
+    style SAI fill:#fff3e0,stroke:#e65100
+    style R fill:#e8f5e9,stroke:#2e7d32
+```
+
+### Flux Recherche (Legacy — ASCII)
+
+```text
 ┌─────────┐
 │ Client  │ (Application)
 └────┬────┘
@@ -169,7 +233,7 @@ Le projet **ARKEA** est un Proof of Concept (POC) démontrant la faisabilité de
 
 ### Structure des Répertoires
 
-```
+```text
 Arkea/
 ├── scripts/              # Scripts d'automatisation
 │   ├── setup/           # Installation et configuration

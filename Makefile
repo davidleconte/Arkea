@@ -171,6 +171,18 @@ docs-index: ## Update documentation index
 	@./scripts/utils/92_generate_docs.sh --index 2>/dev/null || true
 
 # =============================================================================
+# DEMO
+# =============================================================================
+
+demo: ## Run one-command POC showcase (use demo-dry for simulation)
+	@chmod +x scripts/demo.sh
+	@./scripts/demo.sh
+
+demo-dry: ## Run demo in dry-run mode (no services required)
+	@chmod +x scripts/demo.sh
+	@./scripts/demo.sh --dry-run
+
+# =============================================================================
 # CLEANUP
 # =============================================================================
 
