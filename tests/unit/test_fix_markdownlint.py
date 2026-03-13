@@ -211,6 +211,26 @@ class TestEdgeCases:
         assert len(result.split("\n")) == 1
 
 
+class TestFixLineLengthEdgeCases:
+    """Additional edge case tests for fix_line_length()."""
+
+    def test_long_line_space_before_70_percent(self):
+        """Test long line where last space is before 70% threshold (L40)."""
+        # Create a line where the only space is early (before 70% of max_length)
+        # max_length=50, 70% = 35, so space must be before position 35
+        content = "short " + "x" * 80  # space at position 5, well below 70%
+        result = fix_markdownlint.fix_line_length(content, max_length=50)
+        # Line should NOT be split (space too early)
+        assert result == content
+
+    def test_unknown_code_block_language(self):
+        """Test code block with unrecognized language (L83)."""
+        content = "```\n<html><body>Hello</body></html>\n```"
+        result = fix_markdownlint.fix_code_blocks(content)
+        # Should keep generic ``` without adding a language
+        assert "```\n<html>" in result
+
+
 class TestMain:
     """Tests for main() function."""
 
@@ -237,16 +257,20 @@ class TestMain:
         captured = capsys.readouterr()
         assert "dry-run" in captured.out.lower() or "Vérification" in captured.out
 
-    def test_main_no_files_uses_project_root(self, tmp_path, monkeypatch):
-        """Test main() with no file arguments discovers .md files."""
-        # Patch __file__ location to use tmp_path as project root
-        test_file = tmp_path / "test.md"
-        test_file.write_text("## **Title**")
+    def test_main_no_files_discovers_md(self, tmp_path, monkeypatch):
+        """Test main() with no file arguments discovers .md files (L158-162)."""
+        # Create a fake project structure
+        fake_utils = tmp_path / "scripts" / "utils"
+        fake_utils.mkdir(parents=True)
+        test_md = tmp_path / "doc.md"
+        test_md.write_text("## **Title**")
 
-        monkeypatch.setattr("sys.argv", ["fix_markdownlint", str(test_file)])
+        # Patch __file__ so Path(__file__).parent.parent.parent = tmp_path
+        monkeypatch.setattr(fix_markdownlint, "__file__", str(fake_utils / "fix_markdownlint.py"))
+        monkeypatch.setattr("sys.argv", ["fix_markdownlint"])
         fix_markdownlint.main()
 
-        assert "## Title" in test_file.read_text()
+        assert "## Title" in test_md.read_text()
 
 
 if __name__ == "__main__":
