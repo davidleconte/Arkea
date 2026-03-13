@@ -99,7 +99,15 @@ test-consistency: ## Run consistency tests
 
 test-coverage: ## Run tests with coverage report
 	@echo "📊 Running tests with coverage..."
-	@./tests/utils/coverage.sh 2>/dev/null || echo "⚠️  Coverage script not found"
+	@./tests/utils/kcov_runner.sh all 2>/dev/null || ./tests/utils/coverage.sh 2>/dev/null || echo "⚠️  Coverage script not found"
+
+test-coverage-shell: ## Run shell script coverage with kcov
+	@echo "📊 Running shell coverage..."
+	@./tests/utils/kcov_runner.sh shell 2>/dev/null || echo "⚠️  Install kcov: brew install kcov (macOS) or apt install kcov (Linux)"
+
+test-coverage-python: ## Run Python coverage with pytest-cov
+	@echo "📊 Running Python coverage..."
+	@./tests/utils/kcov_runner.sh python
 
 # =============================================================================
 # POC-SPECIFIC TARGETS
