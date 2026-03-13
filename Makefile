@@ -263,3 +263,38 @@ pre-commit: ## Run pre-commit hooks on all files
 	else \
 		echo "⚠️  pre-commit not installed. Run: pip install pre-commit"; \
 	fi
+
+# =============================================================================
+# MONITORING (Phase 4)
+# =============================================================================
+
+monitoring-up: ## Start Prometheus and Grafana
+	@echo "📊 Starting monitoring stack..."
+	@podman-compose -f monitoring/docker-compose.monitoring.yml up -d 2>/dev/null || \
+		echo "⚠️  Monitoring stack requires Podman. Run: make podman-up first"
+	@echo "  Prometheus: http://localhost:9090"
+	@echo "  Grafana:    http://localhost:3000 (admin/admin)"
+
+monitoring-down: ## Stop monitoring stack
+	@echo "🛑 Stopping monitoring..."
+	@podman-compose -f monitoring/docker-compose.monitoring.yml down 2>/dev/null || true
+
+monitoring-status: ## Check monitoring status
+	@echo "📊 Monitoring Status:"
+	@curl -s http://localhost:9090/-/healthy >/dev/null 2>&1 && echo "  Prometheus: ✅ Running" || echo "  Prometheus: ❌ Stopped"
+	@curl -s http://localhost:3000/api/health >/dev/null 2>&1 && echo "  Grafana:    ✅ Running" || echo "  Grafana:    ❌ Stopped"
+
+# =============================================================================
+# DEVCONTAINER (Phase 5)
+# =============================================================================
+
+setup-devcontainer: ## Setup for DevContainer (called by .devcontainer/devcontainer.json)
+	@echo "🔧 Setting up DevContainer environment..."
+	@pip install --upgrade pip
+	@if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+	@if command -v pre-commit >/dev/null 2>&1; then pre-commit install; fi
+	@echo "✅ DevContainer setup complete"
+
+onboarding: ## Run full project onboarding
+	@echo "🚀 Running project onboarding..."
+	@./scripts/setup/00_onboarding.sh
