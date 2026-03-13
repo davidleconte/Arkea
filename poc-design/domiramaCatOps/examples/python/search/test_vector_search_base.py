@@ -4,17 +4,16 @@ Module de base pour les tests de recherche vectorielle.
 Contient les fonctions communes utilisées par tous les tests.
 """
 
-import os
-import time
-import torch
 import json
-import statistics
 import math
+import os
 import random
-from typing import List, Tuple, Optional, Dict, Any
-from transformers import AutoTokenizer, AutoModel
+from typing import Any, List, Optional, Tuple
+
+import torch
 from cassandra.cluster import Cluster
 from cassandra.query import SimpleStatement
+from transformers import AutoModel, AutoTokenizer
 
 # Fixer la seed globale pour cohérence
 torch.manual_seed(42)
@@ -69,7 +68,7 @@ def encode_text(tokenizer, model, text: str) -> List[float]:
     with torch.no_grad():
         encoder_outputs = model.encoder(**inputs)
         embeddings = encoder_outputs.last_hidden_state.mean(dim=1)
-    result = embeddings[0].tolist()
+    result: List[float] = embeddings[0].tolist()
 
     # Vérifier que le vecteur n'est pas nul
     magnitude = math.sqrt(sum(x * x for x in result))
@@ -94,7 +93,7 @@ def vector_search(
     WHERE code_si = '{code_si}' AND contrat = '{contrat}'
     ORDER BY libelle_embedding ANN OF {json.dumps(query_embedding)}
     LIMIT {limit}
-    """
+    """  # nosec B608 - POC demo script, not production
 
     try:
         statement = SimpleStatement(cql_query)
@@ -105,9 +104,7 @@ def vector_search(
         return []
 
 
-def fulltext_search(
-    session, query: str, code_si: str, contrat: str, limit: int = 5
-) -> List[Any]:
+def fulltext_search(session, query: str, code_si: str, contrat: str, limit: int = 5) -> List[Any]:
     """Effectue une recherche full-text avec SAI."""
     # Syntaxe SAI : libelle : 'terme' (opérateur : pour full-text search)
     # Prendre le premier mot de la requête pour la recherche SAI
@@ -125,7 +122,7 @@ def fulltext_search(
     WHERE code_si = '{code_si}' AND contrat = '{contrat}'
       AND libelle : '{first_term}'
     LIMIT {limit}
-    """
+    """  # nosec B608 - POC demo script, not production
 
     try:
         statement = SimpleStatement(cql_query)
@@ -138,7 +135,11 @@ def fulltext_search(
 
 
 def calculate_cosine_similarity(vec1: List[float], vec2: List[float]) -> float:
-    """Calcule la similarité cosinus entre deux vecteurs."""
+    """Calcule la similarité cosinus entre deux vecteurs.
+
+    .. deprecated:: 1.4.1
+        Use :func:`lib.search_utils.calculate_cosine_similarity` instead.
+    """
     import math
 
     dot_product = sum(a * b for a, b in zip(vec1, vec2))
@@ -152,7 +153,7 @@ def calculate_cosine_similarity(vec1: List[float], vec2: List[float]) -> float:
 def get_test_account(session) -> Optional[Tuple[str, str]]:
     """Récupère un compte de test (code_si, contrat)."""
     sample_query = (
-        f"SELECT code_si, contrat FROM {KEYSPACE}.operations_by_account LIMIT 1"
+        f"SELECT code_si, contrat FROM {KEYSPACE}.operations_by_account LIMIT 1"  # nosec B608
     )
     sample = session.execute(sample_query).one()
     if sample:
