@@ -8,12 +8,17 @@ import json
 import math
 import os
 import random
+import sys
 from typing import Any, List, Optional, Tuple
 
-import torch
-from cassandra.cluster import Cluster
-from cassandra.query import SimpleStatement
-from transformers import AutoModel, AutoTokenizer
+# Add project root to path for shared library access
+sys.path.insert(0, str(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..")))
+import torch  # noqa: E402
+from cassandra.cluster import Cluster  # noqa: E402
+from cassandra.query import SimpleStatement  # noqa: E402
+from transformers import AutoModel, AutoTokenizer  # noqa: E402
+
+from lib.search_utils import calculate_cosine_similarity as _shared_cosine_sim  # noqa: E402
 
 # Fixer la seed globale pour cohérence
 torch.manual_seed(42)
@@ -140,14 +145,7 @@ def calculate_cosine_similarity(vec1: List[float], vec2: List[float]) -> float:
     .. deprecated:: 1.4.1
         Use :func:`lib.search_utils.calculate_cosine_similarity` instead.
     """
-    import math
-
-    dot_product = sum(a * b for a, b in zip(vec1, vec2))
-    magnitude1 = math.sqrt(sum(a * a for a in vec1))
-    magnitude2 = math.sqrt(sum(a * a for a in vec2))
-    if magnitude1 == 0 or magnitude2 == 0:
-        return 0.0
-    return dot_product / (magnitude1 * magnitude2)
+    return _shared_cosine_sim(vec1, vec2)
 
 
 def get_test_account(session) -> Optional[Tuple[str, str]]:

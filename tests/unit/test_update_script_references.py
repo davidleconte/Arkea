@@ -176,5 +176,83 @@ class TestEdgeCases:
         assert "./scripts/setup/01_install_hcd.sh" in test_file.read_text()
 
 
+class TestMain:
+    """Tests for main() function."""
+
+    def test_main_processes_directories(self, tmp_path, monkeypatch, capsys):
+        """Test main() processes configured directories with script references."""
+        # Create a minimal project structure matching DIRS_TO_PROCESS
+        docs_dir = tmp_path / "docs"
+        docs_dir.mkdir()
+        test_file = docs_dir / "guide.md"
+        test_file.write_text("Run ./01_install_hcd.sh to start.\nAlso ./80_verify_all.sh\n")
+
+        scripts_dir = tmp_path / "scripts"
+        scripts_dir.mkdir()
+        sh_file = scripts_dir / "readme.sh"
+        sh_file.write_text("#!/bin/bash\n# See ./03_start_hcd.sh\n")
+
+        # Patch DIRS_TO_PROCESS and __file__ path resolution
+        monkeypatch.setattr(update_script_references, "DIRS_TO_PROCESS", ["docs", "scripts"])
+
+        # Patch Path(__file__).parent.parent.parent to return tmp_path
+        original_file = update_script_references.__file__
+        fake_file = str(tmp_path / "scripts" / "utils" / "update_script_references.py")
+        (tmp_path / "scripts" / "utils").mkdir(parents=True, exist_ok=True)
+        monkeypatch.setattr(update_script_references, "__file__", fake_file)
+
+        update_script_references.main()
+
+        # Restore
+        monkeypatch.setattr(update_script_references, "__file__", original_file)
+
+        captured = capsys.readouterr()
+        assert "Mise à jour" in captured.out
+
+        content = test_file.read_text()
+        assert "./scripts/setup/01_install_hcd.sh" in content
+
+    def test_main_skips_missing_directories(self, tmp_path, monkeypatch, capsys):
+        """Test main() skips directories that don't exist."""
+        monkeypatch.setattr(update_script_references, "DIRS_TO_PROCESS", ["nonexistent_dir"])
+
+        fake_file = str(tmp_path / "scripts" / "utils" / "update_script_references.py")
+        (tmp_path / "scripts" / "utils").mkdir(parents=True, exist_ok=True)
+        original_file = update_script_references.__file__
+        monkeypatch.setattr(update_script_references, "__file__", fake_file)
+
+        update_script_references.main()
+
+        monkeypatch.setattr(update_script_references, "__file__", original_file)
+
+        captured = capsys.readouterr()
+        assert "Mise à jour terminée" in captured.out
+        assert "Fichiers traités: 0" in captured.out
+
+    def test_main_skips_git_and_archive(self, tmp_path, monkeypatch, capsys):
+        """Test main() skips .git and archive paths."""
+        docs_dir = tmp_path / "docs"
+        docs_dir.mkdir()
+        archive_dir = docs_dir / "archive"
+        archive_dir.mkdir()
+        archive_file = archive_dir / "old.md"
+        archive_file.write_text("./01_install_hcd.sh")
+        normal_file = docs_dir / "guide.md"
+        normal_file.write_text("No refs here.")
+
+        monkeypatch.setattr(update_script_references, "DIRS_TO_PROCESS", ["docs"])
+        fake_file = str(tmp_path / "scripts" / "utils" / "update_script_references.py")
+        (tmp_path / "scripts" / "utils").mkdir(parents=True, exist_ok=True)
+        original_file = update_script_references.__file__
+        monkeypatch.setattr(update_script_references, "__file__", fake_file)
+
+        update_script_references.main()
+
+        monkeypatch.setattr(update_script_references, "__file__", original_file)
+
+        # Archive file should be skipped
+        assert archive_file.read_text() == "./01_install_hcd.sh"
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
