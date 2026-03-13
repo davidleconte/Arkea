@@ -1,9 +1,8 @@
 #!/bin/bash
+set -euo pipefail
 
 # Script d'installation HCD 1.2.3 (Cross-Platform)
 # Basé sur : https://docs.datastax.com/en/hyper-converged-database/1.2/install/install-tarball.html
-
-set -euo pipefail  # Arrêter en cas d'erreur
 
 # Charger la configuration centralisée
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

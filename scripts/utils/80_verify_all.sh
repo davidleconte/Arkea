@@ -1,9 +1,8 @@
 #!/bin/bash
+set -euo pipefail
 
 # Script de vérification globale de tous les composants
 # Vérifie l'installation et l'état de HCD, Spark, Kafka, et leurs configurations
-
-set -euo pipefail
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'

@@ -1,4 +1,17 @@
 #!/usr/bin/env bash
+set -euo pipefail
+
+# Detect the operating system (macOS, Linux, WSL)
+detect_os() {
+    case "$OSTYPE" in
+        darwin*)      echo "macos" ;;
+        linux-gnu*)   echo "linux" ;;
+        linux*)       echo "linux" ;;
+        msys*)        echo "windows" ;;
+        cygwin*)      echo "windows" ;;
+        *)            echo "unknown" ;;
+    esac
+}
 
 # Return an absolute path in a portable way (macOS compatible).
 get_realpath() {

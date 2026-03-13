@@ -1,9 +1,8 @@
 #!/bin/bash
+set -euo pipefail
 
 # Script d'installation Kafka pour Linux
 # Pour POC Migration HBase → HCD
-
-set -euo pipefail
 
 # Charger la configuration centralisée
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

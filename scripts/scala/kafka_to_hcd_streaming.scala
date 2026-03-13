@@ -21,6 +21,7 @@ val spark = SparkSession.builder()
   .appName("Kafka to HCD Streaming")
   .config("spark.cassandra.connection.host", hcdHost)
   .config("spark.cassandra.connection.port", hcdPort)
+  .config("spark.cassandra.connection.localDC", "datacenter1")
   .config("spark.sql.extensions", "com.datastax.spark.connector.CassandraSparkExtensions")
   .getOrCreate()
 

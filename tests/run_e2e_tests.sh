@@ -28,7 +28,7 @@ echo ""
 # Créer le répertoire de résultats si nécessaire
 mkdir -p "$SCRIPT_DIR/results"
 
-# Tests E2E disponibles
+# Tests E2E disponibles (dans le sous-répertoire e2e/)
 E2E_TESTS=(
     "test_kafka_hcd_pipeline.sh"
     "test_poc_bic_complete.sh"
@@ -38,7 +38,7 @@ E2E_TESTS=(
 
 # Exécuter chaque test E2E
 for test_file in "${E2E_TESTS[@]}"; do
-    test_path="$SCRIPT_DIR/$test_file"
+    test_path="$SCRIPT_DIR/e2e/$test_file"
 
     if [ -f "$test_path" ]; then
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

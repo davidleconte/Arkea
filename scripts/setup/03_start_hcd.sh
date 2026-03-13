@@ -1,9 +1,8 @@
 #!/bin/bash
+set -euo pipefail
 
 # Script de démarrage rapide HCD (Cross-Platform)
 # Usage: ./start_hcd.sh [background]
-
-set -euo pipefail
 
 # Charger la configuration centralisée
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

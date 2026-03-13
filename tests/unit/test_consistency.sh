@@ -92,29 +92,23 @@ else
 fi
 echo ""
 
-# Test 4 : Chemins hardcodés
-echo "📋 Test 4 : Chemins hardcodés"
+# Test 4 : Chemins hardcodés dans les scripts
+echo "📋 Test 4 : Chemins hardcodés dans les scripts"
 HARDCODED_PATHS=0
-HARDCODED_PATTERNS=("${USER_HOME:-$HOME}" "/opt/homebrew" "INSTALL_DIR=")
-for pattern in "${HARDCODED_PATTERNS[@]}"; do
-    while IFS= read -r file; do
-        if [ -f "$file" ] && grep -q "$pattern" "$file" 2>/dev/null; then
-            HARDCODED_PATHS=$((HARDCODED_PATHS + 1))
-        fi
-    done < <(find "$ARKEA_HOME" -type f \
-        ! -path "$ARKEA_HOME/.git/*" \
-        ! -path "$ARKEA_HOME/binaire/*" \
-        ! -path "$ARKEA_HOME/software/*" \
-        ! -path "$ARKEA_HOME/logs/*" \
-        ! -path "*/archive/*" \
-        \( -name "*.sh" -o -name "*.md" \) 2>/dev/null)
+# On vérifie uniquement les scripts shell, pas les docs ni les outils de migration
+# Note: Use temp file to avoid exit code issues with grep in set -e mode
+TEMP_FILE=$(mktemp)
+find "$ARKEA_HOME/scripts" -type f -name "*.sh" ! -path "*/archive/*" 2>/dev/null | while read -r file; do
+    grep -E "/Users/|/home/[a-z]" "$file" 2>/dev/null | grep -v "^[[:space:]]*#" | grep -v "\${" >> "$TEMP_FILE" || true
 done
+HARDCODED_PATHS=$(wc -l < "$TEMP_FILE" | tr -d '[:space:]')
+rm -f "$TEMP_FILE"
 
-# Note: On accepte quelques chemins hardcodés dans la documentation (exemples)
-if [ $HARDCODED_PATHS -lt 30 ]; then
-    test_function "Peu de chemins hardcodés (< 30)" "true" "true"
+# Note: On tolère quelques chemins dans les exemples/commentaires
+if [ "${HARDCODED_PATHS:-0}" -lt 10 ]; then
+    test_function "Peu de chemins hardcodés (< 10)" "true" "true"
 else
-    test_function "Peu de chemins hardcodés (< 30)" "true" "false"
+    test_function "Peu de chemins hardcodés (< 10)" "true" "false"
 fi
 echo ""
 

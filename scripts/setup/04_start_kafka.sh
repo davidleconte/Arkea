@@ -1,9 +1,8 @@
 #!/bin/bash
+set -euo pipefail
 
 # Script de démarrage Kafka avec Java 17 (Cross-Platform)
 # Kafka 4.1.1 nécessite Java 17+
-
-set -euo pipefail
 
 # Charger la configuration centralisée
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

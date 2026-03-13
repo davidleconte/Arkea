@@ -113,11 +113,20 @@ echo ""
 # Test 5 : Chemins portables
 echo "📋 Test 5 : Chemins portables"
 if [ -n "${ARKEA_HOME:-}" ]; then
-    # Vérifier qu'il n'y a pas de chemins hardcodés
-    if echo "$ARKEA_HOME" | grep -q "${USER_HOME:-$HOME}"; then
-        test_function "Pas de chemins hardcodés" "false" "true"
+    # Vérifier que les scripts utilisent des variables et non des chemins littéraux
+    # ARKEA_HOME sous $HOME est normal, ce qu'on vérifie c'est l'absence de
+    # chemins littéraux comme /Users/xxx dans le code
+    # Note: Use a temp file to avoid exit code issues with grep in set -e mode
+    TEMP_FILE=$(mktemp)
+    find "$ARKEA_HOME/scripts" -name "*.sh" -type f 2>/dev/null | while read -r file; do
+        grep -E "/Users/|/home/[a-z]" "$file" 2>/dev/null | grep -v "regex\|pattern\|example\|template" >> "$TEMP_FILE" || true
+    done
+    HARDCODED_IN_SCRIPTS=$(wc -l < "$TEMP_FILE" | tr -d '[:space:]')
+    rm -f "$TEMP_FILE"
+    if [ "${HARDCODED_IN_SCRIPTS:-0}" -eq 0 ]; then
+        test_function "Pas de chemins hardcodés dans scripts" "true" "true"
     else
-        test_function "Pas de chemins hardcodés" "true" "true"
+        test_function "Pas de chemins hardcodés dans scripts" "true" "false"
     fi
 else
     echo "⚠️  ARKEA_HOME non défini"

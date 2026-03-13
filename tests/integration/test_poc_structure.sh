@@ -52,6 +52,12 @@ echo ""
 for poc_dir in "$ARKEA_HOME/poc-design"/*; do
     if [ -d "$poc_dir" ]; then
         POC_NAME="$(basename "$poc_dir")"
+
+        # Ignorer le répertoire archive (stockage uniquement)
+        if [ "$POC_NAME" = "archive" ]; then
+            continue
+        fi
+
         echo "📋 Test POC : $POC_NAME"
 
         # Test 1 : README.md

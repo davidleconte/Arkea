@@ -1,12 +1,11 @@
 #!/bin/bash
+set -euo pipefail
 # =============================================================================
 # Script de Migration : Remplacement des Chemins Hardcodés
 # =============================================================================
 # Remplace tous les INSTALL_DIR hardcodés par setup_paths()
 # Date : 2025-12-01
 # =============================================================================
-
-set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ARKEA_HOME="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/.." && pwd)}"
