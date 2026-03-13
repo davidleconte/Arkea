@@ -5,18 +5,15 @@ Tests for scripts/utils/fix_priorities.py
 Usage: pytest tests/unit/test_fix_priorities.py -v
 """
 
-import os
-import tempfile
+# Import the module under test
+import sys
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 import pytest
 
-# Import the module under test
-import sys
-
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts" / "utils"))
-import fix_priorities
+import fix_priorities  # noqa: E402
 
 
 class TestFindFiles:
@@ -70,10 +67,7 @@ class TestFixHardcodedPaths:
             result = fix_priorities.fix_hardcoded_paths(test_file, dry_run=True)
 
         assert result is True
-        assert (
-            test_file.read_text()
-            == 'INSTALL_DIR="/Users/david.leconte/Documents/Arkea"'
-        )
+        assert test_file.read_text() == 'INSTALL_DIR="/Users/david.leconte/Documents/Arkea"'
 
     def test_fix_hardcoded_path_actual_fix(self, tmp_path):
         """Test actual fix modifies files."""
@@ -180,7 +174,7 @@ class TestRemoveStrangeFiles:
         strange_file.touch()
 
         with patch.object(fix_priorities, "ARKEA_HOME", tmp_path):
-            result = fix_priorities.remove_strange_files(dry_run=True)
+            fix_priorities.remove_strange_files(dry_run=True)
 
         assert strange_file.exists()
 
@@ -192,7 +186,7 @@ class TestRemoveStrangeFiles:
         strange_file.touch()
 
         with patch.object(fix_priorities, "ARKEA_HOME", tmp_path):
-            result = fix_priorities.remove_strange_files(dry_run=False)
+            fix_priorities.remove_strange_files(dry_run=False)
 
         assert not strange_file.exists()
 
@@ -206,15 +200,10 @@ class TestMainFunction:
         test_file.write_text('INSTALL_DIR="/Users/david.leconte/Documents/Arkea"')
 
         with patch.object(fix_priorities, "ARKEA_HOME", tmp_path):
-            with patch(
-                "sys.argv", ["fix_priorities.py", "--dry-run", "--priority", "1"]
-            ):
+            with patch("sys.argv", ["fix_priorities.py", "--dry-run", "--priority", "1"]):
                 fix_priorities.main()
 
-        assert (
-            test_file.read_text()
-            == 'INSTALL_DIR="/Users/david.leconte/Documents/Arkea"'
-        )
+        assert test_file.read_text() == 'INSTALL_DIR="/Users/david.leconte/Documents/Arkea"'
 
     def test_main_priority_1_only(self, tmp_path):
         """Test --priority 1 only fixes hardcoded paths."""
@@ -242,8 +231,7 @@ class TestMainFunction:
         """Test --priority all fixes everything."""
         test_file = tmp_path / "test.sh"
         test_file.write_text(
-            'INSTALL_DIR="/Users/david.leconte/Documents/Arkea"\n'
-            "cqlsh localhost:9042\n"
+            'INSTALL_DIR="/Users/david.leconte/Documents/Arkea"\n' "cqlsh localhost:9042\n"
         )
 
         with patch.object(fix_priorities, "ARKEA_HOME", tmp_path):
@@ -289,6 +277,118 @@ class TestEdgeCases:
 
         result = fix_priorities.fix_hardcoded_paths(test_file, dry_run=False)
         assert result is False
+
+
+class TestWriteErrors:
+    """Tests for write error handling (L116-118, L167-169)."""
+
+    def test_fix_hardcoded_paths_write_error(self, tmp_path, monkeypatch):
+        """Test write error in fix_hardcoded_paths (L116-118)."""
+        test_file = tmp_path / "test.sh"
+        test_file.write_text("path=/Users/david.leconte/Documents/Work/Demos/Arkea/bin")
+
+        monkeypatch.setattr(fix_priorities, "ARKEA_HOME", tmp_path)
+
+        # Make file read-only to trigger write error
+        test_file.chmod(0o444)
+        result = fix_priorities.fix_hardcoded_paths(test_file, dry_run=False)
+        test_file.chmod(0o644)  # Restore
+
+        assert result is False
+
+    def test_fix_localhost_write_error(self, tmp_path, monkeypatch):
+        """Test write error in fix_localhost_references (L167-169)."""
+        test_file = tmp_path / "test.sh"
+        test_file.write_text("host=localhost:9042")
+
+        monkeypatch.setattr(fix_priorities, "ARKEA_HOME", tmp_path)
+
+        # Mock open to fail on write
+        original_open = open
+
+        def mock_open_fail(path, mode="r", **kwargs):
+            if "w" in mode and str(path) == str(test_file):
+                raise PermissionError("Mocked write error")
+            return original_open(path, mode, **kwargs)
+
+        import builtins
+
+        monkeypatch.setattr(builtins, "open", mock_open_fail)
+        result = fix_priorities.fix_localhost_references(test_file, dry_run=False)
+
+        assert result is False
+
+    def test_fix_localhost_read_error(self, tmp_path, monkeypatch):
+        """Test read error in fix_localhost_references (L141-143)."""
+        test_file = tmp_path / "nonexistent_file.sh"
+
+        monkeypatch.setattr(fix_priorities, "ARKEA_HOME", tmp_path)
+
+        result = fix_priorities.fix_localhost_references(test_file, dry_run=False)
+
+        assert result is False
+
+
+class TestRemoveStrangeFilesExtended:
+    """Extended tests for remove_strange_files() — error paths."""
+
+    def test_remove_strange_files_dry_run_extended(self, tmp_path, monkeypatch):
+        """Test dry-run mode of remove_strange_files (L204-206)."""
+        monkeypatch.setattr(fix_priorities, "ARKEA_HOME", tmp_path)
+
+        strange_dir = tmp_path / "binaire" / "spark-3.5.1"
+        strange_dir.mkdir(parents=True)
+        strange_file = strange_dir / "="
+        strange_file.write_text("garbage")
+
+        removed = fix_priorities.remove_strange_files(dry_run=True)
+
+        assert removed == 1
+        assert strange_file.exists()
+
+    def test_remove_strange_files_actual_extended(self, tmp_path, monkeypatch):
+        """Test actual removal of strange files (L198-201)."""
+        monkeypatch.setattr(fix_priorities, "ARKEA_HOME", tmp_path)
+
+        strange_dir = tmp_path / "binaire" / "spark-3.5.1"
+        strange_dir.mkdir(parents=True)
+        strange_file = strange_dir / "="
+        strange_file.write_text("garbage")
+
+        removed = fix_priorities.remove_strange_files(dry_run=False)
+
+        assert removed == 1
+        assert not strange_file.exists()
+
+    def test_remove_strange_files_none_exist_extended(self, tmp_path, monkeypatch):
+        """Test when no strange files exist."""
+        monkeypatch.setattr(fix_priorities, "ARKEA_HOME", tmp_path)
+
+        removed = fix_priorities.remove_strange_files(dry_run=False)
+
+        assert removed == 0
+
+    def test_remove_strange_files_permission_error(self, tmp_path, monkeypatch):
+        """Test removal with permission error (L202-203)."""
+        monkeypatch.setattr(fix_priorities, "ARKEA_HOME", tmp_path)
+
+        strange_dir = tmp_path / "binaire" / "spark-3.5.1"
+        strange_dir.mkdir(parents=True)
+        strange_file = strange_dir / "="
+        strange_file.write_text("garbage")
+
+        original_unlink = Path.unlink
+
+        def mock_unlink(self, *args, **kwargs):
+            if self.name == "=":
+                raise PermissionError("Mocked permission error")
+            return original_unlink(self, *args, **kwargs)
+
+        monkeypatch.setattr(Path, "unlink", mock_unlink)
+        removed = fix_priorities.remove_strange_files(dry_run=False)
+
+        assert removed == 0
+        assert strange_file.exists()
 
 
 if __name__ == "__main__":
