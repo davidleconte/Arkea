@@ -1,0 +1,14 @@
+# ShellCheck Configuration - Arkea POC
+# https://github.com/koalaman/shellcheck/wiki/Directive
+
+# Source path for relative includes
+source-path=SCRIPTDIR
+
+# Disable warnings for sourcing external files (didactique_functions.sh, etc.)
+disable=SC1091
+
+# Allow unused variables (may be used externally or in generated code)
+disable=SC2034
+
+# External sources that are allowed
+external-sources=true
