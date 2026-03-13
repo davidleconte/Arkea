@@ -8,7 +8,7 @@
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](docs/DEPLOYMENT.md)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-**Date** : 2026-03-12
+**Date** : 2026-03-13
 **Version** : 1.4.1
 **Objectif** : Démonstration de faisabilité de la migration HBase vers DataStax HCD
 **IBM | Opportunité ICS 006gR000001hiA5QAI - ARKEA | Ingénieur Avant-Vente** :

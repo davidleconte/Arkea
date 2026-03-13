@@ -6,11 +6,8 @@ Extension de test_vector_search_base.py pour supporter e5-large.
 
 import json
 import math
-import os
 import random
-import statistics
-import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, List
 
 import torch
 from cassandra.cluster import Cluster
@@ -53,7 +50,7 @@ def encode_text_e5(model, text: str) -> List[float]:
 
     # Encoder avec e5-large
     embedding = model.encode(text, normalize_embeddings=True)
-    return embedding.tolist()
+    return list(embedding.tolist())
 
 
 def vector_search_e5(
@@ -66,7 +63,7 @@ def vector_search_e5(
     WHERE code_si = '{code_si}' AND contrat = '{contrat}'
     ORDER BY libelle_embedding_e5 ANN OF {json.dumps(query_embedding)}
     LIMIT {limit}
-    """
+    """  # nosec B608 - POC demo script, not production
 
     try:
         statement = SimpleStatement(cql_query)
@@ -86,7 +83,7 @@ def connect_to_hcd():
 
 def get_test_account(session):
     """Récupère un compte de test."""
-    query = f"SELECT code_si, contrat FROM {KEYSPACE}.operations_by_account LIMIT 1"
+    query = f"SELECT code_si, contrat FROM {KEYSPACE}.operations_by_account LIMIT 1"  # nosec B608
     result = list(session.execute(query))
     if result:
         return (result[0].code_si, result[0].contrat)
@@ -94,7 +91,11 @@ def get_test_account(session):
 
 
 def calculate_cosine_similarity(vec1: List[float], vec2: List[float]) -> float:
-    """Calcule la similarité cosinus entre deux vecteurs."""
+    """Calcule la similarité cosinus entre deux vecteurs.
+
+    .. deprecated:: 1.4.1
+        Use :func:`lib.search_utils.calculate_cosine_similarity` instead.
+    """
     dot_product = sum(a * b for a, b in zip(vec1, vec2))
     magnitude1 = math.sqrt(sum(a * a for a in vec1))
     magnitude2 = math.sqrt(sum(a * a for a in vec2))
