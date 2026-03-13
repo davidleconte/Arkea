@@ -64,7 +64,10 @@ def migrate_script(script_path):
     modified = False
 
     # 1. Remplacer set -e par set -euo pipefail (si pas déjà présent)
-    if re.search(r"^set -e$", content, re.MULTILINE) and "set -euo pipefail" not in content:
+    if (
+        re.search(r"^set -e$", content, re.MULTILINE)
+        and "set -euo pipefail" not in content
+    ):
         content = re.sub(r"^set -e$", "set -euo pipefail", content, flags=re.MULTILINE)
         modified = True
         info("  → set -e remplacé par set -euo pipefail")
@@ -77,7 +80,9 @@ def migrate_script(script_path):
 
         if re.search(pattern, content):
             # Remplacer le bloc complet
-            content = re.sub(pattern, SETUP_PATHS_BLOCK + "\n", content, flags=re.MULTILINE)
+            content = re.sub(
+                pattern, SETUP_PATHS_BLOCK + "\n", content, flags=re.MULTILINE
+            )
         else:
             # Remplacer juste INSTALL_DIR et les lignes suivantes jusqu'à SCRIPT_DIR
             lines = content.split("\n")

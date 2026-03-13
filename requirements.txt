@@ -65,3 +65,58 @@ pyyaml>=6.0
 
 # Markdown linting (utilisé par pre-commit)
 markdownlint-cli>=0.38.0
+
+# =============================================================================
+# Apache Spark
+# =============================================================================
+
+# PySpark (Spark Python API)
+pyspark>=3.5.0,<4.0.0
+
+# =============================================================================
+# Apache Kafka
+# =============================================================================
+
+# Kafka Python client
+kafka-python>=2.0.2
+
+# Confluent Kafka client (alternative)
+confluent-kafka>=2.0.0
+
+# =============================================================================
+# Code Quality & Formatting
+# =============================================================================
+
+# Black (code formatter)
+black>=23.0.0
+
+# Flake8 (linter)
+flake8>=6.0.0
+
+# isort (import sorter)
+isort>=5.12.0
+
+# MyPy (type checker)
+mypy>=1.0.0
+
+# Bandit (security linter)
+bandit>=1.7.0
+
+# Detect secrets
+detect-secrets>=1.4.0
+
+# =============================================================================
+# Additional Utilities
+# =============================================================================
+
+# PyArrow (Parquet support)
+pyarrow>=12.0.0
+
+# python-dotenv (environment variables)
+python-dotenv>=1.0.0
+
+# Rich (pretty terminal output)
+rich>=13.0.0
+
+# Click (CLI framework)
+click>=8.0.0

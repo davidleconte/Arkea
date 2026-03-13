@@ -1,6 +1,6 @@
 # 🤖 AGENTS.md — Instructions pour les Agents IA
 
-**Dernière mise à jour** : 2026-03-12
+**Dernière mise à jour** : 2026-03-13
 **Objectif** : Guider les assistants IA (Claude, GPT, Cursor, etc.) pour travailler efficacement sur ce projet.
 
 ---
@@ -34,12 +34,22 @@ Ce POC démontre la faisabilité de migrer une architecture HBase vers **DataSta
 
 | Répertoire | Description | Priorité |
 |------------|-------------|----------|
+| `lib/` | Bibliothèques partagées (common.sh) | Haute |
 | `scripts/setup/` | Scripts d'installation (01-06) | Haute |
 | `scripts/utils/` | Utilitaires maintenance (70-95) | Haute |
 | `schemas/` | Schémas CQL et Kafka | Moyenne |
 | `tests/` | Tests automatisés | Moyenne |
 | `docs/` | Documentation technique | Moyenne |
 | `poc-design/` | POCs de démonstration | Basse |
+
+### Nouveaux Fichiers Importants
+
+| Fichier | Description |
+|---------|-------------|
+| `Makefile` | Commandes centralisées (`make help`) |
+| `lib/common.sh` | Bibliothèque partagée bash |
+| `pytest.ini` | Configuration tests Python |
+| `tests/conftest.py` | Fixtures pytest centralisées |
 
 ### Répertoires à Ignorer
 
@@ -58,7 +68,20 @@ Ce POC démontre la faisabilité de migrer une architecture HBase vers **DataSta
 ### Scripts Bash
 
 ```bash
-# Portabilité cross-platform
+# Utiliser la bibliothèque partagée (RECOMMANDÉ)
+source "${SCRIPT_DIR}/../lib/common.sh"
+
+# Fonctions disponibles
+log_info "Message d'info"
+log_success "Opération réussie"
+hcd_status && echo "HCD OK"
+wait_for_port 9042 "localhost" 30
+```
+
+### Portabilité Cross-Platform (Alternative)
+
+```bash
+# Sans lib/common.sh - portabilité manuelle
 if [[ "$OSTYPE" == "darwin"* ]]; then
     REALPATH="grealpath"
 else
@@ -124,6 +147,37 @@ pytest tests/integration/ -v
 ---
 
 ## 🚀 Commandes Utiles
+
+### Via Makefile (Recommandé)
+
+```bash
+# Voir toutes les commandes
+make help
+
+# Environnement
+make setup           # Configuration initiale
+make status          # État des services
+make start           # Démarrer HCD + Kafka
+make stop            # Arrêter les services
+
+# Tests
+make test            # Tous les tests
+make test-unit       # Tests unitaires
+make test-integration # Tests d'intégration
+make check           # lint + security + tests
+
+# Qualité code
+make fmt             # Formater le code
+make lint            # Linter (ShellCheck, flake8)
+make security        # Détection secrets
+
+# Utilitaires
+make docs            # Générer documentation
+make clean           # Nettoyer fichiers temporaires
+make check-consistency # Vérifier cohérence projet
+```
+
+### Scripts Directs (Alternative)
 
 ```bash
 # Vérifier cohérence projet

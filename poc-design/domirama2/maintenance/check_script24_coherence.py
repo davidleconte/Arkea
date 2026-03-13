@@ -8,11 +8,11 @@ import os
 from cassandra.cluster import Cluster
 
 # Configuration
-HOST = 'localhost'
+HOST = "localhost"
 PORT = 9042
-KEYSPACE = 'domirama2_poc'
-CODE_SI = '1'
-CONTRAT = '5913101072'
+KEYSPACE = "domirama2_poc"
+CODE_SI = "1"
+CONTRAT = "5913101072"
 
 # Connexion à HCD
 print("📡 Connexion à HCD...")
@@ -25,10 +25,10 @@ print("=" * 70)
 print("  📊 VÉRIFICATION 1 : Nombre de lignes et embeddings")
 print("=" * 70)
 total_query = f"""
-SELECT COUNT(*) as total, 
+SELECT COUNT(*) as total,
        COUNT(libelle_embedding) as avec_embedding
-FROM operations_by_account 
-WHERE code_si = '{CODE_SI}' 
+FROM operations_by_account
+WHERE code_si = '{CODE_SI}'
   AND contrat = '{CONTRAT}';
 """
 result = session.execute(total_query).one()
@@ -45,8 +45,8 @@ print("  📊 VÉRIFICATION 2-5 : Analyse des libellés dans la partition")
 print("=" * 70)
 all_libelles_query = f"""
 SELECT libelle, libelle_embedding
-FROM operations_by_account 
-WHERE code_si = '{CODE_SI}' 
+FROM operations_by_account
+WHERE code_si = '{CODE_SI}'
   AND contrat = '{CONTRAT}';
 """
 all_results = list(session.execute(all_libelles_query))
@@ -62,15 +62,17 @@ paris_libelles = []
 for r in all_results:
     libelle = r.libelle
     has_embedding = r.libelle_embedding is not None
-    row_data = type('obj', (object,), {'libelle': libelle, 'has_embedding': has_embedding})()
-    
-    if 'LOYER' in libelle.upper():
+    row_data = type(
+        "obj", (object,), {"libelle": libelle, "has_embedding": has_embedding}
+    )()
+
+    if "LOYER" in libelle.upper():
         loyer_libelles.append(row_data)
-    if 'IMPAYE' in libelle.upper():
+    if "IMPAYE" in libelle.upper():
         impaye_libelles.append(row_data)
-    if 'VIREMENT' in libelle.upper():
+    if "VIREMENT" in libelle.upper():
         virement_libelles.append(row_data)
-    if 'PARIS' in libelle.upper():
+    if "PARIS" in libelle.upper():
         paris_libelles.append(row_data)
 
 # 2. Vérifier la présence de LOYER
@@ -138,9 +140,10 @@ print("=" * 70)
 print("  📊 RÉSUMÉ DE LA VÉRIFICATION")
 print("=" * 70)
 print(f"   ✅ Total de lignes : {total}")
-print(f"   ✅ Avec embeddings : {avec_embedding} ({(avec_embedding/total*100) if total > 0 else 0:.1f}%)")
+print(
+    f"   ✅ Avec embeddings : {avec_embedding} ({(avec_embedding/total*100) if total > 0 else 0:.1f}%)"
+)
 print()
 
 cluster.shutdown()
 print("✅ Vérification terminée")
-
