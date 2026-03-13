@@ -1,0 +1,46 @@
+# Stale Bot Configuration
+# https://github.com/actions/stale
+
+# Number of days of inactivity before an issue becomes stale
+daysUntilStale: 60
+
+# Number of days of inactivity before a stale issue is closed
+daysUntilClose: 7
+
+# Issues with these labels will never be considered stale
+exemptLabels:
+  - pinned
+  - security
+  - enhancement
+  - bug
+  - documentation
+
+# Label to use when marking an issue as stale
+staleLabel: wontfix
+
+# Comment to post when marking an issue as stale
+markComment: >
+  This issue has been automatically marked as stale because it has not had
+  recent activity. It will be closed if no further activity occurs.
+
+  If this issue is still relevant:
+  - Add a comment with any updates
+  - Remove the `wontfix` label
+  - Add the `pinned` label to keep it open
+
+  Thank you for your contributions!
+
+# Comment to post when closing a stale issue
+closeComment: >
+  This issue has been automatically closed due to inactivity.
+
+  If you believe this was closed in error, please:
+  1. Reopen the issue
+  2. Add a comment explaining why it should remain open
+  3. Add the `pinned` label to prevent future auto-closing
+
+# Limit the number of actions per hour
+limitPerRun: 30
+
+# Only issues (not PRs)
+only: issues
