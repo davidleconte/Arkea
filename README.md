@@ -184,7 +184,7 @@ Toute la documentation est dans le répertoire `docs/` :
 - **ARCHITECTURE_POC_COMPLETE.md** - Architecture technique détaillée
 - **ANALYSE_ETAT_ART_HBASE.md** - Analyse de l'existant
 
-Voir `docs/INDEX.md` pour l'index complet.
+Voir `docs/README.md` pour l'index complet.
 
 ### 👔 Business & Executive Synthesis
 

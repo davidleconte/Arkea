@@ -129,7 +129,7 @@ pytest tests/integration/ -v
 | Document | Emplacement | Usage |
 |----------|-------------|-------|
 | README principal | `/README.md` | Vue d'ensemble projet |
-| Index documentation | `/docs/INDEX.md` | Navigation docs |
+| Index documentation | `/docs/README.md` | Navigation docs |
 | Synthèse POC | `/SYNTHESE_USE_CASES_POC.md` | Résultats POC |
 | Valeur métier | `/business/SYNTHESE_RESULTATS_BENEFICES_HCD_ARKEA.md` | ROI/Bénéfices |
 | Preuves techniques | `/evidence/JUSTIFICATION_RESULTATS_POC_ARKEA.md` | Evidence technique |
@@ -142,13 +142,13 @@ pytest tests/integration/ -v
 2. **Portabilité** : Toujours tester sur macOS et Linux
 3. **Chemins** : Utiliser `.poc-config.sh` pour les chemins
 4. **Logs** : Écrire dans `$LOG_DIR` (jamais à la racine)
-5. **Documentation** : Mettre à jour `docs/INDEX.md` si nouveau doc ajouté
+5. **Documentation** : Mettre à jour `docs/README.md` si nouveau doc ajouté
 
 ---
 
 ## 🚨 IMPERATIVE: Podman Isolation Rules
 
-**⚠️ CRITICAL - MANDATORY COMPLIANCE**
+> ⚠️ **CRITICAL - MANDATORY COMPLIANCE**
 
 Before ANY containerization work, read and follow **`PODMAN_RULES.md`**:
 
@@ -161,11 +161,13 @@ Before ANY containerization work, read and follow **`PODMAN_RULES.md`**:
 | **RULE 5** | Clean up ONLY ARKEA-labeled resources |
 
 **Port Allocation for ARKEA** (Base: 9100):
+
 - HCD CQL: `9102` → 9042
 - Spark UI: `9180` → 8080
 - Kafka: `9192` → 9092
 
 **Reference Documentation**:
+
 - `/Users/david.leconte/Documents/Work/Labs/adal/podman-architecture/PODMAN_ARCHITECTURE.md`
 - `/Users/david.leconte/Documents/Work/Labs/adal/podman-architecture/PODMAN_COMMANDS.md`
 
@@ -222,5 +224,5 @@ make check-consistency # Vérifier cohérence projet
 
 ## 📞 Contact
 
-- **Auteur** : David LECONTE (david.leconte1@ibm.com)
+- **Auteur** : David LECONTE (<david.leconte1@ibm.com>)
 - **Contexte** : IBM | Arkea POC Migration HBase → HCD
