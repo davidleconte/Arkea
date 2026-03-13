@@ -1,6 +1,6 @@
 # ✅ Scripts d'Installation, Configuration et Tests - À Jour
 
-**Date de mise à jour** : 2025-12-02  
+**Date de mise à jour** : 2026-03-13
 **Statut** : ✅ Tous les scripts sont à jour, cohérents et portables cross-platform
 
 ---

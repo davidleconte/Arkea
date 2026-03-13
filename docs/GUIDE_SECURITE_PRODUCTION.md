@@ -1,7 +1,7 @@
 # 🔐 Guide de Sécurité Production - ARKEA
 
-**Date** : 2025-12-02  
-**Version** : 1.0.0  
+**Date** : 2026-03-13
+**Version** : 1.0.0
 **Objectif** : Guide complet pour sécuriser le déploiement ARKEA en production
 
 ---
@@ -46,7 +46,7 @@ Ce guide s'applique à la **production**. Le POC utilise des credentials par dé
 cqlsh ${HCD_HOST:-localhost} ${HCD_PORT:-9042}
 
 # Créer un nouveau superuser
-CREATE ROLE admin_prod WITH SUPERUSER = true AND LOGIN = true AND PASSWORD = 'MotDePasseComplexe123!@#';
+CREATE ROLE admin_prod WITH SUPERUSER = true AND LOGIN = true AND PASSWORD = 'MotDePasseComplexe123!@#';  # pragma: allowlist secret
 
 # Vérifier la création
 LIST ROLES;
@@ -66,7 +66,7 @@ ALTER ROLE cassandra WITH SUPERUSER = false AND LOGIN = false;
 
 ```bash
 # Créer un rôle pour les applications
-CREATE ROLE app_user WITH LOGIN = true AND PASSWORD = 'MotDePasseApp123!@#';
+CREATE ROLE app_user WITH LOGIN = true AND PASSWORD = 'MotDePasseApp123!@#';  # pragma: allowlist secret
 
 # Accorder des permissions spécifiques
 GRANT SELECT, MODIFY ON KEYSPACE poc_hbase_migration TO app_user;
@@ -118,7 +118,7 @@ export HCD_USERNAME="${HCD_USERNAME}"
 export HCD_PASSWORD="${HCD_PASSWORD}"
 
 # ❌ MAUVAIS : Credentials hardcodés
-export HCD_PASSWORD="cassandra"  # NE JAMAIS FAIRE ÇA
+export HCD_PASSWORD="cassandra"  # NE JAMAIS FAIRE ÇA  # pragma: allowlist secret
 ```
 
 ### Fichiers de Secrets
@@ -161,7 +161,7 @@ stringData:
 
 ```bash
 # Créer un nouveau rôle avec nouveau mot de passe
-CREATE ROLE admin_prod_new WITH SUPERUSER = true AND LOGIN = true AND PASSWORD = 'NouveauMotDePasse456!@#';
+CREATE ROLE admin_prod_new WITH SUPERUSER = true AND LOGIN = true AND PASSWORD = 'NouveauMotDePasse456!@#';  # pragma: allowlist secret
 ```
 
 #### 2. Migration Progressive
@@ -281,9 +281,9 @@ audit_logging_options:
 ### Exemples de Logs d'Audit
 
 ```
-2025-12-02 10:00:00,123 | admin_prod | SELECT | poc_hbase_migration.interactions | SUCCESS
-2025-12-02 10:01:00,456 | app_user | INSERT | poc_hbase_migration.interactions | SUCCESS
-2025-12-02 10:02:00,789 | unknown_user | SELECT | poc_hbase_migration.interactions | UNAUTHORIZED
+2026-03-13 10:00:00,123 | admin_prod | SELECT | poc_hbase_migration.interactions | SUCCESS
+2026-03-13 10:01:00,456 | app_user | INSERT | poc_hbase_migration.interactions | SUCCESS
+2026-03-13 10:02:00,789 | unknown_user | SELECT | poc_hbase_migration.interactions | UNAUTHORIZED
 ```
 
 ### Monitoring des Accès
@@ -350,6 +350,6 @@ audit_logging_options:
 
 ---
 
-**Date** : 2025-12-02  
-**Version** : 1.0.0  
+**Date** : 2026-03-13
+**Version** : 1.0.0
 **Statut** : ✅ **Guide complet**

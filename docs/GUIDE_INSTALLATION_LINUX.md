@@ -1,7 +1,7 @@
 # 🐧 Guide d'Installation Linux - ARKEA
 
-**Date** : 2025-12-01  
-**Objectif** : Guide complet pour installer et configurer le projet ARKEA sur Linux  
+**Date** : 2026-03-13
+**Objectif** : Guide complet pour installer et configurer le projet ARKEA sur Linux
 **Version** : 1.0
 
 ---
@@ -600,6 +600,6 @@ nodetool tpstats
 
 ---
 
-**Date** : 2025-12-01  
-**Version** : 1.0  
+**Date** : 2026-03-13
+**Version** : 1.0
 **Statut** : ✅ **Documentation complète**

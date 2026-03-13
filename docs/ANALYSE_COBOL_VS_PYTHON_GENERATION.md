@@ -1,7 +1,7 @@
 # 🔄 Analyse : Génération COBOL vs Python pour Conversion Parquet
 
-**Date** : 2025-12-02  
-**Question** : Est-ce qu'il aurait été possible de générer des séquences de fichiers COBOL puis de les transformer en Parquet ?  
+**Date** : 2026-03-13
+**Question** : Est-ce qu'il aurait été possible de générer des séquences de fichiers COBOL puis de les transformer en Parquet ?
 **Contexte** : Migration HBase → HCD, génération de données de test pour POCs
 
 ---
@@ -398,4 +398,4 @@ spark-submit --class COBOLToParquet convert_cobol_to_parquet.scala
 
 ---
 
-**Dernière mise à jour** : 2025-12-02
+**Dernière mise à jour** : 2026-03-13

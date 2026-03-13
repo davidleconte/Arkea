@@ -1,6 +1,6 @@
 # 🚀 Instructions Étape par Étape : Pousser vers GitHub
 
-**Date** : 2025-12-02  
+**Date** : 2026-03-13
 **Guide pratique** : Instructions détaillées pour pousser le dépôt ARKEA vers GitHub
 
 ---
@@ -29,7 +29,7 @@
 ### 1.2 Générer un Nouveau Token
 
 1. Cliquer sur **"Generate new token"** → **"Generate new token (classic)"**
-2. **Note** : `ARKEA-POC-2025-12-02`
+2. **Note** : `ARKEA-POC-2026-03-13`
 3. **Expiration** : 90 days (ou plus selon vos besoins)
 4. **Scopes** : Cocher **`repo`** (accès complet aux dépôts privés)
    - ✅ repo (Full control of private repositories)
@@ -39,7 +39,7 @@
 
 ⚠️ **IMPORTANT** : Copier le token immédiatement (il ne sera plus affiché) !
 
-**Exemple** : `ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
+**Exemple** : `ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`  # pragma: allowlist secret
 
 **Sauvegarder** le token dans un endroit sûr (Keychain,
 gestionnaire de mots de passe, etc.)
@@ -262,6 +262,6 @@ Avant de pousser, vérifier :
 
 ---
 
-**Date** : 2025-12-02  
-**Version** : 1.0.0  
+**Date** : 2026-03-13
+**Version** : 1.0.0
 **Statut** : ✅ Guide étape par étape complet

@@ -1,17 +1,17 @@
 # 🔍 Audit Complet de la Documentation - ARKEA
 
-**Date** : 2025-12-02  
-**Objectif** : Identifier les fichiers obsolètes, à mettre à jour, et à corriger/améliorer dans `docs/`  
+**Date** : 2026-03-13
+**Objectif** : Identifier les fichiers obsolètes, à mettre à jour, et à corriger/améliorer dans `docs/`
 **Version** : 1.0
 
 ---
 
 ## 📊 Résumé Exécutif
 
-**Total fichiers analysés** : **36 fichiers**  
-**Fichiers obsolètes** : **3 fichiers** (8.3%)  
-**Fichiers à mettre à jour** : **12 fichiers** (33.3%)  
-**Fichiers à corriger/améliorer** : **8 fichiers** (22.2%)  
+**Total fichiers analysés** : **36 fichiers**
+**Fichiers obsolètes** : **3 fichiers** (8.3%)
+**Fichiers à mettre à jour** : **12 fichiers** (33.3%)
+**Fichiers à corriger/améliorer** : **8 fichiers** (22.2%)
 **Fichiers à jour** : **13 fichiers** (36.1%)
 
 ---
@@ -22,7 +22,7 @@
 
 #### ❌ `DOCUMENTATION_FINALE.md`
 
-**Statut** : **OBSOLÈTE**  
+**Statut** : **OBSOLÈTE**
 **Raison** :
 
 - Date : 2025-11-25 (ancien)
@@ -36,7 +36,7 @@
 
 #### ❌ `ORGANISATION.md`
 
-**Statut** : **OBSOLÈTE**  
+**Statut** : **OBSOLÈTE**
 **Raison** :
 
 - Date : 2025-11-25 (ancien)
@@ -50,7 +50,7 @@
 
 #### ❌ `UTILISATION_PROFILE.md`
 
-**Statut** : **OBSOLÈTE**  
+**Statut** : **OBSOLÈTE**
 **Raison** :
 
 - Date : 2025-11-25 (ancien)
@@ -68,7 +68,7 @@
 
 #### ⚠️ `CONFIGURATION_ENVIRONNEMENT.md`
 
-**Statut** : **À METTRE À JOUR**  
+**Statut** : **À METTRE À JOUR**
 **Problèmes** :
 
 - Ligne 20 : `cd ${ARKEA_HOME}` (hardcodé)
@@ -89,7 +89,7 @@
 
 #### ⚠️ `GUIDE_INSTALLATION_HCD_MAC.md`
 
-**Statut** : **À METTRE À JOUR**  
+**Statut** : **À METTRE À JOUR**
 **Problèmes** :
 
 - Titre spécifique à "MacBook Pro M3 Pro" (limite la portabilité)
@@ -108,7 +108,7 @@
 
 #### ⚠️ `GUIDE_INSTALLATION_SPARK_KAFKA.md`
 
-**Statut** : **À METTRE À JOUR**  
+**Statut** : **À METTRE À JOUR**
 **Problèmes** :
 
 - Ligne 42 : `cd ${ARKEA_HOME}` (hardcodé)
@@ -127,7 +127,7 @@
 
 #### ⚠️ `SCRIPTS_A_JOUR.md`
 
-**Statut** : **À METTRE À JOUR**  
+**Statut** : **À METTRE À JOUR**
 **Problèmes** :
 
 - Date : 2025-11-25 (ancien)
@@ -145,7 +145,7 @@
 
 #### ⚠️ `STRUCTURE_PROJET.md`
 
-**Statut** : **À METTRE À JOUR**  
+**Statut** : **À METTRE À JOUR**
 **Problèmes** :
 
 - Date : 2025-11-25 (ancien)
@@ -165,10 +165,10 @@
 
 #### ⚠️ `PLAN_ACTION_FACTORISATION_CONFIG.md`
 
-**Statut** : **À METTRE À JOUR**  
+**Statut** : **À METTRE À JOUR**
 **Problèmes** :
 
-- Date : 2025-12-01 (récent mais plan d'action)
+- Date : 2026-03-13 (récent mais plan d'action)
 - Contient des statistiques obsolètes (93 occurrences, 203 occurrences)
 - Plan d'action en grande partie **IMPLÉMENTÉ** (marquer comme tel)
 - Ne reflète pas l'état actuel (chemins hardcodés éliminés)
@@ -184,10 +184,10 @@
 
 #### ⚠️ `ANALYSE_AMELIORATION_RACINE_ARKEA.md`
 
-**Statut** : **À METTRE À JOUR**  
+**Statut** : **À METTRE À JOUR**
 **Problèmes** :
 
-- Date : 2025-12-01 (récent)
+- Date : 2026-03-13 (récent)
 - Ligne 5 : Chemin hardcodé `${ARKEA_HOME}`
 - Ligne 46 : Mentionne `scripts/` avec seulement `migrate_hardcoded_paths.sh` (dépassé)
 - Ligne 50 : Mentionne `hcd-1.2.3/` à la racine (peut être supprimé maintenant)
@@ -204,10 +204,10 @@
 
 #### ⚠️ `RESUME_AMELIORATION_RACINE_2025.md`
 
-**Statut** : **À METTRE À JOUR**  
+**Statut** : **À METTRE À JOUR**
 **Problèmes** :
 
-- Date : 2025-12-01 (récent)
+- Date : 2026-03-13 (récent)
 - Résumé d'améliorations qui peuvent être complétées
 - Peut contenir des références obsolètes
 
@@ -221,10 +221,10 @@
 
 #### ⚠️ `AUDIT_COMPLET_PROJET_2025.md`
 
-**Statut** : **À METTRE À JOUR**  
+**Statut** : **À METTRE À JOUR**
 **Problèmes** :
 
-- Date : 2025-12-01 (récent)
+- Date : 2026-03-13 (récent)
 - Ligne 21 : "Quelques références hardcodées restantes" (peut être mis à jour)
 - Ligne 22 : "Répertoire `hcd-1.2.3/` à supprimer" (vérifier si fait)
 - Ne mentionne pas les améliorations de portabilité cross-platform
@@ -239,10 +239,10 @@
 
 #### ⚠️ `AUDIT_COMPLET_REPERTOIRE_ARKEA.md`
 
-**Statut** : **À METTRE À JOUR**  
+**Statut** : **À METTRE À JOUR**
 **Problèmes** :
 
-- Date : 2025-12-02 (récent)
+- Date : 2026-03-13 (récent)
 - Peut contenir des informations qui nécessitent vérification
 - Doit être aligné avec l'audit de portabilité
 
@@ -255,7 +255,7 @@
 
 #### ⚠️ `INDEX.md`
 
-**Statut** : **À METTRE À JOUR**  
+**Statut** : **À METTRE À JOUR**
 **Problèmes** :
 
 - Date : 2025-11-25 (ancien)
@@ -273,7 +273,7 @@
 
 #### ⚠️ `README.md` (docs/)
 
-**Statut** : **À METTRE À JOUR**  
+**Statut** : **À METTRE À JOUR**
 **Problèmes** :
 
 - Date : 2025-11-25 (ancien)
@@ -295,7 +295,7 @@
 
 #### ⚠️ `DEPLOYMENT.md`
 
-**Statut** : **À CORRIGER/AMÉLIORER**  
+**Statut** : **À CORRIGER/AMÉLIORER**
 **Problèmes** :
 
 - Ligne 24 : Mentionne seulement macOS et Linux (manque Windows/WSL2)
@@ -314,7 +314,7 @@
 
 #### ⚠️ `TROUBLESHOOTING.md`
 
-**Statut** : **À CORRIGER/AMÉLIORER**  
+**Statut** : **À CORRIGER/AMÉLIORER**
 **Problèmes** :
 
 - Ne mentionne pas les problèmes spécifiques à Linux
@@ -333,7 +333,7 @@
 
 #### ⚠️ `ORDRE_EXECUTION_SCRIPTS.md`
 
-**Statut** : **À CORRIGER/AMÉLIORER**  
+**Statut** : **À CORRIGER/AMÉLIORER**
 **Problèmes** :
 
 - Peut contenir des références aux anciens scripts à la racine
@@ -350,7 +350,7 @@
 
 #### ⚠️ `ARCHITECTURE.md`
 
-**Statut** : **À CORRIGER/AMÉLIORER**  
+**Statut** : **À CORRIGER/AMÉLIORER**
 **Problèmes** :
 
 - Peut contenir des informations dépassées
@@ -367,7 +367,7 @@
 
 #### ⚠️ `GUIDE_STRUCTURE.md`
 
-**Statut** : **À CORRIGER/AMÉLIORER**  
+**Statut** : **À CORRIGER/AMÉLIORER**
 **Problèmes** :
 
 - Peut contenir des informations dépassées
@@ -384,7 +384,7 @@
 
 #### ⚠️ `KAFKA_HCD_STREAMING_READY.md`
 
-**Statut** : **À CORRIGER/AMÉLIORER**  
+**Statut** : **À CORRIGER/AMÉLIORER**
 **Problèmes** :
 
 - Peut contenir des chemins hardcodés
@@ -401,7 +401,7 @@
 
 #### ⚠️ `RESULTATS_TEST_KAFKA_HCD.md`
 
-**Statut** : **À CORRIGER/AMÉLIORER**  
+**Statut** : **À CORRIGER/AMÉLIORER**
 **Problèmes** :
 
 - Date : 2025-11-25 (ancien)
@@ -418,7 +418,7 @@
 
 #### ⚠️ `POC_TABLE_DOMIRAMA.md`
 
-**Statut** : **À CORRIGER/AMÉLIORER**  
+**Statut** : **À CORRIGER/AMÉLIORER**
 **Problèmes** :
 
 - Peut contenir des informations spécifiques à un POC
@@ -436,17 +436,17 @@
 
 ### 4.1 Fichiers Récemment Créés/Mis à Jour
 
-- ✅ `AUDIT_PORTABILITE_CROSS_PLATFORM_2025.md` (2025-12-02) - **À JOUR**
-- ✅ `GUIDE_INSTALLATION_LINUX.md` (2025-12-02) - **À JOUR**
-- ✅ `GUIDE_INSTALLATION_WINDOWS.md` (2025-12-02) - **À JOUR**
-- ✅ `REFERENCE_HCD_DOCUMENTATION.md` (2025-12-02) - **À JOUR**
-- ✅ `ORGANISATION_FINALE.md` (2025-12-02) - **À JOUR**
-- ✅ `ANALYSE_PROPOSITION_IBM_MECE.md` (2025-12-02) - **À JOUR**
-- ✅ `ANALYSE_BONNES_PRATIQUES.md` (2025-12-02) - **À JOUR**
-- ✅ `AUDIT_BONNES_PRATIQUES_RACINE_2025.md` (2025-12-01) - **À JOUR**
-- ✅ `ANALYSE_DOUBLON_HCD_1_2_3.md` (2025-12-01) - **À JOUR**
-- ✅ `GUIDE_CHANGELOG.md` (2025-12-01) - **À JOUR**
-- ✅ `INSTALLATION_SHELLCHECK.md` (2025-12-01) - **À JOUR**
+- ✅ `AUDIT_PORTABILITE_CROSS_PLATFORM_2025.md` (2026-03-13) - **À JOUR**
+- ✅ `GUIDE_INSTALLATION_LINUX.md` (2026-03-13) - **À JOUR**
+- ✅ `GUIDE_INSTALLATION_WINDOWS.md` (2026-03-13) - **À JOUR**
+- ✅ `REFERENCE_HCD_DOCUMENTATION.md` (2026-03-13) - **À JOUR**
+- ✅ `ORGANISATION_FINALE.md` (2026-03-13) - **À JOUR**
+- ✅ `ANALYSE_PROPOSITION_IBM_MECE.md` (2026-03-13) - **À JOUR**
+- ✅ `ANALYSE_BONNES_PRATIQUES.md` (2026-03-13) - **À JOUR**
+- ✅ `AUDIT_BONNES_PRATIQUES_RACINE_2025.md` (2026-03-13) - **À JOUR**
+- ✅ `ANALYSE_DOUBLON_HCD_1_2_3.md` (2026-03-13) - **À JOUR**
+- ✅ `GUIDE_CHANGELOG.md` (2026-03-13) - **À JOUR**
+- ✅ `INSTALLATION_SHELLCHECK.md` (2026-03-13) - **À JOUR**
 - ✅ `ANALYSE_ETAT_ART_HBASE.md` - **À JOUR** (analyse historique, toujours valide)
 - ✅ `ARCHITECTURE_POC_COMPLETE.md` - **À JOUR** (architecture technique, toujours valide)
 
@@ -543,6 +543,6 @@
 
 ---
 
-**Date** : 2025-12-02  
-**Version** : 1.0  
+**Date** : 2026-03-13
+**Version** : 1.0
 **Statut** : ✅ **Audit Complet**

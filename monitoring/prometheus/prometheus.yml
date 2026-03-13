@@ -1,0 +1,53 @@
+# Prometheus Configuration for ARKEA POC
+# Scrape targets for HCD, Spark, Kafka, and custom metrics
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'arkea-poc'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+rule_files: []
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # HCD Cassandra metrics (via jmx_exporter)
+  - job_name: 'hcd-cassandra'
+    static_configs:
+      - targets: ['hcd:7070']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'hcd-node-1'
+
+  # Spark Master metrics
+  - job_name: 'spark-master'
+    static_configs:
+      - targets: ['spark-master:8081']
+    metrics_path: '/metrics/prometheus'
+
+  # Spark Worker metrics
+  - job_name: 'spark-worker'
+    static_configs:
+      - targets: ['spark-worker:8081']
+    metrics_path: '/metrics/prometheus'
+
+  # Kafka metrics (via jmx_exporter)
+  - job_name: 'kafka'
+    static_configs:
+      - targets: ['kafka:7071']
+
+  # Custom application metrics (if exposed)
+  - job_name: 'arkea-app'
+    static_configs:
+      - targets: ['app:8000']
+    metrics_path: '/metrics'

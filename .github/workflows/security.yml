@@ -1,0 +1,233 @@
+# =============================================================================
+# ARKEA POC - Security Scanning Workflow
+# =============================================================================
+# Date : 2026-03-13
+# Version : 1.0.0
+# Author : David LECONTE (IBM WW|Tiger Team - Watsonx.Data GPS)
+# Description : Automated security scanning (SAST, SCA, secrets detection)
+# =============================================================================
+
+name: Security
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run security scan every Monday at 6:00 AM UTC
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  # =============================================================================
+  # SAST - Static Application Security Testing (Python)
+  # =============================================================================
+  bandit:
+    name: Bandit (Python SAST)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Bandit
+        run: pip install bandit[toml]
+
+      - name: Run Bandit
+        run: |
+          bandit -r . \
+            -x ./binaire,./software,./.git,./inputs-client,./inputs-ibm \
+            -ll \
+            --format json --output bandit-report.json
+
+      - name: Display Bandit Results
+        if: always()
+        run: |
+          if [ -f bandit-report.json ]; then
+            echo "📊 Bandit Security Report"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            bandit -r . -x ./binaire,./software,./.git -ll --format txt
+          fi
+
+      - name: Upload Bandit Report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: bandit-report
+          path: bandit-report.json
+
+  # =============================================================================
+  # SAST - Shell Script Security
+  # =============================================================================
+  shellcheck-security:
+    name: ShellCheck (Shell SAST)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38 # v2.0.0
+        with:
+          scandir: '.'
+          severity: error
+          format: gcc
+          exclude_paths: >
+            binaire,
+            software,
+            inputs-client,
+            inputs-ibm
+
+  # =============================================================================
+  # SCA - Software Composition Analysis
+  # =============================================================================
+  dependency-check:
+    name: Dependency Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Safety
+        run: pip install safety
+
+      - name: Check Python Dependencies
+        run: |
+          if [ -f requirements.txt ]; then
+            echo "🔍 Checking Python dependencies for vulnerabilities..."
+            safety check -r requirements.txt --output json > safety-report.json
+            safety check -r requirements.txt
+          else
+            echo "⚠️ No requirements.txt found"
+          fi
+
+      - name: Upload Safety Report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: safety-report
+          path: safety-report.json
+
+  # =============================================================================
+  # Container Security (Trivy)
+  # =============================================================================
+  trivy:
+    name: Trivy (Container Scanner)
+    runs-on: ubuntu-latest
+    # Only run if Dockerfile or container-related files change
+    if: |
+      contains(github.event.head_commit.message, 'container') ||
+      contains(github.event.head_commit.message, 'docker') ||
+      contains(github.event.head_commit.message, 'podman')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@bceef37a45815d6c5cfea1861a414ec7dbc00242 # v0.0.10
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          severity: 'CRITICAL,HIGH'
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          skip-dirs: 'binaire,software,inputs-client,inputs-ibm'
+
+  # =============================================================================
+  # Secrets Detection
+  # =============================================================================
+  detect-secrets:
+    name: Detect Secrets
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.11'
+
+      - name: Install detect-secrets
+        run: pip install detect-secrets
+
+      - name: Scan for secrets
+        run: |
+          echo "🔍 Scanning for secrets..."
+          detect-secrets scan \
+            --baseline .secrets.baseline \
+            --exclude-files 'binaire/*|software/*|inputs-*/*|.git/*' \
+            > scan-results.json
+
+          echo ""
+          echo "📊 Secret Detection Results"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          if [ -f .secrets.baseline ]; then
+            # Compare with baseline
+            detect-secrets audit .secrets.baseline --report
+          else
+            echo "⚠️ No baseline found. Review scan-results.json"
+          fi
+
+      - name: Upload Scan Results
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: secrets-scan
+          path: scan-results.json
+
+  # =============================================================================
+  # Security Summary
+  # =============================================================================
+  security-summary:
+    name: Security Summary
+    runs-on: ubuntu-latest
+    needs: [bandit, shellcheck-security, dependency-check, detect-secrets]
+    if: always()
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          path: reports
+
+      - name: Generate Security Summary
+        run: |
+          echo "🔐 Security Scan Summary"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "| Scanner | Status |"
+          echo "|---------|--------|"
+          echo "| Bandit (SAST) | ${{ needs.bandit.result }} |"
+          echo "| ShellCheck | ${{ needs.shellcheck-security.result }} |"
+          echo "| Dependency Check | ${{ needs.dependency-check.result }} |"
+          echo "| Secrets Detection | ${{ needs.detect-secrets.result }} |"
+          echo ""
+          echo "📄 Detailed reports available in workflow artifacts"
+
+      - name: Check for Critical Issues
+        run: |
+          # Fail if any critical security issues found
+          if [ "${{ needs.bandit.result }}" == "failure" ] || \
+             [ "${{ needs.dependency-check.result }}" == "failure" ]; then
+            echo "❌ Critical security issues detected!"
+            exit 1
+          fi
+          echo "✅ No critical security issues detected"

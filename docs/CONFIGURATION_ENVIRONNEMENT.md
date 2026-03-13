@@ -1,6 +1,6 @@
 # ⚙️ Configuration de l'Environnement POC
 
-**Date** : 2025-12-02 (Mise à jour pour portabilité cross-platform)  
+**Date** : 2026-03-13 (Mise à jour pour portabilité cross-platform)
 **Fichiers** : `.poc-profile` et `.poc-config.sh`
 
 ---

@@ -1,0 +1,210 @@
+# =============================================================================
+# ARKEA POC - Release Automation Workflow
+# =============================================================================
+# Date : 2026-03-13
+# Version : 1.0.0
+# Author : David LECONTE (IBM WW|Tiger Team - Watsonx.Data GPS)
+# Description : Automated release process with changelog generation
+# =============================================================================
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 1.4.2)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  # =============================================================================
+  # Prepare Release
+  # =============================================================================
+  prepare:
+    name: Prepare Release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Release version: $VERSION"
+
+      - name: Generate Changelog
+        id: changelog
+        run: |
+          echo "📝 Generating changelog..."
+
+          # Get previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
+          if [ -n "$PREV_TAG" ]; then
+            echo "Previous tag: $PREV_TAG"
+            CHANGELOG=$(git log $PREV_TAG..HEAD --pretty=format:"- %s (%h)" --no-merges)
+          else
+            echo "No previous tag found, using all commits"
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges -20)
+          fi
+
+          # Save changelog to file
+          {
+            echo "## 🚀 Release v${{ steps.version.outputs.version }}"
+            echo ""
+            echo "### Changes"
+            echo ""
+            echo "$CHANGELOG"
+            echo ""
+            echo "---"
+            echo ""
+            echo "### Installation"
+            echo ""
+            echo "\`\`\`bash"
+            echo "git clone --branch v${{ steps.version.outputs.version }} https://github.com/davidleconte/Arkea.git"
+            echo "\`\`\`"
+            echo ""
+            echo "### Documentation"
+            echo ""
+            echo "- [README](README.md)"
+            echo "- [CHANGELOG](CHANGELOG.md)"
+            echo "- [Security Policy](SECURITY.md)"
+          } > RELEASE_NOTES.md
+
+          echo "changelog_file=RELEASE_NOTES.md" >> $GITHUB_OUTPUT
+
+      - name: Upload Changelog
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-notes
+          path: RELEASE_NOTES.md
+
+  # =============================================================================
+  # Run Tests Before Release
+  # =============================================================================
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    needs: prepare
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+
+      - name: Run unit tests
+        run: |
+          pytest tests/unit/ -v --tb=short
+
+      - name: Check syntax
+        run: |
+          find scripts/ -name "*.sh" -type f | while read -r script; do
+            bash -n "$script" || exit 1
+          done
+
+  # =============================================================================
+  # Create GitHub Release
+  # =============================================================================
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [prepare, test]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Download changelog
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: release-notes
+          path: .
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
+        with:
+          tag_name: ${{ needs.prepare.outputs.tag }}
+          name: Release ${{ needs.prepare.outputs.tag }}
+          body_path: RELEASE_NOTES.md
+          draft: false
+          prerelease: ${{ contains(needs.prepare.outputs.version, '-') }}
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: |
+          echo "✅ Release ${{ needs.prepare.outputs.tag }} created!"
+          echo ""
+          echo "View release: https://github.com/davidleconte/Arkea/releases/tag/${{ needs.prepare.outputs.tag }}"
+
+  # =============================================================================
+  # Update CHANGELOG.md
+  # =============================================================================
+  update-changelog:
+    name: Update CHANGELOG.md
+    runs-on: ubuntu-latest
+    needs: [prepare, release]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: main
+
+      - name: Download changelog
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: release-notes
+          path: .
+
+      - name: Update CHANGELOG.md
+        run: |
+          if [ -f CHANGELOG.md ]; then
+            # Prepend new release notes to existing changelog
+            {
+              cat RELEASE_NOTES.md
+              echo ""
+              cat CHANGELOG.md
+            } > CHANGELOG_NEW.md
+            mv CHANGELOG_NEW.md CHANGELOG.md
+          else
+            mv RELEASE_NOTES.md CHANGELOG.md
+          fi
+
+      - name: Commit updated changelog
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git commit -m "docs: update CHANGELOG for ${{ needs.prepare.outputs.tag }}" || echo "No changes to commit"
+          git push origin main || echo "No changes to push"

@@ -1,5 +1,13 @@
 # 🚀 POC Migration HBase → HCD (Hyper-Converged Database)
 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-1.4.1-green.svg)](CHANGELOG.md)
+[![CI](https://github.com/davidleconte/Arkea/workflows/CI/badge.svg)](https://github.com/davidleconte/Arkea/actions/workflows/test.yml)
+[![Security](https://github.com/davidleconte/Arkea/workflows/Security/badge.svg)](https://github.com/davidleconte/Arkea/actions/workflows/security.yml)
+[![codecov](https://codecov.io/gh/davidleconte/Arkea/branch/main/graph/badge.svg)](https://codecov.io/gh/davidleconte/Arkea)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](docs/DEPLOYMENT.md)
+[![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 **Date** : 2026-03-12
 **Version** : 1.4.1
 **Objectif** : Démonstration de faisabilité de la migration HBase vers DataStax HCD
@@ -56,7 +64,7 @@ Le projet ARKEA est **cross-platform** et supporte les systèmes d'exploitation 
 
 ## 🏗️ Structure du Projet
 
-```
+```text
 Arkea/
 ├── scripts/             # Scripts organisés
 │   ├── setup/           # Scripts d'installation/setup (01-06)
@@ -176,7 +184,7 @@ Toute la documentation est dans le répertoire `docs/` :
 - **ARCHITECTURE_POC_COMPLETE.md** - Architecture technique détaillée
 - **ANALYSE_ETAT_ART_HBASE.md** - Analyse de l'existant
 
-Voir `docs/INDEX.md` pour l'index complet.
+Voir `docs/README.md` pour l'index complet.
 
 ### 👔 Business & Executive Synthesis
 

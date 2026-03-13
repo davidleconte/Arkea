@@ -10,19 +10,20 @@ import argparse
 import os
 import re
 from pathlib import Path
+from typing import Dict, List, Optional, Set
 
 # Configuration
 ARKEA_HOME = Path(__file__).parent.parent.parent.resolve()
 
 # Patterns de correction
-HARDCODED_PATTERNS = {
+HARDCODED_PATTERNS: Dict[str, str] = {
     r"/Users/david\.leconte/Documents/Arkea": "${ARKEA_HOME}",
     r"/Users/david\.leconte": "${USER_HOME:-$HOME}",
     r'INSTALL_DIR="/Users/david\.leconte/Documents/Arkea"': 'INSTALL_DIR="${ARKEA_HOME}"',
     r"INSTALL_DIR=/Users/david\.leconte/Documents/Arkea": "INSTALL_DIR=${ARKEA_HOME}",
 }
 
-LOCALHOST_PATTERNS = {
+LOCALHOST_PATTERNS: Dict[str, str] = {
     r"localhost:9042": "${HCD_HOST:-localhost}:${HCD_PORT:-9042}",
     r'"localhost:9042"': '"${HCD_HOST:-localhost}:${HCD_PORT:-9042}"',
     r"'localhost:9042'": "'${HCD_HOST:-localhost}:${HCD_PORT:-9042}'",
@@ -33,13 +34,13 @@ LOCALHOST_PATTERNS = {
     r'"localhost:2181"': '"${KAFKA_ZOOKEEPER_CONNECT:-localhost:2181}"',
     r"'localhost:2181'": "'${KAFKA_ZOOKEEPER_CONNECT:-localhost:2181}'",
     r"HCD est démarré sur localhost:9042": (
-        "HCD est démarré sur ${HCD_HOST:-localhost}:${HCD_PORT:-9042}",
+        "HCD est démarré sur ${HCD_HOST:-localhost}:${HCD_PORT:-9042}"
     ),
     r"cassandra sur localhost:9042": "cassandra sur ${HCD_HOST:-localhost}:${HCD_PORT:-9042}",
 }
 
 # Patterns Scala spécifiques
-SCALA_LOCALHOST_PATTERNS = {
+SCALA_LOCALHOST_PATTERNS: Dict[str, str] = {
     r"localhost:9042": (
         r'sys.env.getOrElse("HCD_HOST", "localhost") + ":" + '
         r'sys.env.getOrElse("HCD_PORT", "9042")'
@@ -48,12 +49,25 @@ SCALA_LOCALHOST_PATTERNS = {
 }
 
 
-def find_files(directory, extensions, exclude_dirs=None):
-    """Trouve tous les fichiers avec les extensions spécifiées."""
+def find_files(
+    directory: Path,
+    extensions: List[str],
+    exclude_dirs: Optional[Set[str]] = None,
+) -> List[Path]:
+    """Trouve tous les fichiers avec les extensions spécifiées.
+
+    Args:
+        directory: Répertoire racine à parcourir.
+        extensions: Liste des extensions de fichier à inclure.
+        exclude_dirs: Ensemble de noms de répertoires à exclure.
+
+    Returns:
+        Liste des chemins de fichiers trouvés.
+    """
     if exclude_dirs is None:
         exclude_dirs = {".git", "binaire", "software", "logs", "archive", "__pycache__", ".backup"}
 
-    files = []
+    files: List[Path] = []
     for root, dirs, filenames in os.walk(directory):
         # Exclure les répertoires
         dirs[:] = [d for d in dirs if d not in exclude_dirs]
@@ -66,8 +80,16 @@ def find_files(directory, extensions, exclude_dirs=None):
     return files
 
 
-def fix_hardcoded_paths(filepath, dry_run=False):
-    """Corrige les chemins hardcodés dans un fichier."""
+def fix_hardcoded_paths(filepath: Path, dry_run: bool = False) -> bool:
+    """Corrige les chemins hardcodés dans un fichier.
+
+    Args:
+        filepath: Chemin vers le fichier à corriger.
+        dry_run: Si True, simule sans modifier.
+
+    Returns:
+        True si le fichier a été modifié, False sinon.
+    """
     try:
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
@@ -103,8 +125,16 @@ def fix_hardcoded_paths(filepath, dry_run=False):
     return False
 
 
-def fix_localhost_references(filepath, dry_run=False):
-    """Corrige les références localhost hardcodées dans un fichier."""
+def fix_localhost_references(filepath: Path, dry_run: bool = False) -> bool:
+    """Corrige les références localhost hardcodées dans un fichier.
+
+    Args:
+        filepath: Chemin vers le fichier à corriger.
+        dry_run: Si True, simule sans modifier.
+
+    Returns:
+        True si le fichier a été modifié, False sinon.
+    """
     try:
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
@@ -146,8 +176,15 @@ def fix_localhost_references(filepath, dry_run=False):
     return False
 
 
-def remove_strange_files(dry_run=False):
-    """Supprime les fichiers étranges identifiés."""
+def remove_strange_files(dry_run: bool = False) -> int:
+    """Supprime les fichiers étranges identifiés.
+
+    Args:
+        dry_run: Si True, simule sans supprimer.
+
+    Returns:
+        Nombre de fichiers supprimés (ou qui seraient supprimés).
+    """
     strange_files = [
         ARKEA_HOME / "binaire" / "spark-3.5.1" / "=",
         ARKEA_HOME / "poc-design" / "domirama2" / "=",
@@ -171,7 +208,8 @@ def remove_strange_files(dry_run=False):
     return removed
 
 
-def main():
+def main() -> None:
+    """Fonction principale — corrige les priorités critiques du projet."""
     parser = argparse.ArgumentParser(
         description="Corrige les 3 priorités critiques du projet ARKEA"
     )

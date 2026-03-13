@@ -1,7 +1,7 @@
 # 📐 Guide de Standards POCs - ARKEA
 
-**Date** : 2025-12-02  
-**Version** : 1.0.0  
+**Date** : 2026-03-13
+**Version** : 1.0.0
 **Objectif** : Standards communs pour tous les POCs du projet ARKEA
 
 ---
@@ -267,6 +267,6 @@ fi
 
 ---
 
-**Date** : 2025-12-02  
-**Version** : 1.0.0  
+**Date** : 2026-03-13
+**Version** : 1.0.0
 **Statut** : ✅ **Guide complet**

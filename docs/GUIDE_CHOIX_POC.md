@@ -1,7 +1,7 @@
 # 🎯 Guide de Choix de POC - ARKEA
 
-**Date** : 2025-12-02  
-**Objectif** : Aider à choisir le bon POC selon les besoins  
+**Date** : 2026-03-13
+**Objectif** : Aider à choisir le bon POC selon les besoins
 **Version** : 1.0.0
 
 ---

@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
 Script pour mettre à jour les références aux anciens chemins de scripts
-Remplace les références à ./scripts/setup/01_install_hcd.sh par ./scripts/setup/01_install_hcd.sh, etc.
+Remplace les références aux anciens chemins de scripts par les nouveaux.
 """
 
-import os
 import re
 from pathlib import Path
+from typing import Dict, List
 
 # Mapping des anciens chemins vers les nouveaux
-SCRIPT_MAPPING = {
+SCRIPT_MAPPING: Dict[str, str] = {
     # Scripts setup
     r"\./01_install_hcd\.sh": "./scripts/setup/01_install_hcd.sh",
     r"\./02_install_spark_kafka\.sh": "./scripts/setup/02_install_spark_kafka.sh",
@@ -34,23 +34,29 @@ SCRIPT_MAPPING = {
 }
 
 # Répertoires à traiter
-DIRS_TO_PROCESS = [
+DIRS_TO_PROCESS: List[str] = [
     "poc-design",
     "docs",
     ".",
 ]
 
 # Extensions de fichiers à traiter
-EXTENSIONS = [".sh", ".md", ".py", ".txt"]
+EXTENSIONS: List[str] = [".sh", ".md", ".py", ".txt"]
 
 
-def update_file_references(file_path):
-    """Met à jour les références dans un fichier"""
+def update_file_references(file_path: Path) -> bool:
+    """Met à jour les références dans un fichier.
+
+    Args:
+        file_path: Chemin vers le fichier à traiter.
+
+    Returns:
+        True si le fichier a été modifié, False sinon.
+    """
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
 
-        original_content = content
         updated = False
 
         # Appliquer chaque remplacement
@@ -63,9 +69,8 @@ def update_file_references(file_path):
                 count_after = len(re.findall(old_pattern, content))
                 if count_after < count_before:
                     updated = True
-                    print(
-                        f"  ✅ {old_pattern} → {new_path} ({count_before - count_after} remplacements)"
-                    )
+                    replaced = count_before - count_after
+                    print(f"  ✅ {old_pattern} → {new_path} ({replaced} remplacements)")
 
         # Écrire si modifié
         if updated:
@@ -79,8 +84,8 @@ def update_file_references(file_path):
         return False
 
 
-def main():
-    """Fonction principale"""
+def main() -> None:
+    """Fonction principale — met à jour les références de scripts dans le projet."""
     base_dir = Path(__file__).parent.parent.parent
 
     print("🔄 Mise à jour des références aux scripts...")
@@ -115,7 +120,7 @@ def main():
         print("")
 
     print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-    print(f"✅ Mise à jour terminée")
+    print("✅ Mise à jour terminée")
     print(f"   Fichiers traités: {total_files}")
     print(f"   Fichiers mis à jour: {updated_files}")
     print("")

@@ -1,7 +1,7 @@
 # 📝 Guide : Mettre à Jour le CHANGELOG.md
 
-**Date** : 2025-12-01  
-**Objectif** : Guide pour maintenir le CHANGELOG.md à jour  
+**Date** : 2026-03-13
+**Objectif** : Guide pour maintenir le CHANGELOG.md à jour
 **Version** : 1.0
 
 ---
@@ -238,7 +238,7 @@ Ajouter les changements dans `[Unreleased]` :
 
 ---
 
-## [1.0.0] - 2025-12-01
+## [1.0.0] - 2026-03-13
 
 ### Ajouté
 - Structure complète du projet
@@ -249,6 +249,6 @@ Ajouter les changements dans `[Unreleased]` :
 
 ---
 
-**Date** : 2025-12-01  
-**Version** : 1.0  
+**Date** : 2026-03-13
+**Version** : 1.0
 **Statut** : ✅ **Guide complet**

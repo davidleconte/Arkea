@@ -1,7 +1,7 @@
 # 🚀 Guide : Pousser le Dépôt Git Local vers GitHub
 
-**Date** : 2025-12-02  
-**Objectif** : Instructions pour envoyer le dépôt Git local vers GitHub.com  
+**Date** : 2026-03-13
+**Objectif** : Instructions pour envoyer le dépôt Git local vers GitHub.com
 **Auteur** : David LECONTE
 
 ---
@@ -349,6 +349,6 @@ git pull origin main
 
 ---
 
-**Date** : 2025-12-02  
-**Version** : 1.0.0  
+**Date** : 2026-03-13
+**Version** : 1.0.0
 **Statut** : ✅ Guide complet

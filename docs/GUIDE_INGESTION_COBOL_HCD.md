@@ -1,7 +1,7 @@
 # 🔄 Guide : Ingestion Directe de Fichiers COBOL dans HCD
 
-**Date** : 2025-12-02  
-**Objectif** : Ingérer directement des fichiers séquentiels COBOL dans HCD en respectant les bonnes pratiques et les exigences inputs-clients/inputs-ibm  
+**Date** : 2026-03-13
+**Objectif** : Ingérer directement des fichiers séquentiels COBOL dans HCD en respectant les bonnes pratiques et les exigences inputs-clients/inputs-ibm
 **Contexte** : Migration HBase → HCD, format COBOL Base64 (Domirama)
 
 ---
@@ -523,12 +523,12 @@ echo "✅ Ingestion terminée !"
 
 **OUI, il est possible d'insérer directement des fichiers COBOL dans HCD** en respectant :
 
-✅ **Exigences inputs-clients** : Format COBOL Base64, BulkLoad, TTL  
-✅ **Exigences inputs-ibm** : Spark/DSBulk, colonnes normalisées, performance  
+✅ **Exigences inputs-clients** : Format COBOL Base64, BulkLoad, TTL
+✅ **Exigences inputs-ibm** : Spark/DSBulk, colonnes normalisées, performance
 ✅ **Bonnes pratiques** : Performance, gestion d'erreurs, qualité, sécurité
 
 **Méthode recommandée** : **Spark direct** (Méthode 1) pour performance optimale, ou **DSBulk** (Méthode 2) pour simplicité et gestion d'erreurs.
 
 ---
 
-**Dernière mise à jour** : 2025-12-02
+**Dernière mise à jour** : 2026-03-13

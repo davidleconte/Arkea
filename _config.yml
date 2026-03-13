@@ -1,0 +1,95 @@
+# Jekyll Configuration for GitHub Pages
+# https://docs.github.com/en/pages/setting-up-a-github-pages-site-with-jekyll/about-github-pages-and-jekyll
+
+title: ARKEA POC - Migration HBase → HCD
+description: Documentation for ARKEA POC migration from HBase to DataStax HCD
+author: David LECONTE (IBM)
+email: david.leconte1@ibm.com
+
+# Repository
+repository: davidleconte/Arkea
+github_url: https://github.com/davidleconte/Arkea
+
+# Theme
+theme: jekyll-theme-slate
+
+# Navigation
+nav:
+  - title: "Home"
+    url: "/"
+  - title: "Documentation"
+    url: "/docs/"
+  - title: "API"
+    url: "/api/"
+  - title: "Architecture"
+    url: "/docs/adr/"
+
+# Markdown processing
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# Plugins (GitHub Pages supported)
+plugins:
+  - jekyll-readme-index
+  - jekyll-default-layout
+  - jekyll-titles-from-headings
+  - jekyll-relative-links
+  - jekyll-optional-front-matter
+
+# Collections
+collections:
+  adr:
+    output: true
+    permalink: /adr/:path/
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+      type: "adr"
+    values:
+      layout: "default"
+  - scope:
+      path: "docs"
+    values:
+      layout: "default"
+
+# Exclude from processing
+exclude:
+  - binaire/
+  - software/
+  - logs/
+  - inputs-clients/
+  - inputs-ibm/
+  - .git/
+  - .github/
+  - .venv/
+  - node_modules/
+  - "*.sh"
+  - "*.py"
+  - "*.scala"
+  - "*.jar"
+  - Makefile
+  - podman-compose.yml
+  - monitoring/
+
+# Include these files
+include:
+  - README.md
+  - CHANGELOG.md
+  - CONTRIBUTING.md
+  - CODE_OF_CONDUCT.md
+  - SECURITY.md
+  - LICENSE
+  - docs/
+
+# File extensions to process
+markdown_ext: "md,mkd,mkdn,markdown"
+
+# Timezone
+timezone: Europe/Paris
+
+# Language
+lang: fr

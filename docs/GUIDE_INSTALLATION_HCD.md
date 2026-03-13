@@ -2,7 +2,7 @@
 
 **Référence** : [DataStax HCD Installation Documentation](https://docs.datastax.com/en/hyper-converged-database/1.2/install/install-tarball.html)
 
-**Date** : 2025-12-02 (Mise à jour pour portabilité cross-platform)  
+**Date** : 2026-03-13 (Mise à jour pour portabilité cross-platform)
 **Systèmes supportés** : macOS, Linux, Windows (WSL2)
 
 ---
@@ -346,7 +346,7 @@ HCD crée un utilisateur `cassandra` par défaut avec privilèges administrateur
 cqlsh localhost 9042
 
 # Créer un nouveau superuser
-CREATE ROLE admin WITH SUPERUSER = true AND LOGIN = true AND PASSWORD = 'VotreMotDePasseSecurise';
+CREATE ROLE admin WITH SUPERUSER = true AND LOGIN = true AND PASSWORD = 'VotreMotDePasseSecurise';  # pragma: allowlist secret
 
 # Se connecter avec le nouveau superuser
 cqlsh -u admin -p 'VotreMotDePasseSecurise' localhost 9042

@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   # =============================================================================
   # Tests de Syntaxe et Validation
@@ -16,10 +20,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.11'
 
@@ -46,7 +50,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Check .poc-config.sh
         run: |
@@ -86,7 +90,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Check README.md
         run: |
@@ -114,7 +118,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Check Required Directories
         run: |
@@ -136,3 +140,134 @@ jobs:
             echo "❌ Scripts not organized correctly"
             exit 1
           fi
+
+  # =============================================================================
+  # Python Tests with Coverage
+  # =============================================================================
+  python-tests:
+    name: Python Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+
+      - name: Run Python tests with coverage
+        run: |
+          pytest tests/unit/ -v \
+            --cov=. \
+            --cov-report=xml \
+            --cov-report=term-missing \
+            --cov-fail-under=0
+
+      - name: Run Shell Script tests
+        run: |
+          echo "🧪 Running shell script tests..."
+          # Make scripts executable
+          chmod +x scripts/setup/00_onboarding.sh 2>/dev/null || true
+          chmod +x tests/utils/kcov_runner.sh 2>/dev/null || true
+          chmod +x scripts/utils/80_verify_all.sh 2>/dev/null || true
+          chmod +x scripts/utils/95_cleanup.sh 2>/dev/null || true
+          chmod +x scripts/utils/91_check_consistency.sh 2>/dev/null || true
+
+          # Run pytest for shell scripts
+          pytest tests/unit/test_shell_scripts.py -v -m "not integration"
+
+          # Test dry-run flags directly
+          echo ""
+          echo "Testing --dry-run flags..."
+          ./scripts/setup/00_onboarding.sh --dry-run
+          ./tests/utils/kcov_runner.sh --dry-run
+          ./scripts/utils/80_verify_all.sh --dry-run
+          ./scripts/utils/95_cleanup.sh --dry-run
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 # v4
+        with:
+          files: ./coverage.xml
+          flags: unittests
+          name: arkea-poc-coverage
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Coverage summary
+        run: |
+          echo "📊 Coverage report uploaded to Codecov"
+          echo "View at: https://codecov.io/gh/davidleconte/Arkea"
+
+  # =============================================================================
+  # Monitoring Stack Validation
+  # =============================================================================
+  monitoring-check:
+    name: Monitoring Config Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Validate monitoring configs
+        run: |
+          echo "📊 Validating monitoring stack configuration..."
+
+          # Check compose file syntax
+          if [ -f monitoring/docker-compose.monitoring.yml ]; then
+            python3 -c "
+          import yaml, sys
+          with open('monitoring/docker-compose.monitoring.yml') as f:
+              data = yaml.safe_load(f)
+          assert 'services' in data, 'Missing services key'
+          assert 'prometheus' in data['services'], 'Missing prometheus service'
+          assert 'grafana' in data['services'], 'Missing grafana service'
+          print('✅ Compose file structure valid')
+          "
+          else
+            echo "❌ monitoring/docker-compose.monitoring.yml not found"
+            exit 1
+          fi
+
+          # Check Prometheus config
+          if [ -f monitoring/prometheus/prometheus.yml ]; then
+            python3 -c "
+          import yaml
+          with open('monitoring/prometheus/prometheus.yml') as f:
+              data = yaml.safe_load(f)
+          assert 'scrape_configs' in data, 'Missing scrape_configs'
+          print(f'✅ Prometheus config valid ({len(data[\"scrape_configs\"])} scrape targets)')
+          "
+          else
+            echo "❌ monitoring/prometheus/prometheus.yml not found"
+            exit 1
+          fi
+
+          # Check Grafana provisioning
+          for f in \
+            monitoring/grafana/provisioning/datasources/datasources.yml \
+            monitoring/grafana/provisioning/dashboards/dashboards.yml; do
+            if [ -f "$f" ]; then
+              python3 -c "import yaml; yaml.safe_load(open('$f'))"
+              echo "✅ $(basename $f) valid"
+            else
+              echo "❌ $f not found"
+              exit 1
+            fi
+          done
+
+          # Check dashboards exist
+          dashboard_count=$(find monitoring/grafana/dashboards -name "*.json" | wc -l)
+          echo "✅ Found $dashboard_count Grafana dashboard(s)"
+
+          echo ""
+          echo "✅ Monitoring stack configuration validated"

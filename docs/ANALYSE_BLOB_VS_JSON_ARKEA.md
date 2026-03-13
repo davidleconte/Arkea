@@ -1,7 +1,7 @@
 # 📊 Analyse : BLOB vs JSON dans le Contexte ARKEA
 
-**Date** : 2025-12-02  
-**Question** : Quels seraient les bénéfices d'utiliser BLOB plutôt que JSON dans le contexte ARKEA ?  
+**Date** : 2026-03-13
+**Question** : Quels seraient les bénéfices d'utiliser BLOB plutôt que JSON dans le contexte ARKEA ?
 **Contexte** : Migration HBase → HCD, données COBOL, exigences clients/IBM
 
 ---
@@ -401,4 +401,4 @@ CREATE TABLE domirama_poc.operations_by_account (
 
 ---
 
-**Dernière mise à jour** : 2025-12-02
+**Dernière mise à jour** : 2026-03-13

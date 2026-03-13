@@ -1,6 +1,6 @@
 # 📦 Guide des Dépendances - Projet ARKEA
 
-**Date** : 2025-12-02  
+**Date** : 2026-03-13
 **Objectif** : Documentation complète des dépendances du projet ARKEA
 
 ---

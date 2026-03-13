@@ -49,6 +49,20 @@ software/
 *.bin
 *.dmg
 
+# Coverage output
+kcov-output/
+htmlcov/
+coverage.xml
+
+# Spark checkpoints
+spark-warehouse/
+metastore_db/
+derby.log
+
+# DevContainer local state
+.devcontainer/.env
+.devcontainer/docker-compose.override.yml
+
 # Legacy backups / archives
 _archive_*/
 _backup_*.tar.gz

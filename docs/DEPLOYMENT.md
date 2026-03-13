@@ -1,7 +1,7 @@
 # 🚀 Guide de Déploiement - ARKEA
 
-**Date** : 2025-12-01  
-**Objectif** : Guide complet pour déployer le projet ARKEA  
+**Date** : 2026-03-13
+**Objectif** : Guide complet pour déployer le projet ARKEA
 **Version** : 1.0
 
 ---
@@ -527,6 +527,6 @@ nodetool tpstats
 
 ---
 
-**Date** : 2025-12-01  
-**Version** : 1.0  
+**Date** : 2026-03-13
+**Version** : 1.0
 **Statut** : ✅ **Documentation complète**
