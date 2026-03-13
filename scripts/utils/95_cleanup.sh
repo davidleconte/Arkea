@@ -1,14 +1,13 @@
 #!/bin/bash
-set -euo pipefail
 # =============================================================================
 # Script de Nettoyage Automatique - ARKEA
 # =============================================================================
-# Date : 2025-12-02
+# Date : 2026-03-13
 # Usage : ./scripts/utils/95_cleanup.sh [--dry-run] [--age DAYS]
 # =============================================================================
 
-set -eo pipefail
-# Note: 'u' désactivé pour permettre des variables optionnelles
+set -euo pipefail
+# Note: Variables optionnelles utilisent la syntaxe ${VAR:-} pour la sécurité
 
 # =============================================================================
 # Configuration
@@ -126,7 +125,8 @@ cleanup_unloads() {
             [ -z "$unload_dir" ] && continue
 
             # Extraire la date du nom (format: UNLOAD_YYYYMMDD-HHMMSS-XXXXXX)
-            local dirname=$(basename "$unload_dir")
+            local dirname
+            dirname=$(basename "$unload_dir")
             if [[ "$dirname" =~ UNLOAD_([0-9]{8})- ]]; then
                 local date_str="${BASH_REMATCH[1]}"
                 local year="${date_str:0:4}"
@@ -136,18 +136,22 @@ cleanup_unloads() {
                 # Convertir en timestamp
                 if [[ "$OSTYPE" == "darwin"* ]]; then
                     # macOS
-                    local dir_timestamp=$(date -j -f "%Y-%m-%d" "$year-$month-$day" "+%s" 2>/dev/null || echo "0")
+                    local dir_timestamp
+                    dir_timestamp=$(date -j -f "%Y-%m-%d" "$year-$month-$day" "+%s" 2>/dev/null || echo "0")
                 else
                     # Linux
-                    local dir_timestamp=$(date -d "$year-$month-$day" "+%s" 2>/dev/null || echo "0")
+                    local dir_timestamp
+                    dir_timestamp=$(date -d "$year-$month-$day" "+%s" 2>/dev/null || echo "0")
                 fi
 
-                local current_timestamp=$(date "+%s")
+                local current_timestamp
+                current_timestamp=$(date "+%s")
                 local age_seconds=$((current_timestamp - dir_timestamp))
                 local age_days=$((age_seconds / 86400))
 
                 if [ "$age_days" -gt "$UNLOAD_AGE_DAYS" ]; then
-                    local size=$(du -sk "$unload_dir" 2>/dev/null | cut -f1 || echo "0")
+                    local size
+                    size=$(du -sk "$unload_dir" 2>/dev/null | cut -f1 || echo "0")
                     total_size=$((total_size + size))
                     count=$((count + 1))
 
@@ -241,20 +245,23 @@ cleanup_old_logs() {
         while IFS= read -r log_file; do
             [ -z "$log_file" ] && continue
 
+            local file_age
             if [[ "$OSTYPE" == "darwin"* ]]; then
                 # macOS
-                local file_age=$(stat -f "%m" "$log_file" 2>/dev/null || echo "0")
+                file_age=$(stat -f "%m" "$log_file" 2>/dev/null || echo "0")
             else
                 # Linux
-                local file_age=$(stat -c "%Y" "$log_file" 2>/dev/null || echo "0")
+                file_age=$(stat -c "%Y" "$log_file" 2>/dev/null || echo "0")
             fi
 
-            local current_timestamp=$(date "+%s")
+            local current_timestamp
+            current_timestamp=$(date "+%s")
             local age_seconds=$((current_timestamp - file_age))
             local age_days=$((age_seconds / 86400))
 
             if [ "$age_days" -gt "$log_age_days" ]; then
-                local size=$(stat -f%z "$log_file" 2>/dev/null || stat -c%s "$log_file" 2>/dev/null || echo "0")
+                local size
+                size=$(stat -f%z "$log_file" 2>/dev/null || stat -c%s "$log_file" 2>/dev/null || echo "0")
                 total_size=$((total_size + size))
                 count=$((count + 1))
 

@@ -123,7 +123,7 @@ jobs:
 
       - name: Run unit tests
         run: |
-          pytest tests/unit/ -v --tb=short || true
+          pytest tests/unit/ -v --tb=short
 
       - name: Check syntax
         run: |

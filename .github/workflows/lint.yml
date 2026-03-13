@@ -46,17 +46,14 @@ jobs:
       - name: Run Black Check
         run: |
           black --check --line-length 100 .
-        continue-on-error: true
 
       - name: Run isort Check
         run: |
           isort --check-only --profile black --line-length 100 .
-        continue-on-error: true
 
       - name: Run Flake8
         run: |
           flake8 --max-line-length=100 --extend-ignore=E203 .
-        continue-on-error: true
 
   # =============================================================================
   # Linting Markdown

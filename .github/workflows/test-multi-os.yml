@@ -155,12 +155,12 @@ jobs:
       - name: Check consistency
         run: |
           chmod +x scripts/utils/91_check_consistency.sh
-          ./scripts/utils/91_check_consistency.sh --check-scripts || true
+          ./scripts/utils/91_check_consistency.sh --check-scripts
           echo "✅ Consistency check completed"
 
       - name: Check hardcoded paths
         run: |
-          ./scripts/utils/91_check_consistency.sh --check-hardcoded-paths || true
+          ./scripts/utils/91_check_consistency.sh --check-hardcoded-paths
           echo "✅ Hardcoded paths check completed"
 
   # =============================================================================
@@ -203,11 +203,11 @@ jobs:
 
       - name: Check consistency in WSL2
         run: |
-          wsl bash -c "cd /mnt/c/Users/runneradmin/actions-runner/_work/Arkea/Arkea && chmod +x scripts/utils/91_check_consistency.sh && ./scripts/utils/91_check_consistency.sh --check-scripts || true"
+          wsl bash -c "cd /mnt/c/Users/runneradmin/actions-runner/_work/Arkea/Arkea && chmod +x scripts/utils/91_check_consistency.sh && ./scripts/utils/91_check_consistency.sh --check-scripts"
 
       - name: Check hardcoded paths in WSL2
         run: |
-          wsl bash -c "cd /mnt/c/Users/runneradmin/actions-runner/_work/Arkea/Arkea && ./scripts/utils/91_check_consistency.sh --check-hardcoded-paths || true"
+          wsl bash -c "cd /mnt/c/Users/runneradmin/actions-runner/_work/Arkea/Arkea && ./scripts/utils/91_check_consistency.sh --check-hardcoded-paths"
 
   # =============================================================================
   # Tests de Portabilité Cross-Platform
@@ -229,7 +229,7 @@ jobs:
       - name: Check consistency (final)
         run: |
           chmod +x scripts/utils/91_check_consistency.sh
-          ./scripts/utils/91_check_consistency.sh --report || true
+          ./scripts/utils/91_check_consistency.sh --report
           echo "✅ Final consistency check completed"
 
       - name: Generate compatibility report

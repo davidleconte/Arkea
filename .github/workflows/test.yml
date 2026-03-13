@@ -168,8 +168,7 @@ jobs:
             --cov=. \
             --cov-report=xml \
             --cov-report=term-missing \
-            --cov-fail-under=0 \
-            || true
+            --cov-fail-under=0
 
       - name: Run Shell Script tests
         run: |
@@ -182,15 +181,15 @@ jobs:
           chmod +x scripts/utils/91_check_consistency.sh 2>/dev/null || true
 
           # Run pytest for shell scripts
-          pytest tests/unit/test_shell_scripts.py -v -m "not integration" || true
+          pytest tests/unit/test_shell_scripts.py -v -m "not integration"
 
           # Test dry-run flags directly
           echo ""
           echo "Testing --dry-run flags..."
-          ./scripts/setup/00_onboarding.sh --dry-run 2>/dev/null || true
-          ./tests/utils/kcov_runner.sh --dry-run 2>/dev/null || true
-          ./scripts/utils/80_verify_all.sh --dry-run 2>/dev/null || true
-          ./scripts/utils/95_cleanup.sh --dry-run 2>/dev/null || true
+          ./scripts/setup/00_onboarding.sh --dry-run
+          ./tests/utils/kcov_runner.sh --dry-run
+          ./scripts/utils/80_verify_all.sh --dry-run
+          ./scripts/utils/95_cleanup.sh --dry-run
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4

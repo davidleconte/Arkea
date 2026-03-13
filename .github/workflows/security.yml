@@ -44,15 +44,15 @@ jobs:
           bandit -r . \
             -x ./binaire,./software,./.git,./inputs-client,./inputs-ibm \
             -ll \
-            --format json --output bandit-report.json \
-            || true
+            --format json --output bandit-report.json
 
       - name: Display Bandit Results
+        if: always()
         run: |
           if [ -f bandit-report.json ]; then
             echo "📊 Bandit Security Report"
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            bandit -r . -x ./binaire,./software,./.git -ll --format txt || true
+            bandit -r . -x ./binaire,./software,./.git -ll --format txt
           fi
 
       - name: Upload Bandit Report
@@ -108,8 +108,8 @@ jobs:
         run: |
           if [ -f requirements.txt ]; then
             echo "🔍 Checking Python dependencies for vulnerabilities..."
-            safety check -r requirements.txt --output json > safety-report.json || true
-            safety check -r requirements.txt || true
+            safety check -r requirements.txt --output json > safety-report.json
+            safety check -r requirements.txt
           else
             echo "⚠️ No requirements.txt found"
           fi
@@ -173,7 +173,7 @@ jobs:
           detect-secrets scan \
             --baseline .secrets.baseline \
             --exclude-files 'binaire/*|software/*|inputs-*/*|.git/*' \
-            > scan-results.json || true
+            > scan-results.json
 
           echo ""
           echo "📊 Secret Detection Results"
@@ -181,7 +181,7 @@ jobs:
 
           if [ -f .secrets.baseline ]; then
             # Compare with baseline
-            detect-secrets audit .secrets.baseline --report || true
+            detect-secrets audit .secrets.baseline --report
           else
             echo "⚠️ No baseline found. Review scan-results.json"
           fi
