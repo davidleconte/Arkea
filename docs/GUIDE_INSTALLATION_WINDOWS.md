@@ -1,7 +1,7 @@
 # 🪟 Guide d'Installation Windows - ARKEA
 
-**Date** : 2025-12-01  
-**Objectif** : Guide complet pour installer et configurer le projet ARKEA sur Windows via WSL2  
+**Date** : 2025-12-01
+**Objectif** : Guide complet pour installer et configurer le projet ARKEA sur Windows via WSL2
 **Version** : 1.0
 
 ---
@@ -26,7 +26,7 @@
 
 1. ✅ **WSL2 (Recommandé)** - Windows Subsystem for Linux 2
 2. ⚠️ **Git Bash** - Partiel (certaines fonctionnalités ne fonctionnent pas)
-3. ⚠️ **Docker Desktop** - Pour conteneurisation
+3. ⚠️ **Podman Desktop** - Pour conteneurisation (voir ADR-0001)
 4. ❌ **PowerShell** - Nécessiterait réécriture complète des scripts
 
 **Ce guide se concentre sur WSL2**, qui est la solution recommandée.
@@ -70,7 +70,7 @@ wsl --list --verbose
 
 ### 2. Installer WSL2
 
-**Option 1 : Installation Automatique (Recommandé)**
+#### Option 1 : Installation Automatique (Recommandé)
 
 ```powershell
 # Exécuter PowerShell en tant qu'administrateur
@@ -87,7 +87,7 @@ wsl --install
 
 ---
 
-**Option 2 : Installation Manuelle**
+#### Option 2 : Installation Manuelle
 
 ```powershell
 # Exécuter PowerShell en tant qu'administrateur
@@ -253,7 +253,7 @@ cd /mnt/d/
 
 **Depuis Windows, accéder aux fichiers WSL2** :
 
-```
+```text
 \\wsl$\Ubuntu\home\votrenom\Arkea
 ```
 
@@ -416,7 +416,7 @@ cd /mnt/c/Users/VotreNom/Documents/Arkea
 cd ~/Arkea
 ```
 
-2. **Augmenter la mémoire allouée à WSL2** :
+1. **Augmenter la mémoire allouée à WSL2** :
 Créer `%UserProfile%\.wslconfig` :
 
 ```ini
@@ -478,23 +478,38 @@ cd /c/Users/VotreNom/Documents/Arkea
 
 ---
 
-### Docker Desktop
+### Podman Desktop (Recommandé par ADR-0001)
+
+> ⚠️ **Important** : Ce projet utilise **Podman** au lieu de Docker conformément à l'ADR-0001.
+
+**Installation** :
+
+```bash
+# Installer Podman Desktop depuis : https://podman-desktop.io/downloads
+# ou via winget
+winget install RedHat.Podman-Desktop
+
+# Initialiser une machine Podman
+podman machine init
+podman machine start
+```
 
 **Utilisation** :
 
 ```bash
-# Installer Docker Desktop depuis : https://www.docker.com/products/docker-desktop
 # Créer un conteneur Linux
-docker run -it ubuntu:20.04 bash
+podman run -it ubuntu:20.04 bash
 
 # Installer les dépendances dans le conteneur
 # Suivre le guide Linux
 ```
 
-**Limitations** :
+**Avantages vs Docker Desktop** :
 
-- ⚠️ Nécessite configuration Docker
-- ⚠️ Isolation complète (pas d'accès direct aux fichiers Windows)
+- ✅ Open source et gratuit
+- ✅ Architecture daemonless (plus sécurisé)
+- ✅ Compatible avec les images OCI/Docker
+- ✅ Pas de licence commerciale requise
 
 ---
 
@@ -524,6 +539,6 @@ docker run -it ubuntu:20.04 bash
 
 ---
 
-**Date** : 2025-12-01  
-**Version** : 1.0  
+**Date** : 2025-12-01
+**Version** : 1.0
 **Statut** : ✅ **Documentation complète**

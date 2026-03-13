@@ -71,12 +71,12 @@ jobs:
       - name: Check consistency
         run: |
           chmod +x scripts/utils/91_check_consistency.sh
-          ./scripts/utils/91_check_consistency.sh --check-scripts || true
+          ./scripts/utils/91_check_consistency.sh --check-scripts
           echo "✅ Consistency check completed"
 
       - name: Check hardcoded paths
         run: |
-          ./scripts/utils/91_check_consistency.sh --check-hardcoded-paths || true
+          ./scripts/utils/91_check_consistency.sh --check-hardcoded-paths
           echo "✅ Hardcoded paths check completed"
 
   # =============================================================================

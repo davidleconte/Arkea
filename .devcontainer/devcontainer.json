@@ -7,10 +7,6 @@
     },
     "ghcr.io/devcontainers/features/java:1": {
       "version": "11"
-    },
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {
-      "version": "latest",
-      "moby": false
     }
   },
   "postCreateCommand": "make setup-devcontainer",
@@ -19,7 +15,6 @@
       "extensions": [
         "ms-python.python",
         "ms-python.vscode-pylance",
-        "ms-azuretools.vscode-docker",
         "redhat.vscode-yaml",
         "timonwong.shellcheck",
         "ms-vscode.makefile-tools"
