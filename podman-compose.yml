@@ -43,7 +43,7 @@ services:
       - "${HCD_INTRA_NODE:-9100}:7000"    # Intra-node
       - "${HCD_INTRA_NODE_TLS:-9101}:7001" # Intra-node TLS
       - "${HCD_SOLR_PORT:-9045}:8983"     # Solr HTTP
-      - "${HCD_GRAPH_PORT:-8182}:8182"    # Graph
+      - "${HCD_GRAPH_PORT:-9182}:8182"    # Graph
     volumes:
       - arkea-hcd-data:/var/lib/cassandra
       - arkea-hcd-logs:/var/log/cassandra

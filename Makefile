@@ -194,6 +194,52 @@ version: ## Show version info
 	@echo "Kafka:  4.1.1"
 
 # =============================================================================
+# PODMAN CONTAINER MANAGEMENT
+# =============================================================================
+# ⚠️ IMPERATIVE: See PODMAN_RULES.md for isolation requirements
+# =============================================================================
+
+podman-check: ## Pre-flight check for Podman ports and resources
+	@echo "🔍 Running Podman pre-flight checks..."
+	@./scripts/utils/96_check_podman_ports.sh
+
+podman-up: ## Start ARKEA stack with Podman (full profile)
+	@echo "🚀 Starting ARKEA stack with Podman..."
+	@./scripts/utils/96_check_podman_ports.sh || exit 1
+	podman-compose --profile full up -d
+	@echo "✅ ARKEA stack started"
+	@echo "  HCD CQL:    localhost:9102"
+	@echo "  Spark UI:   localhost:9180"
+	@echo "  Kafka:      localhost:9192"
+	@echo "  Kafka UI:   localhost:9190"
+
+podman-down: ## Stop ARKEA stack (preserves volumes)
+	@echo "🛑 Stopping ARKEA stack..."
+	podman-compose --profile full down
+	@echo "✅ ARKEA stack stopped"
+
+podman-logs: ## View ARKEA container logs
+	@podman-compose logs -f
+
+podman-status: ## Check ARKEA container status
+	@echo "📊 ARKEA Container Status:"
+	@podman ps --filter "label=project=arkea" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null || echo "No containers running"
+
+podman-clean: ## Remove ARKEA containers and network (keeps volumes)
+	@echo "🧹 Cleaning ARKEA containers..."
+	podman-compose --profile full down --rmi local
+	@podman network rm arkea-network 2>/dev/null || true
+	@echo "✅ Cleanup complete (volumes preserved)"
+
+podman-nuke: ## ⚠️ Remove ALL ARKEA resources including volumes
+	@echo "⚠️  WARNING: This will delete all ARKEA data!"
+	@read -p "Continue? [y/N] " confirm && [ "$$confirm" = "y" ] || exit 1
+	podman-compose --profile full down -v
+	@podman network rm arkea-network 2>/dev/null || true
+	@podman volume rm arkea-hcd-data arkea-hcd-logs arkea-spark-data arkea-kafka-data 2>/dev/null || true
+	@echo "✅ All ARKEA resources removed"
+
+# =============================================================================
 # DEVELOPMENT
 # =============================================================================
 

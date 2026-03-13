@@ -29,7 +29,7 @@ declare -A ARKEA_PORTS=(
     ["HCD_INTRA"]="9100:7000:Intra-node communication"
     ["HCD_INTRA_TLS"]="9101:7001:Intra-node TLS"
     ["HCD_SOLR"]="9045:8983:Solr HTTP"
-    ["HCD_GRAPH"]="8182:8182:Graph API"
+    ["HCD_GRAPH"]="9182:8182:Graph API"
     ["SPARK_MASTER"]="9177:7077:Spark Master"
     ["SPARK_UI"]="9180:8080:Spark Web UI"
     ["SPARK_WORKER_UI"]="9181:8081:Spark Worker UI"
@@ -150,6 +150,26 @@ check_existing_projects() {
     fi
 }
 
+check_arkea_network() {
+    log_section "ARKEA Network Status"
+
+    local network_exists
+    network_exists=$(podman network ls --filter "name=arkea-network" --format "{{.Name}}" 2>/dev/null || echo "")
+
+    if [[ -n "$network_exists" ]]; then
+        log_success "arkea-network exists"
+        local subnet
+        subnet=$(podman network inspect arkea-network --format '{{(index .IPAM.Config 0).Subnet}}' 2>/dev/null || echo "unknown")
+        echo "  Subnet: $subnet"
+        echo "  Expected: 10.89.10.0/24"
+    else
+        log_warn "arkea-network does not exist"
+        echo "  Will be created automatically by podman-compose"
+        echo "  Or create manually:"
+        echo "    podman network create --subnet=10.89.10.0/24 --label project=arkea arkea-network"
+    fi
+}
+
 check_arkea_resources() {
     log_section "ARKEA Resources Status"
 
@@ -188,7 +208,11 @@ main() {
     check_existing_projects
     echo ""
 
-    # 3. Check ARKEA resources
+    # 3. Check ARKEA network
+    check_arkea_network
+    echo ""
+
+    # 4. Check ARKEA resources
     check_arkea_resources
     echo ""
 
