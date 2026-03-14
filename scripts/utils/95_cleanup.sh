@@ -1,12 +1,11 @@
 #!/bin/bash
+set -euo pipefail
 # =============================================================================
 # Script de Nettoyage Automatique - ARKEA
 # =============================================================================
 # Date : 2026-03-13
 # Usage : ./scripts/utils/95_cleanup.sh [--dry-run] [--age DAYS]
 # =============================================================================
-
-set -euo pipefail
 # Note: Variables optionnelles utilisent la syntaxe ${VAR:-} pour la sécurité
 
 # =============================================================================

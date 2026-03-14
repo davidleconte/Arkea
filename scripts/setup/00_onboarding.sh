@@ -1,9 +1,8 @@
 #!/bin/bash
+set -euo pipefail
 # ARKEA POC Onboarding Script
 # Run this script to set up a complete development environment
 # Usage: ./scripts/setup/00_onboarding.sh [--skip-deps] [--dry-run]
-
-set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"

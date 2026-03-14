@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # =============================================================================
 # Script : Vérification Globale des Composants ARKEA
 # =============================================================================
@@ -7,8 +8,6 @@
 # Usage : ./scripts/utils/80_verify_all.sh [--dry-run] [--help]
 # Description : Vérifie l'installation et l'état de HCD, Spark, Kafka
 # =============================================================================
-
-set -euo pipefail
 
 # Colors
 GREEN='\033[0;32m'
