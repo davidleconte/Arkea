@@ -5,12 +5,12 @@ Teste différents seuils pour filtrer les résultats.
 """
 
 from test_vector_search_base import (
-    load_model,
-    encode_text,
-    connect_to_hcd,
-    get_test_account,
-    calculate_cosine_similarity,
     KEYSPACE,
+    calculate_cosine_similarity,
+    connect_to_hcd,
+    encode_text,
+    get_test_account,
+    load_model,
 )
 
 
@@ -18,8 +18,9 @@ def vector_search_with_threshold(
     session, query_embedding, code_si: str, contrat: str, threshold: float = 0.7, limit: int = 5
 ):
     """Recherche vectorielle avec seuil de similarité."""
-    from cassandra.query import SimpleStatement
     import json
+
+    from cassandra.query import SimpleStatement
 
     # Récupérer plus de résultats pour filtrer par seuil
     # Note: HCD ne supporte pas directement le filtrage par seuil dans la requête ANN

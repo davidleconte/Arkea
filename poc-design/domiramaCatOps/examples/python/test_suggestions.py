@@ -7,12 +7,13 @@ Test Complexe P3-05 : Tests de Suggestions/Autocomplétion
 - Performance suggestions
 """
 
-import sys
-import os
-import time
-from cassandra.cluster import Cluster
-from typing import Dict, Tuple
 import json
+import os
+import sys
+import time
+from typing import Dict, Tuple
+
+from cassandra.cluster import Cluster
 
 KEYSPACE = "domiramacatops_poc"
 
@@ -142,7 +143,7 @@ def test_suggestions_with_scoring(session, code_si: str, contrat: str) -> Tuple[
         SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
         sys.path.insert(0, os.path.join(SCRIPT_DIR, "search"))
 
-        from test_vector_search_base import load_model, encode_text
+        from test_vector_search_base import encode_text, load_model
 
         tokenizer, model = load_model()
         query = "LOYER"

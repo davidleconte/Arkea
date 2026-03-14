@@ -4,8 +4,9 @@ Module de base pour le modèle spécialisé facturation.
 Fonctions communes pour charger le modèle et effectuer des recherches.
 """
 
-import sys
 import json
+import sys
+
 from cassandra.cluster import Cluster
 from cassandra.query import SimpleStatement
 

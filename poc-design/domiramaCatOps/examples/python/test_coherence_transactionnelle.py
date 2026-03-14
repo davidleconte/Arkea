@@ -9,8 +9,9 @@ Test Complexe P1-04 : Cohérence Transactionnelle Multi-Tables
 """
 
 import sys
-from cassandra.cluster import Cluster
 from typing import Tuple
+
+from cassandra.cluster import Cluster
 
 KEYSPACE = "domiramacatops_poc"
 

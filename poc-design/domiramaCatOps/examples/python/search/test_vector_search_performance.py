@@ -32,9 +32,9 @@ def benchmark_embedding_generation(tokenizer, model, queries: list, iterations: 
         "mean": statistics.mean(latencies),
         "median": statistics.median(latencies),
         "p95": statistics.quantiles(latencies, n=20)[18] if len(latencies) >= 20 else latencies[-1],
-        "p99": statistics.quantiles(latencies, n=100)[98]
-        if len(latencies) >= 100
-        else latencies[-1],
+        "p99": (
+            statistics.quantiles(latencies, n=100)[98] if len(latencies) >= 100 else latencies[-1]
+        ),
         "min": min(latencies),
         "max": max(latencies),
         "count": len(latencies),
@@ -75,12 +75,14 @@ def benchmark_vector_search(
         "total": {
             "mean": statistics.mean(latencies),
             "median": statistics.median(latencies),
-            "p95": statistics.quantiles(latencies, n=20)[18]
-            if len(latencies) >= 20
-            else latencies[-1],
-            "p99": statistics.quantiles(latencies, n=100)[98]
-            if len(latencies) >= 100
-            else latencies[-1],
+            "p95": (
+                statistics.quantiles(latencies, n=20)[18] if len(latencies) >= 20 else latencies[-1]
+            ),
+            "p99": (
+                statistics.quantiles(latencies, n=100)[98]
+                if len(latencies) >= 100
+                else latencies[-1]
+            ),
             "min": min(latencies),
             "max": max(latencies),
         },

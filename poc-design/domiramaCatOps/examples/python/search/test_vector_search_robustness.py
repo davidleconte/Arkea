@@ -43,7 +43,9 @@ def test_sql_injection(session, tokenizer, model, code_si: str, contrat: str):
         try:
             query_embedding = encode_text(tokenizer, model, query)
             results = vector_search(session, query_embedding, code_si, contrat, limit=5)
-            print(f"   ✅ Requête malveillante '{query[:30]}...' gérée : {len(results)} résultat(s)")
+            print(
+                f"   ✅ Requête malveillante '{query[:30]}...' gérée : {len(results)} résultat(s)"
+            )
         except Exception as e:
             print(f"   ⚠️  Erreur avec requête malveillante : {e}")
     print()

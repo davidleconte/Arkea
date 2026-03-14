@@ -7,10 +7,11 @@ Test Complexe P2-05 : Tests d'Agrégations
 - Performance agrégations
 """
 
+import statistics
 import sys
 from datetime import datetime
+
 from cassandra.cluster import Cluster
-import statistics
 
 KEYSPACE = "domiramacatops_poc"
 

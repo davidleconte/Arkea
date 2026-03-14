@@ -7,18 +7,19 @@ Test Complexe P2-03 : Recherche avec Filtres Multiples Combinés
 - Validation résultats (tous les filtres respectés)
 """
 
-import sys
-import os
-import time
 import json
+import os
+import sys
+import time
 from datetime import datetime
+
 from cassandra.cluster import Cluster
 
 # Ajouter le répertoire parent au PYTHONPATH
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(SCRIPT_DIR, "search"))
 
-from test_vector_search_base import load_model, encode_text, KEYSPACE  # noqa: E402
+from test_vector_search_base import KEYSPACE, encode_text, load_model  # noqa: E402
 
 
 def connect_to_hcd(host="localhost", port=9042):

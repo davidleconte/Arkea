@@ -7,12 +7,13 @@ Test Complexe P3-02 : Tests de Facettes (Groupement)
 - Performance facettes
 """
 
+import json
 import sys
 import time
 from datetime import datetime
-from cassandra.cluster import Cluster
 from typing import Dict, Tuple
-import json
+
+from cassandra.cluster import Cluster
 
 KEYSPACE = "domiramacatops_poc"
 

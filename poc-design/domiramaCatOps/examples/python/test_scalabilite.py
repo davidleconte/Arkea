@@ -7,17 +7,18 @@ Test Complexe P2-02 : Tests de Scalabilité
 - Dégradation performance selon volume
 """
 
-import sys
 import os
-import time
-from cassandra.cluster import Cluster
 import statistics
+import sys
+import time
+
+from cassandra.cluster import Cluster
 
 # Ajouter le répertoire parent au PYTHONPATH
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(SCRIPT_DIR, "search"))
 
-from test_vector_search_base import load_model, encode_text, KEYSPACE  # noqa: E402
+from test_vector_search_base import KEYSPACE, encode_text, load_model  # noqa: E402
 
 
 def connect_to_hcd(host="localhost", port=9042):

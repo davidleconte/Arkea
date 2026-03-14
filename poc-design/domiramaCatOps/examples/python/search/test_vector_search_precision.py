@@ -6,11 +6,11 @@ Note: Nécessite un jeu de test annoté manuellement pour une évaluation compl�
 """
 
 from test_vector_search_base import (
-    load_model,
-    encode_text,
-    vector_search,
     connect_to_hcd,
+    encode_text,
     get_test_account,
+    load_model,
+    vector_search,
 )
 
 

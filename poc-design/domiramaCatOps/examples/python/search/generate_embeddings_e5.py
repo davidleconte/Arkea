@@ -19,7 +19,7 @@ except ImportError:
     print("   Installation : pip install sentence-transformers")
     sys.exit(1)
 
-from test_vector_search_base_e5 import KEYSPACE, load_model_e5, encode_text_e5
+from test_vector_search_base_e5 import KEYSPACE, encode_text_e5, load_model_e5
 
 
 def main():

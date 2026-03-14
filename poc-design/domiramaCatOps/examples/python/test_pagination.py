@@ -7,12 +7,13 @@ Test Complexe P3-03 : Tests de Pagination
 - Performance pagination
 """
 
+import json
 import sys
 import time
+from typing import Dict, Tuple
+
 from cassandra.cluster import Cluster
 from cassandra.query import SimpleStatement
-from typing import Dict, Tuple
-import json
 
 KEYSPACE = "domiramacatops_poc"
 

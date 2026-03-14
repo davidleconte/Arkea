@@ -34,7 +34,7 @@ def fix_line_length(content: str, max_length: int = 100) -> str:
                     fixed_lines.append(line[:last_space])
                     # Indenter la suite si c'est une liste
                     indent = len(line) - len(line.lstrip())
-                    continuation = " " * (indent + 2) + line[last_space + 1:]
+                    continuation = " " * (indent + 2) + line[last_space + 1 :]
                     fixed_lines.append(continuation)
                 else:
                     fixed_lines.append(line)

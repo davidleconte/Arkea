@@ -8,9 +8,9 @@ Recherche Hybride V2 : Combinaison Full-Text Search (SAI) + Vector Search Multi-
 Adapté pour domiramaCatOps (keyspace: domiramacatops_poc)
 """
 
+import json
 import os
 import sys
-import json
 
 # Ajouter le répertoire parent au PYTHONPATH pour les imports
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -20,12 +20,9 @@ from cassandra.cluster import Cluster
 from cassandra.query import SimpleStatement
 
 # Imports des modules de base pour chaque modèle
-from test_vector_search_base import load_model, encode_text  # noqa: E402
-from test_vector_search_base_e5 import load_model_e5, encode_text_e5  # noqa: E402
-from test_vector_search_base_invoice import (  # noqa: E402
-    load_model_invoice,
-    encode_text_invoice,
-)
+from test_vector_search_base import encode_text, load_model  # noqa: E402
+from test_vector_search_base_e5 import encode_text_e5, load_model_e5  # noqa: E402
+from test_vector_search_base_invoice import encode_text_invoice, load_model_invoice  # noqa: E402
 
 KEYSPACE = "domiramacatops_poc"
 

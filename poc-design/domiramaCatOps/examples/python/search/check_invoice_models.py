@@ -15,8 +15,8 @@ except ImportError:
 
 # Essayer transformers aussi
 try:
-    from transformers import AutoModel, AutoTokenizer
     import torch
+    from transformers import AutoModel, AutoTokenizer
 
     TRANSFORMERS_AVAILABLE = True
 except ImportError:

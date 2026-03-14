@@ -8,13 +8,14 @@ Test Complexe P1-01 : Migration Incrémentale avec Validation
 - Validation multi-tables
 """
 
-import sys
-import os
 import json
+import os
+import sys
 from datetime import datetime
-from cassandra.cluster import Cluster
+from typing import Dict, Optional, Tuple
+
 import pandas as pd
-from typing import Dict, Tuple, Optional
+from cassandra.cluster import Cluster
 
 # Ajouter le répertoire parent au PYTHONPATH
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))

@@ -161,9 +161,9 @@ def export_partition(
                 "cat_validee": bool(row.cat_validee) if row.cat_validee is not None else None,
                 "libelle_prefix": row.libelle_prefix,
                 "libelle_tokens": list(row.libelle_tokens) if row.libelle_tokens else None,
-                "libelle_embedding": str(row.libelle_embedding)
-                if row.libelle_embedding
-                else None,  # VECTOR en string
+                "libelle_embedding": (
+                    str(row.libelle_embedding) if row.libelle_embedding else None
+                ),  # VECTOR en string
                 "meta_source": row.meta_source,
                 "meta_device": row.meta_device,
                 "meta_channel": row.meta_channel,

@@ -5,12 +5,12 @@ Vérifie la compréhension sémantique (synonymes).
 """
 
 from test_vector_search_base import (
-    load_model,
-    encode_text,
-    vector_search,
-    connect_to_hcd,
-    get_test_account,
     calculate_cosine_similarity,
+    connect_to_hcd,
+    encode_text,
+    get_test_account,
+    load_model,
+    vector_search,
 )
 from test_vector_search_relevance_check import check_relevance
 

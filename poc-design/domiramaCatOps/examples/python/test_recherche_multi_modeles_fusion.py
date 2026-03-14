@@ -7,20 +7,21 @@ Test Complexe P1-03 : Recherche Multi-Modèles avec Fusion
 - Fallback automatique (modèle 1 → modèle 2 → modèle 3)
 """
 
-import sys
-import os
 import json
+import os
+import sys
 import time
-from typing import List, Dict
+from typing import Dict, List
+
 from cassandra.cluster import Cluster
 
 # Ajouter le répertoire parent au PYTHONPATH
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(SCRIPT_DIR, "search"))
 
-from test_vector_search_base import load_model, encode_text, KEYSPACE  # noqa: E402
-from test_vector_search_base_e5 import load_model_e5, encode_text_e5  # noqa: E402
-from test_vector_search_base_invoice import load_model_invoice, encode_text_invoice  # noqa: E402
+from test_vector_search_base import KEYSPACE, encode_text, load_model  # noqa: E402
+from test_vector_search_base_e5 import encode_text_e5, load_model_e5  # noqa: E402
+from test_vector_search_base_invoice import encode_text_invoice, load_model_invoice  # noqa: E402
 
 
 def connect_to_hcd(host="localhost", port=9042):

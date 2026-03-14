@@ -6,13 +6,14 @@ Teste la recherche vectorielle + filtres sur date_op, montant, catégorie.
 
 import json
 from datetime import datetime, timedelta
+
 from cassandra.query import SimpleStatement
 from test_vector_search_base import (
-    load_model,
-    encode_text,
-    connect_to_hcd,
-    get_test_account,
     KEYSPACE,
+    connect_to_hcd,
+    encode_text,
+    get_test_account,
+    load_model,
 )
 
 

@@ -9,6 +9,7 @@ Test Complexe P2-01 : Fenêtre Glissante Complexe
 
 import sys
 from datetime import datetime, timedelta
+
 from cassandra.cluster import Cluster
 
 KEYSPACE = "domiramacatops_poc"
