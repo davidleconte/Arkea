@@ -45,30 +45,131 @@ check-env: ## Validate environment configuration
 # SERVICES
 # =============================================================================
 
-start: start-hcd start-kafka ## Start all services (HCD + Kafka)
+start: ## Start all services (HCD + Kafka) with health checks
+	@echo "🚀 Starting all services..."
+	@$(MAKE) start-hcd
+	@$(MAKE) start-kafka
 	@echo "✅ All services started"
+	@$(MAKE) status
 
-start-hcd: ## Start HCD (Cassandra)
+start-hcd: ## Start HCD (Cassandra) and wait for ready
 	@echo "🚀 Starting HCD..."
-	@./scripts/setup/03_start_hcd.sh 2>/dev/null || echo "⚠️  HCD start script not found or failed"
-	@sleep 3
-	@./scripts/utils/80_verify_all.sh 2>/dev/null || true
+	@if [ -f ./scripts/setup/03_start_hcd.sh ]; then \
+		./scripts/setup/03_start_hcd.sh background; \
+		echo "⏳ Waiting for HCD to be ready..."; \
+		for i in $$(seq 1 30); do \
+			if nc -z localhost 9042 2>/dev/null; then \
+				echo "✅ HCD is ready on port 9042"; \
+				exit 0; \
+			fi; \
+			sleep 2; \
+		done; \
+		echo "⚠️  HCD failed to start within 60s"; \
+		exit 1; \
+	else \
+		echo "⚠️  HCD start script not found"; \
+		exit 1; \
+	fi
 
-start-kafka: ## Start Kafka
+start-kafka: ## Start Kafka and wait for ready
 	@echo "🚀 Starting Kafka..."
-	@./scripts/setup/04_start_kafka.sh 2>/dev/null || echo "⚠️  Kafka start script not found or failed"
+	@if [ -f ./scripts/setup/04_start_kafka.sh ]; then \
+		./scripts/setup/04_start_kafka.sh background; \
+		echo "⏳ Waiting for Kafka to be ready..."; \
+		for i in $$(seq 1 30); do \
+			if nc -z localhost 9092 2>/dev/null; then \
+				echo "✅ Kafka is ready on port 9092"; \
+				exit 0; \
+			fi; \
+			sleep 2; \
+		done; \
+		echo "⚠️  Kafka failed to start within 60s"; \
+		exit 1; \
+	else \
+		echo "⚠️  Kafka start script not found"; \
+		exit 1; \
+	fi
 
-stop: ## Stop all services
+stop: ## Stop all services gracefully
 	@echo "🛑 Stopping services..."
-	@pkill -f "kafka.Kafka" 2>/dev/null || true
-	@pkill -f "cassandra" 2>/dev/null || true
+	@if [ -f ./scripts/setup/04_stop_kafka.sh ]; then \
+		./scripts/setup/04_stop_kafka.sh 2>/dev/null || true; \
+	else \
+		pkill -f "kafka.Kafka" 2>/dev/null || true; \
+	fi
+	@if [ -f ./scripts/setup/03_stop_hcd.sh ]; then \
+		./scripts/setup/03_stop_hcd.sh 2>/dev/null || true; \
+	else \
+		pkill -f "cassandra" 2>/dev/null || true; \
+	fi
 	@echo "✅ Services stopped"
 
-status: ## Check service status
-	@echo "📊 Service Status:"
-	@echo "  HCD:    $$(nc -z localhost 9042 2>/dev/null && echo '✅ Running' || echo '❌ Stopped')"
-	@echo "  Kafka:  $$(nc -z localhost 9092 2>/dev/null && echo '✅ Running' || echo '❌ Stopped')"
-	@echo "  Spark:  $$(if [ -n \"$${SPARK_HOME:-}\" ]; then echo '✅ Configured'; else echo '❌ Not configured'; fi)"
+restart: stop start ## Restart all services
+
+status: ## Check service status with detailed info
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "📊 ARKEA Service Status"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo ""
+	@echo "  HCD (Cassandra):"
+	@if nc -z localhost 9042 2>/dev/null; then \
+		echo "    Status: ✅ Running on port 9042"; \
+		cqlsh localhost 9042 -e "DESCRIBE KEYSPACES;" 2>/dev/null | head -5 || true; \
+	else \
+		echo "    Status: ❌ Stopped"; \
+	fi
+	@echo ""
+	@echo "  Kafka:"
+	@if nc -z localhost 9092 2>/dev/null; then \
+		echo "    Status: ✅ Running on port 9092"; \
+	else \
+		echo "    Status: ❌ Stopped"; \
+	fi
+	@echo ""
+	@echo "  Spark:"
+	@if [ -n "$${SPARK_HOME:-}" ] && [ -d "$${SPARK_HOME}" ]; then \
+		echo "    Status: ✅ Configured at $${SPARK_HOME}"; \
+	else \
+		echo "    Status: ⚠️  Not configured"; \
+	fi
+	@echo ""
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# =============================================================================
+# DEMO TARGETS (Quick Start for Presentations)
+# =============================================================================
+
+demo: ## Quick demo: Start services + run verification
+	@echo "🎯 Starting ARKEA Demo..."
+	@$(MAKE) start
+	@echo ""
+	@echo "⏳ Running verification..."
+	@./scripts/utils/80_verify_all.sh
+	@echo ""
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "✅ Demo environment ready!"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo ""
+	@echo "Quick commands:"
+	@echo "  make status      - Check service status"
+	@echo "  make demo-poc    - Run a POC demo"
+	@echo "  make demo-stop   - Stop demo environment"
+
+demo-quick: ## Fast demo: Skip waits, start services in background
+	@echo "🚀 Quick demo start (no waits)..."
+	@./scripts/setup/03_start_hcd.sh background 2>/dev/null || true
+	@./scripts/setup/04_start_kafka.sh background 2>/dev/null || true
+	@sleep 5
+	@$(MAKE) status
+
+demo-stop: ## Stop demo environment
+	@echo "🛑 Stopping demo environment..."
+	@$(MAKE) stop
+	@echo "✅ Demo stopped"
+
+demo-poc: ## Run POC demo (BIC by default)
+	@echo "🏦 Running BIC POC demo..."
+	@$(MAKE) poc-bic
 
 # =============================================================================
 # TESTS
