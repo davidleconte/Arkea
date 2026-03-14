@@ -12,6 +12,7 @@
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Démarrage](#démarrage)
+- [Déploiement Conteneurisé](#-déploiement-conteneurisé)
 - [Vérification](#vérification)
 - [Dépannage](#dépannage)
 
@@ -518,15 +519,154 @@ nodetool tpstats
 
 ---
 
+## 🐳 Déploiement Conteneurisé (Podman)
+
+### ⚠️ IMPERATIF - Lire PODMAN_RULES.md
+
+Avant toute conteneurisation, lire et suivre **`PODMAN_RULES.md`** :
+
+| Règle | Description |
+|-------|-------------|
+| **RULE 1** | Utiliser la machine `podman-wxd` existante - NE JAMAIS supprimer |
+| **RULE 2** | Utiliser `podman` + `podman-compose` - PAS Docker |
+| **RULE 3** | Isolation 5 couches (network, volume, resource, port, label) |
+| **RULE 4** | Détection de conflits de ports OBLIGATOIRE avant démarrage |
+| **RULE 5** | Nettoyer UNIQUEMENT les ressources labelisées ARKEA |
+
+### Allocation des Ports ARKEA (Base: 9100)
+
+| Service | Port Hôte | Port Conteneur | Description |
+|---------|-----------|----------------|-------------|
+| HCD CQL | `9102` | 9042 | CQL Native Transport |
+| HCD Intra | `9100` | 7000 | Communication inter-nœuds |
+| HCD Intra TLS | `9101` | 7001 | Communication TLS |
+| HCD Solr | `9045` | 8983 | Solr HTTP |
+| Spark UI | `9180` | 8080 | Spark Web UI |
+| Kafka | `9192` | 9092 | Kafka Broker |
+
+### Prérequis Conteneurisation
+
+```bash
+# Vérifier Podman
+podman --version
+
+# Vérifier podman-compose
+podman-compose --version
+
+# Vérifier la machine podman-wxd
+podman machine ls
+```
+
+### Détection de Conflits de Ports
+
+**OBLIGATOIRE** avant de démarrer les conteneurs :
+
+```bash
+# Vérification pré-flight
+./scripts/utils/96_check_podman_ports.sh
+```
+
+**Sortie attendue** :
+
+```text
+Service              Host Port    Status          Note
+-------              ---------    ------          ----
+HCD_CQL              9102         ✅ Available    CQL Native Transport
+KAFKA                9192         ✅ Available    Kafka Broker
+```
+
+### Démarrage des Conteneurs
+
+```bash
+# 1. Vérification pré-flight (OBLIGATOIRE)
+./scripts/utils/96_check_podman_ports.sh
+
+# 2. Démarrer les services
+podman-compose up -d
+
+# 3. Vérifier le statut
+podman ps --filter "label=project=arkea"
+
+# 4. Voir les logs
+podman logs arkea-hcd
+podman logs arkea-kafka
+```
+
+### Arrêt des Conteneurs
+
+```bash
+# Arrêter les services
+podman-compose down
+
+# ⚠️ NE PAS supprimer les volumes sauf si nécessaire
+# podman-compose down -v  # Supprime les données
+```
+
+### Variables d'Environnement Conteneurisées
+
+```bash
+# Configuration HCD
+export HCD_HOST="localhost"
+export HCD_PORT="9102"  # Port mappé
+
+# Configuration Kafka
+export KAFKA_BOOTSTRAP_SERVERS="localhost:9192"
+```
+
+### Isolation Réseau
+
+Le réseau ARKEA est isolé :
+
+```bash
+# Créer le réseau (ou via podman-compose)
+podman network create \
+    --subnet=10.89.10.0/24 \
+    --label project=arkea \
+    arkea-network
+
+# Vérifier
+podman network inspect arkea-network
+```
+
+### Correction des Références localhost
+
+Pour les scripts existants utilisant des ports hardcodés :
+
+```bash
+# Mode simulation
+./scripts/utils/96_fix_localhost_references.sh --dry-run
+
+# Appliquer les corrections
+./scripts/utils/96_fix_localhost_references.sh
+```
+
+### Monitoring Conteneurisé
+
+```bash
+# Vérifier les services de monitoring
+./scripts/utils/97_check_monitoring.sh
+```
+
+### Documentation de Référence Conteneurs
+
+| Document | Chemin |
+|----------|--------|
+| Règles Podman | `PODMAN_RULES.md` |
+| Architecture Podman | `docs/PODMAN_ARCHITECTURE.md` |
+| Commandes Podman | `docs/PODMAN_COMMANDS.md` |
+
+---
+
 ## 📚 Références
 
 - `docs/ARCHITECTURE.md` - Architecture du projet
 - `docs/TROUBLESHOOTING.md` - Guide de dépannage détaillé
+- `PODMAN_RULES.md` - Règles d'isolation conteneur (OBLIGATOIRE)
 - `README.md` - Vue d'ensemble
 - `CONTRIBUTING.md` - Guide de contribution
 
 ---
 
-**Date** : 2026-03-13
-**Version** : 1.0
+**Date** : 2026-03-14
+**Version** : 1.1
 **Statut** : ✅ **Documentation complète**

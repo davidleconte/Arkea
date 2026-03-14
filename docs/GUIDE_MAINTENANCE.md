@@ -33,7 +33,7 @@ Ce guide décrit les processus de **maintenance** et d'**archivage** pour le pro
 - **doc/demonstrations/*.md** : Générés automatiquement (ne pas modifier manuellement)
 - **doc/audits/*.md** : Archiver les audits obsolètes
 
-#### Processus
+#### Processus de Mise à Jour
 
 ```bash
 # 1. Vérifier les fichiers modifiés
@@ -76,7 +76,7 @@ mv poc-design/<poc-name>/doc/audits/OLD_AUDIT.md \
 
 #### Structure d'Archive
 
-```
+```text
 poc-design/<poc-name>/doc/
 ├── audits/
 │   ├── archive/
@@ -255,32 +255,121 @@ Générer un rapport de maintenance :
 
 ---
 
+---
+
+## 🐳 Scripts Podman & Containerisation
+
+### 96_check_podman_ports.sh - Détection de Conflits de Ports
+
+Script de vérification **pré-flight** pour détecter les conflits de ports avant de démarrer les conteneurs ARKEA.
+
+```bash
+# Vérification complète
+./scripts/utils/96_check_podman_ports.sh
+
+# Sortie exemple:
+# Service              Host Port    Status          Note
+# -------              ---------    ------          ----
+# HCD_CQL              9102         ✅ Available    CQL Native Transport
+# KAFKA                9192         ✅ Available    Kafka Broker
+```
+
+**Fonctionnalités**:
+
+- ✅ Vérifie la machine `podman-wxd` (NE JAMAIS supprimer)
+- ✅ Détecte les projets existants (à ne PAS modifier)
+- ✅ Vérifie le réseau ARKEA (`arkea-network`)
+- ✅ Valide l'allocation des ports (Base: 9100)
+
+**⚠️ IMPERATIF**: Voir `PODMAN_RULES.md` pour les règles d'isolation obligatoires.
+
+---
+
+### 96_fix_localhost_references.sh - Correction Automatique localhost
+
+Remplace les références `localhost` hardcodées par des variables d'environnement configurables.
+
+```bash
+# Mode simulation (dry-run)
+./scripts/utils/96_fix_localhost_references.sh --dry-run
+
+# Appliquer les corrections
+./scripts/utils/96_fix_localhost_references.sh
+
+# Fichier spécifique
+./scripts/utils/96_fix_localhost_references.sh --file scripts/setup/03_start_hcd.sh
+```
+
+**Patterns corrigés**:
+
+| Original | Remplacement |
+|----------|--------------|
+| `localhost:9042` | `${HCD_HOST:-localhost}:${HCD_PORT:-9042}` |
+| `localhost:9092` | `${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}` |
+| `localhost:2181` | `${KAFKA_ZOOKEEPER_CONNECT:-localhost:2181}` |
+
+**Sauvegarde**: Les fichiers originaux sont sauvegardés dans `.backup_localhost_YYYYMMDD_HHMMSS/`.
+
+---
+
+### 97_check_monitoring.sh - Vérification Monitoring
+
+Vérifie que les services de monitoring sont démarrés et accessibles.
+
+```bash
+./scripts/utils/97_check_monitoring.sh
+```
+
+**Services vérifiés**:
+
+| Service | Port | Statut |
+|---------|------|--------|
+| Prometheus | 9090 | Obligatoire |
+| Grafana | 3000 | Obligatoire |
+| Alertmanager | 9093 | Optionnel |
+| JMX Exporter HCD | 7072 | Optionnel |
+| JMX Exporter Kafka | 7073 | Optionnel |
+
+---
+
 ## 📚 Ressources
 
-- **scripts/utils/95_cleanup.sh** : Script de nettoyage automatique
-- **scripts/utils/91_check_consistency.sh** : Script de vérification de cohérence
-- **scripts/utils/92_generate_docs.sh** : Script de génération de documentation
+### Scripts de Maintenance
+
+| Script | Usage | Priorité |
+|--------|-------|----------|
+| `91_check_consistency.sh` | Vérification de cohérence projet | Haute |
+| `92_generate_docs.sh` | Génération de documentation | Moyenne |
+| `95_cleanup.sh` | Nettoyage automatique | Hebdomadaire |
+| `96_check_podman_ports.sh` | Détection conflits ports Podman | Pré-déploiement |
+| `96_fix_localhost_references.sh` | Correction localhost hardcodés | Migration |
+| `97_check_monitoring.sh` | Vérification services monitoring | Opérationnel |
+
+### Documentation de Référence
+
 - **CHANGELOG.md** : Historique des changements
+- **PODMAN_RULES.md** : Règles d'isolation conteneur (OBLIGATOIRE)
 - **docs/AUDIT_COMPLET_PROJET_ARKEA_2025_V2.md** : Audit complet du projet
+- **docs/GUIDE_MONITORING.md** : Guide de configuration monitoring
 
 ---
 
 ## ✅ Checklist de Maintenance
 
-### Hebdomadaire
+### Tâches Hebdomadaires
 
 - [ ] Exécuter `95_cleanup.sh`
 - [ ] Vérifier les logs d'erreur
 - [ ] Vérifier l'espace disque
 
-### Mensuel
+### Tâches Mensuelles
 
 - [ ] Exécuter `91_check_consistency.sh`
 - [ ] Archiver les audits obsolètes
 - [ ] Mettre à jour la documentation
 - [ ] Vérifier les métriques
 
-### Trimestriel
+### Tâches Trimestrielles
 
 - [ ] Audit complet du projet
 - [ ] Révision des standards
