@@ -5,7 +5,6 @@ Mesure la latence, le débit et les temps de génération d'embedding.
 """
 
 import statistics
-import sys
 import time
 
 from test_vector_search_base import (
@@ -64,7 +63,7 @@ def benchmark_vector_search(
 
             # Recherche HCD
             start_search = time.time()
-            results = vector_search(session, query_embedding, code_si, contrat, limit=5)
+            vector_search(session, query_embedding, code_si, contrat, limit=5)
             search_time = (time.time() - start_search) * 1000
             search_times.append(search_time)
 

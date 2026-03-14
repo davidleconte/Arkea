@@ -107,7 +107,7 @@ def test_model(model_name: str, model_type: str = "sentence_transformer") -> Dic
 
             # Vérifier la pertinence (simulation - nécessite données réelles)
             if query in REFERENCE_LIBELLES:
-                print(f"   ✅ Requête testée")
+                print("   ✅ Requête testée")
                 # Dans un vrai test, on comparerait avec les résultats de recherche
                 results["relevance_scores"].append(0.5)  # Placeholder
 

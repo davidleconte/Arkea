@@ -80,7 +80,8 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
         echo "✅ Java 17 trouvé via Homebrew"
     fi
 elif command -v jenv &> /dev/null && jenv versions | grep -q "17"; then
-    export JAVA_HOME=$(jenv prefix 17)
+    JAVA_HOME=$(jenv prefix 17)
+    export JAVA_HOME
     export PATH="$JAVA_HOME/bin:$PATH"
     echo "✅ Java 17 trouvé via jenv"
 fi

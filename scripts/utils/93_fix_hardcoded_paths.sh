@@ -92,7 +92,8 @@ done
 create_backup() {
     local file="$1"
     local backup_file="${BACKUP_DIR}${file#$ARKEA_HOME}"
-    local backup_dir="$(dirname "$backup_file")"
+    local backup_dir
+    backup_dir="$(dirname "$backup_file")"
 
     if [ "$DRY_RUN" = false ]; then
         mkdir -p "$backup_dir"
@@ -135,8 +136,10 @@ fix_file() {
         local replacement="${HARDCODED_PATTERNS[$pattern]}"
 
         # Échapper les caractères spéciaux pour sed
-        local escaped_pattern=$(printf '%s\n' "$pattern" | sed 's/[[\.*^$()+?{|]/\\&/g')
-        local escaped_replacement=$(printf '%s\n' "$replacement" | sed 's/[[\.*^$()+?{|]/\\&/g')
+        local escaped_pattern
+        escaped_pattern=$(printf '%s\n' "$pattern" | sed 's/[[\.*^$()+?{|]/\\&/g')
+        local escaped_replacement
+        escaped_replacement=$(printf '%s\n' "$replacement" | sed 's/[[\.*^$()+?{|]/\\&/g')
 
         if grep -q "$pattern" "$temp_file" 2>/dev/null; then
             # Utiliser sed pour remplacer (compatible macOS et Linux)

@@ -91,7 +91,8 @@ fix_script() {
             warn "[DRY-RUN] Ajouter 'set -euo pipefail' après le shebang dans $script"
         else
             # Créer un fichier temporaire
-            local tmp_file=$(mktemp)
+            local tmp_file
+            tmp_file=$(mktemp)
             {
                 head -1 "$script"
                 echo "set -euo pipefail"

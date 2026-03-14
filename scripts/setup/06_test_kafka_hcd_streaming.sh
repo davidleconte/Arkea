@@ -87,7 +87,8 @@ info "✅ 4 messages produits dans Kafka"
 
 # 6. Lancer le job Spark Streaming en arrière-plan
 info "🚀 Lancement du job Spark Streaming..."
-export SPARK_HOME=$(pwd)/binaire/spark-3.5.1
+SPARK_HOME=$(pwd)/binaire/spark-3.5.1
+export SPARK_HOME
 export PATH=$SPARK_HOME/bin:$PATH
 jenv local 11
 eval "$(jenv init -)"

@@ -125,7 +125,8 @@ check_hardcoded_paths() {
     done
 
     # Dédupliquer
-    local unique_files=($(printf '%s\n' "${files_with_hardcoded[@]}" | sort -u))
+    local unique_files
+    mapfile -t unique_files < <(printf '%s\n' "${files_with_hardcoded[@]}" | sort -u)
 
     if [ ${#unique_files[@]} -eq 0 ]; then
         info "✅ Aucun chemin hardcodé détecté"
@@ -194,12 +195,15 @@ check_docs() {
         if [ -f "$doc_file" ]; then
             # Rechercher les liens relatifs potentiellement cassés
             while IFS= read -r line; do
-                if [[ "$line" =~ \[.*\]\(([^)]+)\) ]]; then
+                local link_regex='\[.*\]\(([^)]+)\)'
+                if [[ "$line" =~ $link_regex ]]; then
                     local link="${BASH_REMATCH[1]}"
                     # Ignorer les liens http/https et les ancres
                     if [[ ! "$link" =~ ^(http|https|#) ]] && [[ "$link" =~ ^\.\.?/ ]]; then
-                        local doc_dir="$(dirname "$doc_file")"
-                        local target_file="$(cd "$doc_dir" && realpath -m "$link" 2>/dev/null || echo "")"
+                        local doc_dir
+                        doc_dir="$(dirname "$doc_file")"
+                        local target_file
+                        target_file="$(cd "$doc_dir" && realpath -m "$link" 2>/dev/null || echo "")"
                         if [ ! -f "$target_file" ]; then
                             docs_issues+=("$doc_file: Lien cassé: $link")
                             count=$((count + 1))

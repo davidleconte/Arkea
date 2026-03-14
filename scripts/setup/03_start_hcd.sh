@@ -33,7 +33,8 @@ if [ -z "${JAVA_HOME:-}" ] || ! java -version 2>&1 | grep -q "11"; then
     if command -v jenv &> /dev/null; then
         eval "$(jenv init -)" 2>/dev/null || true
         if jenv versions | grep -q "11"; then
-            export JAVA_HOME=$(jenv prefix 11)
+            JAVA_HOME=$(jenv prefix 11)
+            export JAVA_HOME
             export PATH="$JAVA_HOME/bin:$PATH"
             echo "✅ Java 11 configuré via jenv : $JAVA_HOME"
         fi

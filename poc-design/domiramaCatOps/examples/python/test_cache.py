@@ -12,18 +12,15 @@ import json
 import os
 import sys
 import time
-from datetime import datetime, timedelta
-from functools import lru_cache
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Tuple
 
 from cassandra.cluster import Cluster
-from cassandra.query import SimpleStatement
 
 # Ajouter le répertoire parent au PYTHONPATH
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(SCRIPT_DIR, "search"))
 
-from test_vector_search_base import KEYSPACE, encode_text, load_model
+from test_vector_search_base import KEYSPACE, encode_text, load_model  # noqa: E402
 
 # Cache simple en mémoire
 _embedding_cache = {}
@@ -95,7 +92,8 @@ def test_cache_embeddings() -> Tuple[bool, str, Dict]:
 
         print(f"   ✅ Cache hits: {_cache_stats['hits']}, misses: {_cache_stats['misses']}")
         print(
-            f"   ✅ Accélération : {speedup:.2f}x (sans cache: {avg_without:.2f}ms, avec cache: {avg_with:.2f}ms)"
+            "   ✅ Accélération : "
+            f"{speedup:.2f}x (sans cache: {avg_without:.2f}ms, avec cache: {avg_with:.2f}ms)"
         )
 
         return True, f"Cache embeddings validé ({speedup:.2f}x speedup)", cache_info
@@ -199,9 +197,7 @@ def test_cache_invalidation(session, code_si: str, contrat: str) -> Tuple[bool, 
 
         # Deuxième appel (cache hit)
         if cache_key in _search_cache:
-            results2 = _search_cache[cache_key]
-        else:
-            results2 = []
+            _search_cache[cache_key]  # Access to verify cache works
 
         # Invalidation
         if cache_key in _search_cache:

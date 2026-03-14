@@ -81,7 +81,8 @@ if command -v jenv &> /dev/null; then
         JAVA_VERSION=$(java -version 2>&1 | head -n 1 | cut -d'"' -f2 | cut -d'.' -f1)
         if [ "$JAVA_VERSION" = "11" ]; then
             info "✅ Java 11 activé via jenv : $(java -version 2>&1 | head -n 1)"
-            export JAVA_HOME=$(jenv prefix 11)
+            JAVA_HOME=$(jenv prefix 11)
+            export JAVA_HOME
         else
             warn "jenv local 11 n'a pas fonctionné. Tentative alternative..."
             JENV_AVAILABLE=false
@@ -187,7 +188,7 @@ mkdir -p "$BINAIRE_DIR"
 
 if [ -d "$BINAIRE_DIR/$HCD_DIR" ]; then
     warn "Répertoire $BINAIRE_DIR/$HCD_DIR existe déjà. Suppression..."
-    rm -rf "$BINAIRE_DIR/$HCD_DIR"
+    rm -rf "${BINAIRE_DIR:?}/${HCD_DIR:?}"
 fi
 
 info "Extraction de ${HCD_TARBALL}..."

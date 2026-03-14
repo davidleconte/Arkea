@@ -37,7 +37,8 @@ if [ -z "${JAVA_HOME:-}" ]; then
         export JAVA_HOME="${HOMEBREW_PREFIX}/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home"
         export PATH="$JAVA_HOME/bin:$PATH"
     elif command -v jenv &> /dev/null && jenv versions | grep -q "17"; then
-        export JAVA_HOME=$(jenv prefix 17)
+        JAVA_HOME=$(jenv prefix 17)
+        export JAVA_HOME
         export PATH="$JAVA_HOME/bin:$PATH"
     elif [ -d "${ARKEA_HOME}/binaire/java" ]; then
         export JAVA_HOME="${ARKEA_HOME}/binaire/java"
@@ -58,4 +59,4 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-"$KAFKA_HOME/libexec/bin/$@"
+exec "${KAFKA_HOME}/libexec/bin/$1" "${@:2}"

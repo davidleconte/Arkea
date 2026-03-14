@@ -4,7 +4,6 @@ Test comparatif entre ByteT5-small et multilingual-e5-large.
 Compare les performances et la pertinence des résultats.
 """
 
-import sys
 import time
 
 from test_vector_search_base import (
@@ -111,7 +110,7 @@ def main():
 
         relevance_byt5 = check_relevance(query, results_byt5)
 
-        print(f"   📊 ByteT5-small ({latency_byt5:.1f} ms):")
+        print("   📊 ByteT5-small ({latency_byt5:.1f} ms):")
         print(f"      Résultats : {len(results_byt5)}")
         print(
             f"      Pertinence : {relevance_byt5['relevant_count']}/{relevance_byt5['total_count']} ({relevance_byt5['relevance_rate']:.1%})"
@@ -129,7 +128,7 @@ def main():
 
             relevance_e5 = check_relevance(query, results_e5)
 
-            print(f"   📊 multilingual-e5-large ({latency_e5:.1f} ms):")
+            print("   📊 multilingual-e5-large ({latency_e5:.1f} ms):")
             print(f"      Résultats : {len(results_e5)}")
             print(
                 f"      Pertinence : {relevance_e5['relevant_count']}/{relevance_e5['total_count']} ({relevance_e5['relevance_rate']:.1%})"
@@ -150,7 +149,7 @@ def main():
             else:
                 print(f"      ➡️  Pertinence équivalente")
         else:
-            print(f"   ⚠️  e5-large non disponible (sentence-transformers non installé)")
+            print("   ⚠️  e5-large non disponible (sentence-transformers non installé)")
 
         print()
         print("-" * 70)

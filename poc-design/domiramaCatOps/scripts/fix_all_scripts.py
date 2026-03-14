@@ -4,9 +4,7 @@ Script de correction systématique de tous les scripts .sh
 Corrige les problèmes identifiés dans l'audit
 """
 
-import os
 import re
-import sys
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).parent

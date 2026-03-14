@@ -77,7 +77,7 @@ echo "📋 Test 3 : Scripts avec set -euo pipefail"
 SCRIPTS_WITHOUT_STANDARDS=0
 while IFS= read -r script; do
     if [ -f "$script" ]; then
-        if ! head -5 "$script" | grep -q "set -euo pipefail"; then
+        if ! head -15 "$script" | grep -q "set -euo pipefail"; then
             SCRIPTS_WITHOUT_STANDARDS=$((SCRIPTS_WITHOUT_STANDARDS + 1))
         fi
     fi

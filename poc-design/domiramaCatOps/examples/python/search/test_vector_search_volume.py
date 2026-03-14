@@ -5,7 +5,6 @@ Teste la performance avec un grand volume de données.
 """
 
 import statistics
-import sys
 import time
 
 from test_vector_search_base import (
@@ -19,10 +18,12 @@ from test_vector_search_base import (
 
 def count_operations(session, code_si: str, contrat: str) -> int:
     """Compte le nombre d'opérations pour un compte."""
-    from cassandra.query import SimpleStatement
     from test_vector_search_base import KEYSPACE
 
-    query = f"SELECT COUNT(*) FROM {KEYSPACE}.operations_by_account WHERE code_si = '{code_si}' AND contrat = '{contrat}'"
+    query = (
+        f"SELECT COUNT(*) FROM {KEYSPACE}.operations_by_account "
+        f"WHERE code_si = '{code_si}' AND contrat = '{contrat}'"
+    )
     try:
         result = session.execute(query).one()
         return result[0] if result else 0
@@ -39,7 +40,7 @@ def benchmark_with_volume(
 
     for _ in range(iterations):
         start = time.time()
-        results = vector_search(session, query_embedding, code_si, contrat, limit=5)
+        vector_search(session, query_embedding, code_si, contrat, limit=5)
         latency = (time.time() - start) * 1000  # ms
         latencies.append(latency)
 

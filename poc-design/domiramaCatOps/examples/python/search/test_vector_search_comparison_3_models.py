@@ -4,7 +4,6 @@ Test comparatif entre ByteT5-small, multilingual-e5-large, et modèle spécialis
 Compare les performances et la pertinence des résultats.
 """
 
-import sys
 import time
 
 from test_vector_search_base import (

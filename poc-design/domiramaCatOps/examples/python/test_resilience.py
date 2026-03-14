@@ -11,8 +11,7 @@ import json
 import os
 import sys
 import time
-from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import Tuple
 
 from cassandra import ConsistencyLevel
 from cassandra.cluster import EXEC_PROFILE_DEFAULT, Cluster, ExecutionProfile
@@ -23,7 +22,7 @@ from cassandra.query import SimpleStatement
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(SCRIPT_DIR, "search"))
 
-from test_vector_search_base import KEYSPACE, encode_text, load_model
+from test_vector_search_base import KEYSPACE  # noqa: E402
 
 
 def connect_to_hcd(host="localhost", port=9042):
@@ -67,7 +66,7 @@ def test_connection_resilience(session) -> Tuple[bool, str]:
         print("🧪 Test 1 : Résilience de connexion")
 
         # Test connexion normale
-        result = session.execute(f"SELECT COUNT(*) FROM {KEYSPACE}.operations_by_account LIMIT 1")
+        session.execute(f"SELECT COUNT(*) FROM {KEYSPACE}.operations_by_account LIMIT 1")
         print("   ✅ Connexion initiale réussie")
 
         # Simuler une interruption (fermer et rouvrir)
@@ -171,7 +170,8 @@ def test_timeout_handling(session, code_si: str, contrat: str) -> Tuple[bool, st
 
         # Requête avec timeout court (peut échouer si trop lent)
         query = SimpleStatement(
-            f"SELECT libelle, montant FROM {KEYSPACE}.operations_by_account WHERE code_si = '{code_si}' AND contrat = '{contrat}' LIMIT 10",
+            f"SELECT libelle, montant FROM {KEYSPACE}.operations_by_account "
+            f"WHERE code_si = '{code_si}' AND contrat = '{contrat}' LIMIT 10",
             consistency_level=ConsistencyLevel.ONE,
         )
 
@@ -196,7 +196,10 @@ def test_data_consistency_after_error(session, code_si: str, contrat: str) -> Tu
         print("🧪 Test 5 : Cohérence des données après erreur")
 
         # Compter avant
-        query_before = f"SELECT COUNT(*) as cnt FROM {KEYSPACE}.operations_by_account WHERE code_si = '{code_si}' AND contrat = '{contrat}'"
+        query_before = (
+            f"SELECT COUNT(*) as cnt FROM {KEYSPACE}.operations_by_account "
+            f"WHERE code_si = '{code_si}' AND contrat = '{contrat}'"
+        )
         result_before = session.execute(query_before)
         count_before = list(result_before)[0].cnt if result_before else 0
 
@@ -207,7 +210,10 @@ def test_data_consistency_after_error(session, code_si: str, contrat: str) -> Tu
             pass  # Erreur attendue
 
         # Compter après
-        query_after = f"SELECT COUNT(*) as cnt FROM {KEYSPACE}.operations_by_account WHERE code_si = '{code_si}' AND contrat = '{contrat}'"
+        query_after = (
+            f"SELECT COUNT(*) as cnt FROM {KEYSPACE}.operations_by_account "
+            f"WHERE code_si = '{code_si}' AND contrat = '{contrat}'"
+        )
         result_after = session.execute(query_after)
         count_after = list(result_after)[0].cnt if result_after else 0
 

@@ -4,10 +4,7 @@ Script pour générer un rapport détaillé des tests fuzzy search.
 Analyse les résultats de chaque test et génère un rapport markdown complet.
 """
 
-import json
-import os
 import subprocess
-import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -327,7 +324,8 @@ def generate_report(test_results):
 
 ### Données Requises
 
-Pour que tous les tests fonctionnent correctement, les données suivantes doivent être présentes dans HCD :
+Pour que tous les tests fonctionnent correctement, les données suivantes doivent être
+présentes dans HCD :
 
 - **Table** : `domiramacatops_poc.operations_by_account`
 - **Colonnes requises** :

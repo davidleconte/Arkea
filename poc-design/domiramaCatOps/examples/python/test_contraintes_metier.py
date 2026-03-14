@@ -6,13 +6,10 @@ Test Complexe P2-04 : Tests de Contraintes Métier
 - Validation contraintes logiques (ex: cat_auto doit exister dans regles_personnalisees)
 """
 
-import os
 import sys
 from datetime import datetime
-from typing import Dict, List, Tuple
 
 from cassandra.cluster import Cluster
-from cassandra.query import SimpleStatement
 
 KEYSPACE = "domiramacatops_poc"
 
@@ -154,7 +151,7 @@ def test_contrainte_logique_cat_auto(session):
                 missing_cats.append(cat_auto)
 
         if not missing_cats:
-            print(f"   ✅ Toutes les catégories trouvées dans regles_personnalisees")
+            print("   ✅ Toutes les catégories trouvées dans regles_personnalisees")
             return True, f"✅ {len(cat_autos)} catégories vérifiées"
         else:
             print(f"   ⚠️  Catégories manquantes (peut être normal) : {missing_cats[:5]}")
@@ -182,7 +179,7 @@ def test_contrainte_integrite_references(session, code_si: str, contrat: str):
 
         if ops_count > 0:
             print(f"   ✅ Opérations existantes : {ops_count}")
-            print(f"   ✅ Pas de références orphelines détectées")
+            print("   ✅ Pas de références orphelines détectées")
             return True, f"✅ {ops_count} opérations vérifiées"
         else:
             return True, "Aucune opération à vérifier"

@@ -4,7 +4,6 @@ Tests comparatifs entre Vector Search et Full-Text Search.
 Compare les résultats, la latence et la pertinence.
 """
 
-import sys
 import time
 
 from test_vector_search_base import (
@@ -96,18 +95,18 @@ def main():
         comparison = compare_searches(session, tokenizer, model, query_text, code_si, contrat)
 
         # Afficher résultats Vector
-        print(
-            f"   📊 Vector Search ({comparison['vector']['count']} résultats, {comparison['vector']['time']:.2f} ms):"
-        )
+        vec_count = comparison["vector"]["count"]
+        vec_time = comparison["vector"]["time"]
+        print(f"   📊 Vector Search ({vec_count} résultats, {vec_time:.2f} ms):")
         for i, row in enumerate(comparison["vector"]["results"][:3], 1):
             libelle = row.libelle[:40] if row.libelle else "N/A"
             print(f"      {i}. {libelle}")
         print()
 
         # Afficher résultats Full-Text
-        print(
-            f"   📊 Full-Text Search ({comparison['fulltext']['count']} résultats, {comparison['fulltext']['time']:.2f} ms):"
-        )
+        ft_count = comparison["fulltext"]["count"]
+        ft_time = comparison["fulltext"]["time"]
+        print(f"   📊 Full-Text Search ({ft_count} résultats, {ft_time:.2f} ms):")
         if comparison["fulltext"]["results"]:
             for i, row in enumerate(comparison["fulltext"]["results"][:3], 1):
                 libelle = row.libelle[:40] if row.libelle else "N/A"
@@ -120,14 +119,12 @@ def main():
         if comparison["fulltext"]["count"] == 0 and comparison["vector"]["count"] > 0:
             print("   ✅ Vector Search trouve des résultats (typo tolérée)")
         elif comparison["fulltext"]["count"] > 0 and comparison["vector"]["count"] > 0:
-            if comparison["fulltext"]["time"] < comparison["vector"]["time"]:
-                print(
-                    f"   ⚠️  Full-Text plus rapide ({comparison['fulltext']['time']:.2f} ms vs {comparison['vector']['time']:.2f} ms)"
-                )
+            ft_time = comparison["fulltext"]["time"]
+            vec_time = comparison["vector"]["time"]
+            if ft_time < vec_time:
+                print(f"   ⚠️  Full-Text plus rapide ({ft_time:.2f} ms vs {vec_time:.2f} ms)")
             else:
-                print(
-                    f"   ⚠️  Vector plus rapide ({comparison['vector']['time']:.2f} ms vs {comparison['fulltext']['time']:.2f} ms)"
-                )
+                print(f"   ⚠️  Vector plus rapide ({vec_time:.2f} ms vs {ft_time:.2f} ms)")
         print()
         print("-" * 70)
         print()

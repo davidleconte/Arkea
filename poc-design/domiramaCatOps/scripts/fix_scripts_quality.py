@@ -6,7 +6,6 @@ Script pour corriger la qualité des scripts domiramaCatOps
 - Remplacer localhost par $HCD_HOST
 """
 
-import os
 import re
 from pathlib import Path
 
@@ -213,7 +212,7 @@ def main():
 
     print()
     print(f"✅ {fixed} scripts corrigés")
-    print(f"📦 Sauvegardes créées : *.sh.bak")
+    print("📦 Sauvegardes créées : *.sh.bak")
 
 
 if __name__ == "__main__":

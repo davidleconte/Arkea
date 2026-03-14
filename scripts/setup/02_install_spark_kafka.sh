@@ -140,7 +140,7 @@ if [ -n "${KAFKA_HOME:-}" ] && [ -d "${KAFKA_HOME}" ]; then
     info "✅ Kafka déjà installé : $KAFKA_HOME"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     # macOS : Utiliser Homebrew
-    if command -v kafka-server-start.sh &> /dev/null || brew list kafka &> /dev/null 2>/dev/null; then
+    if command -v kafka-server-start.sh &> /dev/null || brew list kafka &> /dev/null; then
         info "✅ Kafka déjà installé"
         KAFKA_HOME=$(brew --prefix kafka 2>/dev/null || echo "")
     else

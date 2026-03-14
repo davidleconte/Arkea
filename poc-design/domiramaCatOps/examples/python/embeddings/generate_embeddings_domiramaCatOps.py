@@ -10,7 +10,6 @@ Pré requis:
   - HF_API_KEY dans l'environnement (optionnel si modèle public accessible)
   - transformers, torch et cassandra-driver installés
 """
-import math
 import os
 import sys
 import time
@@ -18,7 +17,6 @@ import time
 import torch
 from cassandra import ConsistencyLevel
 from cassandra.cluster import Cluster
-from cassandra.query import SimpleStatement
 from transformers import AutoModel, AutoTokenizer
 
 MODEL_NAME = "google/byt5-small"

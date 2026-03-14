@@ -4,7 +4,6 @@ Tests de robustesse pour la recherche vectorielle.
 Teste la gestion des requêtes malformées, NULL, injection SQL, etc.
 """
 
-import sys
 
 from test_vector_search_base import (
     connect_to_hcd,

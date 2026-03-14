@@ -30,11 +30,11 @@ def fix_line_length(content: str, max_length: int = 100) -> str:
             # Essayer de couper sur un espace avant max_length
             if " " in line[:max_length]:
                 last_space = line.rfind(" ", 0, max_length)
-                if last_space > max_length * 0.7:  # Au moins 70% de la ligne
+                if last_space > int(max_length * 0.7):  # Au moins 70% de la ligne
                     fixed_lines.append(line[:last_space])
                     # Indenter la suite si c'est une liste
                     indent = len(line) - len(line.lstrip())
-                    continuation = " " * (indent + 2) + line[last_space + 1 :]
+                    continuation = " " * (indent + 2) + line[last_space + 1:]
                     fixed_lines.append(continuation)
                 else:
                     fixed_lines.append(line)

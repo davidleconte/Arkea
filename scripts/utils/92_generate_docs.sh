@@ -99,8 +99,10 @@ EOF
 
     # Lister les fichiers .md dans docs/ (exclure les fichiers auto-générés)
     find "$ARKEA_HOME/docs" -maxdepth 1 -type f -name "*.md" ! -name "*AUTO*" ! -name "*GENERATED*" | sort | while IFS= read -r doc_file; do
-        local filename="$(basename "$doc_file")"
-        local title="$(head -1 "$doc_file" | sed 's/^# //' | sed 's/^## //')"
+        local filename
+        filename="$(basename "$doc_file")"
+        local title
+        title="$(head -1 "$doc_file" | sed 's/^# //' | sed 's/^## //')"
         echo "- **[$filename]($filename)** : $title" >> "$index_file"
     done
 
@@ -115,7 +117,8 @@ EOF
     # Lister les POCs
     for poc_dir in "$ARKEA_HOME/poc-design"/*; do
         if [ -d "$poc_dir" ] && [ -f "$poc_dir/README.md" ]; then
-            local poc_name="$(basename "$poc_dir")"
+            local poc_name
+            poc_name="$(basename "$poc_dir")"
             echo "### $poc_name" >> "$index_file"
             echo "" >> "$index_file"
             echo "- **[README.md](../poc-design/$poc_name/README.md)**" >> "$index_file"
@@ -157,7 +160,8 @@ EOF
 
     # Lister les scripts dans scripts/utils/
     find "$ARKEA_HOME/scripts/utils" -type f -name "*.sh" | sort | while IFS= read -r script; do
-        local filename="$(basename "$script")"
+        local filename
+        filename="$(basename "$script")"
         local rel_path="${script#$ARKEA_HOME/}"
         local description=""
 
@@ -182,12 +186,14 @@ EOF
     # Lister les scripts par POC
     for poc_dir in "$ARKEA_HOME/poc-design"/*; do
         if [ -d "$poc_dir/scripts" ]; then
-            local poc_name="$(basename "$poc_dir")"
+            local poc_name
+            poc_name="$(basename "$poc_dir")"
             echo "### $poc_name" >> "$scripts_file"
             echo "" >> "$scripts_file"
 
             find "$poc_dir/scripts" -type f -name "*.sh" ! -path "*/archive/*" | sort | while IFS= read -r script; do
-                local filename="$(basename "$script")"
+                local filename
+                filename="$(basename "$script")"
                 local rel_path="${script#$ARKEA_HOME/}"
                 echo "- \`$filename\` : \`$rel_path\`" >> "$scripts_file"
             done
@@ -233,7 +239,8 @@ EOF
     # Générer les statistiques pour chaque POC
     for poc_dir in "$ARKEA_HOME/poc-design"/*; do
         if [ -d "$poc_dir" ]; then
-            local poc_name="$(basename "$poc_dir")"
+            local poc_name
+            poc_name="$(basename "$poc_dir")"
             local scripts_count=0
             local docs_count=0
             local schemas_count=0
@@ -270,7 +277,8 @@ EOF
     # Générer les détails pour chaque POC
     for poc_dir in "$ARKEA_HOME/poc-design"/*; do
         if [ -d "$poc_dir" ] && [ -f "$poc_dir/README.md" ]; then
-            local poc_name="$(basename "$poc_dir")"
+            local poc_name
+            poc_name="$(basename "$poc_dir")"
             echo "### $poc_name" >> "$comparison_file"
             echo "" >> "$comparison_file"
             echo "- **README** : [README.md](../poc-design/$poc_name/README.md)" >> "$comparison_file"

@@ -5,7 +5,6 @@ Script Python pour générer le rapport de démonstration du script 07.
 """
 import datetime
 import os
-import sys
 
 report_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 script_name = os.environ.get("SCRIPT_NAME", "07_load_category_data_realtime.sh")
