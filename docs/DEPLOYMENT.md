@@ -173,8 +173,8 @@ Si vous devez personnaliser la configuration :
 # Définir avant de sourcer .poc-profile
 export ARKEA_HOME="/chemin/vers/Arkea"
 export HCD_HOST="localhost"
-export HCD_PORT="9042"
-export KAFKA_BOOTSTRAP_SERVERS="localhost:9092"
+export HCD_PORT="9102"
+export KAFKA_BOOTSTRAP_SERVERS="localhost:9192"
 
 source .poc-profile
 ```

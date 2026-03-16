@@ -121,7 +121,7 @@ cd /path/to/Arkea
 
 ```bash
 Error: Address already in use
-Error: Cannot bind to address 0.0.0.0:9042
+Error: Cannot bind to address 0.0.0.0:9102
 ```
 
 **Solutions** :
@@ -131,14 +131,14 @@ Error: Cannot bind to address 0.0.0.0:9042
 ```bash
 # Utiliser la fonction portable
 source scripts/utils/portable_functions.sh
-check_port 9042 && echo "Port 9042 utilisé" || echo "Port 9042 libre"
+check_port 9102 && echo "Port 9102 utilisé" || echo "Port 9102 libre"
 
 # Ou manuellement selon l'OS
 # macOS/Linux
-lsof -i :9042 || ss -tuln | grep 9042
+lsof -i :9102 || ss -tuln | grep 9102
 
 # Windows (WSL2)
-netstat -an | grep 9042
+netstat -an | grep 9102
 ```
 
 2. **Tuer les processus existants (fonction portable)** :
@@ -161,8 +161,8 @@ pgrep -f cassandra | xargs kill -9
 3. **Vérifier les ports** :
 
 ```bash
-lsof -i :9042
-netstat -an | grep 9042
+lsof -i :9102
+netstat -an | grep 9102
 ```
 
 4. **Redémarrer** :
@@ -179,7 +179,7 @@ netstat -an | grep 9042
 
 ```bash
 Connection refused
-Timeout connecting to localhost/127.0.0.1:9042
+Timeout connecting to localhost/127.0.0.1:9102
 ```
 
 **Solutions** :
@@ -336,7 +336,7 @@ spark-shell --packages com.datastax.spark:spark-cassandra-connector_2.12:3.5.0
 **Symptômes** :
 
 ```bash
-Connection refused connecting to localhost/127.0.0.1:9042
+Connection refused connecting to localhost/127.0.0.1:9102
 ```
 
 **Solutions** :
@@ -350,7 +350,7 @@ Connection refused connecting to localhost/127.0.0.1:9042
 2. **Vérifier la configuration Spark** :
 
 ```bash
-spark-shell --conf spark.cassandra.connection.host=localhost --conf spark.cassandra.connection.port=9042
+spark-shell --conf spark.cassandra.connection.host=localhost --conf spark.cassandra.connection.port=9102
 ```
 
 3. **Tester la connexion** :
@@ -391,7 +391,7 @@ lsof -i :2181
 3. **Vérifier les ports** :
 
 ```bash
-lsof -i :9092
+lsof -i :9192
 lsof -i :2181
 ```
 
@@ -423,13 +423,13 @@ Topic 'test-topic' does not exist
 1. **Créer le topic** :
 
 ```bash
-kafka-topics.sh --create --bootstrap-server localhost:9092 --topic test-topic --partitions 1 --replication-factor 1
+kafka-topics.sh --create --bootstrap-server localhost:9192 --topic test-topic --partitions 1 --replication-factor 1
 ```
 
 2. **Lister les topics** :
 
 ```bash
-kafka-topics.sh --list --bootstrap-server localhost:9092
+kafka-topics.sh --list --bootstrap-server localhost:9192
 ```
 
 ---
@@ -440,7 +440,7 @@ kafka-topics.sh --list --bootstrap-server localhost:9092
 
 ```bash
 Connection refused
-Bootstrap broker localhost:9092 disconnected
+Bootstrap broker localhost:9192 disconnected
 ```
 
 **Solutions** :
