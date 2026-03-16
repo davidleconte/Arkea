@@ -11,6 +11,7 @@ import os
 import sys
 from datetime import datetime, timezone
 from decimal import Decimal
+
 from astrapy import DataAPIClient
 from astrapy.authentication import UsernamePasswordTokenProvider
 from astrapy.constants import Environment
@@ -137,7 +138,7 @@ try:
             "numero_op": test_numero_op,
         }
     )
-    
+
     if result:
         print("✅ ✅ GET RÉUSSI !")
         print()
@@ -173,12 +174,12 @@ try:
     # Mise à jour du libellé et du montant
     new_libelle = "DÉMONSTRATION DATA API - MODIFIÉ"
     new_montant = Decimal("456.78")
-    
-    print(f"🔄 Mise à jour en cours...")
+
+    print("🔄 Mise à jour en cours...")
     print(f"   Nouveau libellé : {new_libelle}")
     print(f"   Nouveau montant : {new_montant}")
     print()
-    
+
     result = table.update_one(
         filter={
             "code_si": test_code_si,
@@ -191,13 +192,13 @@ try:
                 "libelle": new_libelle,
                 "montant": new_montant,
             }
-        }
+        },
     )
-    
+
     print("✅ ✅ UPDATE RÉUSSI !")
     print(f"   Documents modifiés : {result.get('modifiedCount', 'N/A')}")
     print()
-    
+
     # Vérifier la mise à jour
     print("🔄 Vérification de la mise à jour...")
     updated = table.find_one(
@@ -208,13 +209,13 @@ try:
             "numero_op": test_numero_op,
         }
     )
-    
+
     if updated:
         print("✅ Données mises à jour confirmées :")
         print(f"   Libellé : {updated.get('libelle', 'N/A')}")
         print(f"   Montant : {updated.get('montant', 'N/A')}")
         print()
-    
+
 except Exception as e:
     print(f"❌ Erreur UPDATE : {type(e).__name__}")
     print(f"   Message : {str(e)[:200]}")
@@ -236,21 +237,21 @@ try:
             "code_si": test_code_si,
             "contrat": test_contrat,
         },
-        limit=10
+        limit=10,
     )
-    
+
     operations = list(results)
-    print(f"✅ ✅ GET Multiple RÉUSSI !")
+    print("✅ ✅ GET Multiple RÉUSSI !")
     print(f"   {len(operations)} opération(s) trouvée(s)")
     print()
-    
+
     if operations:
         print("📄 Exemples d'opérations :")
         for i, op in enumerate(operations[:3], 1):
             print(f"   {i}. Libellé : {op.get('libelle', 'N/A')[:50]}...")
             print(f"      Montant : {op.get('montant', 'N/A')}")
             print()
-    
+
 except Exception as e:
     print(f"❌ Erreur GET Multiple : {type(e).__name__}")
     print(f"   Message : {str(e)[:200]}")
@@ -275,11 +276,11 @@ try:
             "numero_op": test_numero_op,
         }
     )
-    
+
     print("✅ ✅ DELETE RÉUSSI !")
     print(f"   Documents supprimés : {result.get('deletedCount', 'N/A')}")
     print()
-    
+
     # Vérifier la suppression
     print("🔄 Vérification de la suppression...")
     deleted_check = table.find_one(
@@ -290,13 +291,13 @@ try:
             "numero_op": test_numero_op,
         }
     )
-    
+
     if not deleted_check:
         print("✅ Suppression confirmée : l'opération n'existe plus")
     else:
         print("⚠️  L'opération existe encore (peut être normal selon les permissions)")
     print()
-    
+
 except Exception as e:
     print(f"❌ Erreur DELETE : {type(e).__name__}")
     print(f"   Message : {str(e)[:200]}")
@@ -342,4 +343,3 @@ print("   ✅ DELETE - Suppression de données")
 print()
 print("💡 La Data API est pleinement opérationnelle !")
 print()
-

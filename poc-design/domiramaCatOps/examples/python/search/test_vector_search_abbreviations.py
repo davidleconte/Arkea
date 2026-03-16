@@ -4,7 +4,6 @@ Tests avec abréviations pour la recherche vectorielle.
 Vérifie la compréhension des abréviations courantes.
 """
 
-import sys
 
 from test_vector_search_base import (
     calculate_cosine_similarity,

@@ -5,9 +5,7 @@ Teste la recherche floue avec des typos et compare les résultats.
 Adapté pour domiramaCatOps (keyspace: domiramacatops_poc)
 """
 
-import json
 import os
-import sys
 
 import torch
 from cassandra.cluster import Cluster
@@ -27,7 +25,7 @@ def load_model():
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, token=HF_API_KEY)
     model = AutoModel.from_pretrained(MODEL_NAME, token=HF_API_KEY)
     model.eval()
-    print(f"✅ Modèle chargé")
+    print("✅ Modèle chargé")
     return tokenizer, model
 
 
@@ -36,9 +34,7 @@ def encode_text(tokenizer, model, text):
     if not text or text.strip() == "":
         return [0.0] * VECTOR_DIMENSION
 
-    inputs = tokenizer(
-        text, return_tensors="pt", truncation=True, padding=True, max_length=512
-    )
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
     with torch.no_grad():
         encoder_outputs = model.encoder(**inputs)
         embeddings = encoder_outputs.last_hidden_state.mean(dim=1)
@@ -48,7 +44,7 @@ def encode_text(tokenizer, model, text):
 def vector_search(session, query_embedding, code_si, contrat, limit=5):
     """Effectue une recherche vectorielle avec ANN."""
     # Construire la requête CQL avec ANN
-    cql_query = f"""
+    cql_query = """
     SELECT libelle, montant, cat_auto, cat_user, cat_confidence
     FROM {KEYSPACE}.operations_by_account
     WHERE code_si = '{code_si}' AND contrat = '{contrat}'
@@ -85,9 +81,7 @@ def main():
     print()
 
     # Récupérer un code_si et contrat pour les tests
-    sample_query = (
-        f"SELECT code_si, contrat FROM {KEYSPACE}.operations_by_account LIMIT 1"
-    )
+    sample_query = f"SELECT code_si, contrat FROM {KEYSPACE}.operations_by_account LIMIT 1"
     sample = session.execute(sample_query).one()
     if not sample:
         print("⚠️  Aucune opération trouvée")
@@ -152,9 +146,7 @@ def main():
                 confidence = row.cat_confidence if row.cat_confidence else "N/A"
                 # Afficher cat_user si présent, sinon cat_auto
                 cat_display = cat_user if cat_user != "N/A" else cat_auto
-                print(
-                    f"      {i}. {libelle} | {montant} | {cat_display} (conf: {confidence})"
-                )
+                print(f"      {i}. {libelle} | {montant} | {cat_display} (conf: {confidence})")
         else:
             print("   ⚠️  Aucun résultat trouvé")
 

@@ -130,7 +130,8 @@ class TestOnboardingScript:
         # Run with dry-run
         result = run_script(onboarding_script, "--dry-run")
 
-        # If .venv already existed, that's fine - we just verify dry-run didn't create it
+        # If .venv already existed, that's fine - we just verify dry-run didn't
+        # create it
         assert result.returncode == 0
         assert "[DRY-RUN]" in result.stdout or "DRY-RUN" in result.stdout
 

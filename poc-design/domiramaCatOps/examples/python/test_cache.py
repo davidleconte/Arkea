@@ -12,18 +12,15 @@ import json
 import os
 import sys
 import time
-from datetime import datetime, timedelta
-from functools import lru_cache
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Tuple
 
 from cassandra.cluster import Cluster
-from cassandra.query import SimpleStatement
+from test_vector_search_base import KEYSPACE, encode_text, load_model
 
 # Ajouter le répertoire parent au PYTHONPATH
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(SCRIPT_DIR, "search"))
 
-from test_vector_search_base import KEYSPACE, encode_text, load_model
 
 # Cache simple en mémoire
 _embedding_cache = {}
@@ -118,8 +115,8 @@ def test_cache_search_results(session, code_si: str, contrat: str) -> Tuple[bool
         _search_cache.clear()
         for query in queries:
             start = time.time()
-            query_embedding = encode_text(tokenizer, model, query)
-            cql_query = f"""
+            encode_text(tokenizer, model, query)
+            cql_query = """
             SELECT libelle, montant, cat_auto
             FROM {KEYSPACE}.operations_by_account
             WHERE code_si = '{code_si}' AND contrat = '{contrat}'
@@ -140,8 +137,8 @@ def test_cache_search_results(session, code_si: str, contrat: str) -> Tuple[bool
             else:
                 _cache_stats["misses"] += 1
                 start = time.time()
-                query_embedding = encode_text(tokenizer, model, query)
-                cql_query = f"""
+                encode_text(tokenizer, model, query)
+                cql_query = """
                 SELECT libelle, montant, cat_auto
                 FROM {KEYSPACE}.operations_by_account
                 WHERE code_si = '{code_si}' AND contrat = '{contrat}'
@@ -184,8 +181,8 @@ def test_cache_invalidation(session, code_si: str, contrat: str) -> Tuple[bool, 
         query = "LOYER"
 
         # Premier appel (cache miss)
-        query_embedding = encode_text(tokenizer, model, query)
-        cql_query = f"""
+        encode_text(tokenizer, model, query)
+        cql_query = """
         SELECT libelle, montant, cat_auto
         FROM {KEYSPACE}.operations_by_account
         WHERE code_si = '{code_si}' AND contrat = '{contrat}'
@@ -199,9 +196,9 @@ def test_cache_invalidation(session, code_si: str, contrat: str) -> Tuple[bool, 
 
         # Deuxième appel (cache hit)
         if cache_key in _search_cache:
-            results2 = _search_cache[cache_key]
+            _search_cache[cache_key]
         else:
-            results2 = []
+            pass
 
         # Invalidation
         if cache_key in _search_cache:
@@ -209,8 +206,8 @@ def test_cache_invalidation(session, code_si: str, contrat: str) -> Tuple[bool, 
             _cache_stats["invalidations"] += 1
 
         # Troisième appel après invalidation (cache miss)
-        query_embedding = encode_text(tokenizer, model, query)
-        cql_query = f"""
+        encode_text(tokenizer, model, query)
+        cql_query = """
         SELECT libelle, montant, cat_auto
         FROM {KEYSPACE}.operations_by_account
         WHERE code_si = '{code_si}' AND contrat = '{contrat}'
@@ -250,8 +247,8 @@ def test_cache_performance(session, code_si: str, contrat: str) -> Tuple[bool, s
         _search_cache.clear()
         start = time.time()
         for query in queries:
-            query_embedding = encode_text(tokenizer, model, query)
-            cql_query = f"""
+            encode_text(tokenizer, model, query)
+            cql_query = """
             SELECT libelle, montant, cat_auto
             FROM {KEYSPACE}.operations_by_account
             WHERE code_si = '{code_si}' AND contrat = '{contrat}'
@@ -267,8 +264,8 @@ def test_cache_performance(session, code_si: str, contrat: str) -> Tuple[bool, s
         for query in queries:
             cache_key = get_cache_key(query)
             if cache_key not in _search_cache:
-                query_embedding = encode_text(tokenizer, model, query)
-                cql_query = f"""
+                encode_text(tokenizer, model, query)
+                cql_query = """
                 SELECT libelle, montant, cat_auto
                 FROM {KEYSPACE}.operations_by_account
                 WHERE code_si = '{code_si}' AND contrat = '{contrat}'

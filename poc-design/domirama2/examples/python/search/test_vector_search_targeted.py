@@ -5,12 +5,11 @@ Compare les résultats avec/sans typos et vérifie que les libellés pertinents 
 """
 
 import os
-import sys
+
 import torch
-from transformers import AutoTokenizer, AutoModel
 from cassandra.cluster import Cluster
 from cassandra.query import SimpleStatement
-import json
+from transformers import AutoModel, AutoTokenizer
 
 # Configuration
 MODEL_NAME = "google/byt5-small"
@@ -24,7 +23,7 @@ def load_model():
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, token=HF_API_KEY)
     model = AutoModel.from_pretrained(MODEL_NAME, token=HF_API_KEY)
     model.eval()
-    print(f"✅ Modèle chargé")
+    print("✅ Modèle chargé")
     return tokenizer, model
 
 
@@ -33,9 +32,7 @@ def encode_text(tokenizer, model, text):
     if not text or text.strip() == "":
         return [0.0] * VECTOR_DIMENSION
 
-    inputs = tokenizer(
-        text, return_tensors="pt", truncation=True, padding=True, max_length=512
-    )
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
     with torch.no_grad():
         encoder_outputs = model.encoder(**inputs)
         embeddings = encoder_outputs.last_hidden_state.mean(dim=1)
@@ -44,7 +41,7 @@ def encode_text(tokenizer, model, text):
 
 def vector_search(session, query_embedding, code_si, contrat, limit=10):
     """Effectue une recherche vectorielle avec ANN."""
-    cql_query = f"""
+    cql_query = """
     SELECT libelle, montant, cat_auto
     FROM operations_by_account
     WHERE code_si = '{code_si}' AND contrat = '{contrat}'
@@ -94,9 +91,7 @@ def main():
     print("📋 Recherche d'une partition avec des opérations 'LOYER'...")
 
     # Utiliser la recherche full-text pour trouver une partition avec "LOYER"
-    partitions_query = (
-        "SELECT DISTINCT code_si, contrat FROM operations_by_account LIMIT 20"
-    )
+    partitions_query = "SELECT DISTINCT code_si, contrat FROM operations_by_account LIMIT 20"
     partitions = list(session.execute(partitions_query))
 
     code_si = None
@@ -105,7 +100,7 @@ def main():
 
     for partition in partitions:
         # Chercher dans cette partition avec full-text search
-        search_query = f"""
+        search_query = """
         SELECT libelle
         FROM operations_by_account
         WHERE code_si = '{partition.code_si}'
@@ -120,7 +115,7 @@ def main():
                 contrat = partition.contrat
                 example_libelle = result.libelle
                 break
-        except:
+        except BaseException:
             continue
 
     if not code_si:
@@ -176,19 +171,13 @@ def main():
         # Test avec requête correcte
         print(f"   ✅ Requête correcte: '{query}'")
         query_embedding = encode_text(tokenizer, model, query)
-        results_correct = vector_search(
-            session, query_embedding, code_si, contrat, limit=10
-        )
+        results_correct = vector_search(session, query_embedding, code_si, contrat, limit=10)
 
         if results_correct:
             relevant_correct = [
-                r
-                for r in results_correct
-                if check_relevance(r.libelle, " ".join(expected_terms))
+                r for r in results_correct if check_relevance(r.libelle, " ".join(expected_terms))
             ]
-            print(
-                f"      Résultats pertinents: {len(relevant_correct)}/{len(results_correct)}"
-            )
+            print(f"      Résultats pertinents: {len(relevant_correct)}/{len(results_correct)}")
             for i, row in enumerate(relevant_correct[:3], 1):
                 libelle = row.libelle[:60] if row.libelle else "N/A"
                 print(f"         {i}. {libelle}")
@@ -197,19 +186,13 @@ def main():
         # Test avec typo
         print(f"   ⚠️  Requête avec typo: '{typo_query}'")
         typo_embedding = encode_text(tokenizer, model, typo_query)
-        results_typo = vector_search(
-            session, typo_embedding, code_si, contrat, limit=10
-        )
+        results_typo = vector_search(session, typo_embedding, code_si, contrat, limit=10)
 
         if results_typo:
             relevant_typo = [
-                r
-                for r in results_typo
-                if check_relevance(r.libelle, " ".join(expected_terms))
+                r for r in results_typo if check_relevance(r.libelle, " ".join(expected_terms))
             ]
-            print(
-                f"      Résultats pertinents: {len(relevant_typo)}/{len(results_typo)}"
-            )
+            print(f"      Résultats pertinents: {len(relevant_typo)}/{len(results_typo)}")
             for i, row in enumerate(relevant_typo[:3], 1):
                 libelle = row.libelle[:60] if row.libelle else "N/A"
                 print(f"         {i}. {libelle}")
@@ -220,7 +203,7 @@ def main():
                     f"      ✅ Tolérance aux typos: {len(relevant_typo)} résultat(s) pertinent(s) trouvé(s)"
                 )
             else:
-                print(f"      ⚠️  Aucun résultat pertinent trouvé avec la typo")
+                print("      ⚠️  Aucun résultat pertinent trouvé avec la typo")
         print()
         print("-" * 70)
         print()

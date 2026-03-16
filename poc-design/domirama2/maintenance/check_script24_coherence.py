@@ -4,7 +4,6 @@ Script de vérification de cohérence des résultats du script 24
 Vérifie la présence des données attendues et la génération des embeddings
 """
 
-import os
 from cassandra.cluster import Cluster
 
 # Configuration
@@ -24,7 +23,7 @@ print("✅ Connecté à HCD\n")
 print("=" * 70)
 print("  📊 VÉRIFICATION 1 : Nombre de lignes et embeddings")
 print("=" * 70)
-total_query = f"""
+total_query = """
 SELECT COUNT(*) as total,
        COUNT(libelle_embedding) as avec_embedding
 FROM operations_by_account
@@ -43,7 +42,7 @@ print()
 print("=" * 70)
 print("  📊 VÉRIFICATION 2-5 : Analyse des libellés dans la partition")
 print("=" * 70)
-all_libelles_query = f"""
+all_libelles_query = """
 SELECT libelle, libelle_embedding
 FROM operations_by_account
 WHERE code_si = '{CODE_SI}'
@@ -62,9 +61,7 @@ paris_libelles = []
 for r in all_results:
     libelle = r.libelle
     has_embedding = r.libelle_embedding is not None
-    row_data = type(
-        "obj", (object,), {"libelle": libelle, "has_embedding": has_embedding}
-    )()
+    row_data = type("obj", (object,), {"libelle": libelle, "has_embedding": has_embedding})()
 
     if "LOYER" in libelle.upper():
         loyer_libelles.append(row_data)

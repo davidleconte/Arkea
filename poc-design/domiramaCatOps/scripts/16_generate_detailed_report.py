@@ -4,11 +4,7 @@ Script pour générer un rapport détaillé des tests fuzzy search.
 Analyse les résultats de chaque test et génère un rapport markdown complet.
 """
 
-import json
-import os
 import subprocess
-import sys
-from datetime import datetime
 from pathlib import Path
 
 # Configuration
@@ -142,9 +138,9 @@ def generate_report(test_results):
     passed = sum(1 for r in test_results.values() if r["status"] == "SUCCESS")
     failed = sum(1 for r in test_results.values() if r["status"] in ["FAILED", "ERROR", "TIMEOUT"])
     skipped = sum(1 for r in test_results.values() if r["status"] == "SKIPPED")
-    success_rate = (passed / total_tests * 100) if total_tests > 0 else 0
+    (passed / total_tests * 100) if total_tests > 0 else 0
 
-    report = f"""# Tests Fuzzy Search Complets - Rapport Détaillé
+    report = """# Tests Fuzzy Search Complets - Rapport Détaillé
 
 **Date** : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 **Script** : 16_test_fuzzy_search_complete.sh
@@ -175,19 +171,19 @@ def generate_report(test_results):
 
         # Icône de statut
         if status == "SUCCESS":
-            status_icon = "✅"
+            pass
         elif status == "FAILED":
-            status_icon = "❌"
+            pass
         elif status == "ERROR":
-            status_icon = "⚠️"
+            pass
         elif status == "TIMEOUT":
-            status_icon = "⏱️"
+            pass
         elif status == "SKIPPED":
-            status_icon = "⏭️"
+            pass
         else:
-            status_icon = "❓"
+            pass
 
-        report += f"""### {idx}. {test_name} {status_icon}
+        report += """### {idx}. {test_name} {status_icon}
 
 **Fichier** : `{test_file}`
 **Description** : {test_desc}
@@ -227,9 +223,9 @@ def generate_report(test_results):
                     + "\n".join(output_lines[-25:])
                 )
             else:
-                output_preview = output
+                pass
 
-            report += f"""<details>
+            report += """<details>
 <summary>📄 Sortie complète du test (cliquer pour développer)</summary>
 
 ```
@@ -365,7 +361,7 @@ Pour que tous les tests fonctionnent correctement, les données suivantes doiven
     else:
         report += "- Aucun problème connu identifié\n"
 
-    report += f"""
+    report += """
 
 ---
 

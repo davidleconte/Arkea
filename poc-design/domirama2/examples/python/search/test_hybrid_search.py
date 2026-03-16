@@ -5,12 +5,11 @@ Démontre la meilleure pertinence en combinant les deux approches.
 """
 
 import os
-import sys
+
 import torch
-from transformers import AutoTokenizer, AutoModel
 from cassandra.cluster import Cluster
 from cassandra.query import SimpleStatement
-import json
+from transformers import AutoModel, AutoTokenizer
 
 # Configuration
 MODEL_NAME = "google/byt5-small"
@@ -24,7 +23,7 @@ def load_model():
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, token=HF_API_KEY)
     model = AutoModel.from_pretrained(MODEL_NAME, token=HF_API_KEY)
     model.eval()
-    print(f"✅ Modèle chargé")
+    print("✅ Modèle chargé")
     return tokenizer, model
 
 
@@ -33,9 +32,7 @@ def encode_text(tokenizer, model, text):
     if not text or text.strip() == "":
         return [0.0] * VECTOR_DIMENSION
 
-    inputs = tokenizer(
-        text, return_tensors="pt", truncation=True, padding=True, max_length=512
-    )
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
     with torch.no_grad():
         encoder_outputs = model.encoder(**inputs)
         embeddings = encoder_outputs.last_hidden_state.mean(dim=1)
@@ -44,7 +41,7 @@ def encode_text(tokenizer, model, text):
 
 def fulltext_search(session, query_term, code_si, contrat, limit=10):
     """Recherche full-text avec SAI."""
-    cql_query = f"""
+    cql_query = """
     SELECT libelle, montant, cat_auto
     FROM operations_by_account
     WHERE code_si = '{code_si}'
@@ -64,7 +61,7 @@ def fulltext_search(session, query_term, code_si, contrat, limit=10):
 
 def vector_search(session, query_embedding, code_si, contrat, limit=10):
     """Recherche vectorielle avec ANN."""
-    cql_query = f"""
+    cql_query = """
     SELECT libelle, montant, cat_auto
     FROM operations_by_account
     WHERE code_si = '{code_si}' AND contrat = '{contrat}'
@@ -86,9 +83,7 @@ def hybrid_search(session, query_embedding, query_term, code_si, contrat, limit=
     # Note: HCD ne supporte pas directement WHERE + ORDER BY ANN sur différentes colonnes
     # On filtre d'abord avec full-text, puis on trie par similarité vectorielle
     # Pour l'instant, on simule en filtrant les résultats vectoriels
-    vector_results = vector_search(
-        session, query_embedding, code_si, contrat, limit=limit * 2
-    )
+    vector_results = vector_search(session, query_embedding, code_si, contrat, limit=limit * 2)
 
     # Filtrer les résultats qui contiennent le terme recherché
     filtered = []
@@ -158,31 +153,27 @@ def main():
 
         # 1. Recherche Full-Text seule
         print(f"   1️⃣  Full-Text Search (SAI): '{fulltext_term}'")
-        fulltext_results = fulltext_search(
-            session, fulltext_term, code_si, contrat, limit=5
-        )
+        fulltext_results = fulltext_search(session, fulltext_term, code_si, contrat, limit=5)
         if fulltext_results:
             print(f"      ✅ {len(fulltext_results)} résultat(s) trouvé(s)")
             for i, row in enumerate(fulltext_results[:3], 1):
                 libelle = row.libelle[:55] if row.libelle else "N/A"
                 print(f"         {i}. {libelle}")
         else:
-            print(f"      ⚠️  Aucun résultat")
+            print("      ⚠️  Aucun résultat")
         print()
 
         # 2. Recherche Vectorielle seule (sans typo)
         print(f"   2️⃣  Vector Search (ByteT5): '{query}'")
         query_embedding = encode_text(tokenizer, model, query)
-        vector_results = vector_search(
-            session, query_embedding, code_si, contrat, limit=5
-        )
+        vector_results = vector_search(session, query_embedding, code_si, contrat, limit=5)
         if vector_results:
             print(f"      ✅ {len(vector_results)} résultat(s) trouvé(s)")
             for i, row in enumerate(vector_results[:3], 1):
                 libelle = row.libelle[:55] if row.libelle else "N/A"
                 print(f"         {i}. {libelle}")
         else:
-            print(f"      ⚠️  Aucun résultat")
+            print("      ⚠️  Aucun résultat")
         print()
 
         # 3. Recherche Vectorielle avec typo
@@ -195,7 +186,7 @@ def main():
                 libelle = row.libelle[:55] if row.libelle else "N/A"
                 print(f"         {i}. {libelle}")
         else:
-            print(f"      ⚠️  Aucun résultat")
+            print("      ⚠️  Aucun résultat")
         print()
 
         print("-" * 70)

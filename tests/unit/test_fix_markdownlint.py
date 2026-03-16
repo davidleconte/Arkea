@@ -52,7 +52,8 @@ class TestFixLineLength:
         assert len(lines) >= 2
         # Each line should be at most max_length (approximately)
         for line in lines:
-            assert len(line) <= 55  # Allow some flexibility for word boundaries
+            # Allow some flexibility for word boundaries
+            assert len(line) <= 55
 
     def test_empty_line_unchanged(self):
         """Test that empty lines are not modified."""

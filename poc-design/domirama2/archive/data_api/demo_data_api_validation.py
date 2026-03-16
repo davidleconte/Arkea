@@ -9,6 +9,7 @@ Même sans Stargate déployé, cette démonstration montre que :
 """
 import os
 import sys
+
 from astrapy import DataAPIClient
 from astrapy.authentication import UsernamePasswordTokenProvider
 from astrapy.constants import Environment
@@ -43,7 +44,8 @@ print()
 
 try:
     import astrapy
-    print(f"   ✅ Client astrapy installé")
+
+    print("   ✅ Client astrapy installé")
     print(f"   ✅ Version : {astrapy.__version__}")
     print(f"   ✅ Environment.HCD disponible : {hasattr(Environment, 'HCD')}")
 except ImportError:
@@ -106,7 +108,7 @@ try:
     print()
     print("   🎉 La Data API fonctionne !")
     print()
-    
+
     # Essayer de lister les keyspaces
     try:
         print("   📋 Keyspaces disponibles :")
@@ -120,21 +122,21 @@ try:
     except Exception as e:
         print(f"      ⚠️  Liste des keyspaces : {type(e).__name__}")
         print("      (la connexion fonctionne, mais cette opération nécessite des permissions)")
-    
+
     print()
     print("=" * 80)
     print("✅ ✅ DÉMONSTRATION RÉUSSIE : Data API fonctionne !")
     print("=" * 80)
     sys.exit(0)
-    
+
 except Exception as e:
     error_type = type(e).__name__
     error_msg = str(e)
-    
+
     print(f"   ⚠️  Erreur de connexion : {error_type}")
     print(f"   Message : {error_msg}")
     print()
-    
+
     # Analyser l'erreur
     if "Environments outside of Astra DB" in error_msg:
         print("   💡 Analyse :")
@@ -159,7 +161,7 @@ except Exception as e:
         print("   💡 Analyse :")
         print("      → Erreur inattendue")
         print("      → Vérifiez la configuration et les logs")
-    
+
     print()
     print("=" * 80)
     print("⚠️  DÉMONSTRATION PARTIELLE : Configuration correcte, endpoint non accessible")
@@ -181,6 +183,5 @@ except Exception as e:
     print("   3. Attendre 30-60 secondes")
     print("   4. Relancer : python3 demo_data_api_validation.py")
     print()
-    
-    sys.exit(1)
 
+    sys.exit(1)

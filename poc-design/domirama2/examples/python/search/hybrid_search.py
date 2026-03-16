@@ -7,12 +7,11 @@ Recherche Hybride : Combinaison Full-Text Search (SAI) + Vector Search (ByteT5)
 """
 
 import os
-import sys
+
 import torch
-from transformers import AutoTokenizer, AutoModel
 from cassandra.cluster import Cluster
 from cassandra.query import SimpleStatement
-import json
+from transformers import AutoModel, AutoTokenizer
 
 # Configuration
 MODEL_NAME = "google/byt5-small"
@@ -33,9 +32,7 @@ def encode_text(tokenizer, model, text):
     if not text or text.strip() == "":
         return [0.0] * VECTOR_DIMENSION
 
-    inputs = tokenizer(
-        text, return_tensors="pt", truncation=True, padding=True, max_length=512
-    )
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
     with torch.no_grad():
         encoder_outputs = model.encoder(**inputs)
         embeddings = encoder_outputs.last_hidden_state.mean(dim=1)
@@ -59,17 +56,17 @@ def hybrid_search(session, query_text, code_si, contrat, limit=10, use_fulltext=
     """
     # Générer l'embedding de la requête
     tokenizer, model = load_model()
-    query_embedding = encode_text(tokenizer, model, query_text)
+    encode_text(tokenizer, model, query_text)
 
     if use_fulltext:
         # Stratégie 1: Filtrer avec Full-Text, puis trier par Vector
         # Extraire le terme principal pour le filtre Full-Text
         # (prendre le premier mot significatif)
         terms = query_text.lower().split()
-        main_term = terms[0] if terms else query_text.lower()
+        terms[0] if terms else query_text.lower()
 
         # Requête hybride : WHERE (full-text) + ORDER BY (vector)
-        cql_query = f"""
+        cql_query = """
         SELECT libelle, montant, cat_auto
         FROM operations_by_account
         WHERE code_si = '{code_si}'
@@ -80,7 +77,7 @@ def hybrid_search(session, query_text, code_si, contrat, limit=10, use_fulltext=
         """
     else:
         # Stratégie 2: Recherche vectorielle pure (pour typos sévères)
-        cql_query = f"""
+        cql_query = """
         SELECT libelle, montant, cat_auto
         FROM operations_by_account
         WHERE code_si = '{code_si}' AND contrat = '{contrat}'
@@ -96,9 +93,7 @@ def hybrid_search(session, query_text, code_si, contrat, limit=10, use_fulltext=
         # Si la recherche hybride échoue (ex: terme non trouvé en full-text),
         # Fallback sur recherche vectorielle pure
         if use_fulltext:
-            return hybrid_search(
-                session, query_text, code_si, contrat, limit, use_fulltext=False
-            )
+            return hybrid_search(session, query_text, code_si, contrat, limit, use_fulltext=False)
         else:
             print(f"   ❌ Erreur: {str(e)}")
             return []
@@ -112,15 +107,15 @@ def smart_hybrid_search(session, query_text, code_si, contrat, limit=10):
     3. Filtre côté client pour améliorer la pertinence
     """
     tokenizer, model = load_model()
-    query_embedding = encode_text(tokenizer, model, query_text)
+    encode_text(tokenizer, model, query_text)
 
     # Stratégie 1: Essayer Full-Text + Vector (pour requêtes correctes)
     terms = query_text.lower().split()
-    main_term = terms[0] if terms and len(terms[0]) > 2 else query_text.lower()
+    terms[0] if terms and len(terms[0]) > 2 else query_text.lower()
 
     # Essayer la recherche hybride Full-Text + Vector
     try:
-        cql_query_hybrid = f"""
+        cql_query_hybrid = """
         SELECT libelle, montant, cat_auto
         FROM operations_by_account
         WHERE code_si = '{code_si}'
@@ -135,12 +130,12 @@ def smart_hybrid_search(session, query_text, code_si, contrat, limit=10):
         if results:
             # Recherche hybride réussie
             return results[:limit]
-    except:
+    except BaseException:
         pass
 
     # Stratégie 2: Fallback sur Vector Search seul (pour typos)
     try:
-        cql_query_vector = f"""
+        cql_query_vector = """
         SELECT libelle, montant, cat_auto
         FROM operations_by_account
         WHERE code_si = '{code_si}' AND contrat = '{contrat}'
@@ -169,16 +164,19 @@ def smart_hybrid_search(session, query_text, code_si, contrat, limit=10):
                             # Correspondance exacte = score élevé
                             if term in libelle_lower:
                                 score += 3
-                            # Correspondance partielle (préfixe de 3+ caractères) = score moyen
+                            # Correspondance partielle (préfixe de 3+
+                            # caractères) = score moyen
                             elif len(term) >= 3:
-                                # Vérifier si un préfixe du terme est dans le libellé
+                                # Vérifier si un préfixe du terme est dans le
+                                # libellé
                                 for i in range(3, min(len(term) + 1, 6)):
                                     prefix = term[:i]
                                     if prefix in libelle_lower:
                                         score += 1
                                         break
 
-                        # Même avec score 0, on garde les résultats (car triés par similarité vectorielle)
+                        # Même avec score 0, on garde les résultats (car triés
+                        # par similarité vectorielle)
                         scored_results.append((score, result))
 
                 # Trier par score décroissant, puis garder les meilleurs

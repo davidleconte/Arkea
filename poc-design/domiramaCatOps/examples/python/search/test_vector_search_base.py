@@ -4,7 +4,6 @@ Module de base pour les tests de recherche vectorielle.
 Contient les fonctions communes utilisées par tous les tests.
 """
 
-import json
 import math
 import os
 import random
@@ -42,7 +41,8 @@ def load_model():
         _tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, token=HF_API_KEY)
         _model = AutoModel.from_pretrained(MODEL_NAME, token=HF_API_KEY)
         _model.eval()
-        # S'assurer que le modèle est sur CPU (évite les erreurs device meta vs cpu)
+        # S'assurer que le modèle est sur CPU (évite les erreurs device meta vs
+        # cpu)
         _model = _model.to("cpu")
     return _tokenizer, _model
 
@@ -56,7 +56,8 @@ def encode_text(tokenizer, model, text: str) -> List[float]:
 
     if not text or (isinstance(text, str) and text.strip() == ""):
         # Retourner un vecteur normalisé (pas de zéros) pour éviter l'erreur HCD
-        # Utiliser un petit vecteur aléatoire normalisé avec seed fixe pour cohérence
+        # Utiliser un petit vecteur aléatoire normalisé avec seed fixe pour
+        # cohérence
         random.seed(42)  # Seed fixe pour cohérence
         vec = [random.gauss(0, 0.01) for _ in range(VECTOR_DIMENSION)]
         magnitude = math.sqrt(sum(x * x for x in vec))
@@ -92,7 +93,7 @@ def vector_search(
     session, query_embedding: List[float], code_si: str, contrat: str, limit: int = 5
 ) -> List[Any]:
     """Effectue une recherche vectorielle avec ANN."""
-    cql_query = f"""
+    cql_query = """
     SELECT libelle, montant, cat_auto, cat_user, cat_confidence, libelle_embedding
     FROM {KEYSPACE}.operations_by_account
     WHERE code_si = '{code_si}' AND contrat = '{contrat}'
@@ -119,9 +120,9 @@ def fulltext_search(session, query: str, code_si: str, contrat: str, limit: int 
         return []
 
     # Utiliser le premier terme pour la recherche SAI
-    first_term = query_terms[0].replace("'", "''")
+    query_terms[0].replace("'", "''")
 
-    cql_query = f"""
+    cql_query = """
     SELECT libelle, montant, cat_auto, cat_user, cat_confidence
     FROM {KEYSPACE}.operations_by_account
     WHERE code_si = '{code_si}' AND contrat = '{contrat}'
@@ -151,7 +152,8 @@ def calculate_cosine_similarity(vec1: List[float], vec2: List[float]) -> float:
 def get_test_account(session) -> Optional[Tuple[str, str]]:
     """Récupère un compte de test (code_si, contrat)."""
     sample_query = (
-        f"SELECT code_si, contrat FROM {KEYSPACE}.operations_by_account LIMIT 1"  # nosec B608
+        # nosec B608
+        f"SELECT code_si, contrat FROM {KEYSPACE}.operations_by_account LIMIT 1"
     )
     sample = session.execute(sample_query).one()
     if sample:

@@ -4,10 +4,11 @@ Script pour générer des embeddings ByteT5 pour les libellés d'opérations.
 Utilise le modèle "google/byt5-small" pour créer des vecteurs de dimension 1472.
 """
 
-import sys
 import os
+import sys
+
 import torch
-from transformers import AutoTokenizer, AutoModel
+from transformers import AutoModel, AutoTokenizer
 
 # Configuration
 MODEL_NAME = "google/byt5-small"
@@ -20,7 +21,7 @@ HF_API_KEY = os.getenv("HF_API_KEY")
 def load_model():
     """Charge le modèle ByteT5 et le tokenizer avec authentification Hugging Face."""
     print(f"📥 Chargement du modèle {MODEL_NAME}...")
-    print(f"   Utilisation de la clé API Hugging Face")
+    print("   Utilisation de la clé API Hugging Face")
 
     # Utiliser la clé API pour le téléchargement
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, token=HF_API_KEY)
@@ -54,7 +55,8 @@ def encode_text(tokenizer, model, text):
     # Générer l'embedding avec l'encodeur
     with torch.no_grad():
         encoder_outputs = model.encoder(**inputs)
-        # Mean pooling sur la dimension des tokens pour obtenir un vecteur unique
+        # Mean pooling sur la dimension des tokens pour obtenir un vecteur
+        # unique
         embeddings = encoder_outputs.last_hidden_state.mean(dim=1)
 
     # Convertir en liste Python

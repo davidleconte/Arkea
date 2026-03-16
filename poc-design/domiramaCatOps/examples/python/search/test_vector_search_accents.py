@@ -4,7 +4,6 @@ Tests avec accents et diacritiques pour la recherche vectorielle.
 Vérifie la robustesse aux accents (é, è, ê, î, etc.).
 """
 
-import sys
 
 from test_vector_search_base import (
     connect_to_hcd,

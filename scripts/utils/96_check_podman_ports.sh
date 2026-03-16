@@ -22,20 +22,20 @@ source "${PROJECT_ROOT}/lib/common.sh"
 # =============================================================================
 # See PODMAN_RULES.md for full allocation table
 
-declare -A ARKEA_PORTS=(
-    # Service          Host Port    Container Port    Description
-    ["HCD_CQL"]="9102:9042:CQL Native Transport"
-    ["HCD_INTRA"]="9100:7000:Intra-node communication"
-    ["HCD_INTRA_TLS"]="9101:7001:Intra-node TLS"
-    ["HCD_SOLR"]="9045:8983:Solr HTTP"
-    ["HCD_GRAPH"]="9182:8182:Graph API"
-    ["SPARK_MASTER"]="9177:7077:Spark Master"
-    ["SPARK_UI"]="9180:8080:Spark Web UI"
-    ["SPARK_WORKER_UI"]="9181:8081:Spark Worker UI"
-    ["KAFKA"]="9192:9092:Kafka Broker"
-    ["KAFKA_CONTROLLER"]="9193:9093:Kafka Controller"
-    ["KAFKA_EXTERNAL"]="9194:9094:Kafka External"
-    ["KAFKA_UI"]="9190:8080:Kafka UI"
+# Use indexed array for port definitions (compatible with set -u)
+ARKEA_PORTS=(
+    "HCD_CQL:9102:9042:CQL Native Transport"
+    "HCD_INTRA:9100:7000:Intra-node communication"
+    "HCD_INTRA_TLS:9101:7001:Intra-node TLS"
+    "HCD_SOLR:9045:8983:Solr HTTP"
+    "HCD_GRAPH:9182:8182:Graph API"
+    "SPARK_MASTER:9177:7077:Spark Master"
+    "SPARK_UI:9180:8080:Spark Web UI"
+    "SPARK_WORKER_UI:9181:8081:Spark Worker UI"
+    "KAFKA:9192:9092:Kafka Broker"
+    "KAFKA_CONTROLLER:9193:9093:Kafka Controller"
+    "KAFKA_EXTERNAL:9194:9094:Kafka External"
+    "KAFKA_UI:9190:8080:Kafka UI"
 )
 
 # Ports that are MANDATORY to check
@@ -74,8 +74,8 @@ check_all_ports() {
     printf "%-20s %-12s %-15s %-10s\n" "-------" "---------" "------" "----"
 
     # Check each port
-    for service in "${!ARKEA_PORTS[@]}"; do
-        IFS=':' read -r host_port container_port description <<< "${ARKEA_PORTS[$service]}"
+    for entry in "${ARKEA_PORTS[@]}"; do
+        IFS=':' read -r service host_port container_port description <<< "$entry"
 
         if check_port "$host_port"; then
             printf "%-20s %-12s \033[32m%-15s\033[0m %-10s\n" "$service" "$host_port" "✅ Available" "$description"

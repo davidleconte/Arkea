@@ -4,9 +4,7 @@ Script de correction systématique de tous les scripts .sh
 Corrige les problèmes identifiés dans l'audit
 """
 
-import os
 import re
-import sys
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).parent
@@ -46,14 +44,17 @@ def fix_script(script_path):
             content = content.replace('"$HCD_HOME"/bin/cqlsh', '"${HCD_DIR}/bin/cqlsh"')
             fixed = True
 
-        # 3. Remplacer $HCD_HOME/bin/cqlsh (sans guillemets) par "${HCD_DIR}/bin/cqlsh"
+        # 3. Remplacer $HCD_HOME/bin/cqlsh (sans guillemets) par
+        # "${HCD_DIR}/bin/cqlsh"
         content = re.sub(r"\$HCD_HOME/bin/cqlsh", r'"${HCD_DIR}/bin/cqlsh"', content)
         if "$HCD_HOME/bin/cqlsh" in original_content:
             fixed = True
 
-    # 4. Pour scripts anciens : remplacer cqlsh sans chemin par "${HCD_DIR}/bin/cqlsh"
+    # 4. Pour scripts anciens : remplacer cqlsh sans chemin par
+    # "${HCD_DIR}/bin/cqlsh"
     if "HCD_DIR=" in content and "cqlsh" in content:
-        # Remplacer les occurrences de cqlsh qui ne sont pas déjà dans un chemin
+        # Remplacer les occurrences de cqlsh qui ne sont pas déjà dans un
+        # chemin
         lines = content.split("\n")
         new_lines = []
         for line in lines:

@@ -4,7 +4,6 @@ Tests comparatifs entre Vector Search et Full-Text Search.
 Compare les résultats, la latence et la pertinence.
 """
 
-import sys
 import time
 
 from test_vector_search_base import (

@@ -107,15 +107,16 @@ def test_model(model_name: str, model_type: str = "sentence_transformer") -> Dic
 
             # Vérifier la pertinence (simulation - nécessite données réelles)
             if query in REFERENCE_LIBELLES:
-                print(f"   ✅ Requête testée")
-                # Dans un vrai test, on comparerait avec les résultats de recherche
+                print("   ✅ Requête testée")
+                # Dans un vrai test, on comparerait avec les résultats de
+                # recherche
                 results["relevance_scores"].append(0.5)  # Placeholder
 
         results["avg_latency"] = sum(results["latency"]) / len(results["latency"])
         results["min_latency"] = min(results["latency"])
         results["max_latency"] = max(results["latency"])
 
-        print(f"\n📊 Résultats globaux :")
+        print("\n📊 Résultats globaux :")
         print(f"   Latence moyenne : {results['avg_latency']:.2f} ms")
         print(f"   Latence min : {results['min_latency']:.2f} ms")
         print(f"   Latence max : {results['max_latency']:.2f} ms")

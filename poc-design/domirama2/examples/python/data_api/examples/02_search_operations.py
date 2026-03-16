@@ -37,7 +37,8 @@ def main() -> None:
 
     try:
         # Filtre : code_si, contrat, et libelle contenant "LOYER"
-        # Note : Pour full-text search avec SAI, utiliser les opérateurs appropriés
+        # Note : Pour full-text search avec SAI, utiliser les opérateurs
+        # appropriés
         results = table.find(
             filter={
                 "$and": [

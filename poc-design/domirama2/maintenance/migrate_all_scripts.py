@@ -64,10 +64,7 @@ def migrate_script(script_path):
     modified = False
 
     # 1. Remplacer set -e par set -euo pipefail (si pas déjà présent)
-    if (
-        re.search(r"^set -e$", content, re.MULTILINE)
-        and "set -euo pipefail" not in content
-    ):
+    if re.search(r"^set -e$", content, re.MULTILINE) and "set -euo pipefail" not in content:
         content = re.sub(r"^set -e$", "set -euo pipefail", content, flags=re.MULTILINE)
         modified = True
         info("  → set -e remplacé par set -euo pipefail")
@@ -75,16 +72,16 @@ def migrate_script(script_path):
     # 2. Remplacer les chemins hardcodés INSTALL_DIR
     hardcoded_pattern = r'INSTALL_DIR="/Users/david\.leconte/Documents/Arkea"'
     if re.search(hardcoded_pattern, content):
-        # Trouver la section à remplacer (INSTALL_DIR jusqu'à SCRIPT_DIR suivant)
+        # Trouver la section à remplacer (INSTALL_DIR jusqu'à SCRIPT_DIR
+        # suivant)
         pattern = rf"{hardcoded_pattern}\s*\nHCD_DIR=.*?\n(?:SPARK_HOME=.*?\n)?SCRIPT_DIR=.*?\n"
 
         if re.search(pattern, content):
             # Remplacer le bloc complet
-            content = re.sub(
-                pattern, SETUP_PATHS_BLOCK + "\n", content, flags=re.MULTILINE
-            )
+            content = re.sub(pattern, SETUP_PATHS_BLOCK + "\n", content, flags=re.MULTILINE)
         else:
-            # Remplacer juste INSTALL_DIR et les lignes suivantes jusqu'à SCRIPT_DIR
+            # Remplacer juste INSTALL_DIR et les lignes suivantes jusqu'à
+            # SCRIPT_DIR
             lines = content.split("\n")
             new_lines = []
             skip_until_script_dir = False
@@ -149,7 +146,8 @@ def migrate_script(script_path):
             info(f"  → {pattern} remplacé par {replacement}")
 
     # 4. Améliorer les vérifications HCD
-    # Chercher les vérifications pgrep et les améliorer si check_hcd_prerequisites n'est pas présent
+    # Chercher les vérifications pgrep et les améliorer si
+    # check_hcd_prerequisites n'est pas présent
     if "check_hcd_prerequisites" not in content and 'pgrep -f "cassandra"' in content:
         # Remplacer la première occurrence de vérification HCD
         old_check = (
@@ -196,7 +194,8 @@ fi"""
 def main():
     script_dir = Path(__file__).parent
 
-    # Trouver tous les scripts .sh à la racine (exclure migrate_scripts.sh et les archives)
+    # Trouver tous les scripts .sh à la racine (exclure migrate_scripts.sh et
+    # les archives)
     scripts = [
         p
         for p in script_dir.glob("*.sh")

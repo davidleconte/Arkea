@@ -29,7 +29,7 @@ def main():
 
     # Récupérer toutes les opérations
     print("📊 Récupération des opérations...")
-    query = f"""
+    query = """
     SELECT code_si, contrat, date_op, numero_op, libelle
     FROM {KEYSPACE}.operations_by_account
     LIMIT 1000
@@ -45,7 +45,7 @@ def main():
 
     # Générer les embeddings
     print("🔄 Génération des embeddings...")
-    update_query = f"""
+    update_query = """
     UPDATE {KEYSPACE}.operations_by_account
     SET libelle_embedding_invoice = ?
     WHERE code_si = ? AND contrat = ? AND date_op = ? AND numero_op = ?

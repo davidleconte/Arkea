@@ -4,7 +4,6 @@ Script de réorganisation de la documentation domirama2
 Déplace les fichiers .md vers les catégories appropriées
 """
 
-import os
 import shutil
 from pathlib import Path
 

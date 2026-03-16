@@ -5,7 +5,6 @@ Teste la performance avec un grand volume de données.
 """
 
 import statistics
-import sys
 import time
 
 from test_vector_search_base import (
@@ -19,7 +18,6 @@ from test_vector_search_base import (
 
 def count_operations(session, code_si: str, contrat: str) -> int:
     """Compte le nombre d'opérations pour un compte."""
-    from cassandra.query import SimpleStatement
     from test_vector_search_base import KEYSPACE
 
     query = f"SELECT COUNT(*) FROM {KEYSPACE}.operations_by_account WHERE code_si = '{code_si}' AND contrat = '{contrat}'"

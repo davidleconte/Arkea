@@ -24,7 +24,7 @@ def check_relevant_data(session, code_si: str, contrat: str):
     print()
 
     # Récupérer tous les libellés
-    query = f"""
+    query = """
     SELECT libelle FROM {KEYSPACE}.operations_by_account
     WHERE code_si = '{code_si}' AND contrat = '{contrat}'
     LIMIT 1000
@@ -50,11 +50,11 @@ def check_relevant_data(session, code_si: str, contrat: str):
 
         print(f"   Libellés pertinents trouvés : {len(relevant)}")
         if relevant:
-            print(f"   Exemples :")
+            print("   Exemples :")
             for i, lib in enumerate(relevant[:5], 1):
                 print(f"      {i}. {lib[:60]}")
         else:
-            print(f"   ⚠️  AUCUN libellé pertinent trouvé !")
+            print("   ⚠️  AUCUN libellé pertinent trouvé !")
         print()
 
     return len(all_libelles)

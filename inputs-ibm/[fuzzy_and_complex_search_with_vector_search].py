@@ -81,7 +81,11 @@ Adjustable Fuzziness Levels:
 
 # Importing necessary modules for our vector search implementation:
 
-# 4. Importing PyTorch:
+import random
+import re
+import uuid
+
+import astrapy
 import torch
 
 # 2. From the AstraDB Python client library (astrapy):
@@ -89,6 +93,19 @@ from astrapy import DataAPIClient
 
 # 3. Importing a constant for vector metric specification:
 from astrapy.constants import VectorMetric
+from astrapy.info import CollectionDefinition, CollectionVectorOptions
+from cassandra import ProtocolVersion
+from cassandra.auth import PlainTextAuthProvider
+
+# 4. Importing PyTorch:
+from cassandra.cluster import (
+    EXEC_PROFILE_DEFAULT,
+    Cluster,
+    ConsistencyLevel,
+    ExecutionProfile,
+    ProtocolVersion,
+)
+from google.colab import userdata
 
 # 1. From the Hugging Face Transformers library:
 from transformers import AutoModel, AutoTokenizer
@@ -96,16 +113,19 @@ from transformers import AutoModel, AutoTokenizer
 # - AutoTokenizer: Automatically loads the appropriate tokenizer for our chosen pre-trained model ("google/byt5-small").
 #   The tokenizer is responsible for converting input text into tokens (numerical representations) that the model can process.
 # - AutoModel: Automatically loads the pre-trained model, which in our case is used to generate vector embeddings from text.
-#   These embeddings capture the semantic meaning of the text and will be used for vector search.
+# These embeddings capture the semantic meaning of the text and will be
+# used for vector search.
 
 # - DataAPIClient: Provides a convenient interface to connect to AstraDB, allowing us to manage databases and collections,
 #   as well as perform vector search operations.
 
 # - VectorMetric: Contains constants (such as COSINE) that define the metric used for comparing vectors in the database.
-#   In our case, we use the cosine similarity metric to measure the similarity between vector embeddings.
+# In our case, we use the cosine similarity metric to measure the
+# similarity between vector embeddings.
 
 # - torch: A popular deep learning framework that the Transformers library relies on.
-#   It handles tensor operations, which are essential for processing data and running the pre-trained model.
+# It handles tensor operations, which are essential for processing data
+# and running the pre-trained model.
 
 """# 1. Initialize ByteT5 model and tokenizer
 
@@ -134,7 +154,7 @@ applications, especially in environments with diverse alphabets and languages:
 | ------------------------------------- | ------------------------------------------ |
 | Typo/noisy text matching (e.g. fuzzy) | **ByT5**, **Canine**, or **bge-m3**        |
 | Semantic document search              | **SBERT**, **bge-base**, **e5-base**       |
-| Multilingual Q\&A or retrieval        | **LaBSE**, **XLM-R**, **e5-multilingual**  |
+| Multilingual Q\\&A or retrieval        | **LaBSE**, **XLM-R**, **e5-multilingual**  |
 | Fast inference / edge deployment      | **MiniLM**, **all-MiniLM-L6-v2**           |
 | GenAI / LLM-based hybrid apps         | **bge**, **e5**, integrated with LangChain |
 
@@ -183,8 +203,6 @@ The get_database() method retrieves an object representing your database instanc
 This configuration ensures that your code can interact with the AstraDB instance to create collections, insert data, and perform searches using vector embeddings.
 """
 
-from astrapy import DataAPIClient
-from google.colab import userdata
 
 # 2. Connect to AstraDB with proper configuration using secrets
 
@@ -236,8 +254,6 @@ Name Match: If the collection's name matches COLLECTION_NAME.
 If both conditions are met, it indicates that an existing collection has been set up with an incorrect vector dimension. We then drop that collection using database.drop_collection(COLLECTION_NAME) to avoid issues later during vector search operations.
 """
 
-from astrapy.constants import VectorMetric
-
 
 def create_collection_simple(database, collection_name, vector_dimension=1472):
     """
@@ -267,9 +283,6 @@ def create_collection_simple(database, collection_name, vector_dimension=1472):
 
 # Usage
 collection = create_collection_simple(database, "multilingual_search", 1472)
-
-from astrapy.constants import VectorMetric
-from astrapy.info import CollectionDefinition, CollectionVectorOptions
 
 
 def create_collection_simple(database, collection_name, vector_dimension=1472):
@@ -338,9 +351,11 @@ By generating and storing the vector embedding for each document, we validate th
 The custom _id ensures that each document is uniquely identifiable within the collection, which is important for data management and retrieval operations in AstraDB.
 """
 
-# 4. Insert (or upsert) sample data with vector validation using update_one without modifying _id
+# 4. Insert (or upsert) sample data with vector validation using
+# update_one without modifying _id
 
-# Define a list of documents, each containing a name, descriptive text, and country.
+# Define a list of documents, each containing a name, descriptive text,
+# and country.
 documents = [
     {"name": "Jóhann Müller", "text": "Software developer from Berlin", "country": "Germany"},
     {"name": "Jean Dupont", "text": "Développeur de logiciels à Paris", "country": "France"},
@@ -413,7 +428,8 @@ Overall, this function encapsulates the vector search process in a robust and fa
 """
 
 
-# 5. Define a safe search function for vector search with cosine similarity conversion
+# 5. Define a safe search function for vector search with cosine
+# similarity conversion
 def safe_search(query, country_filter=None):
     """
     Performs a vector search on the collection using the encoded query.
@@ -441,7 +457,8 @@ def safe_search(query, country_filter=None):
         return list(results)
 
     except Exception as e:
-        # If any error occurs during the search, print an error message and return an empty list.
+        # If any error occurs during the search, print an error message and
+        # return an empty list.
         print(f"Search error: {str(e)}")
         return []
 
@@ -489,8 +506,10 @@ hard_test_queries = [
     "S0ftware d3vElopeR from BerLyn",  # Multiple typos, numbers, inconsistent casing
     "Entwickler aus Berlin",  # German query (for developer from Berlin)
     "Software engineer and coder in Berlin",  # Extended phrasing with synonyms
-    "Jóhann, code wizard from Berlin",  # Query including a name hint and creative language
-    "I need a software expert in the capital of Germany",  # Semantic query with extended description
+    # Query including a name hint and creative language
+    "Jóhann, code wizard from Berlin",
+    "I need a software expert in the capital of Germany",
+    # Semantic query with extended description
     "Dev who works in Berln",  # Shortened form with a typo
 ]
 
@@ -513,7 +532,8 @@ for query in hard_test_queries:
         print("  No results found.")
 
 # 7. Even Harder Complex Fuzzy Logic Test Cases:
-# These queries include multiple typos, extra adjectives, and compound conditions
+# These queries include multiple typos, extra adjectives, and compound
+# conditions
 complex_fuzzy_queries = [
     "I'm on the hunt for a brilliant sofware whiz who codes like a pro in the bustling heart of BerLyn!",
     "Searching for an innovative code ninja in Germany's capital, renowned for its tech scene and digital flair.",
@@ -528,7 +548,8 @@ for query in complex_fuzzy_queries:
     results = safe_search(query, country_filter="Germany")
     if results:
         for doc in results:
-            # The vector search returns cosine distance (0.0 = best match); convert to cosine similarity:
+            # The vector search returns cosine distance (0.0 = best match);
+            # convert to cosine similarity:
             distance = doc.get("$similarity", 0)
             similarity = 1 - distance
             print(f"  - {doc['name']} | {doc['text']} (Cosine Similarity: {similarity:.2f})")
@@ -569,27 +590,36 @@ This comprehensive set of test cases allows you to evaluate how well the vector 
 # 8. Pioneer Project Fuzzy Search Test Cases
 # These test cases are built to mimic the complex, fuzzy queries from the Pioneer project,
 # covering a wide range of use cases including heavy typos, extended descriptions, and multilingual queries.
-# We also include a phonetic example to simulate queries written as they sound rather than their standard spelling.
+# We also include a phonetic example to simulate queries written as they
+# sound rather than their standard spelling.
 
 pioneer_test_queries = [
     # Original English fuzzy search examples:
-    "Looking for a softare devloper from Berlin",  # Heavy typos as seen in fuzzy search demos
+    "Looking for a softare devloper from Berlin",
+    # Heavy typos as seen in fuzzy search demos
     "Senior software enginner in Berlin",  # Slightly altered phrasing and typo
-    "Software developer in Berlin with 5 years experience",  # Extended query with specific criteria
+    "Software developer in Berlin with 5 years experience",
+    # Extended query with specific criteria
     "Need a coding wizard in Berlin",  # Creative phrasing hinting at expertise
     "Searching for a proficient developer in Berlin",  # Alternative phrasing
     # Additional language examples:
     # Mandarin (Simplified Chinese): Standard and fuzzy versions
     "在柏林找一位软件开发人员",  # Standard phrasing: "Looking for a software developer in Berlin"
-    "在柏林找一位软体开法人员",  # Fuzzy version with typos (using similar-looking characters)
-    # Hindi: Standard and fuzzy versions for "Need a software developer in Berlin"
+    # Fuzzy version with typos (using similar-looking characters)
+    "在柏林找一位软体开法人员",
+    # Hindi: Standard and fuzzy versions for "Need a software developer in
+    # Berlin"
     "बर्लिन में एक सॉफ्टवेयर डेवलपर चाहिए",  # Standard phrasing in Hindi
-    "बर्लिन में एक सॉफ्टवेयर डेवेलपर चाहिए",  # Fuzzy version with a common misspelling
-    # Arabic: Standard and fuzzy versions for "Searching for a software developer in Berlin"
+    # Fuzzy version with a common misspelling
+    "बर्लिन में एक सॉफ्टवेयर डेवेलपर चाहिए",
+    # Arabic: Standard and fuzzy versions for "Searching for a software
+    # developer in Berlin"
     "أبحث عن مطور برمجيات في برلين",  # Standard phrasing in Arabic
-    "أبحث عن مطور برمجيات في برلين",  # Fuzzy version with a misspelling (letter transposition)
+    # Fuzzy version with a misspelling (letter transposition)
+    "أبحث عن مطور برمجيات في برلين",
     # Phonetic example:
-    "Sohftwair devalupur in Ber-lin",  # Query written phonetically to simulate non-standard spelling
+    # Query written phonetically to simulate non-standard spelling
+    "Sohftwair devalupur in Ber-lin",
 ]
 
 print("=== AstraDB Vector Search - Pioneer Project Fuzzy Test Cases ===")
@@ -708,14 +738,12 @@ for coll in existing_dse:
         database.drop_collection(COLLECTION_DSE)
         break
 
-import astrapy
 
 print(astrapy.__version__)
 
 # Check what parameters the method accepts
 help(database.create_collection)
 
-from astrapy.info import CollectionDefinition
 
 # Create collection definition
 collection_definition = (
@@ -733,7 +761,8 @@ collection_dse = database.create_collection(
 print("Collection created successfully!")
 
 # Insert sample data relevant to typical DSE 6.8 use cases.
-# These documents include extra fields such as job_title, description, experience, and location.
+# These documents include extra fields such as job_title, description,
+# experience, and location.
 dse_documents = [
     {
         "name": "Alice Smith",
@@ -758,7 +787,8 @@ dse_documents = [
     },
 ]
 
-# For each document, we generate a vector embedding from a combination of its fields (name, job_title, description).
+# For each document, we generate a vector embedding from a combination of
+# its fields (name, job_title, description).
 for doc in dse_documents:
     combined_text = f"{doc['name']} {doc['job_title']} {doc['description']}"
     embedding = encode(combined_text)
@@ -771,7 +801,8 @@ for doc in dse_documents:
     )
 
 
-# Define a safe search function for the DSE collection (similar to our earlier safe_search).
+# Define a safe search function for the DSE collection (similar to our
+# earlier safe_search).
 def safe_search_dse(query, filter_dict=None):
     """
     Performs a vector search on the DSE collection using the encoded query.
@@ -795,7 +826,8 @@ def safe_search_dse(query, filter_dict=None):
 #   1. Exact Phrase Search – for precise matching of phrases in a given location.
 #   2. Boolean Search Simulation – for queries with multiple keywords.
 #   3. Range Query Simulation – combining vector search with numeric filtering (e.g., experience range).
-#   4. Fuzzy Search with Synonyms – leveraging vector search to handle synonymy and alternative expressions.
+# 4. Fuzzy Search with Synonyms – leveraging vector search to handle
+# synonymy and alternative expressions.
 
 print("=== DSE 6.8 Search Patterns Test Cases ===")
 
@@ -806,14 +838,16 @@ print("=== DSE 6.8 Search Patterns Test Cases ===")
 # Query: "Senior Software Developer in Berlin"
 # The query is restricted to documents with location "Berlin".
 # The safe_search_dse function encodes the query into a vector, applies the location filter,
-# and returns results sorted by cosine distance (which is converted to cosine similarity).
+# and returns results sorted by cosine distance (which is converted to
+# cosine similarity).
 query1 = "Senior Software Developer in Berlin"
 print(f"\nQuery: '{query1}'")
 results = safe_search_dse(query1, filter_dict={"location": "Berlin"})
 for doc in results:
     # Retrieve the raw cosine distance stored in the field '$similarity'.
     distance = doc.get("$similarity", 0)
-    # Convert cosine distance to cosine similarity (1.00 means a perfect match).
+    # Convert cosine distance to cosine similarity (1.00 means a perfect
+    # match).
     similarity = 1 - distance
     print(f"  - {doc['name']} | {doc['job_title']} (Cosine Similarity: {similarity:.2f})")
 
@@ -840,7 +874,8 @@ for doc in results:
 # This query demonstrates how to combine vector search with numeric range filtering.
 # Query: "Software Developer with experience"
 # In addition to the vector search, an extra filter is applied to return only candidates
-# whose 'experience' is between 5 and 8 years. This is useful when you want to filter by a numeric attribute.
+# whose 'experience' is between 5 and 8 years. This is useful when you
+# want to filter by a numeric attribute.
 query3 = "Software Developer with experience"
 print(f"\nQuery: '{query3}' with experience between 5 and 8 years")
 results = collection_dse.find(
@@ -851,7 +886,8 @@ results = collection_dse.find(
             "$lte": 8,
         },  # Numeric range filter: experience between 5 and 8 years.
     },
-    sort={"$vector": encode(query3)},  # Sort based on vector similarity using the encoded query.
+    # Sort based on vector similarity using the encoded query.
+    sort={"$vector": encode(query3)},
     limit=3,
 )
 results = list(results)
@@ -886,7 +922,9 @@ for doc in results:
 # 6. Compound and Contextual Queries: Combining multiple conditions such as exact phrases, range filters, and field-specific criteria.
 # 7. Synonym Handling Beyond Vector Semantics: Explicitly filtering on synonyms using an $in operator in addition to vector search.
 #
-# These examples are used to simulate various search scenarios that were part of the DSE 6.8 Search requirements for the Pioneer project at Chanel.
+# These examples are used to simulate various search scenarios that were
+# part of the DSE 6.8 Search requirements for the Pioneer project at
+# Chanel.
 
 # ------------------------------------------------------------------------------
 # 5. Field-Specific Queries:
@@ -907,7 +945,8 @@ results_field_specific = safe_search_dse(
 
 # Process each result:
 # Retrieve the raw cosine distance (stored as '$similarity') and convert it to cosine similarity using (1 - distance).
-# Then, print the candidate's name and job title along with the computed similarity.
+# Then, print the candidate's name and job title along with the computed
+# similarity.
 for doc in results_field_specific:
     distance = doc.get("$similarity", 0)
     similarity = 1 - distance
@@ -929,7 +968,8 @@ for doc in results_field_specific:
 #   - 'experience' is in the numeric range 5 to 10 years.
 #   - 'job_title' exactly matches "Senior Software Developer"
 #
-# The combination ensures that only documents matching all these criteria are returned.
+# The combination ensures that only documents matching all these criteria
+# are returned.
 compound_query = "Senior Software Developer"
 print("\nCompound and Contextual Query Example:")
 
@@ -939,7 +979,8 @@ results_compound = collection_dse.find(
         "experience": {"$gte": 5, "$lte": 10},
         "job_title": "Senior Software Developer",
     },
-    sort={"$vector": encode(compound_query)},  # Sort by vector similarity to the query.
+    # Sort by vector similarity to the query.
+    sort={"$vector": encode(compound_query)},
     limit=3,
 )
 results_compound = list(results_compound)
@@ -963,7 +1004,8 @@ for doc in results_compound:
 #
 # In this example, we define a list of accepted synonyms for the job title.
 # The query applies a filter using the $in operator to restrict results to documents where
-# the 'job_title' is one of the provided synonyms, ensuring explicit handling of synonyms.
+# the 'job_title' is one of the provided synonyms, ensuring explicit
+# handling of synonyms.
 synonym_query = "Software Developer"
 # Define accepted synonyms.
 synonyms = ["Software Developer", "Programmer", "Developer", "Software Engineer"]
@@ -976,7 +1018,8 @@ results_synonyms = collection_dse.find(
             "$in": synonyms
         },  # Only return documents with a job_title that is in the synonyms list.
     },
-    sort={"$vector": encode(synonym_query)},  # Further refine ranking using vector similarity.
+    # Further refine ranking using vector similarity.
+    sort={"$vector": encode(synonym_query)},
     limit=3,
 )
 results_synonyms = list(results_synonyms)
@@ -991,9 +1034,8 @@ for doc in results_synonyms:
 # In these examples, we simulate advanced query patterns where users may use wildcards
 # ('*' and '%') similar to SQL's LIKE operator. Since the Data API doesn't support full
 # SQL-like regex filtering, we build regex patterns from the user's query and perform
-# client-side filtering on the results. The following functions and examples illustrate this.
-
-import re
+# client-side filtering on the results. The following functions and
+# examples illustrate this.
 
 
 # -------------------------------------------------------------------------------
@@ -1023,7 +1065,8 @@ def build_regex_pattern(query_pattern):
 # -------------------------------------------------------------------------------
 # Purpose:
 #   This function filters a list of documents (results) by applying a compiled regex pattern
-#   to a specific field's value. It returns only those documents where the regex finds a match.
+# to a specific field's value. It returns only those documents where the
+# regex finds a match.
 def filter_results_with_regex(results, field, regex_pattern):
     compiled = re.compile(regex_pattern, re.IGNORECASE)
     return [doc for doc in results if compiled.search(doc.get(field, ""))]
@@ -1050,7 +1093,8 @@ results1 = collection_dse.find(
     limit=10,
 )
 results1 = list(results1)
-# Apply client-side regex filtering on the "job_title" field using the generated regex.
+# Apply client-side regex filtering on the "job_title" field using the
+# generated regex.
 filtered_results1 = filter_results_with_regex(results1, "job_title", regex_pattern1)
 
 print("\nResults for Query 1 (using * wildcard) after client-side regex filtering:")
@@ -1074,7 +1118,8 @@ wildcard_query2 = "Senior % Developer"
 regex_pattern2 = build_regex_pattern(wildcard_query2)
 print(f"\nQuery with wildcard: '{wildcard_query2}' converted to regex: '{regex_pattern2}'")
 
-# Retrieve candidate documents (again, filtered by location "Berlin") and sorted by vector similarity.
+# Retrieve candidate documents (again, filtered by location "Berlin") and
+# sorted by vector similarity.
 results2 = collection_dse.find(
     filter={"location": "Berlin"},
     sort={"$vector": encode("Senior Software Developer in Berlin")},
@@ -1120,8 +1165,6 @@ for doc in filtered_results3[:3]:
 
 print("=== Advanced Query Examples Using Explicit LIKE Operator ===")
 
-import re
-
 
 # -------------------------------------------------------------------------------
 # Function: build_regex_pattern
@@ -1156,9 +1199,11 @@ def build_regex_pattern(query_pattern):
 #       - The field name ("job_title")
 #       - The like pattern ("%Developer%")
 #   Then it converts the like pattern to a regex using the build_regex_pattern function.
-#   It returns a tuple (field, regex_pattern) if a match is found, otherwise (None, None).
+# It returns a tuple (field, regex_pattern) if a match is found, otherwise
+# (None, None).
 def parse_explicit_like(query):
-    # Define a pattern to capture a field, the LIKE keyword, and a pattern in single quotes.
+    # Define a pattern to capture a field, the LIKE keyword, and a pattern in
+    # single quotes.
     pattern = r"(\w+)\s+LIKE\s+'(.+)'"
     match = re.search(pattern, query, re.IGNORECASE)
     if match:
@@ -1193,7 +1238,8 @@ print(f"Parsed Field: '{field}', Regex Pattern: '{regex_pattern}'")
 #   allow client-side regex filtering.
 results_like = collection_dse.find(
     filter={"location": "Berlin"},  # Basic filter on location.
-    sort={"$vector": encode("Software Developer")},  # Sort by vector similarity.
+    sort={"$vector": encode("Software Developer")},
+    # Sort by vector similarity.
     limit=10,  # Retrieve a larger set of documents for filtering.
 )
 results_like = list(results_like)
@@ -1203,7 +1249,8 @@ results_like = list(results_like)
 # -------------------------------------------------------------------------------
 # Purpose:
 #   Use the regex pattern obtained from parsing the explicit LIKE query to filter the candidate
-#   documents. The filtering is applied on the field extracted from the explicit LIKE query (e.g., "job_title").
+# documents. The filtering is applied on the field extracted from the
+# explicit LIKE query (e.g., "job_title").
 if field and regex_pattern:
     filtered_results_like = [
         doc for doc in results_like if re.search(regex_pattern, doc.get(field, ""), re.IGNORECASE)
@@ -1253,7 +1300,8 @@ By installing these packages, we set up the necessary environment to prototype v
 # The '--quiet' flag is added to reduce the verbosity of the output during installation,
 # so that only minimal information is shown in the notebook output.
 # !pip install cassandra-driver transformers torch --quiet
-# Note: Install dependencies manually: pip install cassandra-driver transformers torch
+# Note: Install dependencies manually: pip install cassandra-driver
+# transformers torch
 
 """**Cassandra Driver Imports:**
 
@@ -1279,25 +1327,21 @@ Each of these imports contributes to building a robust prototype for vector sear
 """
 
 # Importing classes and functions from the Cassandra driver
-# These are needed to establish connections, configure queries, and set up the execution environment for Cassandra clusters.
+# These are needed to establish connections, configure queries, and set up
+# the execution environment for Cassandra clusters.
 
 # 'random' is a module that generates pseudo-random numbers. Useful for tasks like sampling or testing with random inputs.
-import random
 
 # 're' is Python’s built-in library for regular expressions, which enables advanced string searching and manipulation.
-import re
 
 # 'time' provides various time-related functions, such as measuring time intervals or pausing execution.
-import time
 
 # 'uuid' provides a way to generate universally unique identifiers (UUIDs), which can be used as unique keys or identifiers.
-import uuid
 
-# Importing PyTorch, a deep learning library, used here for tensor operations and model handling.
-import torch
+# Importing PyTorch, a deep learning library, used here for tensor
+# operations and model handling.
 
 # 'PlainTextAuthProvider' handles simple authentication using a username and password.
-from cassandra.auth import PlainTextAuthProvider
 
 # The following line imports additional classes and constants from the Cassandra driver:
 # - ExecutionProfile: Used to define how queries are executed (e.g., timeouts, consistency levels).
@@ -1305,18 +1349,10 @@ from cassandra.auth import PlainTextAuthProvider
 # - ProtocolVersion: Allows specification of the protocol version to communicate with Cassandra.
 # - ConsistencyLevel: Defines the consistency requirements (e.g., ONE, QUORUM, ALL) for read/write operations.
 # 'Cluster' is used to create a connection to one or more nodes in a Cassandra cluster.
-from cassandra.cluster import (
-    EXEC_PROFILE_DEFAULT,
-    Cluster,
-    ConsistencyLevel,
-    ExecutionProfile,
-    ProtocolVersion,
-)
 
 # Importing modules from the Hugging Face Transformers library
 # 'AutoTokenizer' automatically loads a tokenizer that corresponds to a given pre-trained model.
 # 'AutoModel' automatically loads the pre-trained model itself.
-from transformers import AutoModel, AutoTokenizer
 
 """**Secure Connect Bundle & Credentials:**
 
@@ -1350,19 +1386,23 @@ This comprehensive breakdown should help in understanding how the code sets up a
 """
 
 # Define the path to the secure connect bundle for Astra
-# This file contains the necessary configuration and certificates to securely connect to an Astra DB instance.
+# This file contains the necessary configuration and certificates to
+# securely connect to an Astra DB instance.
 ASTRA_SECURE_BUNDLE_PATH = "secure-connect-chanel.zip"
 
 # Set up the client ID and client secret for authentication with Astra.
-# Note: In production code, these credentials should be securely stored and not hardcoded.
+# Note: In production code, these credentials should be securely stored
+# and not hardcoded.
 ASTRA_CLIENT_ID = "hzWZutAlYFhnUkDPZEZaKNSv"
 ASTRA_CLIENT_SECRET = "JaHDAS9wrD0was7cNa9qseJfBPX3Y-r8knKBmk_LEFGYG-YrK.b2mSsqUs.h8-iLd62S-FuH1fwBp1-oqxGdsBnbUfaKBlUc8_-OZDyuFu5EB0FGAUpm0,zZ55h8Sfn8"
 
-# Specify the keyspace (similar to a database schema) that we want to work with.
+# Specify the keyspace (similar to a database schema) that we want to work
+# with.
 KEYSPACE = "default_keyspace"
 
 # Create a dictionary for cloud configuration, including the secure connect bundle.
-# This tells the Cassandra driver where to find the necessary connection settings for Astra.
+# This tells the Cassandra driver where to find the necessary connection
+# settings for Astra.
 cloud_config = {"secure_connect_bundle": ASTRA_SECURE_BUNDLE_PATH}
 
 # Create an authentication provider using the plain text credentials.
@@ -1370,8 +1410,10 @@ cloud_config = {"secure_connect_bundle": ASTRA_SECURE_BUNDLE_PATH}
 auth_provider = PlainTextAuthProvider(username=ASTRA_CLIENT_ID, password=ASTRA_CLIENT_SECRET)
 
 # Create an execution profile to customize query behavior.
-# Here, we set the request timeout to 30 seconds to allow longer queries to complete without error.
-profile = ExecutionProfile(request_timeout=30)  # Increase timeout to 30 seconds
+# Here, we set the request timeout to 30 seconds to allow longer queries
+# to complete without error.
+# Increase timeout to 30 seconds
+profile = ExecutionProfile(request_timeout=30)
 
 # Initialize the Cluster object which represents the Cassandra cluster.
 # Parameters provided include:
@@ -1415,7 +1457,7 @@ def create_index_if_not_exists(session, table_name, column_name, index_name):
     """
     try:
         # Check if index already exists
-        check_index_query = f"""
+        check_index_query = """
         SELECT index_name FROM system_schema.indexes
         WHERE keyspace_name = 'default_keyspace'
         AND table_name = '{table_name}'
@@ -1425,7 +1467,7 @@ def create_index_if_not_exists(session, table_name, column_name, index_name):
 
         if not result:
             # Index doesn't exist, create it
-            create_index_query = f"""
+            create_index_query = """
             CREATE CUSTOM INDEX IF NOT EXISTS {index_name}
             ON default_keyspace.{table_name} ({column_name})
             USING 'StorageAttachedIndex'
@@ -1486,13 +1528,15 @@ print("Skipping embedding index - automatically created by AstraDB")
 
 print("All custom indexes created successfully.")
 
-# Refresh the schema metadata to ensure the driver is aware of the latest tables and keyspace changes.
+# Refresh the schema metadata to ensure the driver is aware of the latest
+# tables and keyspace changes.
 session.cluster.refresh_schema_metadata()
 
 # Print out all the keyspaces available in the connected cluster.
 print("Keyspaces:", list(session.cluster.metadata.keyspaces.keys()))
 
-# Check if the specified keyspace exists in the metadata, then print detailed metadata for that keyspace.
+# Check if the specified keyspace exists in the metadata, then print
+# detailed metadata for that keyspace.
 if KEYSPACE in session.cluster.metadata.keyspaces:
     print(session.cluster.metadata.keyspaces[KEYSPACE])
 else:
@@ -1506,13 +1550,8 @@ print("Tables in keyspace '{}':".format(KEYSPACE))
 for table in keyspace_metadata.tables:
     print(table)
 
-from cassandra import ProtocolVersion
-from cassandra.auth import PlainTextAuthProvider
-from cassandra.cluster import EXEC_PROFILE_DEFAULT, Cluster, ExecutionProfile
-from cassandra.policies import DCAwareRoundRobinPolicy
 
 # Import necessary modules for Google Colab secrets
-from google.colab import userdata
 
 # Retrieve sensitive information from Google Colab secrets
 # Make sure you've added these as secrets in your Colab environment:
@@ -1533,7 +1572,8 @@ except Exception as e:
     raise
 
 # Create a dictionary for cloud configuration, including the secure connect bundle.
-# This tells the Cassandra driver where to find the necessary connection settings for Astra.
+# This tells the Cassandra driver where to find the necessary connection
+# settings for Astra.
 cloud_config = {"secure_connect_bundle": ASTRA_SECURE_BUNDLE_PATH}
 
 # Create an authentication provider using the application token.
@@ -1541,8 +1581,10 @@ cloud_config = {"secure_connect_bundle": ASTRA_SECURE_BUNDLE_PATH}
 auth_provider = PlainTextAuthProvider(username="token", password=ASTRA_DB_APPLICATION_TOKEN)
 
 # Create an execution profile to customize query behavior.
-# Here, we set the request timeout to 30 seconds to allow longer queries to complete without error.
-profile = ExecutionProfile(request_timeout=30)  # Increase timeout to 30 seconds
+# Here, we set the request timeout to 30 seconds to allow longer queries
+# to complete without error.
+# Increase timeout to 30 seconds
+profile = ExecutionProfile(request_timeout=30)
 
 # Initialize the Cluster object which represents the Cassandra cluster.
 # Parameters provided include:
@@ -1565,7 +1607,7 @@ print("✓ Successfully connected to Astra DB")
 # ----------------------------------------------------------------------
 # Create Table: multilingual_table
 # ----------------------------------------------------------------------
-create_table_cql = f"""
+create_table_cql = """
 CREATE TABLE IF NOT EXISTS {KEYSPACE}.multilingual_table (
     "_id" text PRIMARY KEY,
     country text,
@@ -1588,7 +1630,7 @@ def create_index_if_not_exists(session, keyspace, table_name, column_name, index
     """
     try:
         # Check if index already exists
-        check_index_query = f"""
+        check_index_query = """
         SELECT index_name FROM system_schema.indexes
         WHERE keyspace_name = '{keyspace}'
         AND table_name = '{table_name}'
@@ -1598,7 +1640,7 @@ def create_index_if_not_exists(session, keyspace, table_name, column_name, index
 
         if not result:
             # Index doesn't exist, create it
-            create_index_query = f"""
+            create_index_query = """
             CREATE CUSTOM INDEX IF NOT EXISTS {index_name}
             ON {keyspace}.{table_name} ({column_name})
             USING 'StorageAttachedIndex'
@@ -1628,7 +1670,7 @@ print("All custom indexes for 'multilingual_table' created successfully.")
 # ----------------------------------------------------------------------
 # Create Table: enriched_multilingual_table
 # ----------------------------------------------------------------------
-create_table_cql = f"""
+create_table_cql = """
 CREATE TABLE IF NOT EXISTS {KEYSPACE}.enriched_multilingual_table (
     "_id" text PRIMARY KEY,
     description text,
@@ -1669,13 +1711,15 @@ print("Skipping embedding index - automatically created by AstraDB")
 
 print("All custom indexes created successfully.")
 
-# Refresh the schema metadata to ensure the driver is aware of the latest tables and keyspace changes.
+# Refresh the schema metadata to ensure the driver is aware of the latest
+# tables and keyspace changes.
 session.cluster.refresh_schema_metadata()
 
 # Print out all the keyspaces available in the connected cluster.
 print("Keyspaces:", list(session.cluster.metadata.keyspaces.keys()))
 
-# Check if the specified keyspace exists in the metadata, then print detailed metadata for that keyspace.
+# Check if the specified keyspace exists in the metadata, then print
+# detailed metadata for that keyspace.
 if KEYSPACE in session.cluster.metadata.keyspaces:
     print(session.cluster.metadata.keyspaces[KEYSPACE])
 else:
@@ -1720,7 +1764,8 @@ This code snippet provides a foundation for generating vector representations of
 
 # Load the tokenizer and model from Hugging Face's model hub.
 # "google/byt5-small" is a pre-trained model, which in this case uses a byte-level variant of the T5 architecture.
-# The AutoTokenizer and AutoModel classes automatically download and configure the model/tokenizer based on the provided name.
+# The AutoTokenizer and AutoModel classes automatically download and
+# configure the model/tokenizer based on the provided name.
 tokenizer = AutoTokenizer.from_pretrained("google/byt5-small")
 model = AutoModel.from_pretrained("google/byt5-small")
 
@@ -1749,11 +1794,13 @@ def encode(text):
         encoder_outputs = model.encoder(**inputs)
 
     # Perform mean-pooling over the sequence dimension.
-    # This averages the hidden states across all tokens to produce a single fixed-size vector.
+    # This averages the hidden states across all tokens to produce a single
+    # fixed-size vector.
     embeddings = encoder_outputs.last_hidden_state.mean(dim=1)
 
     # Return the embedding as a list of floats.
-    # The output embedding is of dimension 1472 for this model, representing the encoded text.
+    # The output embedding is of dimension 1472 for this model, representing
+    # the encoded text.
     return embeddings[0].tolist()
 
 
@@ -1777,21 +1824,26 @@ By clearly structuring the sample documents, this section lays the groundwork fo
 """
 
 # Define a list of sample documents that will be ingested into the database.
-# Each document is represented as a dictionary containing fields such as 'name', 'description', and 'country'.
+# Each document is represented as a dictionary containing fields such as
+# 'name', 'description', and 'country'.
 documents = [
     {
         "name": "Jóhann Müller",  # The name of the individual.
-        "description": "Software developer from Berlin",  # A brief description of the individual, including profession and location.
+        # A brief description of the individual, including profession and
+        # location.
+        "description": "Software developer from Berlin",
         "country": "Germany",  # The country associated with the individual.
     },
     {
         "name": "Jean Dupont",  # Name of the individual.
-        "description": "Développeur de logiciels à Paris",  # Description in French, indicating a software developer in Paris.
+        # Description in French, indicating a software developer in Paris.
+        "description": "Développeur de logiciels à Paris",
         "country": "France",  # Country associated with the individual.
     },
     {
         "name": "Giovanni Rossi",  # Name of the individual.
-        "description": "Sviluppatore software di Milano",  # Description in Italian, indicating a software developer in Milan.
+        # Description in Italian, indicating a software developer in Milan.
+        "description": "Sviluppatore software di Milano",
         "country": "Italy",  # Country associated with the individual.
     },
 ]
@@ -1816,14 +1868,16 @@ This snippet sets up the foundation for data ingestion into the multilingual_tab
 
 # Prepare the CQL (Cassandra Query Language) insert statement.
 # This statement is used to insert data into the 'multilingual_table'.
-# The order of the columns in the INSERT statement must match the order of the values provided later.
+# The order of the columns in the INSERT statement must match the order of
+# the values provided later.
 insert_cql = """
 INSERT INTO multilingual_table ("_id", country, description, embedding, name)
 VALUES (?, ?, ?, ?, ?)
 """
 
 # Prepare the CQL statement using the session object.
-# The prepare() method compiles the CQL statement, allowing for efficient reuse with bound parameters.
+# The prepare() method compiles the CQL statement, allowing for efficient
+# reuse with bound parameters.
 prepared = session.prepare(insert_cql)
 
 """#Document Ingestion and Embedding Insertion
@@ -1871,10 +1925,12 @@ for doc in documents:
     emb = encode(text_for_encoding)
 
     # Execute the prepared CQL insert statement using the session.
-    # Bind the generated UUID, country, description, computed embedding, and name to the query.
+    # Bind the generated UUID, country, description, computed embedding, and
+    # name to the query.
     session.execute(prepared, (uid, doc["country"], doc["description"], emb, doc["name"]))
 
-    # Print a confirmation message indicating successful insertion of the document.
+    # Print a confirmation message indicating successful insertion of the
+    # document.
     print(f"Inserted document {uid} for {doc['name']}")
 
 """#Querying and Displaying the Top 10 Rows from the Table
@@ -1899,7 +1955,8 @@ This snippet demonstrates how to query a Cassandra table and display a sample of
 query = "SELECT * FROM default_keyspace.multilingual_table LIMIT 10"
 
 # Execute the CQL query using the active session.
-# The session.execute() method sends the query to the Cassandra cluster and retrieves the result set.
+# The session.execute() method sends the query to the Cassandra cluster
+# and retrieves the result set.
 rows = session.execute(query)
 
 # Iterate over each row in the result set.
@@ -1951,7 +2008,8 @@ def vector_search(query_text, top_k=3):
     - top_k (int): The number of top similar documents to return (default is 3).
     """
     # Generate an embedding vector from the query text.
-    # The 'encode()' function converts the input text into a high-dimensional vector.
+    # The 'encode()' function converts the input text into a high-dimensional
+    # vector.
     query_vector = encode(query_text)
 
     # Define a CQL query to retrieve documents along with their cosine similarity to the query vector.
@@ -1971,7 +2029,8 @@ def vector_search(query_text, top_k=3):
     prepared = session.prepare(cql_query)
 
     # Set the consistency level to LOCAL_ONE.
-    # This is required for Top-K/ANN queries to ensure the query is served by at least one local replica.
+    # This is required for Top-K/ANN queries to ensure the query is served by
+    # at least one local replica.
     prepared.consistency_level = ConsistencyLevel.LOCAL_ONE
 
     # Bind the query vector twice:
@@ -1980,7 +2039,8 @@ def vector_search(query_text, top_k=3):
     # Also, bind the top_k value to limit the result set.
     results = session.execute(prepared, (query_vector, query_vector, top_k))
 
-    # Iterate over the returned rows and print out each document's details along with its similarity score.
+    # Iterate over the returned rows and print out each document's details
+    # along with its similarity score.
     for row in results:
         print(
             f"Name: {row.name}, Description: {row.description}, Country: {row.country}, Similarity: {row.sim:.6f}"
@@ -2049,7 +2109,8 @@ def search_by_vector(query_text, filter_country=None, limit=3):
         # Define the CQL query with a country filter.
         # The query selects document fields and computes cosine similarity (as 'sim')
         # between each document's embedding and the query vector.
-        # It filters documents by 'country' and orders results using ANN (Approximate Nearest Neighbor) on the embedding.
+        # It filters documents by 'country' and orders results using ANN
+        # (Approximate Nearest Neighbor) on the embedding.
         cql = """
         SELECT
           "_id",
@@ -2064,13 +2125,16 @@ def search_by_vector(query_text, filter_country=None, limit=3):
         """
         # Prepare the CQL statement for efficient execution.
         prepared = session.prepare(cql)
-        # Set the consistency level to LOCAL_ONE, which is necessary for Top-K/ANN queries.
+        # Set the consistency level to LOCAL_ONE, which is necessary for
+        # Top-K/ANN queries.
         prepared.consistency_level = ConsistencyLevel.LOCAL_ONE
-        # Execute the query by binding the query embedding, country filter, query embedding again for ANN ordering, and limit.
+        # Execute the query by binding the query embedding, country filter,
+        # query embedding again for ANN ordering, and limit.
         rows = session.execute(prepared, (query_emb, filter_country, query_emb, limit))
     else:
         # Define the CQL query without a country filter.
-        # The query computes cosine similarity and orders results using ANN on the embedding.
+        # The query computes cosine similarity and orders results using ANN on
+        # the embedding.
         cql = """
         SELECT
           "_id",
@@ -2086,7 +2150,8 @@ def search_by_vector(query_text, filter_country=None, limit=3):
         prepared = session.prepare(cql)
         # Set the consistency level for the query.
         prepared.consistency_level = ConsistencyLevel.LOCAL_ONE
-        # Execute the query by binding the query embedding twice (for similarity and ANN ordering) and the limit.
+        # Execute the query by binding the query embedding twice (for
+        # similarity and ANN ordering) and the limit.
         rows = session.execute(prepared, (query_emb, query_emb, limit))
 
     # Return all the resulting rows as a list.
@@ -2117,9 +2182,11 @@ This example usage demonstrates how to integrate the vector search function into
 """
 
 # Define a list of sample query strings.
-# These queries are variations meant to simulate typical user input for testing.
+# These queries are variations meant to simulate typical user input for
+# testing.
 test_queries = [
-    "Sofware devloper from Berln",  # Intentional typos to test fuzzy matching and vector robustness.
+    # Intentional typos to test fuzzy matching and vector robustness.
+    "Sofware devloper from Berln",
     "Software developer in Berlin",  # Correctly spelled query.
 ]
 
@@ -2129,16 +2196,19 @@ for q in test_queries:
     print(f"\nQuery: {q}")
 
     # Execute the vector search function with the current query and a country filter.
-    # The filter_country="Germany" parameter restricts the search to documents from Germany.
+    # The filter_country="Germany" parameter restricts the search to documents
+    # from Germany.
     results = search_by_vector(q, filter_country="Germany")
 
     # Loop through the returned results from the search.
     for row in results:
         # Extract the similarity score from the row.
-        # The 'sim' field contains the cosine similarity value between the document's embedding and the query vector.
+        # The 'sim' field contains the cosine similarity value between the
+        # document's embedding and the query vector.
         similarity = row.sim
 
-        # Print the details of each result including the name, description, and similarity score formatted to 3 decimal places.
+        # Print the details of each result including the name, description, and
+        # similarity score formatted to 3 decimal places.
         print(f"  => {row.name}, desc='{row.description}', similarity={similarity:.3f}")
 
 """# Advanced Vector Search with Dynamic Filtering and ANN Ordering
@@ -2192,10 +2262,12 @@ def search_by_vector_complex(query_text, filters=None, limit=5):
     :return: A list of rows.
     """
     # Encode the input query text into its vector representation.
-    # This vector (query_emb) is used for computing cosine similarity with document embeddings.
+    # This vector (query_emb) is used for computing cosine similarity with
+    # document embeddings.
     query_emb = encode(query_text)
 
-    # Define the base part of the CQL query which selects document fields and computes the cosine similarity.
+    # Define the base part of the CQL query which selects document fields and
+    # computes the cosine similarity.
     base_query = """
     SELECT "_id", name, description, country, embedding,
            similarity_cosine(embedding, ?) AS sim
@@ -2218,17 +2290,21 @@ def search_by_vector_complex(query_text, filters=None, limit=5):
         where_clause = "WHERE " + " AND ".join(conditions)
 
     # Define the ANN ordering and LIMIT clause.
-    # The query vector is bound again for the ANN ordering, and limit sets the maximum number of returned rows.
+    # The query vector is bound again for the ANN ordering, and limit sets the
+    # maximum number of returned rows.
     ann_clause = "ORDER BY embedding ANN OF ? LIMIT ?"
-    # Append the second occurrence of query_emb and the limit to the parameters list.
+    # Append the second occurrence of query_emb and the limit to the
+    # parameters list.
     params.extend([query_emb, limit])
 
-    # Combine the base query, the optional WHERE clause, and the ANN ordering clause into a complete CQL query.
+    # Combine the base query, the optional WHERE clause, and the ANN ordering
+    # clause into a complete CQL query.
     cql_query = f"{base_query} {where_clause} {ann_clause}"
 
     # Prepare the CQL statement for efficient execution.
     prepared = session.prepare(cql_query)
-    # Set the consistency level to LOCAL_ONE, which is necessary for Top-K/ANN queries.
+    # Set the consistency level to LOCAL_ONE, which is necessary for Top-K/ANN
+    # queries.
     prepared.consistency_level = ConsistencyLevel.LOCAL_ONE
 
     # Execute the prepared query by binding all the parameters.
@@ -2285,22 +2361,27 @@ This approach efficiently ingests data into the database while ensuring that eac
 """
 
 # Define the CQL insert statement for adding documents to the multilingual_table.
-# The columns in the INSERT statement are specified in the same order as the values provided.
+# The columns in the INSERT statement are specified in the same order as
+# the values provided.
 insert_cql = """
 INSERT INTO default_keyspace.multilingual_table ("_id", country, description, embedding, name)
 VALUES (?, ?, ?, ?, ?)
 """
 
 # Prepare the CQL statement using the session object.
-# Preparing the statement allows the query to be compiled once and reused efficiently.
+# Preparing the statement allows the query to be compiled once and reused
+# efficiently.
 prepared = session.prepare(insert_cql)
 
 # Set the write consistency level to LOCAL_QUORUM.
-# LOCAL_QUORUM is a consistency level allowed by Astra DB that ensures writes are acknowledged by a majority of replicas in the local datacenter.
+# LOCAL_QUORUM is a consistency level allowed by Astra DB that ensures
+# writes are acknowledged by a majority of replicas in the local
+# datacenter.
 prepared.consistency_level = ConsistencyLevel.LOCAL_QUORUM
 
 # Define a list of sample documents to be ingested into the table.
-# Each document is a dictionary containing 'name', 'description', and 'country'.
+# Each document is a dictionary containing 'name', 'description', and
+# 'country'.
 documents = [
     {
         "name": "Jóhann Müller",
@@ -2328,10 +2409,12 @@ for doc in documents:
     uid = str(uuid.uuid4())
 
     # Concatenate the document's name, description, and country into a single string.
-    # This string is used to compute a vector embedding representing the document.
+    # This string is used to compute a vector embedding representing the
+    # document.
     text_for_encoding = f"{doc['name']} {doc['description']} {doc['country']}"
 
-    # Compute the vector embedding using the previously defined encode() function.
+    # Compute the vector embedding using the previously defined encode()
+    # function.
     emb = encode(text_for_encoding)
 
     # Execute the prepared CQL insert statement with the following bound values:
@@ -2394,7 +2477,8 @@ def search_by_vector(query_text, filter_country=None, limit=3):
     query_emb = encode(query_text)
 
     if filter_country:
-        # If a country filter is provided, build a CQL query that includes a WHERE clause.
+        # If a country filter is provided, build a CQL query that includes a
+        # WHERE clause.
         cql = """
         SELECT
           "_id",
@@ -2409,7 +2493,8 @@ def search_by_vector(query_text, filter_country=None, limit=3):
         """
         # Prepare the CQL statement.
         prepared = session.prepare(cql)
-        # Set the consistency level to LOCAL_ONE (required for Top-K/ANN queries).
+        # Set the consistency level to LOCAL_ONE (required for Top-K/ANN
+        # queries).
         prepared.consistency_level = ConsistencyLevel.LOCAL_ONE
         # Execute the prepared query with bound parameters:
         # 1st: query_emb for cosine similarity computation,
@@ -2418,7 +2503,8 @@ def search_by_vector(query_text, filter_country=None, limit=3):
         # 4th: limit to restrict the number of results.
         rows = session.execute(prepared, (query_emb, filter_country, query_emb, limit))
     else:
-        # If no country filter is specified, build a simpler CQL query without a WHERE clause.
+        # If no country filter is specified, build a simpler CQL query without
+        # a WHERE clause.
         cql = """
         SELECT
           "_id",
@@ -2433,7 +2519,8 @@ def search_by_vector(query_text, filter_country=None, limit=3):
         # Prepare the statement.
         prepared = session.prepare(cql)
         prepared.consistency_level = ConsistencyLevel.LOCAL_ONE
-        # Execute the query with the query vector bound twice (for similarity and ANN ordering) and the limit.
+        # Execute the query with the query vector bound twice (for similarity
+        # and ANN ordering) and the limit.
         rows = session.execute(prepared, (query_emb, query_emb, limit))
 
     # Return all rows from the result set as a list.
@@ -2457,17 +2544,22 @@ def safe_search(query_text, country_filter="Germany", limit=3):
 
 
 # 6. Test Cases: A suite of challenging queries
-# These queries simulate various real-world inputs including typos, mixed languages, synonyms, and extended descriptions.
+# These queries simulate various real-world inputs including typos, mixed
+# languages, synonyms, and extended descriptions.
 hard_test_queries = [
     "Sofware devloper from Berln",  # Typo-intense query.
     "Software developer in Berlin",  # Correct phrasing.
     "developer in Berlyn",  # Minor typo on 'Berlin'.
     "Software engineer in Berlin",  # Synonym change.
-    "S0ftware d3vElopeR from BerLyn",  # Multiple typos, numbers, inconsistent casing.
+    # Multiple typos, numbers, inconsistent casing.
+    "S0ftware d3vElopeR from BerLyn",
     "Entwickler aus Berlin",  # German query.
-    "Software engineer and coder in Berlin",  # Extended phrasing with synonyms.
-    "Jóhann, code wizard from Berlin",  # Query including a name hint and creative language.
-    "I need a software expert in the capital of Germany",  # Extended semantic query.
+    "Software engineer and coder in Berlin",
+    # Extended phrasing with synonyms.
+    # Query including a name hint and creative language.
+    "Jóhann, code wizard from Berlin",
+    "I need a software expert in the capital of Germany",
+    # Extended semantic query.
     "Dev who works in Berln",  # Shortened form with a typo.
 ]
 
@@ -2480,10 +2572,12 @@ for query in hard_test_queries:
     if results:
         for row in results:
             # The query returns a cosine similarity 'sim', where 1.0 is a perfect match.
-            # Here, we compute a 'distance' as 1 - sim for intuitive interpretation.
+            # Here, we compute a 'distance' as 1 - sim for intuitive
+            # interpretation.
             sim = row.sim
             distance = 1 - sim
-            # Print the name, description, and similarity metrics for each matching document.
+            # Print the name, description, and similarity metrics for each
+            # matching document.
             print(
                 f"  - {row.name} | {row.description} (Cosine Similarity: {sim:.2f}, Distance: {distance:.2f})"
             )
@@ -2548,10 +2642,12 @@ for query in complex_fuzzy_queries:
         # is used to assess the closeness of the document to the query.
         for row in results:
             similarity = row.sim
-            # Print out the document details including the name, description, and cosine similarity score.
+            # Print out the document details including the name, description,
+            # and cosine similarity score.
             print(f"  - {row.name} | {row.description} (Cosine Similarity: {similarity:.2f})")
     else:
-        # If no documents match the query, print a message indicating no results were found.
+        # If no documents match the query, print a message indicating no
+        # results were found.
         print("  No results found.")
 
 """# Pioneer Fuzzy Search Demonstration: Inserting Data and Running Fuzzy Test Queries
@@ -2615,7 +2711,8 @@ VALUES (?, ?, ?, ?, ?)
 """
 # Prepare the statement using the session, which compiles the query for reuse.
 prepared_insert = session.prepare(insert_cql)
-# Set the write consistency level to LOCAL_QUORUM, as required by Astra DB for writes.
+# Set the write consistency level to LOCAL_QUORUM, as required by Astra DB
+# for writes.
 prepared_insert.consistency_level = ConsistencyLevel.LOCAL_QUORUM
 
 print("Inserting sample test documents...")
@@ -2624,7 +2721,8 @@ for doc in sample_documents:
     # Generate a unique identifier for the document.
     uid = str(uuid.uuid4())
     # Concatenate the fields (name, description, country) to create a text string.
-    # This text will be encoded into a vector embedding that represents the document.
+    # This text will be encoded into a vector embedding that represents the
+    # document.
     text_for_encoding = f"{doc['name']} {doc['description']} {doc['country']}"
     # Compute the embedding using the encode() function.
     emb = encode(text_for_encoding)
@@ -2643,9 +2741,12 @@ for doc in sample_documents:
 # and inputs in various languages.
 pioneer_test_queries = [
     "Looking for a softare devloper from Berlin",  # Heavy typos.
-    "Senior software enginner in Berlin",  # Slightly altered phrasing and typo.
-    "Software developer in Berlin with 5 years experience",  # Extended query with specific criteria.
-    "Need a coding wizard in Berlin",  # Creative phrasing hinting at expertise.
+    # Slightly altered phrasing and typo.
+    "Senior software enginner in Berlin",
+    "Software developer in Berlin with 5 years experience",
+    # Extended query with specific criteria.
+    # Creative phrasing hinting at expertise.
+    "Need a coding wizard in Berlin",
     "Searching for a proficient developer in Berlin",  # Alternative phrasing.
     "在柏林找一位软件开发人员",  # Standard phrasing in Chinese.
     "在柏林找一位软体开法人员",  # Fuzzy Chinese with typos.
@@ -2664,7 +2765,8 @@ for query in pioneer_test_queries:
     # Here, we filter by "Germany" and limit the results to 3.
     results = safe_search(query, country_filter="Germany", limit=3)
     if results:
-        # For each result, retrieve and print the document details along with the cosine similarity score.
+        # For each result, retrieve and print the document details along with
+        # the cosine similarity score.
         for row in results:
             # The similarity score 'sim' indicates how close the document embedding is to the query embedding,
             # with 1.00 being the best match.
@@ -2764,7 +2866,8 @@ sample_locations = ["Berlin", "Munich", "Hamburg", "Frankfurt"]
 sample_languages = ["English", "Arabic", "Hindi", "Mandarin", "Japanese"]
 
 
-# Define a helper function to generate a random number representing years of experience.
+# Define a helper function to generate a random number representing years
+# of experience.
 def random_experience():
     return random.randint(3, 15)
 
@@ -2814,7 +2917,8 @@ for doc in enriched_documents:
     # Compute the vector embedding using the encode() function.
     emb = encode(text_for_encoding)
     # Execute the prepared insert statement by binding the values:
-    # uid, name, job_title, description, experience, location, salary, language, and the computed embedding.
+    # uid, name, job_title, description, experience, location, salary,
+    # language, and the computed embedding.
     session.execute(
         prepared_insert,
         (
@@ -2886,16 +2990,19 @@ def hybrid_search(query_text, filter_dict=None, limit=5):
     Returns:
       - A list of rows matching the query.
     """
-    # Encode the query text into its vector representation using the encode() function.
+    # Encode the query text into its vector representation using the encode()
+    # function.
     query_emb = encode(query_text)
 
-    # Define the base CQL query to select document fields and compute cosine similarity.
+    # Define the base CQL query to select document fields and compute cosine
+    # similarity.
     base_query = """
     SELECT "_id", name, job_title, description, experience, location, salary, language,
            similarity_cosine(embedding, ?) AS sim
     FROM default_keyspace.enriched_multilingual_table
     """
-    # Start the list of parameters with the query embedding, used in the similarity_cosine() function.
+    # Start the list of parameters with the query embedding, used in the
+    # similarity_cosine() function.
     params = [query_emb]
 
     # Initialize a list to hold conditions for the WHERE clause.
@@ -2940,7 +3047,8 @@ def hybrid_search(query_text, filter_dict=None, limit=5):
     ann_clause = "ORDER BY embedding ANN OF ? LIMIT ?"
     params.extend([query_emb, limit])
 
-    # Combine the base query, optional WHERE clause, and ANN clause into a complete CQL query.
+    # Combine the base query, optional WHERE clause, and ANN clause into a
+    # complete CQL query.
     cql_query = f"{base_query} {where_clause} {ann_clause}"
 
     # Debug statements (optional):
@@ -2949,7 +3057,8 @@ def hybrid_search(query_text, filter_dict=None, limit=5):
 
     # Prepare the query to optimize execution.
     prepared = session.prepare(cql_query)
-    # Set the consistency level to LOCAL_ONE, which is required for Top-K/ANN queries.
+    # Set the consistency level to LOCAL_ONE, which is required for Top-K/ANN
+    # queries.
     prepared.consistency_level = ConsistencyLevel.LOCAL_ONE
     # Execute the prepared query with the collected parameters.
     rows = session.execute(prepared, tuple(params))
@@ -2997,23 +3106,27 @@ def search_by_vector_complex(query_text, filters=None, limit=5):
     Returns:
       list: A list of rows matching the search criteria.
     """
-    # Encode the query text into a vector representation using the encode() function.
+    # Encode the query text into a vector representation using the encode()
+    # function.
     query_emb = encode(query_text)
 
     # Define the base part of the CQL query.
     # This selects document fields from the enriched_multilingual_table and computes the cosine similarity
-    # between each document's embedding and the query vector (query_emb) using the similarity_cosine function.
+    # between each document's embedding and the query vector (query_emb) using
+    # the similarity_cosine function.
     base_query = """
     SELECT "_id", name, description, country, embedding,
            similarity_cosine(embedding, ?) AS sim
     FROM default_keyspace.enriched_multilingual_table
     """
-    # Start the parameter list with the query embedding, which is needed for the similarity_cosine() calculation.
+    # Start the parameter list with the query embedding, which is needed for
+    # the similarity_cosine() calculation.
     params = [query_emb]
 
     # Initialize an empty WHERE clause.
     where_clause = ""
-    # If filters are provided, build the WHERE clause by adding equality conditions.
+    # If filters are provided, build the WHERE clause by adding equality
+    # conditions.
     if filters:
         conditions = []
         # Iterate over each key-value pair in the filters dictionary.
@@ -3026,17 +3139,22 @@ def search_by_vector_complex(query_text, filters=None, limit=5):
         where_clause = "WHERE " + " AND ".join(conditions)
 
     # Define the ANN (Approximate Nearest Neighbor) ordering clause with a LIMIT.
-    # The query_emb is bound again to serve as the reference vector for ANN ordering.
+    # The query_emb is bound again to serve as the reference vector for ANN
+    # ordering.
     ann_clause = "ORDER BY embedding ANN OF ? LIMIT ?"
-    # Append the query embedding (for ANN ordering) and the limit to the parameters list.
+    # Append the query embedding (for ANN ordering) and the limit to the
+    # parameters list.
     params.extend([query_emb, limit])
 
-    # Combine the base query, optional WHERE clause, and ANN ordering clause to form the final CQL query.
+    # Combine the base query, optional WHERE clause, and ANN ordering clause
+    # to form the final CQL query.
     cql_query = f"{base_query} {where_clause} {ann_clause}"
 
-    # Prepare the CQL query for execution, which compiles it for efficient repeated use.
+    # Prepare the CQL query for execution, which compiles it for efficient
+    # repeated use.
     prepared = session.prepare(cql_query)
-    # Set the consistency level to LOCAL_ONE, which is required for efficient Top-K/ANN queries.
+    # Set the consistency level to LOCAL_ONE, which is required for efficient
+    # Top-K/ANN queries.
     prepared.consistency_level = ConsistencyLevel.LOCAL_ONE
 
     # Execute the prepared query by passing in the parameters tuple.
@@ -3051,7 +3169,8 @@ def search_by_vector_complex(query_text, filters=None, limit=5):
 
 """
 
-# Print a header to indicate the beginning of the advanced hybrid search use cases.
+# Print a header to indicate the beginning of the advanced hybrid search
+# use cases.
 print("=== Advanced Hybrid Search Use Cases ===\n")
 
 # Refresh the cluster's schema metadata to ensure the latest schema is used.
@@ -3083,13 +3202,15 @@ def hybrid_search(query_text, filter_dict=None, limit=5):
            similarity_cosine(embedding, ?) AS sim
     FROM default_keyspace.enriched_multilingual_table
     """
-    # Start the parameter list with the query embedding for the similarity calculation.
+    # Start the parameter list with the query embedding for the similarity
+    # calculation.
     params = [query_emb]
 
     # Prepare a list for WHERE clause conditions.
     conditions = []
 
-    # If a filter dictionary is provided, dynamically construct the WHERE clause.
+    # If a filter dictionary is provided, dynamically construct the WHERE
+    # clause.
     if filter_dict:
         for col, val in filter_dict.items():
             # For dictionary values, handle range and IN clause filters.
@@ -3105,7 +3226,8 @@ def hybrid_search(query_text, filter_dict=None, limit=5):
                     params.append(val["$lte"])
                 elif "$in" in val:
                     in_vals = val["$in"]
-                    # Create a comma-separated list of placeholders for the IN clause.
+                    # Create a comma-separated list of placeholders for the IN
+                    # clause.
                     placeholders = ", ".join("?" for _ in in_vals)
                     conditions.append(f"{col} IN ({placeholders})")
                     params.extend(in_vals)
@@ -3124,12 +3246,14 @@ def hybrid_search(query_text, filter_dict=None, limit=5):
     ann_clause = "ORDER BY embedding ANN OF ? LIMIT ?"
     params.extend([query_emb, limit])
 
-    # Combine the base query, WHERE clause, and ANN clause to form the complete CQL query.
+    # Combine the base query, WHERE clause, and ANN clause to form the
+    # complete CQL query.
     cql_query = f"{base_query} {where_clause} {ann_clause}"
 
     # Prepare the query to compile it for efficient execution.
     prepared = session.prepare(cql_query)
-    # Set the consistency level to LOCAL_ONE, which is required for Top-K/ANN queries.
+    # Set the consistency level to LOCAL_ONE, which is required for Top-K/ANN
+    # queries.
     prepared.consistency_level = ConsistencyLevel.LOCAL_ONE
 
     # Execute the prepared query with the collected parameters.
@@ -3233,14 +3357,17 @@ This set of examples illustrates the flexibility of hybrid search by combining s
 
 """
 
-# Print a header to indicate the beginning of the advanced hybrid search use cases.
+# Print a header to indicate the beginning of the advanced hybrid search
+# use cases.
 print("=== Advanced Hybrid Search Use Cases ===\n")
 
-# Refresh the schema metadata to ensure the client has the most recent table definitions.
+# Refresh the schema metadata to ensure the client has the most recent
+# table definitions.
 session.cluster.refresh_schema_metadata()
 
 # For convenience, we alias the hybrid_search function as safe_search_dse.
-# This alias makes it easier to refer to the hybrid search functionality in the examples below.
+# This alias makes it easier to refer to the hybrid search functionality
+# in the examples below.
 safe_search_dse = hybrid_search
 
 # ------------------------------------------------------------------------------
@@ -3251,10 +3378,12 @@ safe_search_dse = hybrid_search
 # ------------------------------------------------------------------------------
 query4 = "Cloud automation expert"
 print(f"\nQuery: '{query4}'")
-# Execute the hybrid search with a filter restricting results to the "Berlin" location.
+# Execute the hybrid search with a filter restricting results to the
+# "Berlin" location.
 results = safe_search_dse(query4, filter_dict={"location": "Berlin"}, limit=5)
 # Iterate over each result row and print out the name, job title, and cosine similarity score.
-# The 'sim' field represents the cosine similarity (with 1.0 being the best match).
+# The 'sim' field represents the cosine similarity (with 1.0 being the
+# best match).
 for row in results:
     print(f"  - {row.name} | {row.job_title} (Cosine Similarity: {row.sim:.2f})")
 
@@ -3265,7 +3394,8 @@ for row in results:
 # ------------------------------------------------------------------------------
 query_field_specific = "Senior Software Developer"
 print("\nField-Specific Query Example (job_title):")
-# Execute the search with filters for both location and an exact match on job_title.
+# Execute the search with filters for both location and an exact match on
+# job_title.
 results = safe_search_dse(
     query_field_specific,
     filter_dict={"location": "Berlin", "job_title": query_field_specific},
@@ -3345,16 +3475,19 @@ def hybrid_search(query_text, filter_dict=None, limit=5):
     query_emb = encode(query_text)
 
     # Define the base CQL query that selects key fields from the enriched_multilingual_table,
-    # and computes cosine similarity between the document embedding and query_emb.
+    # and computes cosine similarity between the document embedding and
+    # query_emb.
     base_query = """
     SELECT "_id", name, job_title, description, experience, location, salary, language,
            similarity_cosine(embedding, ?) AS sim
     FROM default_keyspace.enriched_multilingual_table
     """
-    # Start the parameters list with the query embedding needed for the similarity function.
+    # Start the parameters list with the query embedding needed for the
+    # similarity function.
     params = [query_emb]
 
-    # Prepare a list to hold conditions for the WHERE clause based on provided filters.
+    # Prepare a list to hold conditions for the WHERE clause based on provided
+    # filters.
     conditions = []
     if filter_dict:
         for col, val in filter_dict.items():
@@ -3389,7 +3522,8 @@ def hybrid_search(query_text, filter_dict=None, limit=5):
     ann_clause = "ORDER BY embedding ANN OF ? LIMIT ?"
     params.extend([query_emb, limit])
 
-    # Combine the base query, WHERE clause, and ANN clause into a complete CQL query.
+    # Combine the base query, WHERE clause, and ANN clause into a complete CQL
+    # query.
     cql_query = f"{base_query} {where_clause} {ann_clause}"
     # Debug prints can be enabled if needed:
     # print("CQL Query:", cql_query)
@@ -3569,8 +3703,6 @@ This code snippet demonstrates how to enhance hybrid search with explicit LIKE f
 
 print("=== Advanced Query Examples Using Explicit LIKE Operator ===\n")
 
-import re
-
 
 # -------------------------------------------------------------------------------
 # Function: build_regex_pattern
@@ -3586,7 +3718,8 @@ def build_regex_pattern(query_pattern):
     temp_pattern = query_pattern.replace("*", placeholder).replace("%", placeholder)
     # Escape the pattern to neutralize regex-special characters.
     escaped = re.escape(temp_pattern)
-    # Replace the placeholder with '.*' which in regex means "match any characters".
+    # Replace the placeholder with '.*' which in regex means "match any
+    # characters".
     regex_pattern = escaped.replace(placeholder, ".*")
     print(f"DEBUG: Escaped pattern for '{query_pattern}' is '{escaped}'")
     print(f"DEBUG: Regex pattern after conversion is '{regex_pattern}'")
@@ -3601,7 +3734,8 @@ def build_regex_pattern(query_pattern):
 #   For example, "job_title LIKE '%Developer%'" extracts the field "job_title" and the pattern "%Developer%"
 #   and converts the pattern into a regex pattern.
 def parse_explicit_like(query):
-    # Define a regex pattern to capture a field name, the LIKE keyword, and a pattern enclosed in single quotes.
+    # Define a regex pattern to capture a field name, the LIKE keyword, and a
+    # pattern enclosed in single quotes.
     pattern = r"(\w+)\s+LIKE\s+'(.+)'"
     match = re.search(pattern, query, re.IGNORECASE)
     if match:
@@ -3637,9 +3771,11 @@ results_like = list(results_like)
 # -------------------------------------------------------------------------------
 # Apply Client-Side Regex Filtering Based on the Explicit LIKE Query
 # -------------------------------------------------------------------------------
-# Use the parsed field and regex pattern to filter candidate rows on the client side.
+# Use the parsed field and regex pattern to filter candidate rows on the
+# client side.
 if field and regex_pattern:
-    # For each row, get the attribute corresponding to the parsed field and test it against the regex.
+    # For each row, get the attribute corresponding to the parsed field and
+    # test it against the regex.
     filtered_results_like = [
         row
         for row in results_like

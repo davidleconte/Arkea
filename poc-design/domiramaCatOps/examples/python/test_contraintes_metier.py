@@ -6,13 +6,10 @@ Test Complexe P2-04 : Tests de Contraintes Métier
 - Validation contraintes logiques (ex: cat_auto doit exister dans regles_personnalisees)
 """
 
-import os
 import sys
 from datetime import datetime
-from typing import Dict, List, Tuple
 
 from cassandra.cluster import Cluster
-from cassandra.query import SimpleStatement
 
 KEYSPACE = "domiramacatops_poc"
 
@@ -34,7 +31,7 @@ def test_contrainte_cat_user_accepte(session, code_si: str, contrat: str):
     print("-" * 70)
 
     # Récupérer les opérations avec cat_user
-    query_ops = f"""
+    query_ops = """
     SELECT code_si, contrat, date_op, numero_op, cat_auto, cat_user, cat_validee
     FROM {KEYSPACE}.operations_by_account
     WHERE code_si = '{code_si}' AND contrat = '{contrat}'
@@ -48,7 +45,8 @@ def test_contrainte_cat_user_accepte(session, code_si: str, contrat: str):
         if not rows:
             return True, "Aucune opération à vérifier"
 
-        # Vérifier la contrainte : si cat_validee = true, cat_user ne devrait pas changer
+        # Vérifier la contrainte : si cat_validee = true, cat_user ne devrait
+        # pas changer
         violations = []
         for row in rows:
             if row.cat_validee and row.cat_user and row.cat_auto:
@@ -79,7 +77,7 @@ def test_contrainte_temporelle(session, code_si: str, contrat: str):
     print("\n📋 TEST 2 : Contraintes Temporelles")
     print("-" * 70)
 
-    query_ops = f"""
+    query_ops = """
     SELECT date_op, date_valeur
     FROM {KEYSPACE}.operations_by_account
     WHERE code_si = '{code_si}' AND contrat = '{contrat}'
@@ -126,7 +124,7 @@ def test_contrainte_logique_cat_auto(session):
     print("-" * 70)
 
     # Récupérer les cat_auto uniques
-    query_ops = f"""
+    query_ops = """
     SELECT cat_auto
     FROM {KEYSPACE}.operations_by_account
     LIMIT 100
@@ -142,7 +140,7 @@ def test_contrainte_logique_cat_auto(session):
         # Vérifier chaque cat_auto dans regles_personnalisees
         missing_cats = []
         for cat_auto in cat_autos[:10]:  # Limiter à 10 pour performance
-            query_rules = f"""
+            query_rules = """
             SELECT COUNT(*) as count
             FROM {KEYSPACE}.regles_personnalisees
             WHERE categorie_cible = '{cat_auto}'
@@ -154,7 +152,7 @@ def test_contrainte_logique_cat_auto(session):
                 missing_cats.append(cat_auto)
 
         if not missing_cats:
-            print(f"   ✅ Toutes les catégories trouvées dans regles_personnalisees")
+            print("   ✅ Toutes les catégories trouvées dans regles_personnalisees")
             return True, f"✅ {len(cat_autos)} catégories vérifiées"
         else:
             print(f"   ⚠️  Catégories manquantes (peut être normal) : {missing_cats[:5]}")
@@ -170,7 +168,7 @@ def test_contrainte_integrite_references(session, code_si: str, contrat: str):
     print("-" * 70)
 
     # Vérifier que les opérations référencées existent
-    query_ops = f"""
+    query_ops = """
     SELECT COUNT(*) as count
     FROM {KEYSPACE}.operations_by_account
     WHERE code_si = '{code_si}' AND contrat = '{contrat}'
@@ -182,7 +180,7 @@ def test_contrainte_integrite_references(session, code_si: str, contrat: str):
 
         if ops_count > 0:
             print(f"   ✅ Opérations existantes : {ops_count}")
-            print(f"   ✅ Pas de références orphelines détectées")
+            print("   ✅ Pas de références orphelines détectées")
             return True, f"✅ {ops_count} opérations vérifiées"
         else:
             return True, "Aucune opération à vérifier"

@@ -4,7 +4,6 @@ Module de base pour les tests de recherche vectorielle avec multilingual-e5-larg
 Extension de test_vector_search_base.py pour supporter e5-large.
 """
 
-import json
 import math
 import os
 import random
@@ -63,7 +62,7 @@ def vector_search_e5(
     session, query_embedding: List[float], code_si: str, contrat: str, limit: int = 5
 ) -> List[Any]:
     """Effectue une recherche vectorielle avec ANN en utilisant libelle_embedding_e5."""
-    cql_query = f"""
+    cql_query = """
     SELECT libelle, montant, cat_auto, cat_user, cat_confidence, libelle_embedding_e5
     FROM {KEYSPACE}.operations_by_account
     WHERE code_si = '{code_si}' AND contrat = '{contrat}'

@@ -3,7 +3,6 @@
 Script pour ajouter setup_paths() aux scripts qui ne l'ont pas
 """
 
-import os
 import re
 from pathlib import Path
 
@@ -88,7 +87,8 @@ def update_script(script_path):
     config_start = insert_pos
     config_end = insert_pos
 
-    # Trouver la fin de la section de configuration (jusqu'à la première fonction ou section)
+    # Trouver la fin de la section de configuration (jusqu'à la première
+    # fonction ou section)
     for i in range(insert_pos, min(insert_pos + 30, len(lines))):
         if (
             lines[i].strip()
@@ -157,7 +157,7 @@ def main():
 
     print()
     print(f"✅ {updated} scripts mis à jour")
-    print(f"📦 Sauvegardes créées : *.sh.bak")
+    print("📦 Sauvegardes créées : *.sh.bak")
 
 
 if __name__ == "__main__":

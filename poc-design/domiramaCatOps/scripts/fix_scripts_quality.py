@@ -6,7 +6,6 @@ Script pour corriger la qualité des scripts domiramaCatOps
 - Remplacer localhost par $HCD_HOST
 """
 
-import os
 import re
 from pathlib import Path
 
@@ -146,7 +145,8 @@ def fix_script(script_path):
             new_lines = lines[:config_start]
             new_lines.extend(SETUP_PATHS_CODE.split("\n"))
 
-            # Garder les lignes après la configuration qui ne sont pas remplacées
+            # Garder les lignes après la configuration qui ne sont pas
+            # remplacées
             skip_patterns = [
                 r"^SCRIPT_DIR=",
                 r"^INSTALL_DIR=",
@@ -213,7 +213,7 @@ def main():
 
     print()
     print(f"✅ {fixed} scripts corrigés")
-    print(f"📦 Sauvegardes créées : *.sh.bak")
+    print("📦 Sauvegardes créées : *.sh.bak")
 
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@ import os
 import sys
 from datetime import datetime, timezone
 from decimal import Decimal
+
 from astrapy import DataAPIClient
 from astrapy.authentication import UsernamePasswordTokenProvider
 from astrapy.constants import Environment
@@ -17,7 +18,9 @@ from astrapy.constants import Environment
 print("=" * 80)
 print("🎯 DÉMONSTRATION COMPLÈTE : Data API HCD - Tables")
 print("=" * 80)
-print("📚 Conforme à : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html")
+print(
+    "📚 Conforme à : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html"
+)
 print()
 
 # Configuration (conforme à la documentation)
@@ -157,7 +160,9 @@ print()
 print("=" * 80)
 print("📝 OPÉRATION 1 : INSERT (PUT) - Insert a row")
 print("=" * 80)
-print("📚 Référence : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html")
+print(
+    "📚 Référence : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html"
+)
 print()
 
 print("📄 Code (conforme documentation) :")
@@ -189,7 +194,9 @@ except Exception as e:
 print("=" * 80)
 print("📖 OPÉRATION 2 : GET (SELECT) - Find a row")
 print("=" * 80)
-print("📚 Référence : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html")
+print(
+    "📚 Référence : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html"
+)
 print()
 
 print("📄 Code (conforme documentation) :")
@@ -207,7 +214,7 @@ if INSERT_OK:
                 "numero_op": test_numero_op,
             }
         )
-        
+
         if result:
             print("✅ ✅ GET RÉUSSI !")
             print()
@@ -238,7 +245,9 @@ else:
 print("=" * 80)
 print("✏️  OPÉRATION 3 : UPDATE - Update a row")
 print("=" * 80)
-print("📚 Référence : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html")
+print(
+    "📚 Référence : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html"
+)
 print()
 
 print("📄 Code (conforme documentation) :")
@@ -253,7 +262,7 @@ if GET_OK:
         print("🔄 Exécution...")
         new_libelle = "DÉMONSTRATION DATA API - MODIFIÉ (Conforme Doc)"
         new_montant = Decimal("888.88")
-        
+
         result = table.update_one(
             filter={
                 "code_si": test_code_si,
@@ -266,13 +275,13 @@ if GET_OK:
                     "libelle": new_libelle,
                     "montant": new_montant,
                 }
-            }
+            },
         )
-        
+
         print("✅ ✅ UPDATE RÉUSSI !")
         print(f"   Résultat : {result}")
         print()
-        
+
         # Vérifier la mise à jour
         print("🔄 Vérification de la mise à jour...")
         updated = table.find_one(
@@ -283,7 +292,7 @@ if GET_OK:
                 "numero_op": test_numero_op,
             }
         )
-        
+
         if updated:
             print("✅ Données mises à jour confirmées :")
             print(f"   Nouveau libellé : {updated.get('libelle', 'N/A')}")
@@ -306,7 +315,9 @@ else:
 print("=" * 80)
 print("🔍 OPÉRATION 4 : GET Multiple - Find rows")
 print("=" * 80)
-print("📚 Référence : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html")
+print(
+    "📚 Référence : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html"
+)
 print()
 
 print("📄 Code (conforme documentation) :")
@@ -320,14 +331,14 @@ try:
             "code_si": test_code_si,
             "contrat": test_contrat,
         },
-        limit=10
+        limit=10,
     )
-    
+
     operations = list(results)
-    print(f"✅ ✅ GET Multiple RÉUSSI !")
+    print("✅ ✅ GET Multiple RÉUSSI !")
     print(f"   {len(operations)} opération(s) trouvée(s)")
     print()
-    
+
     if operations:
         print("📄 Exemples d'opérations :")
         for i, op in enumerate(operations[:3], 1):
@@ -348,7 +359,9 @@ except Exception as e:
 print("=" * 80)
 print("🗑️  OPÉRATION 5 : DELETE - Delete a row")
 print("=" * 80)
-print("📚 Référence : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html")
+print(
+    "📚 Référence : https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html"
+)
 print()
 
 print("📄 Code (conforme documentation) :")
@@ -366,11 +379,11 @@ if UPDATE_OK:
                 "numero_op": test_numero_op,
             }
         )
-        
+
         print("✅ ✅ DELETE RÉUSSI !")
         print(f"   Résultat : {result}")
         print()
-        
+
         # Vérifier la suppression
         print("🔄 Vérification de la suppression...")
         deleted_check = table.find_one(
@@ -381,7 +394,7 @@ if UPDATE_OK:
                 "numero_op": test_numero_op,
             }
         )
-        
+
         if not deleted_check:
             print("✅ Suppression confirmée : l'opération n'existe plus")
         else:
@@ -442,7 +455,9 @@ if success_count == total_count:
     print("   ✅ DELETE - delete_one()")
     print()
     print("✅ Code 100% conforme à la documentation officielle :")
-    print("   https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html")
+    print(
+        "   https://docs.datastax.com/en/hyper-converged-database/1.2/api-reference/dataapiclient.html"
+    )
     print()
     sys.exit(0)
 else:
@@ -462,4 +477,3 @@ else:
     print("   4. Relancer : python3 demo_data_api_tables_complete.py")
     print()
     sys.exit(1)
-

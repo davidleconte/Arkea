@@ -12,7 +12,6 @@ Ce module fournit les fonctions nécessaires pour :
 Basé sur les démonstrations du fichier inputs-ibm/[fuzzy_and_complex_search_with_vector_search].py
 """
 
-import json
 import os
 import re
 import sys
@@ -88,9 +87,7 @@ def build_regex_pattern(query_pattern: str) -> str:
     placeholder = "__WILDCARD__"
 
     # Détecter si le pattern commence ou se termine par un wildcard
-    starts_with_wildcard = query_pattern.startswith("*") or query_pattern.startswith(
-        "%"
-    )
+    starts_with_wildcard = query_pattern.startswith("*") or query_pattern.startswith("%")
     ends_with_wildcard = query_pattern.endswith("*") or query_pattern.endswith("%")
 
     # Remplacer '*' et '%' par le placeholder (les deux sont équivalents)
@@ -99,7 +96,8 @@ def build_regex_pattern(query_pattern: str) -> str:
     # Échapper tous les caractères spéciaux regex pour sécurité
     escaped = re.escape(temp_pattern)
 
-    # Remplacer le placeholder par '.*' (regex pour "n'importe quels caractères")
+    # Remplacer le placeholder par '.*' (regex pour "n'importe quels
+    # caractères")
     regex_pattern = escaped.replace(placeholder, ".*")
 
     # Ajouter les ancres ^ et $ pour correspondre exactement au comportement SQL LIKE
@@ -111,11 +109,13 @@ def build_regex_pattern(query_pattern: str) -> str:
     #   (ex: '%LOYER%' → '.*LOYER.*' - peut être n'importe où)
 
     if starts_with_wildcard and not ends_with_wildcard:
-        # Pattern commence par wildcard mais ne se termine pas : doit se terminer par le texte
+        # Pattern commence par wildcard mais ne se termine pas : doit se
+        # terminer par le texte
         if not regex_pattern.endswith("$"):
             regex_pattern = regex_pattern + "$"
     elif ends_with_wildcard and not starts_with_wildcard:
-        # Pattern se termine par wildcard mais ne commence pas : doit commencer par le texte
+        # Pattern se termine par wildcard mais ne commence pas : doit commencer
+        # par le texte
         if not regex_pattern.startswith("^"):
             regex_pattern = "^" + regex_pattern
 
@@ -201,9 +201,7 @@ def encode_text(tokenizer, model, text: str) -> List[float]:
     if not text or text.strip() == "":
         return [0.0] * VECTOR_DIMENSION
 
-    inputs = tokenizer(
-        text, return_tensors="pt", truncation=True, padding=True, max_length=512
-    )
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
 
     with torch.no_grad():
         encoder_outputs = model.encoder(**inputs)
@@ -295,10 +293,10 @@ def hybrid_like_search(
                 params.append(val)
 
     # Construire la clause WHERE
-    where_clause = "WHERE " + " AND ".join(conditions) if conditions else ""
+    "WHERE " + " AND ".join(conditions) if conditions else ""
 
     # Requête CQL complète avec ANN
-    cql_query = f"""
+    cql_query = """
     SELECT code_si, contrat, date_op, numero_op, libelle, montant, cat_auto, cat_user,
            similarity_cosine(libelle_embedding, ?) AS sim
     FROM {KEYSPACE}.{TABLE_NAME}
@@ -437,10 +435,10 @@ def multi_field_like_search(
                 conditions.append(f"{col} = ?")
                 params.append(val)
 
-    where_clause = "WHERE " + " AND ".join(conditions)
+    "WHERE " + " AND ".join(conditions)
 
     # Requête CQL complète avec ANN
-    cql_query = f"""
+    cql_query = """
     SELECT code_si, contrat, date_op, numero_op, libelle, montant, cat_auto, cat_user,
            similarity_cosine(libelle_embedding, ?) AS sim
     FROM {KEYSPACE}.{TABLE_NAME}

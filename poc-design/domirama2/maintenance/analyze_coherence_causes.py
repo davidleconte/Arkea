@@ -4,10 +4,7 @@ Script d'analyse approfondie des causes des incohérences dans les résultats de
 Identifie pourquoi certains tests ne retournent pas de résultats pertinents malgré la présence des données.
 """
 
-import json
 import os
-import sys
-from decimal import Decimal
 
 import numpy as np
 import torch
@@ -38,9 +35,7 @@ def encode_text(tokenizer, model, text):
     if not text or text.strip() == "":
         return [0.0] * VECTOR_DIMENSION
 
-    inputs = tokenizer(
-        text, return_tensors="pt", truncation=True, padding=True, max_length=512
-    )
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
 
     with torch.no_grad():
         encoder_outputs = model.encoder(**inputs)
@@ -100,7 +95,7 @@ def main():
 
     # Récupérer tous les libellés de la partition avec leurs embeddings
     print("📊 Récupération des données de la partition...")
-    all_libelles_query = f"""
+    all_libelles_query = """
     SELECT libelle, libelle_embedding, cat_auto, type_operation
     FROM operations_by_account
     WHERE code_si = '{CODE_SI}'
@@ -137,10 +132,7 @@ def main():
             if libelle_row.libelle:
                 libelle_upper = libelle_row.libelle.upper()
                 for keyword in expected_keywords:
-                    if (
-                        keyword in libelle_upper
-                        and libelle_row.libelle_embedding is not None
-                    ):
+                    if keyword in libelle_upper and libelle_row.libelle_embedding is not None:
                         relevant_libelles.append(
                             {
                                 "libelle": libelle_row.libelle,
@@ -200,7 +192,7 @@ def main():
         print()
 
         # Exécuter la recherche ANN
-        cql_query = f"""
+        cql_query = """
         SELECT libelle, montant, cat_auto, libelle_embedding
         FROM operations_by_account
         WHERE code_si = '{CODE_SI}'
@@ -211,7 +203,7 @@ def main():
 
         ann_results = list(session.execute(SimpleStatement(cql_query, fetch_size=20)))
 
-        print(f"📊 Résultats ANN (top 20) :")
+        print("📊 Résultats ANN (top 20) :")
         print()
         print("| Rang ANN | Libellé | Contient mot-clé ? |")
         print("|----------|---------|-------------------|")
@@ -221,9 +213,7 @@ def main():
         for i, row in enumerate(ann_results, 1):
             libelle = row.libelle or "N/A"
             libelle_short = libelle[:50] if len(libelle) > 50 else libelle
-            contains_keyword = any(
-                keyword in libelle.upper() for keyword in expected_keywords
-            )
+            contains_keyword = any(keyword in libelle.upper() for keyword in expected_keywords)
             marker = "✅" if contains_keyword else "❌"
 
             if contains_keyword:
@@ -245,9 +235,7 @@ def main():
                 "   → La recherche ANN fonctionne, mais le résultat n'était peut-être pas le premier"
             )
         elif ann_rank_in_top20 is not None:
-            print(
-                f"⚠️  **Résultat pertinent trouvé mais hors top 5** : Rang {ann_rank_in_top20}"
-            )
+            print(f"⚠️  **Résultat pertinent trouvé mais hors top 5** : Rang {ann_rank_in_top20}")
             print(
                 "   → Cause : La similarité cosinus n'est pas assez élevée pour être dans le top 5"
             )
@@ -255,18 +243,14 @@ def main():
         else:
             print("❌ **Aucun résultat pertinent dans le top 20**")
             print("   → Cause : La similarité vectorielle est insuffisante")
-            print(
-                "   → Les embeddings de la requête typée sont trop différents des libellés réels"
-            )
+            print("   → Les embeddings de la requête typée sont trop différents des libellés réels")
 
         print()
 
         # 7. Comparaison des similarités
         if similarities:
             top_similarity = similarities[0]["similarity"]
-            print(
-                f"📊 Similarité maximale avec libellé pertinent : {top_similarity:.4f}"
-            )
+            print(f"📊 Similarité maximale avec libellé pertinent : {top_similarity:.4f}")
 
             # Comparer avec les similarités des résultats ANN
             if ann_results:
@@ -274,9 +258,7 @@ def main():
                 for row in ann_results[:5]:
                     if row.libelle_embedding:
                         sim = cosine_similarity(query_embedding, row.libelle_embedding)
-                        ann_similarities.append(
-                            {"libelle": row.libelle, "similarity": sim}
-                        )
+                        ann_similarities.append({"libelle": row.libelle, "similarity": sim})
 
                 if ann_similarities:
                     top_ann_similarity = ann_similarities[0]["similarity"]
@@ -300,19 +282,13 @@ def main():
                         print()
                         print("💡 **Solutions possibles :**")
                         print("   1. Augmenter le LIMIT de 5 à 10 ou 20")
-                        print(
-                            "   2. Vérifier que l'index SAI vectoriel est bien construit"
-                        )
-                        print(
-                            "   3. Utiliser la recherche hybride (Full-Text + Vector)"
-                        )
+                        print("   2. Vérifier que l'index SAI vectoriel est bien construit")
+                        print("   3. Utiliser la recherche hybride (Full-Text + Vector)")
                     else:
                         print("✅ **Pas de problème de similarité** :")
                         print("   - Les résultats ANN ont une similarité correcte")
                         print("   - Mais ils ne contiennent pas les mots-clés attendus")
-                        print(
-                            "   → Cause : Les embeddings capturent une similarité sémantique"
-                        )
+                        print("   → Cause : Les embeddings capturent une similarité sémantique")
                         print("     mais pas lexicale (les mots ne correspondent pas)")
                         print()
                         print(

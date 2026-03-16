@@ -18,13 +18,12 @@ Colonnes exclues :
 
 import os
 import sys
-import torch
-from transformers import AutoTokenizer, AutoModel
-from cassandra.cluster import Cluster
-from cassandra.query import SimpleStatement
-from cassandra import ConsistencyLevel
 import time
-from decimal import Decimal
+
+import torch
+from cassandra import ConsistencyLevel
+from cassandra.cluster import Cluster
+from transformers import AutoModel, AutoTokenizer
 
 # Configuration
 MODEL_NAME = "google/byt5-small"
@@ -37,7 +36,7 @@ FORCE_REGENERATE = False  # Si True, régénère même les embeddings existants
 def load_model():
     """Charge le modèle ByteT5 et le tokenizer."""
     print(f"📥 Chargement du modèle {MODEL_NAME}...")
-    print(f"   Utilisation de la clé API Hugging Face")
+    print("   Utilisation de la clé API Hugging Face")
 
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, token=HF_API_KEY)
     model = AutoModel.from_pretrained(MODEL_NAME, token=HF_API_KEY)
@@ -91,9 +90,7 @@ def encode_text(tokenizer, model, text):
     if not text or text.strip() == "":
         return [0.0] * VECTOR_DIMENSION
 
-    inputs = tokenizer(
-        text, return_tensors="pt", truncation=True, padding=True, max_length=512
-    )
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
 
     with torch.no_grad():
         encoder_outputs = model.encoder(**inputs)
@@ -154,7 +151,8 @@ def main():
     print(f"   {len(partitions)} partition(s) trouvée(s)")
     print()
 
-    # Récupérer toutes les opérations par partition avec toutes les colonnes pertinentes
+    # Récupérer toutes les opérations par partition avec toutes les colonnes
+    # pertinentes
     rows = []
     prepared = session.prepare(
         """
@@ -171,9 +169,7 @@ def main():
                 end="\r",
                 flush=True,
             )
-        partition_rows = list(
-            session.execute(prepared, [partition.code_si, partition.contrat])
-        )
+        partition_rows = list(session.execute(prepared, [partition.code_si, partition.contrat]))
         # Filtrer côté client pour ne garder que celles avec libelle
         # Si FORCE_REGENERATE=False, ne traiter que celles sans embedding
         for r in partition_rows:
@@ -185,9 +181,7 @@ def main():
 
     total_count = len(rows)
     if FORCE_REGENERATE:
-        print(
-            f"✅ {total_count} opérations avec libellé trouvées (régénération forcée)"
-        )
+        print(f"✅ {total_count} opérations avec libellé trouvées (régénération forcée)")
     else:
         print(f"✅ {total_count} opérations avec libellé trouvées (sans embedding)")
     print()
@@ -264,7 +258,7 @@ def main():
     print("=" * 70)
     print("  ✅ Génération terminée !")
     print("=" * 70)
-    print(f"📊 Statistiques:")
+    print("📊 Statistiques:")
     print(f"   Total traité: {processed}")
     print(f"   Mis à jour: {updated}")
     print(f"   Erreurs: {errors}")
@@ -294,12 +288,8 @@ def main():
 
         print(f"   Échantillon analysé: {total_sample} opérations")
         print(f"   Avec libelle: {avec_libelle} ({avec_libelle/total_sample*100:.1f}%)")
-        print(
-            f"   Avec cat_auto: {avec_cat_auto} ({avec_cat_auto/total_sample*100:.1f}%)"
-        )
-        print(
-            f"   Avec type_operation: {avec_type_op} ({avec_type_op/total_sample*100:.1f}%)"
-        )
+        print(f"   Avec cat_auto: {avec_cat_auto} ({avec_cat_auto/total_sample*100:.1f}%)")
+        print(f"   Avec type_operation: {avec_type_op} ({avec_type_op/total_sample*100:.1f}%)")
         print(f"   Avec devise: {avec_devise} ({avec_devise/total_sample*100:.1f}%)")
 
     session.shutdown()
@@ -310,9 +300,7 @@ if __name__ == "__main__":
     # Vérifier les arguments
     if len(sys.argv) > 1 and sys.argv[1] == "--force":
         FORCE_REGENERATE = True
-        print(
-            "⚠️  Mode régénération forcée activé (tous les embeddings seront régénérés)"
-        )
+        print("⚠️  Mode régénération forcée activé (tous les embeddings seront régénérés)")
         print()
 
     main()

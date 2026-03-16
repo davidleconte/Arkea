@@ -5,13 +5,12 @@ Lit les données depuis HCD, génère les embeddings, et met à jour la colonne 
 """
 
 import os
-import sys
-import torch
-from transformers import AutoTokenizer, AutoModel
-from cassandra.cluster import Cluster
-from cassandra.query import SimpleStatement
-from cassandra import ConsistencyLevel
 import time
+
+import torch
+from cassandra import ConsistencyLevel
+from cassandra.cluster import Cluster
+from transformers import AutoModel, AutoTokenizer
 
 # Configuration
 MODEL_NAME = "google/byt5-small"
@@ -23,7 +22,7 @@ BATCH_SIZE = 100  # Traiter par lots pour éviter la surcharge mémoire
 def load_model():
     """Charge le modèle ByteT5 et le tokenizer."""
     print(f"📥 Chargement du modèle {MODEL_NAME}...")
-    print(f"   Utilisation de la clé API Hugging Face")
+    print("   Utilisation de la clé API Hugging Face")
 
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, token=HF_API_KEY)
     model = AutoModel.from_pretrained(MODEL_NAME, token=HF_API_KEY)
@@ -37,9 +36,7 @@ def encode_text(tokenizer, model, text):
     if not text or text.strip() == "":
         return [0.0] * VECTOR_DIMENSION
 
-    inputs = tokenizer(
-        text, return_tensors="pt", truncation=True, padding=True, max_length=512
-    )
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
 
     with torch.no_grad():
         encoder_outputs = model.encoder(**inputs)
@@ -105,9 +102,7 @@ def main():
                 end="\r",
                 flush=True,
             )
-        partition_rows = list(
-            session.execute(prepared, [partition.code_si, partition.contrat])
-        )
+        partition_rows = list(session.execute(prepared, [partition.code_si, partition.contrat]))
         # Filtrer côté client pour ne garder que celles avec libelle
         rows.extend([r for r in partition_rows if r.libelle and r.libelle.strip()])
 
@@ -180,7 +175,7 @@ def main():
     print("=" * 70)
     print("  ✅ Génération terminée !")
     print("=" * 70)
-    print(f"📊 Statistiques:")
+    print("📊 Statistiques:")
     print(f"   Total traité: {processed}")
     print(f"   Mis à jour: {updated}")
     print(f"   Erreurs: {errors}")

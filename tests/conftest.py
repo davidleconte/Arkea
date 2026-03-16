@@ -8,8 +8,9 @@
 # =============================================================================
 
 import os
-import pytest
 from pathlib import Path
+
+import pytest
 
 # Project root directory
 PROJECT_ROOT = Path(__file__).parent.parent.resolve()
@@ -23,9 +24,7 @@ PROJECT_ROOT = Path(__file__).parent.parent.resolve()
 def pytest_configure(config):
     """Configure pytest with custom markers."""
     config.addinivalue_line("markers", "unit: Unit tests (no external dependencies)")
-    config.addinivalue_line(
-        "markers", "integration: Integration tests (require HCD/Kafka)"
-    )
+    config.addinivalue_line("markers", "integration: Integration tests (require HCD/Kafka)")
     config.addinivalue_line("markers", "e2e: End-to-end tests (full pipeline)")
     config.addinivalue_line("markers", "slow: Slow tests (skip with -m 'not slow')")
 
@@ -147,7 +146,6 @@ def isolated_env(tmp_path, monkeypatch):
 def mock_hcd_connection(monkeypatch):
     """Mock HCD connection for tests that don't need real HCD."""
     # This can be extended to mock cassandra-driver
-    pass
 
 
 # =============================================================================

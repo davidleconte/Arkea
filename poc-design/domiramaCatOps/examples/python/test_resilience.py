@@ -11,19 +11,17 @@ import json
 import os
 import sys
 import time
-from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import Tuple
 
 from cassandra import ConsistencyLevel
 from cassandra.cluster import EXEC_PROFILE_DEFAULT, Cluster, ExecutionProfile
 from cassandra.policies import ExponentialReconnectionPolicy, RetryPolicy
 from cassandra.query import SimpleStatement
+from test_vector_search_base import KEYSPACE
 
 # Ajouter le répertoire parent au PYTHONPATH
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(SCRIPT_DIR, "search"))
-
-from test_vector_search_base import KEYSPACE, encode_text, load_model
 
 
 def connect_to_hcd(host="localhost", port=9042):
@@ -48,7 +46,7 @@ def connect_to_hcd(host="localhost", port=9042):
 
 
 def retry_with_backoff(func, max_retries=3, base_delay=1.0, max_delay=10.0):
-    """Retry avec exponential backoff"""
+    """Retry avec exponential backof"""
     for attempt in range(max_retries):
         try:
             return func()
@@ -85,7 +83,7 @@ def test_query_with_retry(session, code_si: str, contrat: str) -> Tuple[bool, st
         print("🧪 Test 2 : Requête avec retry automatique")
 
         def execute_query():
-            query = f"""
+            query = """
             SELECT libelle, montant, cat_auto
             FROM {KEYSPACE}.operations_by_account
             WHERE code_si = '{code_si}' AND contrat = '{contrat}'
@@ -136,10 +134,10 @@ def test_model_fallback(session, query_text: str, code_si: str, contrat: str) ->
                     query_embedding = encode_func_obj(tokenizer, model, query_text)
                 else:
                     model = load_model_func()
-                    query_embedding = encode_func_obj(model, query_text)
+                    encode_func_obj(model, query_text)
 
                 # Recherche vectorielle
-                cql_query = f"""
+                cql_query = """
                 SELECT libelle, montant, cat_auto
                 FROM {KEYSPACE}.operations_by_account
                 WHERE code_si = '{code_si}' AND contrat = '{contrat}'
@@ -185,7 +183,8 @@ def test_timeout_handling(session, code_si: str, contrat: str) -> Tuple[bool, st
         except Exception as e:
             latency = (time.time() - start_time) * 1000
             print(f"   ⚠️  Timeout après {latency:.2f}ms : {e}")
-            return True, f"Timeout détecté et géré ({latency:.2f}ms)"  # Timeout géré = succès
+            # Timeout géré = succès
+            return True, f"Timeout détecté et géré ({latency:.2f}ms)"
     except Exception as e:
         return False, f"Erreur : {e}"
 

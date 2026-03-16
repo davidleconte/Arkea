@@ -10,6 +10,7 @@ import os
 import sys
 from datetime import datetime, timezone
 from decimal import Decimal
+
 from astrapy import DataAPIClient
 from astrapy.authentication import UsernamePasswordTokenProvider
 from astrapy.constants import Environment
@@ -40,6 +41,7 @@ try:
     from astrapy import DataAPIClient
     from astrapy.authentication import UsernamePasswordTokenProvider
     from astrapy.constants import Environment
+
     print("✅ Tous les imports sont corrects")
     print("✅ DataAPIClient disponible")
     print("✅ UsernamePasswordTokenProvider disponible")
@@ -219,7 +221,7 @@ try:
             "numero_op": test_numero_op,
         }
     )
-    
+
     if result:
         print("✅ ✅ GET RÉUSSI !")
         print(f"   Libellé : {result.get('libelle', 'N/A')}")
@@ -263,7 +265,7 @@ try:
                 "libelle": "DÉMONSTRATION DATA API - MODIFIÉ",
                 "montant": Decimal("456.78"),
             }
-        }
+        },
     )
     print("✅ ✅ UPDATE RÉUSSI !")
     print(f"   Modifié : {result.get('modifiedCount', 'N/A')}")
@@ -329,4 +331,3 @@ print("   Le code CRUD est correct et conforme à la documentation Data API HCD"
 print("   Toutes les opérations sont implémentées avec la bonne syntaxe")
 print("   Le code fonctionnera dès que Stargate sera accessible")
 print()
-

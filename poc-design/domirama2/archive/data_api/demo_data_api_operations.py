@@ -5,6 +5,7 @@ Montre que la Data API fonctionne avec des opérations réelles
 """
 import os
 import sys
+
 from astrapy import DataAPIClient
 from astrapy.authentication import UsernamePasswordTokenProvider
 from astrapy.constants import Environment
@@ -59,16 +60,16 @@ try:
     table = database.get_table("operations_by_account", keyspace="domirama2_poc")
     print("✅ Table 'operations_by_account' accessible")
     print()
-    
+
     # Essayer de trouver une opération
     print("📋 Étape 3 : Recherche d'opérations")
     print()
-    
+
     try:
         # Recherche simple (limite à 1 pour le test)
         result = table.find(limit=1)
         rows = list(result)
-        
+
         if rows:
             print(f"✅ {len(rows)} opération(s) trouvée(s)")
             print()
@@ -83,12 +84,16 @@ try:
     except Exception as e:
         print(f"⚠️  Recherche d'opérations : {type(e).__name__}")
         print(f"   Message : {str(e)[:100]}")
-        print("   (la connexion fonctionne, mais cette opération nécessite des permissions ou données)")
-    
+        print(
+            "   (la connexion fonctionne, mais cette opération nécessite des permissions ou données)"
+        )
+
 except Exception as e:
     print(f"⚠️  Accès à la table : {type(e).__name__}")
     print(f"   Message : {str(e)[:100]}")
-    print("   (la connexion fonctionne, mais cette table peut ne pas exister ou nécessiter des permissions)")
+    print(
+        "   (la connexion fonctionne, mais cette table peut ne pas exister ou nécessiter des permissions)"
+    )
 
 print()
 
@@ -101,7 +106,7 @@ print()
 
 try:
     admin = database.get_admin()
-    
+
     # Essayer de lister les keyspaces
     try:
         keyspaces = admin.list_keyspaces()
@@ -116,7 +121,7 @@ try:
     except Exception as e:
         print(f"⚠️  Liste des keyspaces : {type(e).__name__}")
         print("   (la connexion fonctionne, mais cette opération nécessite des permissions)")
-    
+
 except Exception as e:
     print(f"⚠️  Accès à l'admin : {type(e).__name__}")
     print("   (la connexion fonctionne, mais cette opération nécessite des permissions)")
@@ -144,4 +149,3 @@ print("   1. Explorer les exemples : ls data_api_examples/")
 print("   2. Tester les opérations CRUD")
 print("   3. Consulter la documentation : README_DATA_API.md")
 print()
-

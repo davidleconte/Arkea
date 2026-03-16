@@ -6,9 +6,7 @@ Libellés complexes et variés pour démontrer le full-text search
 
 import csv
 import random
-import uuid
 from datetime import datetime, timedelta
-from decimal import Decimal
 
 # Libellés réalistes et complexes pour opérations bancaires françaises
 LIBELLES = [
@@ -35,7 +33,6 @@ LIBELLES = [
     "CHARGES COPROPRIETE TRIMESTRE 4",
     "TAXE FONCIERE ANNEE 2024",
     "ASSURANCE HABITATION ANNUELLE",
-    
     # Alimentation
     "CB CARREFOUR CITY PARIS 15",
     "CB CARREFOUR MARKET RUE DE VAUGIRARD",
@@ -56,7 +53,6 @@ LIBELLES = [
     "CB BOULANGERIE PAUL PARIS",
     "CB BOULANGERIE ERIC KAYSER",
     "CB BOULANGERIE MAISON KAYSER",
-    
     # Restaurants
     "CB RESTAURANT LE COMPTOIR PARIS",
     "CB RESTAURANT ITALIEN PARIS 15",
@@ -74,7 +70,6 @@ LIBELLES = [
     "CB DELIVEROO PARIS LIVRAISON",
     "CB UBER EATS PARIS LIVRAISON",
     "CB JUST EAT PARIS LIVRAISON",
-    
     # Transports
     "CB RATP NAVIGO MOIS JANVIER",
     "CB RATP NAVIGO MOIS FEVRIER",
@@ -104,7 +99,6 @@ LIBELLES = [
     "CB PARKING PARIS 15EME",
     "CB PARKING INDIGO PARIS",
     "CB PARKING QPARK PARIS",
-    
     # Utilitaires
     "PRELEVEMENT EDF FACTURE ELECTRICITE",
     "PRELEVEMENT EDF FACTURE JANVIER 2024",
@@ -129,7 +123,6 @@ LIBELLES = [
     "PRELEVEMENT SPOTIFY ABONNEMENT",
     "PRELEVEMENT APPLE MUSIC ABONNEMENT",
     "PRELEVEMENT DISNEY PLUS ABONNEMENT",
-    
     # Revenus
     "SALAIRE MENSUEL JANVIER 2024",
     "SALAIRE MENSUEL FEVRIER 2024",
@@ -149,7 +142,6 @@ LIBELLES = [
     "ALLOCATION FAMILIALE CAF",
     "PRESTATION ACCUEIL JEUNE ENFANT PAJE",
     "ALLOCATION LOGEMENT APL",
-    
     # Virements
     "VIREMENT SEPA VERS COMPTE EPARGNE",
     "VIREMENT SEPA VERS COMPTE COURANT",
@@ -170,7 +162,6 @@ LIBELLES = [
     "VIREMENT IMPAYE REGULARISATION",
     "VIREMENT IMPAYE PARIS BANQUE",
     "VIREMENT IMPAYE REMBOURSEMENT",
-    
     # Loisirs
     "CB AMAZON FR ACHAT EN LIGNE",
     "CB AMAZON FR LIVRAISON PRIME",
@@ -196,7 +187,6 @@ LIBELLES = [
     "CB PISCINE PARIS ABONNEMENT",
     "CB TENNIS CLUB PARIS ABONNEMENT",
     "CB GOLF CLUB PARIS ABONNEMENT",
-    
     # Santé
     "CB PHARMACIE PARIS 15EME",
     "CB PHARMACIE PARIS MEDICAMENTS",
@@ -207,14 +197,12 @@ LIBELLES = [
     "CB LABORATOIRE ANALYSES PARIS",
     "CB HOPITAL PARIS FRAIS",
     "CB MUTUELLE REMBOURSEMENT",
-    
     # Assurances
     "PRELEVEMENT ASSURANCE AUTO",
     "PRELEVEMENT ASSURANCE HABITATION",
     "PRELEVEMENT ASSURANCE SANTE",
     "PRELEVEMENT ASSURANCE VIE",
     "PRELEVEMENT ASSURANCE PREVOYANCE",
-    
     # Banque
     "FRAIS BANCAIRES TENUE DE COMPTE",
     "FRAIS BANCAIRES CARTE BLEUE",
@@ -222,7 +210,6 @@ LIBELLES = [
     "AGIOS DECOUVERT AUTORISE",
     "COMMISSION INTERVENTION",
     "REMBOURSEMENT FRAIS BANCAIRES",
-    
     # Divers
     "CB COIFFEUR PARIS COUPE",
     "CB COIFFEUR PARIS COLORATION",
@@ -234,7 +221,6 @@ LIBELLES = [
     "CB LIBRAIRIE PARIS LIVRES",
     "CB FLEURISTE PARIS FLEURS",
     "CB JARDINERIE PARIS PLANTES",
-    
     # Virements avec accents et termes complexes
     "VIREMENT IMPAYE PARIS",
     "VIREMENT IMPAYE REGULARISATION",
@@ -244,7 +230,6 @@ LIBELLES = [
     "VIREMENT IMPAYE COMPTE CLOS",
     "VIREMENT IMPAYE REMBOURSEMENT",
     "VIREMENT IMPAYE PARIS BANQUE",
-    
     # Loyers avec localisation
     "LOYER IMPAYE PARIS 15EME",
     "LOYER IMPAYE PARIS 16EME",
@@ -353,6 +338,7 @@ CATEGORIES = {
 TYPES_OPERATION = ["VIREMENT", "CARTE", "PRELEVEMENT", "CHEQUE"]
 SENS_OPERATION = ["DEBIT", "CREDIT"]
 
+
 def get_category(libelle):
     """Détermine la catégorie automatique basée sur le libellé"""
     libelle_upper = libelle.upper()
@@ -360,6 +346,7 @@ def get_category(libelle):
         if keyword in libelle_upper:
             return category
     return "DIVERS"
+
 
 def get_confidence(libelle):
     """Génère un score de confiance réaliste"""
@@ -371,6 +358,7 @@ def get_confidence(libelle):
     else:
         return round(random.uniform(0.60, 0.85), 2)
 
+
 def generate_date(start_date, end_date):
     """Génère une date aléatoire entre start_date et end_date"""
     time_between = end_date - start_date
@@ -378,10 +366,11 @@ def generate_date(start_date, end_date):
     random_days = random.randrange(days_between)
     return start_date + timedelta(days=random_days)
 
+
 def generate_amount(libelle, sens):
     """Génère un montant réaliste basé sur le libellé et le sens"""
     libelle_upper = libelle.upper()
-    
+
     if sens == "CREDIT":
         if "SALAIRE" in libelle_upper:
             return round(random.uniform(2000, 5000), 2)
@@ -421,53 +410,70 @@ def generate_amount(libelle, sens):
         else:
             return round(random.uniform(-10, -100), 2)
 
+
 def main():
     output_file = "poc-design/domirama2/data/operations_10000.csv"
-    
+
     # Générer 10 000 lignes
     num_lines = 10000
-    
+
     # Dates sur 2 ans (2023-2024)
     start_date = datetime(2023, 1, 1)
     end_date = datetime(2024, 12, 31)
-    
+
     # Comptes variés
     codes_si = ["01", "02", "03"]
-    contrats = [f"{random.randint(1000000000, 9999999999)}" for _ in range(50)]  # 50 comptes différents
-    
-    with open(output_file, 'w', newline='', encoding='utf-8') as csvfile:
+    # 50 comptes différents
+    contrats = [f"{random.randint(1000000000, 9999999999)}" for _ in range(50)]
+
+    with open(output_file, "w", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
-        
+
         # En-tête
-        writer.writerow([
-            "code_si", "contrat", "date_iso", "seq", "libelle", "montant", 
-            "devise", "type_operation", "sens_operation", "categorie_auto", 
-            "categorie_client", "cat_confidence"
-        ])
-        
+        writer.writerow(
+            [
+                "code_si",
+                "contrat",
+                "date_iso",
+                "seq",
+                "libelle",
+                "montant",
+                "devise",
+                "type_operation",
+                "sens_operation",
+                "categorie_auto",
+                "categorie_client",
+                "cat_confidence",
+            ]
+        )
+
         # Générer les lignes
         seq_by_account = {}  # Suivi des séquences par compte
-        
+
         for i in range(num_lines):
             code_si = random.choice(codes_si)
             contrat = random.choice(contrats)
-            
+
             # Gérer la séquence par compte
             account_key = f"{code_si}_{contrat}"
             if account_key not in seq_by_account:
                 seq_by_account[account_key] = 0
             seq_by_account[account_key] += 1
             seq = seq_by_account[account_key]
-            
+
             # Générer une date aléatoire
             op_date = generate_date(start_date, end_date)
             date_iso = op_date.strftime("%Y-%m-%dT%H:%M:%SZ")
-            
+
             # Libellé aléatoire
             libelle = random.choice(LIBELLES)
-            
+
             # Sens et type d'opération
-            if "SALAIRE" in libelle.upper() or "PRIME" in libelle.upper() or "ALLOCATION" in libelle.upper():
+            if (
+                "SALAIRE" in libelle.upper()
+                or "PRIME" in libelle.upper()
+                or "ALLOCATION" in libelle.upper()
+            ):
                 sens = "CREDIT"
                 type_op = "VIREMENT"
             elif "PRELEVEMENT" in libelle.upper():
@@ -482,39 +488,41 @@ def main():
             else:
                 sens = random.choice(SENS_OPERATION)
                 type_op = random.choice(TYPES_OPERATION)
-            
+
             # Montant
             montant = generate_amount(libelle, sens)
-            
+
             # Catégorie et confiance
             categorie_auto = get_category(libelle)
             cat_confidence = get_confidence(libelle)
-            
+
             # Écrire la ligne
-            writer.writerow([
-                code_si,
-                contrat,
-                date_iso,
-                seq,
-                libelle,
-                f"{montant:.2f}",
-                "EUR",
-                type_op,
-                sens,
-                categorie_auto,
-                "",  # categorie_client vide (batch)
-                f"{cat_confidence:.2f}"
-            ])
-            
+            writer.writerow(
+                [
+                    code_si,
+                    contrat,
+                    date_iso,
+                    seq,
+                    libelle,
+                    f"{montant:.2f}",
+                    "EUR",
+                    type_op,
+                    sens,
+                    categorie_auto,
+                    "",  # categorie_client vide (batch)
+                    f"{cat_confidence:.2f}",
+                ]
+            )
+
             if (i + 1) % 1000 == 0:
                 print(f"✅ {i + 1} lignes générées...")
-    
+
     print(f"\n✅ {num_lines} lignes générées dans {output_file}")
-    print(f"📊 Statistiques:")
+    print("📊 Statistiques:")
     print(f"   - {len(contrats)} comptes différents")
     print(f"   - {len(LIBELLES)} libellés uniques")
     print(f"   - Période: {start_date.date()} à {end_date.date()}")
 
+
 if __name__ == "__main__":
     main()
-

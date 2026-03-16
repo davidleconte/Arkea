@@ -6,8 +6,6 @@ Stratégie :
 2. Fall-back sur libelle_prefix si aucun résultat (recherche partielle, tolérance typos)
 """
 
-import sys
-
 from cassandra.cluster import Cluster
 from cassandra.query import SimpleStatement
 
@@ -32,7 +30,7 @@ def search_with_fallback(session, code_si, contrat, search_term, limit=10):
     # Avantages : Meilleure pertinence (stemming, asciifolding)
     #             Performance optimale
     #             Résultats les plus précis
-    query1 = f"""
+    query1 = """
         SELECT code_si, contrat, libelle, montant, cat_auto, date_op
         FROM operations_by_account
         WHERE code_si = '{code_si}'
@@ -59,7 +57,7 @@ def search_with_fallback(session, code_si, contrat, search_term, limit=10):
     # Avantages : Recherche partielle
     #             Tolérance aux typos
     #             Autocomplétion
-    query2 = f"""
+    query2 = """
         SELECT code_si, contrat, libelle, montant, cat_auto, date_op
         FROM operations_by_account
         WHERE code_si = '{code_si}'
@@ -76,7 +74,7 @@ def search_with_fallback(session, code_si, contrat, search_term, limit=10):
             print(f"✅ Fall-back sur libelle_prefix : {len(results2)} résultat(s) trouvé(s)")
             return results2
         else:
-            print(f"⚠️  Aucun résultat trouvé (ni libelle ni libelle_prefix)")
+            print("⚠️  Aucun résultat trouvé (ni libelle ni libelle_prefix)")
             return []
     except Exception as e:
         print(f"❌ Erreur recherche libelle_prefix : {e}")
@@ -103,7 +101,7 @@ def search_combined(session, code_si, contrat, search_term, limit=10):
     # ============================================
     # Recherche sur libelle
     # ============================================
-    query1 = f"""
+    query1 = """
         SELECT code_si, contrat, libelle, montant, cat_auto, date_op
         FROM operations_by_account
         WHERE code_si = '{code_si}'
@@ -127,7 +125,7 @@ def search_combined(session, code_si, contrat, search_term, limit=10):
     # ============================================
     # Recherche sur libelle_prefix
     # ============================================
-    query2 = f"""
+    query2 = """
         SELECT code_si, contrat, libelle, montant, cat_auto, date_op
         FROM operations_by_account
         WHERE code_si = '{code_si}'
@@ -140,7 +138,8 @@ def search_combined(session, code_si, contrat, search_term, limit=10):
         statement2 = SimpleStatement(query2)
         results2 = list(session.execute(statement2))
 
-        # Ajouter les résultats de libelle_prefix avec priorité 2 (moins pertinents)
+        # Ajouter les résultats de libelle_prefix avec priorité 2 (moins
+        # pertinents)
         for result in results2:
             key = (result.code_si, result.contrat, result.date_op, result.libelle)
             if key not in all_results:

@@ -4,7 +4,6 @@ Tests de limites pour la recherche vectorielle.
 Teste les cas limites : requêtes vides, très longues, très courtes, etc.
 """
 
-import sys
 
 from test_vector_search_base import (
     connect_to_hcd,

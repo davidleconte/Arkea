@@ -4,11 +4,9 @@ Test comparatif entre ByteT5-small et multilingual-e5-large.
 Compare les performances et la pertinence des résultats.
 """
 
-import sys
 import time
 
 from test_vector_search_base import (
-    KEYSPACE,
     connect_to_hcd,
     encode_text,
     get_test_account,
@@ -36,11 +34,9 @@ def test_e5_search(session, query: str, code_si: str, contrat: str, limit: int =
     model = SentenceTransformer("intfloat/multilingual-e5-large")
     embedding = model.encode(query, normalize_embeddings=True)
 
-    import json
-
     from cassandra.query import SimpleStatement
 
-    cql_query = f"""
+    cql_query = """
     SELECT libelle, montant, cat_auto, cat_user, cat_confidence
     FROM {KEYSPACE}.operations_by_account
     WHERE code_si = '{code_si}' AND contrat = '{contrat}'
@@ -148,9 +144,9 @@ def main():
                     f"      ⚠️  ByteT5 plus pertinent (+{((relevance_byt5['relevance_rate'] - relevance_e5['relevance_rate']) * 100):.1f}%)"
                 )
             else:
-                print(f"      ➡️  Pertinence équivalente")
+                print("      ➡️  Pertinence équivalente")
         else:
-            print(f"   ⚠️  e5-large non disponible (sentence-transformers non installé)")
+            print("   ⚠️  e5-large non disponible (sentence-transformers non installé)")
 
         print()
         print("-" * 70)

@@ -5,12 +5,11 @@ Teste la recherche floue avec des typos et compare les résultats.
 """
 
 import os
-import sys
+
 import torch
-from transformers import AutoTokenizer, AutoModel
 from cassandra.cluster import Cluster
 from cassandra.query import SimpleStatement
-import json
+from transformers import AutoModel, AutoTokenizer
 
 # Configuration
 MODEL_NAME = "google/byt5-small"
@@ -24,7 +23,7 @@ def load_model():
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, token=HF_API_KEY)
     model = AutoModel.from_pretrained(MODEL_NAME, token=HF_API_KEY)
     model.eval()
-    print(f"✅ Modèle chargé")
+    print("✅ Modèle chargé")
     return tokenizer, model
 
 
@@ -33,9 +32,7 @@ def encode_text(tokenizer, model, text):
     if not text or text.strip() == "":
         return [0.0] * VECTOR_DIMENSION
 
-    inputs = tokenizer(
-        text, return_tensors="pt", truncation=True, padding=True, max_length=512
-    )
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
     with torch.no_grad():
         encoder_outputs = model.encoder(**inputs)
         embeddings = encoder_outputs.last_hidden_state.mean(dim=1)
@@ -45,7 +42,7 @@ def encode_text(tokenizer, model, text):
 def vector_search(session, query_embedding, code_si, contrat, limit=5):
     """Effectue une recherche vectorielle avec ANN."""
     # Construire la requête CQL avec ANN
-    cql_query = f"""
+    cql_query = """
     SELECT libelle, montant, cat_auto
     FROM operations_by_account
     WHERE code_si = '{code_si}' AND contrat = '{contrat}'
