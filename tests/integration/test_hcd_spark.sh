@@ -30,14 +30,19 @@ fi
 
 test_suite_start "Tests d'intégration HCD ↔ Spark"
 
-# Test 1 : HCD est démarré
+# Test 1 : HCD est démarré (vérifie le port externe 9102 pour Podman)
 test_hcd_running() {
-    if [ -z "${HCD_HOST:-}" ] || [ -z "${HCD_PORT:-}" ]; then
-        echo "⚠️ HCD_HOST ou HCD_PORT non défini, test ignoré"
-        return 0
+    # Pour Podman: port externe 9102, pour binaire: port interne 9042
+    if podman ps --filter "name=arkea-hcd" --format "{{.Names}}" | grep -q "arkea-hcd"; then
+        # Container mode - vérifier port externe 9102
+        assert_port_open "9102" "Cassandra devrait être accessible sur le port externe 9102"
+    elif [ -n "${HCD_HOST:-}" ] && [ -n "${HCD_PORT:-}" ]; then
+        # Binary mode - vérifier le port configuré
+        assert_port_open "$HCD_PORT" "HCD devrait être démarré sur le port $HCD_PORT"
+    else
+        echo "⚠️ HCD non détecté (ni container, ni binaire)"
+        return 1
     fi
-
-    assert_port_open "$HCD_PORT" "HCD devrait être démarré sur le port $HCD_PORT"
 }
 
 # Test 2 : Spark est configuré

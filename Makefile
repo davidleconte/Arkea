@@ -111,26 +111,26 @@ status: ## Check service status with detailed info
 	@echo "📊 ARKEA Service Status"
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 	@echo ""
-	@echo "  HCD (Cassandra):"
-	@if nc -z localhost 9042 2>/dev/null; then \
-		echo "    Status: ✅ Running on port 9042"; \
-		cqlsh localhost 9042 -e "DESCRIBE KEYSPACES;" 2>/dev/null | head -5 || true; \
+	@echo "  Cassandra 5.0:"
+	@if nc -z localhost 9102 2>/dev/null; then \
+		echo "    Status: ✅ Running on port 9102"; \
+		podman exec arkea-hcd cqlsh localhost 9042 -e "DESCRIBE KEYSPACES;" 2>/dev/null | head -5 || true; \
 	else \
 		echo "    Status: ❌ Stopped"; \
 	fi
 	@echo ""
 	@echo "  Kafka:"
-	@if nc -z localhost 9092 2>/dev/null; then \
-		echo "    Status: ✅ Running on port 9092"; \
+	@if nc -z localhost 9192 2>/dev/null; then \
+		echo "    Status: ✅ Running on port 9192"; \
 	else \
 		echo "    Status: ❌ Stopped"; \
 	fi
 	@echo ""
 	@echo "  Spark:"
-	@if [ -n "$${SPARK_HOME:-}" ] && [ -d "$${SPARK_HOME}" ]; then \
-		echo "    Status: ✅ Configured at $${SPARK_HOME}"; \
+	@if nc -z localhost 9280 2>/dev/null; then \
+		echo "    Status: ✅ Running (Master: 9280, Worker: 9281)"; \
 	else \
-		echo "    Status: ⚠️  Not configured"; \
+		echo "    Status: ❌ Stopped"; \
 	fi
 	@echo ""
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
