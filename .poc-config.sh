@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # ARKEA PoC configuration (minimal compatible defaults)
 
 # Resolve project root from this file location
