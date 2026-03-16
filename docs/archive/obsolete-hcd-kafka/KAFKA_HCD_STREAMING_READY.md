@@ -1,6 +1,6 @@
 # ✅ Kafka → HCD Streaming : Configuration Terminée
 
-**Date** : 2025-11-25  
+**Date** : 2025-11-25
 **Statut** : ✅ Prêt pour le streaming
 
 ---

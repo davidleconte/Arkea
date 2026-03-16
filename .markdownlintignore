@@ -1,0 +1,6 @@
+# Ignore archived/obsolete documentation
+docs/archive/
+
+# Ignore vendor/third-party docs
+vendor/
+node_modules/

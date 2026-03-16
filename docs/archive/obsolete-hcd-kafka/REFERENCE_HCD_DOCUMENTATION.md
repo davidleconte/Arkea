@@ -1,7 +1,7 @@
 # 📚 Référence Documentation Officielle IBM/DataStax HCD 1.2
 
-**Date** : 2025-11-25  
-**Version HCD** : 1.2  
+**Date** : 2025-11-25
+**Version HCD** : 1.2
 **Source** : Documentation officielle DataStax/IBM
 
 ---
@@ -455,24 +455,24 @@ df.write
 
 ### 1. Remplacement Solr par SAI
 
-**HBase actuel** : Scan complet → Index Solr en mémoire  
+**HBase actuel** : Scan complet → Index Solr en mémoire
 **HCD proposé** : Requête CQL avec index SAI → Résultats directs
 
 ### 2. Recherche Full-Text
 
-**HCD** : Index SAI avec analyseurs Lucene  
-**Syntaxe** : `WHERE libelle : 'terme'`  
+**HCD** : Index SAI avec analyseurs Lucene
+**Syntaxe** : `WHERE libelle : 'terme'`
 **Avantage** : Index persistant, pas de reconstruction à chaque connexion
 
 ### 3. Recherche Vectorielle (Optionnel)
 
-**HCD** : Support embeddings pour recherche sémantique  
-**Syntaxe** : `ORDER BY embedding ANN OF [...]`  
+**HCD** : Support embeddings pour recherche sémantique
+**Syntaxe** : `ORDER BY embedding ANN OF [...]`
 **Usage** : RAG, recherche intelligente
 
 ### 4. Data API
 
-**HCD** : API REST/GraphQL pour accès simplifié  
+**HCD** : API REST/GraphQL pour accès simplifié
 **Avantage** : Pas besoin de driver binaire, accès HTTP simple
 
 ### 5. Migration des Données
