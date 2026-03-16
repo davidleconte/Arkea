@@ -1,8 +1,8 @@
 # 🚀 Guide de Déploiement - ARKEA
 
-**Date** : 2026-03-13
-**Objectif** : Guide complet pour déployer le projet ARKEA
-**Version** : 1.0
+**Date** : 2026-03-16
+**Objectif** : Guide complet pour déployer le projet ARKEA avec Podman
+**Version** : 2.0
 
 ---
 
@@ -21,7 +21,7 @@
 
 ### Système d'Exploitation
 
-- ✅ **macOS** 12+ (testé sur MacBook Pro M3 Pro)
+- ✅ **macOS** 12+ (testé sur MacBook Pro M3 Pro - ARM64)
 - ✅ **Linux** (Ubuntu 20.04+, CentOS 7+, RHEL 7+, Debian 10+, Fedora 30+)
 - ✅ **Windows** (via WSL2 - voir [Guide Windows](GUIDE_INSTALLATION_WINDOWS.md))
 
@@ -29,74 +29,66 @@
 
 #### Java
 
-- ✅ **Java 11** (pour HCD et Spark 3.5.1)
-- ✅ **Java 17** (pour Kafka 4.1.1, optionnel)
+- ✅ **Java 11+** (pour Cassandra 5.0.6 et Spark 3.5.1)
 
 **Installation** :
 
 ```bash
 # macOS (Homebrew)
 brew install openjdk@11
-brew install openjdk@17
 
 # Linux
 sudo apt-get install openjdk-11-jdk
-sudo apt-get install openjdk-17-jdk
 ```
 
 **Vérification** :
 
 ```bash
 java -version
-# Doit afficher Java 11 ou 17
+# Doit afficher Java 11+
 ```
 
 #### Python
 
-- ✅ **Python 3.8-3.11** (pour cqlsh et scripts)
+- ✅ **Python 3.9-3.12** (pour scripts et tests)
 
 **Installation** :
 
 ```bash
 # macOS (Homebrew)
-brew install python@3.11
+brew install python@3.12
 
 # Linux
-sudo apt-get install python3.11
+sudo apt-get install python3.12
 ```
 
 **Vérification** :
 
 ```bash
 python3 --version
-# Doit afficher Python 3.8-3.11
+# Doit afficher Python 3.9+
 ```
 
-#### Homebrew (macOS uniquement)
+#### Podman & Podman-Compose
 
-- ✅ **Homebrew** (pour Kafka sur macOS)
+- ✅ **Podman** 5.x (conteneurisation)
+- ✅ **podman-compose** (orchestration)
 
 **Installation** :
 
 ```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+# macOS (Homebrew)
+brew install podman podman-compose
+
+# Linux
+sudo apt-get install podman podman-compose
 ```
 
-**Note** : Sur **Linux**, Kafka est installé via le script `02_install_kafka_linux.sh`. Sur **Windows (WSL2)**, suivez le guide Linux dans WSL2.
-
-#### jenv (Recommandé)
-
-- ✅ **jenv** (gestionnaire de versions Java)
-
-**Installation** :
+**Vérification** :
 
 ```bash
-# macOS
-brew install jenv
-
-# Configuration
-echo 'export PATH="$HOME/.jenv/bin:$PATH"' >> ~/.bash_profile
-echo 'eval "$(jenv init -)"' >> ~/.bash_profile
+podman --version
+podman-compose --version
 ```
 
 ---
@@ -106,82 +98,44 @@ echo 'eval "$(jenv init -)"' >> ~/.bash_profile
 ### 1. Cloner le Projet
 
 ```bash
-git clone https://github.com/votre-org/Arkea.git
+git clone https://github.com/davidleconte/Arkea.git
 cd Arkea
 ```
 
-### 2. Installer HCD
+### 2. Démarrer les Services avec Podman
 
 ```bash
-./scripts/setup/01_install_hcd.sh
+# Démarrer tous les services (Cassandra, Kafka, Spark, Kafka UI)
+podman-compose --profile full up -d
 ```
 
 **Ce script** :
 
-- ✅ Détecte automatiquement l'OS (macOS/Linux/Windows WSL2)
-- ✅ Configure Java 11 automatiquement
-- ✅ Extrait HCD 1.2.3 dans `binaire/hcd-1.2.3/`
-- ✅ Configure les permissions
-- ✅ Vérifie l'installation
+- ✅ Lance Cassandra 5.0.6 sur le port 9102
+- ✅ Lance Kafka 3.7.1 (KRaft mode) sur le port 9192
+- ✅ Lance Spark Master UI sur le port 9280
+- ✅ Lance Spark Worker sur le port 9281
+- ✅ Lance Kafka UI sur le port 9190
 
-**Voir** :
+**Note** : Les conteneurs sont configurés avec une isolation 5-couches (voir `PODMAN_RULES.md`).
 
-- `docs/GUIDE_INSTALLATION_HCD.md` - Guide détaillé cross-platform
-- `docs/GUIDE_INSTALLATION_LINUX.md` - Guide Linux spécifique
-- `docs/GUIDE_INSTALLATION_WINDOWS.md` - Guide Windows (WSL2)
-
-### 3. Installer Spark et Kafka
-
-**macOS** :
+### 3. Vérifier l'Installation
 
 ```bash
-./scripts/setup/02_install_spark_kafka.sh
-```
+# Via Makefile
+make status
 
-**Linux** :
-
-```bash
-# Installer Spark
-./scripts/setup/02_install_spark_kafka.sh
-
-# Installer Kafka (script dédié Linux)
-./scripts/setup/02_install_kafka_linux.sh
-```
-
-**Windows (WSL2)** :
-
-```bash
-# Suivre les étapes Linux dans WSL2
-./scripts/setup/02_install_spark_kafka.sh
-./scripts/setup/02_install_kafka_linux.sh
-```
-
-**Ce script** :
-
-- ✅ Détecte automatiquement l'OS
-- ✅ Extrait Spark 3.5.1 dans `binaire/spark-3.5.1/`
-- ✅ Installe Kafka via Homebrew (macOS) ou script Linux
-- ✅ Télécharge `spark-cassandra-connector`
-- ✅ Configure les chemins automatiquement
-
-**Voir** :
-
-- `docs/GUIDE_INSTALLATION_SPARK_KAFKA.md` - Guide détaillé
-- `docs/GUIDE_INSTALLATION_LINUX.md` - Guide Linux spécifique
-
-### 4. Vérifier l'Installation
-
-```bash
-./scripts/utils/80_verify_all.sh
+# Ou directement
+podman ps --filter "name=arkea"
 ```
 
 **Vérifie** :
 
-- ✅ Java 11 et 17 installés
-- ✅ HCD installé
-- ✅ Spark installé
-- ✅ Kafka installé
-- ✅ Python 3.8-3.11 installé
+- ✅ Cassandra 5.0.6 sain (healthy)
+- ✅ Kafka 3.7.1 sain (healthy)
+- ✅ Spark Master sain (healthy)
+- ✅ Spark Worker en cours d'exécution
+- ✅ Kafka UI en cours d'exécution
 
 ---
 
@@ -202,7 +156,7 @@ check_poc_env
 **Fonctionnalités** :
 
 - ✅ Détection automatique de l'OS (macOS/Linux/Windows WSL2)
-- ✅ Détection automatique des chemins (Java, Kafka, HCD, Spark)
+- ✅ Détection automatique des chemins
 - ✅ Variables d'environnement surchargeables
 - ✅ Configuration centralisée (`.poc-config.sh`)
 
@@ -254,63 +208,45 @@ source .poc-profile
 
 ## 🚀 Démarrage
 
-### 1. Démarrer HCD
+### Démarrer les Services
 
 ```bash
-# En arrière-plan
-./scripts/setup/03_start_hcd.sh background
+# Démarrer tous les services
+podman-compose --profile full up -d
 
-# Ou en foreground (pour debug)
-./scripts/setup/03_start_hcd.sh
+# Vérifier le statut
+podman ps --filter "name=arkea"
 ```
 
-**Vérification** :
+**Services disponibles** :
+
+| Service | Port | URL |
+|---------|------|-----|
+| Cassandra CQL | 9102 | `localhost:9102` |
+| Spark Master UI | 9280 | <http://localhost:9280> |
+| Spark Worker UI | 9281 | <http://localhost:9281> |
+| Kafka | 9192 | `localhost:9192` |
+| Kafka UI | 9190 | <http://localhost:9190> |
+
+### Vérification
 
 ```bash
-# Vérifier que HCD est démarré
-cqlsh $HCD_HOST $HCD_PORT -e "DESCRIBE KEYSPACES;"
+# Cassandra
+podman exec arkea-hcd cqlsh localhost 9042 -e "DESCRIBE KEYSPACES;"
+
+# Kafka
+podman exec arkea-kafka /opt/kafka/bin/kafka-topics.sh --list --bootstrap-server localhost:9092
 ```
 
-### 2. Démarrer Kafka
+### Arrêter les Services
 
 ```bash
-# En arrière-plan
-./scripts/setup/04_start_kafka.sh background
+# Arrêter tous les services
+podman-compose down
 
-# Ou en foreground (pour debug)
-./scripts/setup/04_start_kafka.sh
+# Ou via Makefile
+make stop
 ```
-
-**Vérification** :
-
-```bash
-# Lister les topics
-kafka-topics.sh --list --bootstrap-server localhost:9092
-```
-
-### 3. Configurer le Streaming Kafka → HCD
-
-```bash
-./scripts/setup/05_setup_kafka_hcd_streaming.sh
-```
-
-**Ce script** :
-
-- Crée le keyspace `poc_hbase_migration`
-- Crée la table `kafka_events`
-- Configure les topics Kafka
-
-### 4. Tester le Pipeline
-
-```bash
-./scripts/setup/06_test_kafka_hcd_streaming.sh
-```
-
-**Ce script** :
-
-- Envoie des messages de test à Kafka
-- Vérifie la réception dans HCD
-- Affiche les résultats
 
 ---
 
@@ -319,23 +255,27 @@ kafka-topics.sh --list --bootstrap-server localhost:9092
 ### Vérification Complète
 
 ```bash
+# Via Makefile
+make status
+
+# Ou script direct
 ./scripts/utils/80_verify_all.sh
 ```
 
 **Vérifie** :
 
-- ✅ Installation de tous les composants
-- ✅ Services démarrés (HCD, Kafka)
-- ✅ Connexions fonctionnelles
+- ✅ Conteneurs Cassandra, Kafka, Spark en cours d'exécution
+- ✅ Services sains (healthy)
+- ✅ Ports accessibles
 - ✅ Configuration correcte
 
 ### Vérifications Manuelles
 
-#### HCD
+#### Cassandra
 
 ```bash
 # Connexion CQL
-cqlsh $HCD_HOST $HCD_PORT
+podman exec -it arkea-hcd cqlsh localhost 9042
 
 # Dans cqlsh
 DESCRIBE KEYSPACES;

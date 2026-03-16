@@ -1,29 +1,30 @@
 # 🤖 AGENTS.md — Instructions pour les Agents IA
 
-**Dernière mise à jour** : 2026-03-13
+**Dernière mise à jour** : 2026-03-16
 **Objectif** : Guider les assistants IA (Claude, GPT, Cursor, etc.) pour travailler efficacement sur ce projet.
 
 ---
 
 ## 🎯 Contexte Projet
 
-Ce POC démontre la faisabilité de migrer une architecture HBase vers **DataStax HCD** (Hyper-Converged Database, basé sur Cassandra 4.0.11) en utilisant **Apache Spark** et **Kafka**.
+Ce POC démontre la faisabilité de migrer une architecture HBase vers **Apache Cassandra 5.0** en utilisant **Apache Spark**, **Kafka** et **Podman** pour la conteneurisation.
 
 ### Stack Technique
 
 | Composant | Version | Rôle |
 |-----------|---------|------|
-| **HCD** | 1.2.3 | Base de données cible (Cassandra 4.0.11) |
+| **Cassandra** | 5.0.6 | Base de données cible |
 | **Spark** | 3.5.1 | Traitement distribué et streaming |
-| **Kafka** | 4.1.1 | Streaming de données |
-| **spark-cassandra-connector** | 3.5.0 | Intégration Spark ↔ HCD |
+| **Kafka** | 3.7.1 | Streaming de données (KRaft mode) |
+| **spark-cassandra-connector** | 3.5.0 | Intégration Spark ↔ Cassandra |
 | **Python** | 3.9+ | Scripts utilitaires |
 | **Scala** | 2.12 | Tests Spark |
+| **Podman** | 5.x | Conteneurisation (5-layer isolation) |
 
 ### Contexte Métier
 
 - **Client** : Arkea (institution financière française)
-- **Objectif** : Migration COBOL/HBase → Python/Spark/HCD
+- **Objectif** : Migration COBOL/HBase → Python/Spark/Cassandra 5.0
 - **Type** : Preuve de concept (POC) pour validation technique
 
 ---
@@ -162,9 +163,11 @@ Before ANY containerization work, read and follow **`PODMAN_RULES.md`**:
 
 **Port Allocation for ARKEA** (Base: 9100):
 
-- HCD CQL: `9102` → 9042
-- Spark UI: `9180` → 8080
+- Cassandra CQL: `9102` → 9042
+- Spark Master UI: `9280` → 8080
+- Spark Worker UI: `9281` → 8081
 - Kafka: `9192` → 9092
+- Kafka UI: `9190` → 8080
 
 **Reference Documentation**:
 
@@ -225,4 +228,4 @@ make check-consistency # Vérifier cohérence projet
 ## 📞 Contact
 
 - **Auteur** : David LECONTE (<david.leconte1@ibm.com>)
-- **Contexte** : IBM | Arkea POC Migration HBase → HCD
+- **Contexte** : IBM | Arkea POC Migration HBase → Cassandra 5.0

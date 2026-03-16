@@ -2,7 +2,9 @@
 
 ## Status
 
-Accepted
+**SUPERSEDED** - See ADR-0005: Migration to Apache Cassandra 5.0
+
+> ⚠️ **Note**: This decision was superseded on 2026-03-16. The project now uses Apache Cassandra 5.0.6 instead of DataStax HCD 1.2.3. See `docs/adr/0005-cassandra-5.0.md` for the current architecture.
 
 ## Context
 
@@ -58,3 +60,4 @@ We will migrate from **HBase** to **DataStax HCD** (Hyper-Converged Database, ba
 ---
 
 **Author:** David LECONTE (IBM) | **Date:** 2026-03-13
+**Superseded:** 2026-03-16 by ADR-0005

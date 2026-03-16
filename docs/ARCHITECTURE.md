@@ -1,8 +1,8 @@
 # 🏛️ Architecture - ARKEA
 
-**Date** : 2026-03-13
+**Date** : 2026-03-16
 **Objectif** : Architecture complète du projet ARKEA
-**Version** : 1.0
+**Version** : 2.0
 
 ---
 
@@ -18,11 +18,11 @@
 
 ## 🎯 Vue d'Ensemble
 
-Le projet **ARKEA** est un Proof of Concept (POC) démontrant la faisabilité de migrer une architecture HBase existante vers **DataStax Hyper-Converged Database (HCD)**.
+Le projet **ARKEA** est un Proof of Concept (POC) démontrant la faisabilité de migrer une architecture HBase existante vers **Apache Cassandra 5.0** avec conteneurisation Podman.
 
 ### Objectif Principal
 
-**Migrer** l'architecture HBase → HCD en conservant :
+**Migrer** l'architecture HBase → Cassandra 5.0 en conservant :
 
 - ✅ Fonctionnalités existantes
 - ✅ Performance équivalente ou supérieure
@@ -32,9 +32,9 @@ Le projet **ARKEA** est un Proof of Concept (POC) démontrant la faisabilité de
 
 ## 🧩 Composants Principaux
 
-### 1. HCD (Hyper-Converged Database) 1.2.3
+### 1. Apache Cassandra 5.0.6
 
-**Rôle** : Base de données cible (basée sur Cassandra 4.0.11)
+**Rôle** : Base de données cible
 
 **Caractéristiques** :
 
@@ -43,13 +43,13 @@ Le projet **ARKEA** est un Proof of Concept (POC) démontrant la faisabilité de
 - ✅ Support full-text, fuzzy, vector search
 - ✅ Data API (REST/GraphQL)
 
-**Configuration** :
+**Configuration (Podman)** :
 
-- Host : `localhost` (configurable via `HCD_HOST`)
-- Port : `9042` (configurable via `HCD_PORT`)
+- Host : `localhost`
+- Port : `9102` (mappé depuis 9042 interne)
 - Keyspace : `poc_hbase_migration` (configurable via `POC_KEYSPACE`)
 
-**Répertoire** : `binaire/hcd-1.2.3/`
+**Conteneur** : `cassandra:5.0` (image Apache officielle)
 
 ---
 
@@ -60,21 +60,22 @@ Le projet **ARKEA** est un Proof of Concept (POC) démontrant la faisabilité de
 **Caractéristiques** :
 
 - ✅ Batch processing (chargement de données)
-- ✅ Streaming (Kafka → HCD)
+- ✅ Streaming (Kafka → Cassandra)
 - ✅ Spark SQL pour requêtes
-- ✅ Intégration avec HCD via `spark-cassandra-connector`
+- ✅ Intégration avec Cassandra via `spark-cassandra-connector`
 
-**Configuration** :
+**Configuration (Podman)** :
 
 - Version : 3.5.1
+- Master UI : `9280` (mappé depuis 8080 interne)
+- Worker UI : `9281` (mappé depuis 8081 interne)
 - Connector : `spark-cassandra-connector_2.12-3.5.0`
-- Packages : `spark-sql-kafka-0-10_2.12:3.5.1`
 
-**Répertoire** : `binaire/spark-3.5.1/`
+**Conteneur** : `apache/spark:3.5.1` (image Apache officielle)
 
 ---
 
-### 3. Kafka 4.1.1
+### 3. Kafka 3.7.1
 
 **Rôle** : Streaming de données en temps réel
 
@@ -83,84 +84,60 @@ Le projet **ARKEA** est un Proof of Concept (POC) démontrant la faisabilité de
 - ✅ Topics pour événements
 - ✅ Intégration Spark Streaming
 - ✅ Persistence des messages
+- ✅ **KRaft mode** (sans Zookeeper)
 
-**Configuration** :
+**Configuration (Podman)** :
 
-- Bootstrap Servers : `localhost:9092` (configurable via `KAFKA_BOOTSTRAP_SERVERS`)
-- Zookeeper : `localhost:2181` (configurable via `KAFKA_ZOOKEEPER_CONNECT`)
+- Bootstrap Servers : `localhost:9192` (mappé depuis 9092 interne)
+- Controller : `localhost:9193` (mappé depuis 9093 interne)
+- Mode : KRaft (pas de Zookeeper)
 
-**Répertoire** : `binaire/kafka/` (lien symbolique vers Homebrew)
+**Conteneur** : `apache/kafka:3.7.1` (image Apache officielle)
 
 ---
 
-### 4. DSBulk
+### 4. Kafka UI
 
-**Rôle** : Chargement de données en masse
+**Rôle** : Interface de gestion Kafka
 
 **Caractéristiques** :
 
-- ✅ Import/Export CSV, JSON
-- ✅ Optimisé pour Cassandra/HCD
-- ✅ Support parallélisme
+- ✅ Visualisation des topics
+- ✅ Monitoring des consommateurs
+- ✅ Gestion des messages
 
-**Répertoire** : `binaire/dsbulk/`
+**Configuration (Podman)** :
+
+- Port : `9190` (mappé depuis 8080 interne)
+
+**Conteneur** : `provectuslabs/kafka-ui:latest`
 
 ---
 
 ## 🔄 Flux de Données
 
-### Flux Principal : HBase → HCD
+### Flux Principal : HBase → Cassandra
 
-```
-┌─────────┐
-│  HBase  │ (Source existante)
-└────┬────┘
-     │ Export (Parquet/CSV)
-     ▼
-┌─────────┐
-│  Spark  │ (Traitement batch)
-└────┬────┘
-     │ Transformation
-     ▼
-┌─────────┐
-│   HCD   │ (Destination)
-└─────────┘
+```mermaid
+flowchart TD
+    HBase[HBase - Source existante] -->|Export Parquet/CSV| Spark[Spark - Traitement batch]
+    Spark -->|Transformation| Cassandra[Cassandra - Destination]
 ```
 
-### Flux Streaming : Kafka → HCD
+### Flux Streaming : Kafka → Cassandra
 
-```
-┌─────────┐
-│  Kafka  │ (Topics d'événements)
-└────┬────┘
-     │ Streaming
-     ▼
-┌─────────┐
-│  Spark  │ (Streaming processing)
-└────┬────┘
-     │ Écriture
-     ▼
-┌─────────┐
-│   HCD   │ (Stockage)
-└─────────┘
+```mermaid
+flowchart TD
+    Kafka[Kafka - Topics d'événements] -->|Streaming| Spark[Spark - Streaming processing]
+    Spark -->|Écriture| Cassandra[Cassandra - Stockage]
 ```
 
 ### Flux Recherche
 
-```
-┌─────────┐
-│ Client  │ (Application)
-└────┬────┘
-     │ Requête
-     ▼
-┌─────────┐
-│   HCD   │ (SAI Index)
-└────┬────┘
-     │ Résultats
-     ▼
-┌─────────┐
-│ Client  │ (Réponse)
-└─────────┘
+```mermaid
+flowchart TD
+    Client[Client - Application] -->|Requête| Cassandra[Cassandra - SAI Index]
+    Cassandra -->|Résultats| Client2[Client - Réponse]
 ```
 
 ---
@@ -169,7 +146,7 @@ Le projet **ARKEA** est un Proof of Concept (POC) démontrant la faisabilité de
 
 ### Structure des Répertoires
 
-```
+```text
 Arkea/
 ├── scripts/              # Scripts d'automatisation
 │   ├── setup/           # Installation et configuration
@@ -179,13 +156,8 @@ Arkea/
 ├── schemas/             # Schémas CQL
 │   └── kafka/           # Schémas Kafka
 │
-├── binaire/             # Logiciels installés
-│   ├── hcd-1.2.3/       # HCD
-│   ├── spark-3.5.1/     # Spark
-│   └── dsbulk/          # DSBulk
-│
 ├── poc-design/          # POCs de démonstration
-│   ├── domirama2/        # POC Domirama v2 (remplace domirama/)
+│   ├── domirama2/        # POC Domirama v2
 │   ├── domiramaCatOps/   # POC Catégorisation
 │   └── bic/              # POC BIC (Base d'Interaction Client)
 │
@@ -248,9 +220,10 @@ Arkea/
 
 ### Authentification
 
-- **HCD** : Authentification Cassandra standard
+- **Cassandra** : Authentification standard
 - **Data API** : Token-based authentication
 - **Kafka** : SASL/SSL (optionnel)
+- **Podman** : Isolation réseau 5-couches
 
 ### Configuration
 
@@ -272,8 +245,9 @@ Arkea/
 ### Monitoring
 
 - Logs dans `logs/`
-- Métriques HCD via `nodetool`
-- Métriques Spark via UI (port 4040)
+- Métriques Cassandra via `nodetool`
+- Métriques Spark via UI (port 9280)
+- Kafka UI (port 9190)
 
 ---
 
@@ -281,7 +255,7 @@ Arkea/
 
 ### Horizontal Scaling
 
-- **HCD** : Cluster multi-nœuds
+- **Cassandra** : Cluster multi-nœuds
 - **Spark** : Cluster distribué
 - **Kafka** : Partitionnement des topics
 
@@ -289,28 +263,31 @@ Arkea/
 
 - Configuration des ressources (mémoire, CPU)
 - Tuning des paramètres JVM
+- Podman resource limits (voir `podman-compose.yml`)
 
 ---
 
 ## 📝 Décisions Architecturales
 
-### ADR-001 : Choix de HCD
+### ADR-001 : Choix de Cassandra 5.0
 
-**Contexte** : Migration HBase → HCD
+**Contexte** : Migration HBase → Cassandra
 
-**Décision** : Utiliser HCD 1.2.3 (basé sur Cassandra 4.0.11)
+**Décision** : Utiliser Apache Cassandra 5.0.6
 
 **Justification** :
 
+- ✅ Dernière version stable avec SAI natif
 - ✅ Compatibilité avec écosystème Cassandra
-- ✅ SAI pour recherche avancée
-- ✅ Data API pour modernisation
-- ✅ Support DataStax
+- ✅ SAI pour recherche avancée (full-text, vector)
+- ✅ Images Docker/Podman officielles Apache
+- ✅ Communauté active et support
 
 **Conséquences** :
 
 - Nécessite adaptation des schémas HBase → CQL
 - Migration des données via Spark
+- Conteneurisation via Podman
 
 ---
 
@@ -384,6 +361,6 @@ Arkea/
 
 ---
 
-**Date** : 2026-03-13
-**Version** : 1.0
-**Statut** : ✅ **Documentation complète**
+**Date** : 2026-03-16
+**Version** : 2.0
+**Statut** : ✅ **Documentation complète - Cassandra 5.0**

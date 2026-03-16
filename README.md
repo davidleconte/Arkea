@@ -1,16 +1,16 @@
-# 🚀 POC Migration HBase → HCD (Hyper-Converged Database)
+# 🚀 POC Migration HBase → Cassandra 5.0
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.4.1-green.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.0.0-green.svg)](CHANGELOG.md)
 [![CI](https://github.com/davidleconte/Arkea/workflows/CI/badge.svg)](https://github.com/davidleconte/Arkea/actions/workflows/test.yml)
 [![Security](https://github.com/davidleconte/Arkea/workflows/Security/badge.svg)](https://github.com/davidleconte/Arkea/actions/workflows/security.yml)
 [![codecov](https://codecov.io/gh/davidleconte/Arkea/branch/main/graph/badge.svg)](https://codecov.io/gh/davidleconte/Arkea)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](docs/DEPLOYMENT.md)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-**Date** : 2026-03-13
-**Version** : 1.4.1
-**Objectif** : Démonstration de faisabilité de la migration HBase vers DataStax HCD
+**Date** : 2026-03-16
+**Version** : 2.0.0
+**Objectif** : Démonstration de faisabilité de la migration HBase vers Apache Cassandra 5.0
 **IBM | Opportunité ICS 006gR000001hiA5QAI - ARKEA | Ingénieur Avant-Vente** :
 David LECONTE | <david.leconte1@ibm.com> - Mobile : +33614126117
 **License** : [Apache 2.0](LICENSE)
@@ -20,8 +20,7 @@ David LECONTE | <david.leconte1@ibm.com> - Mobile : +33614126117
 ## 📋 Vue d'Ensemble
 
 Ce projet démontre la faisabilité de migrer l'architecture HBase existante chez
-Arkéa vers DataStax Hyper-Converged Database (HCD) en utilisant Spark, Kafka et
-Cassandra.
+Arkéa vers Apache Cassandra 5.0 en utilisant Spark, Kafka et Podman pour la conteneurisation.
 
 ---
 
@@ -55,10 +54,11 @@ Le projet ARKEA est **cross-platform** et supporte les systèmes d'exploitation 
 
 ### Composants Principaux
 
-- **HCD 1.2.3** - Base de données cible (basée sur Cassandra 4.0.11)
+- **Cassandra 5.0.6** - Base de données cible (Apache Cassandra)
 - **Spark 3.5.1** - Traitement distribué et streaming
-- **Kafka 4.1.1** - Streaming de données
-- **spark-cassandra-connector 3.5.0** - Intégration Spark ↔ HCD
+- **Kafka 3.7.1** - Streaming de données (KRaft mode, sans Zookeeper)
+- **spark-cassandra-connector 3.5.0** - Intégration Spark ↔ Cassandra
+- **Podman** - Conteneurisation (isolation 5-couches)
 
 ---
 
@@ -273,12 +273,11 @@ Voir `docs/CONFIGURATION_ENVIRONNEMENT.md` pour les détails.
 
 ### Logiciels Requis
 
-- **Java 11** (pour HCD et Spark 3.5.1)
-- **Java 17** (pour Kafka 4.1.1, optionnel)
-- **Python 3.8-3.11** (pour scripts et tests)
+- **Java 11+** (pour Cassandra 5.0.6 et Spark 3.5.1)
+- **Python 3.9-3.12** (pour scripts et tests)
 - **pip** (pour installer les dépendances Python)
-- **Homebrew** (pour Kafka sur macOS)
-- **jenv** (recommandé pour gérer les versions Java)
+- **Podman** & **podman-compose** (pour la conteneurisation)
+- **Homebrew** (macOS, optionnel)
 
 ### Dépendances Python
 
