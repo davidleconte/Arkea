@@ -88,7 +88,7 @@ def fix_code_blocks(content: str) -> str:
 def fix_duplicate_headings(content: str) -> str:
     """Ajoute un suffixe aux titres dupliqués."""
     lines = content.split("\n")
-    heading_counts = {}
+    heading_counts: dict[str, int] = {}
     fixed_lines = []
 
     for line in lines:

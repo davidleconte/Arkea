@@ -243,7 +243,9 @@ lint: ## Run linters (ShellCheck, pyflake)
 	@if command -v shellcheck >/dev/null 2>&1; then \
 		find . -name "*.sh" -not -path "./binaire/*" -not -path "./software/*" -exec shellcheck {} \; 2>/dev/null || true; \
 	fi
-	@if command -v flake8 >/dev/null 2>&1; then flake8 . --max-line-length 100; fi
+	@if command -v flake8 >/dev/null 2>&1; then \
+		flake8 . --max-line-length 100 --exclude="binaire/*,software/*,inputs-*,poc-design/*,.venv/*,.git/*"; \
+	fi
 
 security: ## Run security checks (secrets detection)
 	@echo "🔒 Running security checks..."
