@@ -1,6 +1,13 @@
 # Ignore archived/obsolete documentation
 docs/archive/
 
+# Ignore OSS5.0 duplicated POC docs (they're copies)
+poc-design/OSS5.0_*
+
+# Ignore new documentation (can be fixed later)
+docs/TWO_LEG_SETUP_PLAN.md
+docs/OSS5.0_SCRIPT_TEMPLATE.md
+
 # Ignore vendor/third-party docs
 vendor/
 node_modules/

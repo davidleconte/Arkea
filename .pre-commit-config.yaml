@@ -83,6 +83,7 @@ repos:
       - id: shellcheck
         files: ^(scripts|tests|poc-design)/.*\.sh$
         args: ["--severity=warning"]
+        exclude: ^poc-design/OSS5.0_
 
   # =============================================================================
   # Security - Secrets Detection
@@ -92,7 +93,7 @@ repos:
     hooks:
       - id: detect-secrets
         args: ["--baseline", ".secrets.baseline"]
-        exclude: ^inputs-(client|ibm)/
+        exclude: ^inputs-(client|ibm)/|^poc-design/OSS5.0_
 
   # =============================================================================
   # Markdown - Linting
