@@ -7,6 +7,7 @@ poc-design/OSS5.0_*
 # Ignore new documentation (can be fixed later)
 docs/TWO_LEG_SETUP_PLAN.md
 docs/OSS5.0_SCRIPT_TEMPLATE.md
+docs/ARCHITECTURE_POC_COMPLETE.md
 
 # Ignore vendor/third-party docs
 vendor/

@@ -1,6 +1,6 @@
 # Architecture Complète du POC Migration HBase → HCD
 
-**Date** : 2025-11-25  
+**Date** : 2025-11-25
 **Objectif** : POC complet pour démontrer la migration HBase → HCD
 
 ---
@@ -12,7 +12,7 @@
 │                    MacBook Pro M3 Pro                        │
 │                                                               │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │   HCD 1.2.3  │  │  Spark 3.5.x │  │  Kafka 3.6.x │      │
+│  │   Cassandra 5.0.6  │  │  Spark 3.5.x │  │  Kafka 3.7.1 │      │
 │  │  (Cassandra) │  │              │  │              │      │
 │  │   Port 9042  │  │              │  │  Port 9092    │      │
 │  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘      │
@@ -44,7 +44,7 @@
 
 ## 📦 Composants Installés
 
-### ✅ HCD 1.2.3 (Hyper-Converged Database)
+### ✅ Cassandra 5.0.6 (Hyper-Converged Database)
 - **Statut** : ✅ Installé et démarré
 - **Port CQL** : 9042
 - **Port Inter-node** : 7000
@@ -61,7 +61,7 @@
 - **Version** : 3.5.0 (compatible Spark 3.5.x)
 - **Usage** : Connexion Spark ↔ HCD
 
-### ⏳ Kafka 3.6.x
+### ⏳ Kafka 3.7.1
 - **Statut** : À installer
 - **Méthode** : Homebrew ou manuel
 - **Port** : 9092
@@ -264,7 +264,7 @@ kafka-console-consumer.sh \
    ```bash
    # HCD (déjà démarré)
    ./start_hcd.sh
-   
+
    # Kafka
    brew services start zookeeper
    brew services start kafka
@@ -294,4 +294,3 @@ kafka-console-consumer.sh \
 ---
 
 **Architecture prête pour le développement du POC !** 🚀
-
