@@ -52,43 +52,33 @@ start: ## Start all services (HCD + Kafka) with health checks
 	@echo "✅ All services started"
 	@$(MAKE) status
 
-start-hcd: ## Start HCD (Cassandra) and wait for ready
-	@echo "🚀 Starting HCD..."
-	@if [ -f ./scripts/setup/03_start_hcd.sh ]; then \
-		./scripts/setup/03_start_hcd.sh background; \
-		echo "⏳ Waiting for HCD to be ready..."; \
-		for i in $$(seq 1 30); do \
-			if nc -z localhost 9042 2>/dev/null; then \
-				echo "✅ HCD is ready on port 9042"; \
-				exit 0; \
-			fi; \
-			sleep 2; \
-		done; \
-		echo "⚠️  HCD failed to start within 60s"; \
-		exit 1; \
-	else \
-		echo "⚠️  HCD start script not found"; \
-		exit 1; \
-	fi
+start-hcd: ## Start Cassandra 5.0 via Podman and wait for ready
+	@echo "🚀 Starting Cassandra 5.0 via Podman..."
+	@podman-compose -f podman-compose.yml up -d arkea-hcd || podman up arkea-hcd
+	@echo "⏳ Waiting for Cassandra to be ready..."
+	@for i in $$(seq 1 30); do \
+		if nc -z localhost 9102 2>/dev/null; then \
+			echo "✅ Cassandra 5.0 is ready on port 9102"; \
+			exit 0; \
+		fi; \
+		sleep 2; \
+	done; \
+	echo "⚠️  Cassandra failed to start within 60s"; \
+	exit 1
 
-start-kafka: ## Start Kafka and wait for ready
-	@echo "🚀 Starting Kafka..."
-	@if [ -f ./scripts/setup/04_start_kafka.sh ]; then \
-		./scripts/setup/04_start_kafka.sh background; \
-		echo "⏳ Waiting for Kafka to be ready..."; \
-		for i in $$(seq 1 30); do \
-			if nc -z localhost 9092 2>/dev/null; then \
-				echo "✅ Kafka is ready on port 9092"; \
-				exit 0; \
-			fi; \
-			sleep 2; \
-		done; \
-		echo "⚠️  Kafka failed to start within 60s"; \
-		exit 1; \
-	else \
-		echo "⚠️  Kafka start script not found"; \
-		exit 1; \
-	fi
+start-kafka: ## Start Kafka via Podman and wait for ready
+	@echo "🚀 Starting Kafka via Podman..."
+	@podman-compose -f podman-compose.yml up -d arkea-kafka || podman up arkea-kafka
+	@echo "⏳ Waiting for Kafka to be ready..."
+	@for i in $$(seq 1 30); do \
+		if nc -z localhost 9192 2>/dev/null; then \
+			echo "✅ Kafka is ready on port 9192"; \
+			exit 0; \
+		fi; \
+		sleep 2; \
+	done; \
+	echo "⚠️  Kafka failed to start within 60s"; \
+	exit 1
 
 stop: ## Stop all services gracefully
 	@echo "🛑 Stopping services..."
