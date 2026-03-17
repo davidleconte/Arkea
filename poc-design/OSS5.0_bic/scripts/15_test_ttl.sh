@@ -55,6 +55,21 @@ expected() { echo -e "${YELLOW}📋 $1${NC}"; }
 # Créer le répertoire de documentation
 mkdir -p "$(dirname "$REPORT_FILE")"
 
+# OSS5.0 Podman mode
+if [ "$HCD_DIR" = "podman" ] || [ -z "$HCD_DIR" ]; then
+    if podman ps --filter "name=arkea-hcd" --format "{{.Names}}" 2>/dev/null | grep -q "arkea-hcd"; then
+        CQLSH="podman exec arkea-hcd cqlsh localhost 9042"
+        PODMAN_MODE=true
+    else
+        echo "ERROR: Container arkea-hcd not running. Run 'make demo' first."
+        exit 1
+    fi
+else
+    CQLSH_BIN="${HCD_DIR}/bin/cqlsh"
+    CQLSH="$CQLSH_BIN $HCD_HOST $HCD_PORT"
+    PODMAN_MODE=false
+fi
+# Original cqlsh config (commented):
 # Configuration cqlsh
 CQLSH_BIN="${HCD_DIR}/bin/cqlsh"
 CQLSH="$CQLSH_BIN $HCD_HOST $HCD_PORT"
