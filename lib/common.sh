@@ -170,7 +170,7 @@ spark_status() {
 cql_exec() {
     local query="$1"
     local host="${HCD_HOST:-localhost}"
-    local port="${HCD_PORT:-9042}"
+    local port="${HCD_PORT:-9102}"
 
     cqlsh "$host" "$port" -e "$query"
 }
@@ -178,7 +178,7 @@ cql_exec() {
 cql_exec_file() {
     local file="$1"
     local host="${HCD_HOST:-localhost}"
-    local port="${HCD_PORT:-9042}"
+    local port="${HCD_PORT:-9102}"
 
     cqlsh "$host" "$port" -f "$file"
 }

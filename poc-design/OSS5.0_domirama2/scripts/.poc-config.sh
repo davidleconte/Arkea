@@ -37,8 +37,8 @@ set -euo pipefail
 # Host HCD (par défaut: localhost)
 HCD_HOST="${HCD_HOST:-localhost}"
 
-# Port HCD (par défaut: 9042)
-HCD_PORT="${HCD_PORT:-9042}"
+# Port HCD (par défaut: 9102)
+HCD_PORT="${HCD_PORT:-9102}"
 
 # ============================================
 # CONFIGURATION JAVA

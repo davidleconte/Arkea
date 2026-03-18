@@ -33,7 +33,8 @@ if [ -z "${JAVA_HOME:-}" ] || ! java -version 2>&1 | grep -q "11"; then
     if command -v jenv &> /dev/null; then
         eval "$(jenv init -)" 2>/dev/null || true
         if jenv versions | grep -q "11"; then
-            export JAVA_HOME=$(jenv prefix 11)
+            JAVA_HOME="$(jenv prefix 11)"
+            export JAVA_HOME
             export PATH="$JAVA_HOME/bin:$PATH"
             echo "✅ Java 11 configuré via jenv : $JAVA_HOME"
         fi
@@ -52,8 +53,8 @@ if ! java -version 2>&1 | grep -q "11"; then
 fi
 
 # Vérifier si HCD est déjà en cours d'exécution (fonction portable)
-if check_port 9042; then
-    echo "⚠️  HCD est déjà en cours d'exécution (port 9042 utilisé)"
+if check_port "${HCD_PORT:-9042}"; then
+    echo "⚠️  HCD est déjà en cours d'exécution (port ${HCD_PORT:-9042} utilisé)"
     echo "Pour arrêter: kill_process cassandra"
     exit 1
 fi

@@ -30,6 +30,7 @@ build/
 # Runtime logs and local data
 logs/
 *.log
+.arkea-leg
 hcd-data/
 data/
 tmp/

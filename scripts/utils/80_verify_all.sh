@@ -148,11 +148,11 @@ else
             error "Binaire hcd non trouvé"
         fi
 
-        # Vérifier si HCD est démarré
-        if lsof -Pi :9042 -sTCP:LISTEN -t >/dev/null 2>&1; then
-            info "HCD est démarré (port 9042)"
+        # Vérifier si HCD est démarré (port hôte Podman)
+        if lsof -Pi :9102 -sTCP:LISTEN -t >/dev/null 2>&1; then
+            info "HCD est démarré (port 9102)"
         else
-            warn "HCD n'est pas démarré (port 9042 non utilisé)"
+            warn "HCD n'est pas démarré (port 9102 non utilisé)"
         fi
     else
         error "HCD non installé. Exécutez: ./install_hcd.sh"
@@ -192,7 +192,7 @@ HOMEBREW_PREFIX="${HOMEBREW_PREFIX:-/opt/homebrew}"
 KAFKA_HOME="${KAFKA_HOME:-${HOMEBREW_PREFIX}/opt/kafka}"
 if [[ "$DRY_RUN" == true ]]; then
     dry_run_info "Kafka installation at $KAFKA_HOME"
-    dry_run_info "Kafka binaries and port 9092 status"
+    dry_run_info "Kafka binaries and port 9192 status"
 else
     if [ -d "$KAFKA_HOME" ]; then
         info "Kafka installé dans: $KAFKA_HOME"
@@ -202,11 +202,11 @@ else
             error "Binaire kafka-server-start.sh non trouvé"
         fi
 
-        # Vérifier si Kafka est démarré
-        if lsof -Pi :9092 -sTCP:LISTEN -t >/dev/null 2>&1; then
-            info "Kafka est démarré (port 9092)"
+        # Vérifier si Kafka est démarré (port hôte Podman)
+        if lsof -Pi :9192 -sTCP:LISTEN -t >/dev/null 2>&1; then
+            info "Kafka est démarré (port 9192)"
         else
-            warn "Kafka n'est pas démarré (port 9092 non utilisé)"
+            warn "Kafka n'est pas démarré (port 9192 non utilisé)"
         fi
     else
         error "Kafka non installé. Exécutez: ./install_spark_kafka.sh"

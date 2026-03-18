@@ -45,11 +45,11 @@ test_main_directories() {
 # Test 3 : HCD Configuration
 test_hcd_config() {
     assert_var_defined "HCD_VERSION" "HCD_VERSION devrait être défini"
-    assert_equal "$HCD_VERSION" "1.2.3" "HCD_VERSION devrait être 1.2.3"
+    assert_equal "$HCD_VERSION" "5.0.6" "HCD_VERSION devrait être 5.0.6"
 
     assert_var_defined "HCD_HOST" "HCD_HOST devrait être défini"
     assert_var_defined "HCD_PORT" "HCD_PORT devrait être défini"
-    assert_equal "$HCD_PORT" "9042" "HCD_PORT devrait être 9042"
+    assert_equal "$HCD_PORT" "9102" "HCD_PORT devrait être 9102 (Podman default)"
 }
 
 # Test 4 : Spark Configuration

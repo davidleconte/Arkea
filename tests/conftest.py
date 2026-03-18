@@ -72,7 +72,7 @@ def hcd_host():
 @pytest.fixture
 def hcd_port():
     """Return HCD port from environment."""
-    return int(os.environ.get("HCD_PORT", "9042"))
+    return int(os.environ.get("HCD_PORT", "9102"))
 
 
 @pytest.fixture
@@ -84,7 +84,7 @@ def kafka_host():
 @pytest.fixture
 def kafka_port():
     """Return Kafka port from environment."""
-    return int(os.environ.get("KAFKA_PORT", "9092"))
+    return int(os.environ.get("KAFKA_PORT", "9192"))
 
 
 # =============================================================================

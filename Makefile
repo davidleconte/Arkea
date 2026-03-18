@@ -38,92 +38,166 @@ setup: ## Initial project setup (run once)
 check-env: ## Validate environment configuration
 	@echo "🔍 Checking environment..."
 	@bash -c 'source .poc-config.sh && echo "ARKEA_HOME: $$ARKEA_HOME"'
-	@bash -c 'source .poc-config.sh && echo "HCD: $${HCD_HOST:-localhost}:$${HCD_PORT:-9042}"'
-	@bash -c 'source .poc-config.sh && echo "KAFKA: $${KAFKA_HOST:-localhost}:$${KAFKA_PORT:-9092}"'
+	@bash -c 'source .poc-config.sh && echo "ARKEA_LEG: $$ARKEA_LEG"'
+	@bash -c 'source .poc-config.sh && echo "HCD: $$HCD_HOST:$$HCD_PORT"'
+	@bash -c 'source .poc-config.sh && echo "KAFKA: $$KAFKA_HOST:$$KAFKA_PORT"'
 
 # =============================================================================
 # SERVICES
 # =============================================================================
 
-start: ## Start all services (HCD + Kafka) with health checks
-	@echo "🚀 Starting all services..."
-	@$(MAKE) start-hcd
-	@$(MAKE) start-kafka
-	@echo "✅ All services started"
-	@$(MAKE) status
-
-start-hcd: ## Start Cassandra 5.0 via Podman and wait for ready
-	@echo "🚀 Starting Cassandra 5.0 via Podman..."
-	@podman-compose -f podman-compose.yml up -d arkea-hcd || podman up arkea-hcd
-	@echo "⏳ Waiting for Cassandra to be ready..."
-	@for i in $$(seq 1 30); do \
-		if nc -z localhost 9102 2>/dev/null; then \
-			echo "✅ Cassandra 5.0 is ready on port 9102"; \
-			exit 0; \
+select-leg: ## Ask which runtime leg to use (1=podman/cassandra5, 2=binary/hcd-tarball)
+	@bash -c ' \
+		set -e; \
+		if [ -t 0 ]; then \
+			echo "🎯 Select runtime leg for this deployment:"; \
+			echo "  1) Cassandra 5.0 (Podman)"; \
+			echo "  2) HCD tarball (Binary)"; \
+			read -r -p "Choice [1/2]: " choice; \
+			case "$$choice" in \
+				1) leg="podman" ;; \
+				2) leg="binary" ;; \
+				*) echo "❌ Invalid choice: $$choice"; exit 1 ;; \
+			esac; \
+		else \
+			leg="$${ARKEA_LEG:-podman}"; \
+			echo "ℹ️  Non-interactive mode: using ARKEA_LEG=$$leg"; \
 		fi; \
-		sleep 2; \
-	done; \
-	echo "⚠️  Cassandra failed to start within 60s"; \
-	exit 1
-
-start-kafka: ## Start Kafka via Podman and wait for ready
-	@echo "🚀 Starting Kafka via Podman..."
-	@podman-compose -f podman-compose.yml up -d arkea-kafka || podman up arkea-kafka
-	@echo "⏳ Waiting for Kafka to be ready..."
-	@for i in $$(seq 1 30); do \
-		if nc -z localhost 9192 2>/dev/null; then \
-			echo "✅ Kafka is ready on port 9192"; \
-			exit 0; \
+		if [ "$$leg" = "binary" ]; then \
+			if [ "$${ARKEA_ENABLE_BINARY_LEG:-0}" != "1" ]; then \
+				echo "❌ Binary leg disabled by policy (latest HCD tarball unavailable)."; \
+				echo "   Use OSS 5.0 leg for now: ARKEA_LEG=podman make start"; \
+				echo "   To force-enable binary leg later: ARKEA_ENABLE_BINARY_LEG=1 ARKEA_LEG=binary make start"; \
+				exit 1; \
+			fi; \
+			hcd_installed=0; \
+			hcd_tarball=0; \
+			[ -d binaire/hcd-1.2.3 ] && hcd_installed=1 || true; \
+			compgen -G "software/*hcd*.tar.gz" > /dev/null && hcd_tarball=1 || true; \
+			compgen -G "software/*hcd*.tgz" > /dev/null && hcd_tarball=1 || true; \
+			if [ "$$hcd_installed" -ne 1 ] && [ "$$hcd_tarball" -ne 1 ]; then \
+				echo "❌ Binary leg unavailable: no HCD tarball and no local HCD install found."; \
+				echo "   Use OSS 5.0 leg for now: ARKEA_LEG=podman make start"; \
+				exit 1; \
+			fi; \
 		fi; \
-		sleep 2; \
-	done; \
-	echo "⚠️  Kafka failed to start within 60s"; \
-	exit 1
+		echo "$$leg" > .arkea-leg; \
+		echo "✅ Selected leg: $$leg" \
+	'
 
-stop: ## Stop all services gracefully
+enforce-single-leg: ## Ensure only one leg is active to avoid conflicts
+	@bash -c ' \
+		set -e; \
+		LEG="$${ARKEA_LEG:?ARKEA_LEG required}"; \
+		if [ "$$LEG" = "podman" ]; then \
+			pkill -f "kafka.Kafka" 2>/dev/null || true; \
+			pkill -f "cassandra" 2>/dev/null || true; \
+			echo "🧹 Binary leg processes stopped (if any)."; \
+		else \
+			podman-compose -f podman-compose.yml down 2>/dev/null || true; \
+			echo "🧹 Podman leg stopped (if running)."; \
+		fi \
+	'
+
+start: ## Start selected leg (asks each time) with conflict prevention
+	@echo "🚀 Starting services..."
+	@$(MAKE) select-leg
+	@LEG=$$(cat .arkea-leg 2>/dev/null || echo "$${ARKEA_LEG:-podman}"); $(MAKE) enforce-single-leg ARKEA_LEG=$$LEG
+	@LEG=$$(cat .arkea-leg 2>/dev/null || echo "$${ARKEA_LEG:-podman}"); $(MAKE) start-hcd ARKEA_LEG=$$LEG
+	@LEG=$$(cat .arkea-leg 2>/dev/null || echo "$${ARKEA_LEG:-podman}"); $(MAKE) start-kafka ARKEA_LEG=$$LEG
+	@LEG=$$(cat .arkea-leg 2>/dev/null || echo "$${ARKEA_LEG:-podman}"); $(MAKE) status ARKEA_LEG=$$LEG
+	@rm -f .arkea-leg
+	@echo "✅ Selected leg started successfully"
+
+start-hcd: ## Start HCD/Cassandra according to selected leg
+	@bash -c ' \
+		set -e; \
+		source .poc-config.sh; \
+		echo "🚀 Starting HCD ($$ARKEA_LEG leg)..."; \
+		if [ "$$ARKEA_LEG" = "podman" ]; then \
+			podman-compose -f podman-compose.yml --profile full up -d hcd; \
+		else \
+			./scripts/setup/03_start_hcd.sh background; \
+		fi; \
+		echo "⏳ Waiting for HCD on $$HCD_HOST:$$HCD_PORT..."; \
+		for i in $$(seq 1 30); do \
+			if nc -z "$$HCD_HOST" "$$HCD_PORT" 2>/dev/null; then \
+				echo "✅ HCD ready on port $$HCD_PORT"; \
+				exit 0; \
+			fi; \
+			sleep 2; \
+		done; \
+		echo "⚠️  HCD failed to start within 60s"; \
+		exit 1 \
+	'
+
+start-kafka: ## Start Kafka according to selected leg
+	@bash -c ' \
+		set -e; \
+		source .poc-config.sh; \
+		echo "🚀 Starting Kafka ($$ARKEA_LEG leg)..."; \
+		if [ "$$ARKEA_LEG" = "podman" ]; then \
+			podman-compose -f podman-compose.yml --profile full up -d kafka; \
+		else \
+			./scripts/setup/04_start_kafka.sh background; \
+		fi; \
+		echo "⏳ Waiting for Kafka on $$KAFKA_HOST:$$KAFKA_PORT..."; \
+		for i in $$(seq 1 30); do \
+			if nc -z "$$KAFKA_HOST" "$$KAFKA_PORT" 2>/dev/null; then \
+				echo "✅ Kafka ready on port $$KAFKA_PORT"; \
+				exit 0; \
+			fi; \
+			sleep 2; \
+		done; \
+		echo "⚠️  Kafka failed to start within 60s"; \
+		exit 1 \
+	'
+
+stop: ## Stop all services gracefully (both legs)
 	@echo "🛑 Stopping services..."
-	@if [ -f ./scripts/setup/04_stop_kafka.sh ]; then \
-		./scripts/setup/04_stop_kafka.sh 2>/dev/null || true; \
-	else \
-		pkill -f "kafka.Kafka" 2>/dev/null || true; \
-	fi
-	@if [ -f ./scripts/setup/03_stop_hcd.sh ]; then \
-		./scripts/setup/03_stop_hcd.sh 2>/dev/null || true; \
-	else \
-		pkill -f "cassandra" 2>/dev/null || true; \
-	fi
+	@podman-compose -f podman-compose.yml down 2>/dev/null || true
+	@pkill -f "kafka.Kafka" 2>/dev/null || true
+	@pkill -f "cassandra" 2>/dev/null || true
 	@echo "✅ Services stopped"
 
 restart: stop start ## Restart all services
 
-status: ## Check service status with detailed info
-	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-	@echo "📊 ARKEA Service Status"
-	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-	@echo ""
-	@echo "  Cassandra 5.0:"
-	@if nc -z localhost 9102 2>/dev/null; then \
-		echo "    Status: ✅ Running on port 9102"; \
-		podman exec arkea-hcd cqlsh localhost 9042 -e "DESCRIBE KEYSPACES;" 2>/dev/null | head -5 || true; \
-	else \
-		echo "    Status: ❌ Stopped"; \
-	fi
-	@echo ""
-	@echo "  Kafka:"
-	@if nc -z localhost 9192 2>/dev/null; then \
-		echo "    Status: ✅ Running on port 9192"; \
-	else \
-		echo "    Status: ❌ Stopped"; \
-	fi
-	@echo ""
-	@echo "  Spark:"
-	@if nc -z localhost 9280 2>/dev/null; then \
-		echo "    Status: ✅ Running (Master: 9280, Worker: 9281)"; \
-	else \
-		echo "    Status: ❌ Stopped"; \
-	fi
-	@echo ""
-	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+status: ## Check service status for selected leg
+	@bash -c ' \
+		set -e; \
+		source .poc-config.sh; \
+		echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"; \
+		echo "📊 ARKEA Service Status ($$ARKEA_LEG)"; \
+		echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"; \
+		echo ""; \
+		echo "  HCD/Cassandra:"; \
+		if nc -z "$$HCD_HOST" "$$HCD_PORT" 2>/dev/null; then \
+			echo "    Status: ✅ Running on $$HCD_HOST:$$HCD_PORT"; \
+			if [ "$$ARKEA_LEG" = "podman" ]; then \
+				podman exec arkea-hcd cqlsh localhost 9042 -e "DESCRIBE KEYSPACES;" 2>/dev/null | head -5 || true; \
+			fi; \
+		else \
+			echo "    Status: ❌ Stopped"; \
+		fi; \
+		echo ""; \
+		echo "  Kafka:"; \
+		if nc -z "$$KAFKA_HOST" "$$KAFKA_PORT" 2>/dev/null; then \
+			echo "    Status: ✅ Running on $$KAFKA_HOST:$$KAFKA_PORT"; \
+		else \
+			echo "    Status: ❌ Stopped"; \
+		fi; \
+		echo ""; \
+		if [ "$$ARKEA_LEG" = "podman" ]; then \
+			echo "  Spark:"; \
+			if nc -z localhost 9280 2>/dev/null; then \
+				echo "    Status: ✅ Running (Master: 9280, Worker: 9281)"; \
+			else \
+				echo "    Status: ❌ Stopped"; \
+			fi; \
+			echo ""; \
+		fi; \
+		echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" \
+	'
 
 # =============================================================================
 # DEMO TARGETS (Quick Start for Presentations)

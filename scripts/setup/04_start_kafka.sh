@@ -80,7 +80,8 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
         echo "✅ Java 17 trouvé via Homebrew"
     fi
 elif command -v jenv &> /dev/null && jenv versions | grep -q "17"; then
-    export JAVA_HOME=$(jenv prefix 17)
+    JAVA_HOME="$(jenv prefix 17)"
+    export JAVA_HOME
     export PATH="$JAVA_HOME/bin:$PATH"
     echo "✅ Java 17 trouvé via jenv"
 fi
@@ -108,8 +109,8 @@ else
 fi
 
 # Vérifier si Kafka est déjà en cours d'exécution (fonction portable)
-if check_port 9092; then
-    echo "⚠️  Kafka est déjà en cours d'exécution (port 9092 utilisé)"
+if check_port "${KAFKA_PORT:-9092}"; then
+    echo "⚠️  Kafka est déjà en cours d'exécution (port ${KAFKA_PORT:-9092} utilisé)"
     echo "Pour arrêter: kill_process kafka.Kafka"
     exit 1
 fi
