@@ -1,5 +1,9 @@
 # 🚀 Guide de Déploiement - ARKEA
 
+> ⚠️ **HISTORICAL DOCUMENTATION NOTICE**
+> This document may contain references to the legacy binary leg (HCD 1.2.3 / Java 11).
+> For the active **Podman (OSS 5.0 / Java 17)** path, refer to `README.md` and `.poc-config.sh`.
+
 **Date** : 2026-03-16
 **Objectif** : Guide complet pour déployer le projet ARKEA avec Podman
 **Version** : 2.0

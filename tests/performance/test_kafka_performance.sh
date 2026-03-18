@@ -21,6 +21,11 @@ if [ -f "$ARKEA_HOME/.poc-config.sh" ]; then
     source "$ARKEA_HOME/.poc-config.sh"
 fi
 
+# Normaliser les variables réseau depuis .poc-config.sh (fallbacks sûrs)
+: "${KAFKA_HOST:=localhost}"
+: "${KAFKA_PORT:=9192}"
+: "${KAFKA_BOOTSTRAP_SERVERS:=${KAFKA_HOST}:${KAFKA_PORT}}"
+
 # Variables de test
 TEST_TOPIC="perf_test_topic_$(date +%s)"
 MESSAGE_COUNT=1000
@@ -37,7 +42,7 @@ cleanup() {
     if [ -n "${KAFKA_HOME:-}" ] && [ -d "$KAFKA_HOME" ]; then
         "$KAFKA_HOME/bin/kafka-topics.sh" --delete \
             --topic "$TEST_TOPIC" \
-            --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092} 2>/dev/null || true
+            --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS} 2>/dev/null || true
     fi
 
     echo "✅ Nettoyage terminé"
@@ -65,7 +70,7 @@ test_suite_start "Tests de Performance Kafka"
 
 # Test 1 : Kafka est démarré
 test_kafka_running() {
-    assert_port_open "9092" "Kafka devrait être démarré sur le port 9092"
+    assert_port_open "${KAFKA_PORT}" "Kafka devrait être démarré sur le port ${KAFKA_PORT}"
 }
 
 # Test 2 : Latence de création de topic
@@ -81,7 +86,7 @@ test_topic_creation_latency() {
     local duration
     duration=$(measure_time "$KAFKA_HOME/bin/kafka-topics.sh" --create \
         --topic "$TEST_TOPIC" \
-        --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092} \
+        --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS} \
         --partitions 1 \
         --replication-factor 1 > /dev/null 2>&1)
 
@@ -107,7 +112,7 @@ test_producer_throughput() {
     # Créer le topic si nécessaire
     "$KAFKA_HOME/bin/kafka-topics.sh" --create \
         --topic "$TEST_TOPIC" \
-        --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092} \
+        --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS} \
         --partitions 1 \
         --replication-factor 1 > /dev/null 2>&1 || true
 
@@ -123,7 +128,7 @@ test_producer_throughput() {
     for i in $(seq 1 $MESSAGE_COUNT); do
         if echo "$test_message" | "$KAFKA_HOME/bin/kafka-console-producer.sh" \
             --topic "$TEST_TOPIC" \
-            --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092} > /dev/null 2>&1; then
+            --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS} > /dev/null 2>&1; then
             produced=$((produced + 1))
         fi
     done
@@ -171,7 +176,7 @@ test_consumer_throughput() {
     local consumed=0
     "$KAFKA_HOME/bin/kafka-console-consumer.sh" \
         --topic "$TEST_TOPIC" \
-        --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092} \
+        --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS} \
         --from-beginning \
         --max-messages $MESSAGE_COUNT \
         --timeout-ms 10000 2>/dev/null | while read -r line; do

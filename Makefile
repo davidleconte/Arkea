@@ -321,6 +321,16 @@ security: ## Run security checks (secrets detection)
 check-ports: ## Guard against host-side legacy port leaks in active docs/tests
 	@bash ./scripts/utils/97_guard_host_ports.sh
 
+audit-active: ## Audit active docs/config for stale legacy markers
+	@echo "🔍 Running active-scope audit..."
+	@$(MAKE) check-ports
+	@echo "🔍 Checking stale markers in ACTIVE docs..."
+	@rg -n "localhost:9042|localhost:9092|Java 11|Kafka 4\.1\.1" \
+		README.md AGENTS.md docs/README.md docs/ARCHITECTURE.md docs/DEPLOYMENT.md docs/TROUBLESHOOTING.md docs/CONFIGURATION_ENVIRONNEMENT.md docs/GUIDE_DEPENDENCIES.md docs/API.md tests/README.md || true
+	@echo "🔍 ARKEA_LEG configuration snapshot..."
+	@bash -c 'source .poc-config.sh && echo "ARKEA_LEG=$$ARKEA_LEG HCD_PORT=$$HCD_PORT KAFKA_PORT=$$KAFKA_PORT"'
+	@echo "✅ Active-scope audit complete."
+
 check: lint security check-ports test-unit ## Run all checks (lint + security + port-guard + unit tests)
 	@echo "✅ All checks passed"
 

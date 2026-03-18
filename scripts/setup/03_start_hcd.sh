@@ -1,8 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 
-# Script de démarrage rapide HCD (Cross-Platform)
+# =============================================================================
+# ⚠️ LEGACY BINARY START SCRIPT (HCD 1.2.3)
+# For modern OSS Cassandra 5.0 (Podman leg), use: make start
 # Usage: ./start_hcd.sh [background]
+# =============================================================================
 
 # Charger la configuration centralisée
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -10,6 +13,14 @@ ARKEA_HOME="${ARKEA_HOME:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 if [ -f "${ARKEA_HOME}/.poc-config.sh" ]; then
     # shellcheck source=/dev/null
     source "${ARKEA_HOME}/.poc-config.sh"
+fi
+
+# Garde-fou: script binaire autorisé uniquement en leg binary
+if [ "${ARKEA_LEG:-podman}" != "binary" ] && [ "${ARKEA_ENABLE_BINARY_LEG:-0}" != "1" ]; then
+    echo "❌ ERROR: Binary leg is disabled by policy (ARKEA_LEG=${ARKEA_LEG:-podman})."
+    echo "   Use OSS 5.0 path: ARKEA_LEG=podman make start"
+    echo "   To force binary leg: ARKEA_ENABLE_BINARY_LEG=1 ARKEA_LEG=binary make start"
+    exit 1
 fi
 
 # Charger les fonctions portables

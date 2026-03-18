@@ -24,6 +24,13 @@ else
     exit 1
 fi
 
+# Normaliser les variables réseau depuis .poc-config.sh (fallbacks sûrs)
+: "${HCD_HOST:=localhost}"
+: "${HCD_PORT:=9102}"
+: "${KAFKA_HOST:=localhost}"
+: "${KAFKA_PORT:=9192}"
+: "${KAFKA_BOOTSTRAP_SERVERS:=${KAFKA_HOST}:${KAFKA_PORT}}"
+
 # Variables de test
 TEST_TOPIC="test_kafka_hcd_pipeline_$(date +%s)"
 TEST_KEYSPACE="test_e2e_keyspace"
@@ -41,12 +48,12 @@ cleanup() {
     if [ -n "${KAFKA_HOME:-}" ] && [ -d "$KAFKA_HOME" ]; then
         "$KAFKA_HOME/bin/kafka-topics.sh" --delete \
             --topic "$TEST_TOPIC" \
-            --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092} 2>/dev/null || true
+            --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS} 2>/dev/null || true
     fi
 
     # Supprimer la table de test si existe
     if command -v cqlsh &> /dev/null; then
-        cqlsh "${HCD_HOST:-localhost}" "${HCD_PORT:-9042}" <<EOF 2>/dev/null || true
+        cqlsh "${HCD_HOST}" "${HCD_PORT}" <<EOF 2>/dev/null || true
 DROP TABLE IF EXISTS $TEST_KEYSPACE.$TEST_TABLE;
 DROP KEYSPACE IF EXISTS $TEST_KEYSPACE;
 EOF
@@ -66,12 +73,12 @@ test_suite_start "Test E2E Pipeline Kafka → HCD"
 
 # Test 1 : Vérifier que HCD est démarré
 test_hcd_running() {
-    assert_port_open "${HCD_PORT:-9042}" "HCD devrait être démarré"
+    assert_port_open "${HCD_PORT}" "HCD devrait être démarré"
 }
 
 # Test 2 : Vérifier que Kafka est démarré
 test_kafka_running() {
-    assert_port_open "9092" "Kafka devrait être démarré sur le port 9092"
+    assert_port_open "${KAFKA_PORT}" "Kafka devrait être démarré sur le port ${KAFKA_PORT}"
 }
 
 # Test 3 : Créer le keyspace de test
@@ -88,7 +95,7 @@ CREATE KEYSPACE IF NOT EXISTS $TEST_KEYSPACE
 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
 EOF
 
-    if cqlsh "${HCD_HOST:-localhost}" "${HCD_PORT:-9042}" -f "$cql_file" > /dev/null 2>&1; then
+    if cqlsh "${HCD_HOST}" "${HCD_PORT}" -f "$cql_file" > /dev/null 2>&1; then
         echo "✅ Keyspace créé avec succès"
         TEST_PASSED=$((TEST_PASSED + 1))
         TEST_TOTAL=$((TEST_TOTAL + 1))
@@ -122,7 +129,7 @@ CREATE TABLE IF NOT EXISTS $TEST_TABLE (
 );
 EOF
 
-    if cqlsh "${HCD_HOST:-localhost}" "${HCD_PORT:-9042}" -f "$cql_file" > /dev/null 2>&1; then
+    if cqlsh "${HCD_HOST}" "${HCD_PORT}" -f "$cql_file" > /dev/null 2>&1; then
         echo "✅ Table créée avec succès"
         TEST_PASSED=$((TEST_PASSED + 1))
         TEST_TOTAL=$((TEST_TOTAL + 1))
@@ -146,7 +153,7 @@ test_create_kafka_topic() {
 
     if "$KAFKA_HOME/bin/kafka-topics.sh" --create \
         --topic "$TEST_TOPIC" \
-        --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092} \
+        --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS} \
         --partitions 1 \
         --replication-factor 1 > /dev/null 2>&1; then
         echo "✅ Topic Kafka créé avec succès"
@@ -172,7 +179,7 @@ test_produce_message() {
     test_message="test_message_$(date +%s)"
     if echo "$test_message" | "$KAFKA_HOME/bin/kafka-console-producer.sh" \
         --topic "$TEST_TOPIC" \
-        --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092} > /dev/null 2>&1; then
+        --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS} > /dev/null 2>&1; then
         echo "✅ Message produit dans Kafka"
         TEST_PASSED=$((TEST_PASSED + 1))
         TEST_TOTAL=$((TEST_TOTAL + 1))
@@ -198,7 +205,7 @@ test_consume_message() {
     local consumed_message
     consumed_message=$("$KAFKA_HOME/bin/kafka-console-consumer.sh" \
         --topic "$TEST_TOPIC" \
-        --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092} \
+        --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS} \
         --from-beginning \
         --max-messages 1 \
         --timeout-ms 5000 2>/dev/null | head -1)
@@ -223,7 +230,7 @@ test_hcd_connectivity() {
         return 0
     fi
 
-    if cqlsh "${HCD_HOST:-localhost}" "${HCD_PORT:-9042}" -e "SELECT release_version FROM system.local;" > /dev/null 2>&1; then
+    if cqlsh "${HCD_HOST}" "${HCD_PORT}" -e "SELECT release_version FROM system.local;" > /dev/null 2>&1; then
         echo "✅ Connectivité HCD vérifiée"
         TEST_PASSED=$((TEST_PASSED + 1))
         TEST_TOTAL=$((TEST_TOTAL + 1))
@@ -244,7 +251,7 @@ test_kafka_connectivity() {
     fi
 
     if "$KAFKA_HOME/bin/kafka-topics.sh" --list \
-        --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092} > /dev/null 2>&1; then
+        --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS} > /dev/null 2>&1; then
         echo "✅ Connectivité Kafka vérifiée"
         TEST_PASSED=$((TEST_PASSED + 1))
         TEST_TOTAL=$((TEST_TOTAL + 1))
@@ -271,7 +278,7 @@ USE $TEST_KEYSPACE;
 SELECT COUNT(*) FROM $TEST_TABLE;
 EOF
 
-    if cqlsh "${HCD_HOST:-localhost}" "${HCD_PORT:-9042}" -f "$cql_file" > /dev/null 2>&1; then
+    if cqlsh "${HCD_HOST}" "${HCD_PORT}" -f "$cql_file" > /dev/null 2>&1; then
         echo "✅ Table peut être interrogée"
         TEST_PASSED=$((TEST_PASSED + 1))
         TEST_TOTAL=$((TEST_TOTAL + 1))

@@ -1,5 +1,9 @@
 # ARKEA POC Operations Runbook
 
+> ⚠️ **HISTORICAL DOCUMENTATION NOTICE**
+> This document may contain references to the legacy binary leg (HCD 1.2.3 / Java 11).
+> For the active **Podman (OSS 5.0 / Java 17)** path, refer to `README.md` and `.poc-config.sh`.
+
 **Version:** 1.0
 **Last Updated:** 2026-03-13
 **Author:** David LECONTE (IBM WW|Tiger Team - Watsonx.Data GPS)

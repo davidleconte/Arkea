@@ -146,27 +146,41 @@ fi
 
 # 2. Vérifier HCD
 section "2. HCD (Hyper-Converged Database)"
-HCD_DIR="$INSTALL_DIR/binaire/hcd-1.2.3"
 if [[ "$DRY_RUN" == true ]]; then
-    dry_run_info "HCD installation at $HCD_DIR"
-    dry_run_info "HCD binary and port 9042 status"
+    if [ "${ARKEA_LEG:-podman}" = "podman" ]; then
+        dry_run_info "Podman leg: HCD/Cassandra accessibility on host port 9102"
+    else
+        HCD_DIR="$INSTALL_DIR/binaire/hcd-1.2.3"
+        dry_run_info "Binary leg: HCD installation at $HCD_DIR"
+        dry_run_info "Binary leg: HCD process/port 9042 status"
+    fi
 else
-    if [ -d "$HCD_DIR" ]; then
-        info "HCD installé dans: $HCD_DIR"
-        if [ -f "$HCD_DIR/bin/hcd" ]; then
-            info "Binaire hcd trouvé"
-        else
-            error "Binaire hcd non trouvé"
-        fi
-
-        # Vérifier si HCD est démarré (port hôte Podman)
+    if [ "${ARKEA_LEG:-podman}" = "podman" ]; then
+        info "Vérification leg [podman] (host 9102 -> container 9042)"
         if lsof -Pi :9102 -sTCP:LISTEN -t >/dev/null 2>&1; then
-            info "HCD est démarré (port 9102)"
+            info "HCD/Cassandra est accessible sur localhost:9102"
         else
-            warn "HCD n'est pas démarré (port 9102 non utilisé)"
+            error "HCD/Cassandra inaccessible sur localhost:9102 (vérifier podman ps / make status)"
         fi
     else
-        error "HCD non installé. Exécutez: ./install_hcd.sh"
+        HCD_DIR="$INSTALL_DIR/binaire/hcd-1.2.3"
+        info "Vérification leg [binary] (process local, port 9042)"
+        if [ -d "$HCD_DIR" ]; then
+            info "HCD installé dans: $HCD_DIR"
+            if [ -f "$HCD_DIR/bin/hcd" ]; then
+                info "Binaire hcd trouvé"
+            else
+                error "Binaire hcd non trouvé"
+            fi
+
+            if lsof -Pi :9042 -sTCP:LISTEN -t >/dev/null 2>&1; then
+                info "HCD binaire est démarré (port 9042)"
+            else
+                warn "HCD binaire n'est pas démarré (port 9042 non utilisé)"
+            fi
+        else
+            error "HCD non installé. Exécutez: ./install_hcd.sh"
+        fi
     fi
 fi
 
