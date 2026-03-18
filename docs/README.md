@@ -12,12 +12,14 @@
 - [ARCHITECTURE.md](ARCHITECTURE.md) — Global architecture
 - [ORGANISATION_FINALE.md](ORGANISATION_FINALE.md) — Target project structure
 - [REFERENCE_HCD_DOCUMENTATION.md](REFERENCE_HCD_DOCUMENTATION.md) — HCD technical reference
+- [CANONICAL_RUNTIME_MATRIX.md](CANONICAL_RUNTIME_MATRIX.md) — Source of truth (legs, ports, Java, policy guard)
 
 ## 2) Setup / Run / Ops
 
 - [CONFIGURATION_ENVIRONNEMENT.md](CONFIGURATION_ENVIRONNEMENT.md) — Environment configuration
 - [DEPLOYMENT.md](DEPLOYMENT.md) — Deployment guide
 - [TROUBLESHOOTING.md](TROUBLESHOOTING.md) — Troubleshooting guide
+- [LEGACY_TO_ACTIVE_MIGRATION_GUIDE.md](LEGACY_TO_ACTIVE_MIGRATION_GUIDE.md) — Migration path from binary/HCD legacy to podman/OSS 5.0
 
 ## 3) Tests / Validation
 
