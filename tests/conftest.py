@@ -121,12 +121,17 @@ def isolated_env(tmp_path, monkeypatch):
     Provide isolated environment for tests.
     Creates temporary directories and sets environment variables.
     """
+    leg = os.environ.get("ARKEA_LEG", "podman")
+    hcd_port = "9102" if leg == "podman" else "9042"
+    kafka_port = "9192" if leg == "podman" else "9092"
+
     env_vars = {
         "ARKEA_HOME": str(tmp_path),
+        "ARKEA_LEG": leg,
         "HCD_HOST": "localhost",
-        "HCD_PORT": "9042",
+        "HCD_PORT": hcd_port,
         "KAFKA_HOST": "localhost",
-        "KAFKA_PORT": "9092",
+        "KAFKA_PORT": kafka_port,
         "LOG_DIR": str(tmp_path / "logs"),
         "BINAIRE_DIR": str(tmp_path / "binaire"),
         "SOFTWARE_DIR": str(tmp_path / "software"),
@@ -157,13 +162,16 @@ def skip_if_no_hcd():
     """Skip test if HCD is not available."""
     import socket
 
+    leg = os.environ.get("ARKEA_LEG", "podman")
+    port = int(os.environ.get("HCD_PORT", "9102" if leg == "podman" else "9042"))
+
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(2)
-        result = sock.connect_ex(("localhost", 9042))
+        result = sock.connect_ex(("localhost", port))
         sock.close()
         if result != 0:
-            pytest.skip("HCD not available on localhost:9042")
+            pytest.skip(f"HCD not available on localhost:{port}")
     except Exception as e:
         pytest.skip(f"HCD connection check failed: {e}")
 
@@ -172,12 +180,15 @@ def skip_if_no_kafka():
     """Skip test if Kafka is not available."""
     import socket
 
+    leg = os.environ.get("ARKEA_LEG", "podman")
+    port = int(os.environ.get("KAFKA_PORT", "9192" if leg == "podman" else "9092"))
+
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(2)
-        result = sock.connect_ex(("localhost", 9092))
+        result = sock.connect_ex(("localhost", port))
         sock.close()
         if result != 0:
-            pytest.skip("Kafka not available on localhost:9092")
+            pytest.skip(f"Kafka not available on localhost:{port}")
     except Exception as e:
         pytest.skip(f"Kafka connection check failed: {e}")

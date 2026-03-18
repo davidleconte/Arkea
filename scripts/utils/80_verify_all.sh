@@ -104,31 +104,42 @@ fi
 echo "=========================================="
 echo ""
 
-# 1. Vérifier Java
+# 1. Vérifier Java (leg-aware)
 section "1. Java"
+
+ARKEA_LEG="${ARKEA_LEG:-podman}"
+if [ -f "$INSTALL_DIR/.poc-config.sh" ]; then
+    # shellcheck source=/dev/null
+    source "$INSTALL_DIR/.poc-config.sh"
+fi
+
+EXPECTED_JAVA="17"
+if [ "${ARKEA_LEG:-podman}" = "binary" ]; then
+    EXPECTED_JAVA="11"
+fi
+
 if [[ "$DRY_RUN" == true ]]; then
-    dry_run_info "Java version and configuration"
+    dry_run_info "Java version and configuration (leg=${ARKEA_LEG:-podman}, attendu=Java $EXPECTED_JAVA)"
 else
+    info "Vérification Java pour leg: ${ARKEA_LEG:-podman} (attendu: Java $EXPECTED_JAVA)"
     if command -v jenv &> /dev/null; then
-        PROMPT_COMMAND="${PROMPT_COMMAND:-}"
         eval "$(jenv init -)" 2>/dev/null || true
-        cd "$INSTALL_DIR"
-        jenv local 11 2>/dev/null || true
-        eval "$(jenv init -)" 2>/dev/null || true
+        jenv shell "$EXPECTED_JAVA" 2>/dev/null || true
         JAVA_VERSION=$(java -version 2>&1 | head -1)
-        if echo "$JAVA_VERSION" | grep -q "11"; then
-            info "Java 11 configuré via jenv: $JAVA_VERSION"
+        if echo "$JAVA_VERSION" | grep -q "$EXPECTED_JAVA"; then
+            info "Java $EXPECTED_JAVA configuré via jenv: $JAVA_VERSION"
         else
-            warn "Java 11 non détecté via jenv. Version: $JAVA_VERSION"
+            warn "Java $EXPECTED_JAVA non détecté via jenv. Version: $JAVA_VERSION"
         fi
     else
         HOMEBREW_PREFIX="${HOMEBREW_PREFIX:-/opt/homebrew}"
-        if [ -d "${HOMEBREW_PREFIX}/opt/openjdk@11" ]; then
-            export JAVA_HOME="${HOMEBREW_PREFIX}/opt/openjdk@11"
+        if [ -d "${HOMEBREW_PREFIX}/opt/openjdk@$EXPECTED_JAVA" ]; then
+            export JAVA_HOME="${HOMEBREW_PREFIX}/opt/openjdk@$EXPECTED_JAVA"
+            export PATH="$JAVA_HOME/bin:$PATH"
             JAVA_VERSION=$(java -version 2>&1 | head -1)
-            info "Java 11 trouvé via Homebrew: $JAVA_VERSION"
+            info "Java $EXPECTED_JAVA trouvé via Homebrew: $JAVA_VERSION"
         else
-            error "Java 11 non trouvé"
+            error "Java $EXPECTED_JAVA non trouvé (requis pour leg ${ARKEA_LEG:-podman})"
         fi
     fi
 fi

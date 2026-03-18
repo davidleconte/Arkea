@@ -85,17 +85,17 @@ KAFKA_BOOTSTRAP_SERVERS=localhost:9192
 ```bash
 # Create topic
 podman exec arkea-kafka /opt/kafka/bin/kafka-topics.sh \
-  --bootstrap-server localhost:9092 \
+  --bootstrap-server localhost:9192 \
   --create --topic my-topic \
   --partitions 3 --replication-factor 1
 
 # List topics
 podman exec arkea-kafka /opt/kafka/bin/kafka-topics.sh \
-  --bootstrap-server localhost:9092 --list
+  --bootstrap-server localhost:9192 --list
 
 # Describe topic
 podman exec arkea-kafka /opt/kafka/bin/kafka-topics.sh \
-  --bootstrap-server localhost:9092 \
+  --bootstrap-server localhost:9192 \
   --describe --topic my-topic
 ```
 
@@ -104,11 +104,11 @@ podman exec arkea-kafka /opt/kafka/bin/kafka-topics.sh \
 ```bash
 # Produce messages
 podman exec -it arkea-kafka /opt/kafka/bin/kafka-console-producer.sh \
-  --bootstrap-server localhost:9092 --topic my-topic
+  --bootstrap-server localhost:9192 --topic my-topic
 
 # Consume messages
 podman exec -it arkea-kafka /opt/kafka/bin/kafka-console-consumer.sh \
-  --bootstrap-server localhost:9092 --topic my-topic --from-beginning
+  --bootstrap-server localhost:9192 --topic my-topic --from-beginning
 ```
 
 ### Kafka UI

@@ -318,7 +318,10 @@ security: ## Run security checks (secrets detection)
 	fi
 	@git diff --staged --name-only 2>/dev/null | xargs -I {} sh -c 'grep -l "password\|secret\|token\|api.key" "{}" 2>/dev/null && echo "⚠️  Potential secret in {}"' || true
 
-check: lint security test-unit ## Run all checks (lint + security + unit tests)
+check-ports: ## Guard against host-side legacy port leaks in active docs/tests
+	@bash ./scripts/utils/97_guard_host_ports.sh
+
+check: lint security check-ports test-unit ## Run all checks (lint + security + port-guard + unit tests)
 	@echo "✅ All checks passed"
 
 check-consistency: ## Check project consistency
