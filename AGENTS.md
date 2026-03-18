@@ -76,7 +76,7 @@ source "${SCRIPT_DIR}/../lib/common.sh"
 log_info "Message d'info"
 log_success "Opération réussie"
 hcd_status && echo "HCD OK"
-wait_for_port 9042 "localhost" 30
+wait_for_port 9102 "localhost" 30
 ```
 
 ### Portabilité Cross-Platform (Alternative)

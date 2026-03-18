@@ -8,7 +8,7 @@
 
 ## 📁 Structure
 
-```
+```text
 tests/
 ├── unit/              # Tests unitaires (fonctions individuelles)
 │   ├── test_portability.sh
@@ -93,7 +93,7 @@ source "$ARKEA_HOME/.poc-config.sh"
 
 test_suite_start "Tests d'intégration HCD ↔ Spark"
 
-assert_port_open "${HCD_PORT:-9042}" "HCD devrait être démarré"
+assert_port_open "${HCD_PORT:-9102}" "HCD devrait être démarré"
 assert_dir_exists "$SPARK_HOME" "SPARK_HOME devrait exister"
 
 test_suite_end
@@ -121,8 +121,8 @@ source "$ARKEA_HOME/.poc-config.sh"
 
 test_suite_start "Test E2E Pipeline Kafka → HCD"
 
-assert_port_open "${HCD_PORT:-9042}" "HCD devrait être démarré"
-assert_port_open "9092" "Kafka devrait être démarré"
+assert_port_open "${HCD_PORT:-9102}" "HCD devrait être démarré"
+assert_port_open "9192" "Kafka devrait être démarré"
 
 # Tests de création keyspace, table, topic, etc.
 

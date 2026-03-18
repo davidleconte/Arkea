@@ -3,6 +3,8 @@
 **Last Updated** : 2026-03-13
 **Purpose** : Clear navigation to active reference documents.
 
+> ⚠️ **Implementation Note**: This project has migrated to Cassandra 5.0 and Podman. Prefer documentation and scripts in `poc-design/OSS5.0_*`.
+
 ---
 
 ## 1) Project Overview
@@ -56,10 +58,10 @@
 - [DOCUMENTATION_TESTS_POC_ARKEA.md](DOCUMENTATION_TESTS_POC_ARKEA.md) — Technical traceability matrix
 - [RAPPORT_TESTS_POC_ARKEA_RENE.md](RAPPORT_TESTS_POC_ARKEA_RENE.md) — Stakeholder report
 
-## 7) Document Archives
+## 7) Document Archives (Legacy / Historical)
 
-Redundant audits moved to:
-- [archive/legacy-audits/](archive/legacy-audits/)
+- [archive/legacy_v1/](archive/legacy_v1/) — Legacy setup plans, superseded ADRs, and obsolete installation guides
+- [archive/legacy-audits/](archive/legacy-audits/) — Historical audit waves
 
 ---
 

@@ -22,15 +22,15 @@
 
 | Service | Port | Purpose | Dependencies |
 |---------|------|---------|--------------|
-| HCD (Cassandra) | 9042 (9102) | Primary database | - |
-| HCD Graph | 8182 (9182) | JanusGraph integration | HCD |
-| Spark Master | 8080 (9180) | Job orchestration | - |
-| Spark Worker | 8081 | Job execution | Spark Master |
-| Kafka | 9092 (9192) | Message streaming | Zookeeper |
+| Cassandra 5.0 | 9102 | Primary database (host mapped) | - |
+| Cassandra Graph | 9182 | Graph integration (host mapped) | Cassandra |
+| Spark Master | 9280 | Job orchestration (host mapped) | - |
+| Spark Worker | 9281 | Job execution (host mapped) | Spark Master |
+| Kafka 3.7.1 | 9192 | Message streaming (host mapped) | KRaft |
 | Prometheus | 9090 | Metrics collection | All services |
 | Grafana | 3000 | Visualization | Prometheus |
 
-*Ports in parentheses are Podman-mapped ports (9100-9199 range).*
+*All listed service ports are host-mapped ports in the ARKEA range (9100-9199 where applicable).*
 
 ---
 
@@ -132,7 +132,7 @@ curl -s http://localhost:9090/api/v1/targets | jq '.data.activeTargets[].health'
 
 #### HCD Won't Start
 
-**Symptoms:** Connection refused on port 9042/9102
+**Symptoms:** Connection refused on host port 9102
 
 **Diagnosis:**
 
@@ -168,7 +168,7 @@ podman logs kafka-container --tail 50
 
 **Resolution:**
 
-1. Verify Zookeeper is running first
+1. Verify Kafka broker health on port 9192
 2. Check network connectivity
 3. Review `server.properties` for advertised.listeners
 

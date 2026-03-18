@@ -23,10 +23,13 @@
 ### Connection
 
 ```bash
-# CQL Shell
+# CQL Shell (container internal check)
 podman exec -it arkea-hcd cqlsh localhost 9042
 
-# Python Driver
+# CQL Shell (host-side mapped port)
+cqlsh localhost 9102
+
+# Python Driver (host-side mapped port)
 from cassandra.cluster import Cluster
 cluster = Cluster(['localhost'], port=9102)
 session = cluster.connect()

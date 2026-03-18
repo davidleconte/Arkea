@@ -67,17 +67,16 @@ pip install -r requirements-dev.txt
 
 ### Versions Requises
 
-- **Java 11** : Pour HCD 1.2.3 et Spark 3.5.1
-- **Java 17** : Pour Kafka 4.1.1 (optionnel)
+- **Java 17** : Recommandé pour Cassandra 5.0.6, Spark 3.5.1 et Kafka 3.7.1
 
 ### Composants Principaux
 
-- **HCD 1.2.3** : Hyper-Converged Database (basé sur Cassandra 4.0.11)
+- **Apache Cassandra 5.0.6** : Base de données distribuée (OSS)
 - **Spark 3.5.1** : Traitement distribué
-- **Kafka 4.1.1** : Streaming de données
-- **spark-cassandra-connector 3.5.0** : Intégration Spark ↔ HCD
+- **Kafka 3.7.1 (KRaft)** : Streaming de données
+- **spark-cassandra-connector 3.5.0** : Intégration Spark ↔ Cassandra
 
-### Installation
+### Guides d'installation
 
 Voir les guides d'installation :
 

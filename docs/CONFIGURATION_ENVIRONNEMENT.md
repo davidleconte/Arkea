@@ -70,9 +70,8 @@ fi
 
 | Variable | Valeur | Description |
 |----------|--------|-------------|
-| `JAVA_HOME` | Détecté automatiquement | Java 11 pour HCD et Spark (jenv > Homebrew > système) |
-| `JAVA11_HOME` | Détecté automatiquement | Java 11 explicite (macOS/Linux) |
-| `JAVA17_HOME` | Détecté automatiquement | Java 17 pour Kafka (macOS/Linux) |
+| `JAVA_HOME` | Détecté automatiquement | Java 17 pour Cassandra, Spark et Kafka (jenv > Homebrew > système) |
+| `JAVA17_HOME` | Détecté automatiquement | Java 17 explicite (macOS/Linux) |
 
 **Détection automatique** :
 
@@ -89,9 +88,9 @@ fi
 | `HCD_VERSION` | `1.2.3` | Version HCD |
 | `CASSANDRA_HOME` | `$HCD_HOME/resources/cassandra` | Répertoire Cassandra |
 | `CASSANDRA_HOST` | `localhost` | Host Cassandra |
-| `CASSANDRA_PORT` | `9042` | Port Cassandra |
+| `CASSANDRA_PORT` | `9102` | Port Cassandra (Host mapped) |
 | `CQLSH_HOST` | `localhost` | Host cqlsh |
-| `CQLSH_PORT` | `9042` | Port cqlsh |
+| `CQLSH_PORT` | `9102` | Port cqlsh (Host mapped) |
 
 ### Spark
 
@@ -111,11 +110,11 @@ fi
 | Variable | Valeur | Description |
 |----------|--------|-------------|
 | `KAFKA_HOME` | Détecté automatiquement | Répertoire Kafka (macOS: Homebrew, Linux: `/opt/kafka` ou `$ARKEA_HOME/binaire/kafka`) |
-| `KAFKA_VERSION` | `4.1.1` | Version Kafka |
+| `KAFKA_VERSION` | `3.7.1` | Version Kafka |
 | `KAFKA_CONFIG` | Détecté automatiquement | Configuration Kafka (macOS: `.bottle/etc/kafka`, Linux: `config/server.properties`) |
 | `KAFKA_LOG_DIR` | Détecté automatiquement | Répertoire de logs (macOS: `libexec/logs`, Linux: `logs`) |
-| `KAFKA_BOOTSTRAP_SERVERS` | `localhost:9092` | Serveurs Kafka |
-| `KAFKA_ZOOKEEPER_CONNECT` | `localhost:2181` | Zookeeper (Kafka 2.8+ n'utilise plus Zookeeper) |
+| `KAFKA_BOOTSTRAP_SERVERS` | `localhost:9192` | Serveurs Kafka (Host mapped) |
+| `KAFKA_MODE` | `KRaft` | Kafka sans Zookeeper |
 
 **Détection automatique** :
 
@@ -214,7 +213,7 @@ Le système de configuration est **entièrement portable** et supporte :
 
 **Voir** :
 
-- `docs/GUIDE_INSTALLATION_LINUX.md` pour Linux
+- `docs/archive/legacy_v1/GUIDE_INSTALLATION_LINUX.md` pour Linux (legacy)
 - `docs/GUIDE_INSTALLATION_WINDOWS.md` pour Windows (WSL2)
 - `docs/AUDIT_PORTABILITE_CROSS_PLATFORM_2025.md` pour les détails
 

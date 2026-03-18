@@ -39,7 +39,7 @@ Le projet ARKEA est **cross-platform** et supporte les systèmes d'exploitation 
 ### Guides d'Installation par Plateforme
 
 - 🍎 **macOS** : Voir [Guide de Déploiement](docs/DEPLOYMENT.md)
-- 🐧 **Linux** : Voir [Guide d'Installation Linux](docs/GUIDE_INSTALLATION_LINUX.md)
+- 🐧 **Linux** : Voir [Guide d'Installation Linux (legacy)](docs/archive/legacy_v1/GUIDE_INSTALLATION_LINUX.md)
 - 🪟 **Windows** : Voir [Guide d'Installation Windows](docs/GUIDE_INSTALLATION_WINDOWS.md)
 
 ### Fonctionnalités Cross-Platform
@@ -102,6 +102,11 @@ Arkea/
 
 **Voir** `docs/GUIDE_STRUCTURE.md` pour la structure complète.
 
+### 📂 Statut des POCs (IMPORTANT)
+
+- **ACTIF (recommandé)** : utiliser les dossiers `poc-design/OSS5.0_*` (Cassandra 5.0 + Podman)
+- **LEGACY (référence uniquement)** : `poc-design/bic`, `poc-design/domirama2`, `poc-design/domiramaCatOps`
+
 ---
 
 ## 🚀 Démarrage Rapide
@@ -115,7 +120,7 @@ check_poc_env
 ```
 
 **Note** : Le projet utilise maintenant `.poc-config.sh` pour une configuration
-portable. Voir `docs/PLAN_ACTION_FACTORISATION_CONFIG.md` pour les détails.
+portable. Voir `docs/archive/legacy_v1/PLAN_ACTION_FACTORISATION_CONFIG.md` pour le contexte historique.
 
 ### 2. Installation des Dépendances
 
@@ -273,7 +278,7 @@ Voir `docs/CONFIGURATION_ENVIRONNEMENT.md` pour les détails.
 
 ### Logiciels Requis
 
-- **Java 11+** (pour Cassandra 5.0.6 et Spark 3.5.1)
+- **Java 17+** (pour Cassandra 5.0.6, Spark 3.5.1 et Kafka 3.7.1)
 - **Python 3.9-3.12** (pour scripts et tests)
 - **pip** (pour installer les dépendances Python)
 - **Podman** & **podman-compose** (pour la conteneurisation)

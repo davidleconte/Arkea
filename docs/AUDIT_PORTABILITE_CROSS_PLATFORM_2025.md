@@ -490,7 +490,7 @@ export KAFKA_HOME="$INSTALL_DIR/binaire/kafka"
 
 #### R2.2 : Guide d'Installation Linux
 
-**Action** : Créer `docs/GUIDE_INSTALLATION_LINUX.md`
+**Action** : Créer `docs/archive/legacy_v1/GUIDE_INSTALLATION_LINUX.md`
 
 **Contenu** :
 

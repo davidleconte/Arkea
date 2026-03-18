@@ -165,7 +165,7 @@ wsl
 
 ### 2. Installer les Prérequis
 
-**Suivre le guide Linux** : `docs/GUIDE_INSTALLATION_LINUX.md`
+**Suivre le guide Linux (legacy)** : `docs/archive/legacy_v1/GUIDE_INSTALLATION_LINUX.md`
 
 **Résumé rapide** :
 
@@ -515,7 +515,7 @@ podman run -it ubuntu:20.04 bash
 
 ## 📚 Références
 
-- `docs/GUIDE_INSTALLATION_LINUX.md` - Guide Linux (utilisé dans WSL2)
+- `docs/archive/legacy_v1/GUIDE_INSTALLATION_LINUX.md` - Guide Linux (legacy, utilisé dans WSL2)
 - `docs/DEPLOYMENT.md` - Guide de déploiement général
 - `docs/TROUBLESHOOTING.md` - Guide de dépannage détaillé
 - [Documentation WSL2 Microsoft](https://docs.microsoft.com/en-us/windows/wsl/)

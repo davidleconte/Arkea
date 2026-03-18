@@ -29,23 +29,23 @@
 
 #### Java
 
-- ✅ **Java 11+** (pour Cassandra 5.0.6 et Spark 3.5.1)
+- ✅ **Java 17+** (recommandé pour Cassandra 5.0.6, Kafka 3.7.1 et Spark 3.5.1)
 
 **Installation** :
 
 ```bash
 # macOS (Homebrew)
-brew install openjdk@11
+brew install openjdk@17
 
 # Linux
-sudo apt-get install openjdk-11-jdk
+sudo apt-get install openjdk-17-jdk
 ```
 
 **Vérification** :
 
 ```bash
 java -version
-# Doit afficher Java 11+
+# Doit afficher Java 17+
 ```
 
 #### Python
@@ -298,10 +298,10 @@ spark.read.cassandraFormat("kafka_events", "poc_hbase_migration").load().show()
 
 ```bash
 # Lister les topics
-kafka-topics.sh --list --bootstrap-server localhost:9092
+kafka-topics.sh --list --bootstrap-server localhost:9192
 
 # Consommer des messages
-kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test-topic --from-beginning
+kafka-console-consumer.sh --bootstrap-server localhost:9192 --topic test-topic --from-beginning
 ```
 
 ---
@@ -321,8 +321,8 @@ kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test-topic -
 
 ```bash
 # Vérifier les ports
-lsof -i :9042
-netstat -an | grep 9042
+lsof -i :9102
+netstat -an | grep 9102
 
 # Tuer les processus existants
 pkill -f cassandra
@@ -337,16 +337,13 @@ pkill -f hcd
 **Symptômes** :
 
 - Erreur "Address already in use"
-- Erreur Zookeeper
+- Broker Kafka indisponible
 
 **Solutions** :
 
 ```bash
-# Vérifier Zookeeper
-lsof -i :2181
-
 # Vérifier Kafka
-lsof -i :9092
+lsof -i :9192
 
 # Redémarrer
 ./scripts/setup/04_start_kafka.sh background
