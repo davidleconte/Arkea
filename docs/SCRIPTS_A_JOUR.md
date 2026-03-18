@@ -11,7 +11,7 @@
 
 | Script | Description | Statut | Plateformes |
 |--------|-------------|--------|-------------|
-| `scripts/setup/01_install_hcd.sh` | Installe HCD 1.2.3 avec vérification Java 11 | ✅ À jour | macOS, Linux, Windows (WSL2) |
+| `scripts/setup/01_install_hcd.sh` | Installe HCD 1.2.3 (Legacy) avec vérification Java 11 | ⚠️ HISTORICAL | macOS, Linux, Windows (WSL2) |
 | `scripts/setup/02_install_spark_kafka.sh` | Installe Spark 3.5.1, Kafka et spark-cassandra-connector | ✅ À jour | macOS, Linux |
 | `scripts/setup/02_install_kafka_linux.sh` | Installe Kafka 4.1.1 pour Linux | ✅ Nouveau | Linux uniquement |
 
@@ -227,4 +227,4 @@ Tous les scripts sont à jour et prêts à l'emploi. Pour continuer le POC :
 
 ---
 
-**Tous les scripts sont à jour et cohérents ! ✅**
+### Tous les scripts sont à jour et cohérents ! ✅

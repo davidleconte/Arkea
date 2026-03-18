@@ -1,6 +1,10 @@
 # ✅ Résultats du Test : Kafka → HCD Streaming
 
-**Date** : 2025-11-25  
+> ⚠️ **HISTORICAL DOCUMENTATION NOTICE**
+> Ce document reflète un test historique du leg binaire (HCD 1.2.3).
+> Le chemin actif par défaut est Podman/OSS 5.0 (`ARKEA_LEG=podman`) avec ports hôte **9102** (CQL) et **9192** (Kafka).
+
+**Date** : 2025-11-25
 **Statut** : ✅ **SUCCÈS COMPLET**
 
 ---
@@ -89,7 +93,7 @@ Les packages suivants ont été automatiquement téléchargés lors du test :
 spark-shell \
   --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1,com.datastax.spark:spark-cassandra-connector_2.12:3.5.0 \
   --conf spark.cassandra.connection.host=localhost \
-  --conf spark.cassandra.connection.port=9042 \
+  --conf spark.cassandra.connection.port=9102 \
   --conf spark.sql.extensions=com.datastax.spark.connector.CassandraSparkExtensions
 ```
 
@@ -161,4 +165,4 @@ cd ${ARKEA_HOME}
 
 ---
 
-**Test réussi avec succès ! 🎉**
+### Test réussi avec succès ! 🎉

@@ -337,7 +337,11 @@ check: lint security check-ports test-unit ## Run all checks (lint + security + 
 
 check-consistency: ## Check project consistency
 	@echo "🔍 Checking project consistency..."
-	@./scripts/utils/91_check_consistency.sh 2>/dev/null || echo "⚠️  Consistency script not found"
+	@if [ -x ./scripts/utils/91_check_consistency.sh ]; then \
+		./scripts/utils/91_check_consistency.sh; \
+	else \
+		echo "⚠️  Consistency script not found"; \
+	fi
 
 # =============================================================================
 # DOCUMENTATION

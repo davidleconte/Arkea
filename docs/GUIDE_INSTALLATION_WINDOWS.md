@@ -278,14 +278,14 @@ source ~/.bashrc
 
 **Les ports sont partagés entre Windows et WSL2** :
 
-- `localhost:9042` (HCD) accessible depuis Windows
-- `localhost:9092` (Kafka) accessible depuis Windows
+- `localhost:9102` (HCD) accessible depuis Windows
+- `localhost:9192` (Kafka) accessible depuis Windows
 
 **Tester depuis Windows** :
 
 ```powershell
 # Tester la connexion HCD
-Test-NetConnection -ComputerName localhost -Port 9042
+Test-NetConnection -ComputerName localhost -Port 9102
 ```
 
 ---
@@ -308,8 +308,8 @@ Test-NetConnection -ComputerName localhost -Port 9042
 
 ```powershell
 # Vérifier les ports
-netstat -an | findstr "9042"
-netstat -an | findstr "9092"
+netstat -an | findstr "9102"
+netstat -an | findstr "9192"
 ```
 
 ---
@@ -327,7 +327,7 @@ cqlsh localhost 9042
 
 ```bash
 # Depuis WSL2
-kafka-topics.sh --list --bootstrap-server localhost:9092
+kafka-topics.sh --list --bootstrap-server localhost:9192
 ```
 
 ---
@@ -528,7 +528,7 @@ podman run -it ubuntu:20.04 bash
 - [ ] Windows 10 version 2004+ ou Windows 11
 - [ ] WSL2 installé et configuré
 - [ ] Ubuntu installé dans WSL2
-- [ ] Java 11 et 17 installés
+- [ ] Java 17 (actif) et Java 11 (legacy binaire) installés
 - [ ] Python 3.11 installé
 - [ ] Projet ARKEA cloné
 - [ ] HCD installé

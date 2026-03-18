@@ -46,7 +46,7 @@
 
 ### ✅ Cassandra 5.0.6 (Hyper-Converged Database)
 - **Statut** : ✅ Installé et démarré
-- **Port CQL** : 9042
+- **Port CQL (Container)** : 9042 (mappé vers 9102 sur l'hôte)
 - **Port Inter-node** : 7000
 - **Version** : 4.0.11.0-0c7d6f7c9412
 - **Java** : 11.0.28 (via jenv)
@@ -165,7 +165,7 @@ CREATE TABLE poc_hbase_migration.bi_client (
 
 # Se connecter
 cd hcd-1.2.3
-./bin/cqlsh localhost 9042
+./bin/cqlsh localhost 9102
 
 # Arrêter
 pkill -f cassandra
@@ -177,7 +177,7 @@ pkill -f cassandra
 # Spark Shell avec connector
 spark-shell --packages com.datastax.spark:spark-cassandra-connector_2.12:3.5.0 \
   --conf spark.cassandra.connection.host=localhost \
-  --conf spark.cassandra.connection.port=9042
+  --conf spark.cassandra.connection.port=9102
 
 # Soumettre un job
 spark-submit --packages com.datastax.spark:spark-cassandra-connector_2.12:3.5.0 \
@@ -194,19 +194,19 @@ brew services start kafka
 
 # Créer un topic
 kafka-topics.sh --create \
-  --bootstrap-server localhost:9092 \
+  --bootstrap-server localhost:9192 \
   --replication-factor 1 \
   --partitions 1 \
   --topic bic-events
 
 # Producer
 kafka-console-producer.sh \
-  --bootstrap-server localhost:9092 \
+  --bootstrap-server localhost:9192 \
   --topic bic-events
 
 # Consumer
 kafka-console-consumer.sh \
-  --bootstrap-server localhost:9092 \
+  --bootstrap-server localhost:9192 \
   --topic bic-events \
   --from-beginning
 ```
@@ -273,7 +273,7 @@ kafka-console-consumer.sh \
 4. **Créer les schémas** :
    ```bash
    cd hcd-1.2.3
-   ./bin/cqlsh localhost 9042
+   ./bin/cqlsh localhost 9102
    # Exécuter les CREATE KEYSPACE et CREATE TABLE
    ```
 
@@ -287,7 +287,7 @@ kafka-console-consumer.sh \
 ## 📚 Documentation
 
 - **Installation HCD** : `GUIDE_INSTALLATION_HCD_MAC.md`
-- **Installation Spark/Kafka** : `GUIDE_INSTALLATION_SPARK_KAFKA.md`
+- **Installation Spark/Kafka (Legacy)** : `docs/archive/legacy_v1/GUIDE_INSTALLATION_SPARK_KAFKA.md`
 - **Plan d'action** : `PLAN_ACTION_IMMEDIAT.md`
 - **Analyse HBase** : `ANALYSE_ETAT_ART_HBASE.md`
 

@@ -80,8 +80,8 @@ pip install -r requirements-dev.txt
 
 Voir les guides d'installation :
 
-- [Guide Installation HCD](GUIDE_INSTALLATION_HCD.md)
-- [Guide Installation Spark/Kafka](GUIDE_INSTALLATION_SPARK_KAFKA.md)
+- [Guide Installation HCD (Legacy)](archive/legacy_v1/GUIDE_INSTALLATION_HCD.md)
+- [Guide Installation Spark/Kafka (Legacy)](archive/legacy_v1/GUIDE_INSTALLATION_SPARK_KAFKA.md)
 
 ---
 

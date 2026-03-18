@@ -278,7 +278,7 @@ Voir `docs/CONFIGURATION_ENVIRONNEMENT.md` pour les détails.
 
 ### Logiciels Requis
 
-- **Java 17+** (pour Cassandra 5.0.6, Spark 3.5.1 et Kafka 3.7.1)
+- **Java 17** (Active Path: Podman/OSS 5.0) / **Java 11** (Legacy Path: Binary/HCD 1.2.3)
 - **Python 3.9-3.12** (pour scripts et tests)
 - **pip** (pour installer les dépendances Python)
 - **Podman** & **podman-compose** (pour la conteneurisation)

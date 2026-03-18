@@ -16,13 +16,13 @@ ARKEA_HOME="$(cd "$SCRIPT_DIR/../.." && pwd)"
 # Charger les fonctions portables si disponibles
 if [ -f "$ARKEA_HOME/scripts/utils/portable_functions.sh" ]; then
     source "$ARKEA_HOME/scripts/utils/portable_functions.sh"
-else
-    # Définir des fonctions de base si portable_functions.sh n'est pas disponible
-    info() { echo -e "\033[0;32m[INFO]\033[0m $1"; }
-    warn() { echo -e "\033[1;33m[WARN]\033[0m $1"; }
-    error() { echo -e "\033[0;31m[ERROR]\033[0m $1"; }
-    section() { echo -e "\n\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m\n\033[0;34m$1\033[0m\n\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m\n"; }
 fi
+
+# Définir des fonctions de base si manquantes
+declare -F info >/dev/null 2>&1 || info() { echo -e "\033[0;32m[INFO]\033[0m $1"; }
+declare -F warn >/dev/null 2>&1 || warn() { echo -e "\033[1;33m[WARN]\033[0m $1"; }
+declare -F error >/dev/null 2>&1 || error() { echo -e "\033[0;31m[ERROR]\033[0m $1"; }
+declare -F section >/dev/null 2>&1 || section() { echo -e "\n\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m\n\033[0;34m$1\033[0m\n\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m\n"; }
 
 # Variables de configuration
 CHECK_HARDCODED_PATHS=false
@@ -125,7 +125,8 @@ check_hardcoded_paths() {
     done
 
     # Dédupliquer
-    local unique_files=($(printf '%s\n' "${files_with_hardcoded[@]}" | sort -u))
+    local unique_files
+    readarray -t unique_files < <(printf '%s\n' "${files_with_hardcoded[@]}" | sort -u)
 
     if [ ${#unique_files[@]} -eq 0 ]; then
         info "✅ Aucun chemin hardcodé détecté"
@@ -194,12 +195,16 @@ check_docs() {
         if [ -f "$doc_file" ]; then
             # Rechercher les liens relatifs potentiellement cassés
             while IFS= read -r line; do
-                if [[ "$line" =~ \[.*\]\(([^)]+)\) ]]; then
+                local md_link_regex='\[.*\]\(([^)]+)\)'
+                local external_or_anchor_regex='^(http|https|#)'
+                if [[ "$line" =~ $md_link_regex ]]; then
                     local link="${BASH_REMATCH[1]}"
                     # Ignorer les liens http/https et les ancres
-                    if [[ ! "$link" =~ ^(http|https|#) ]] && [[ "$link" =~ ^\.\.?/ ]]; then
-                        local doc_dir="$(dirname "$doc_file")"
-                        local target_file="$(cd "$doc_dir" && realpath -m "$link" 2>/dev/null || echo "")"
+                    if [[ ! "$link" =~ $external_or_anchor_regex ]] && [[ "$link" =~ ^\.\.?/ ]]; then
+                        local doc_dir
+                        doc_dir="$(dirname "$doc_file")"
+                        local target_file
+                        target_file="$(cd "$doc_dir" && realpath -m "$link" 2>/dev/null || echo "")"
                         if [ ! -f "$target_file" ]; then
                             docs_issues+=("$doc_file: Lien cassé: $link")
                             count=$((count + 1))

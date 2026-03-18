@@ -53,31 +53,31 @@ portabilité.
 
 ## 🔴 Priorité 2 : Correction des Références localhost
 
-### Objectif
+### Objectif (Priorité 2)
 
 Remplacer les références hardcodées à `localhost:PORT` par des variables d'environnement avec fallback.
 
-### Corrections Effectuées
+### Corrections Effectuées (Priorité 2)
 
 - ✅ **~30 fichiers corrigés** (scripts shell, Scala, Python)
-- ✅ **HCD/Cassandra** : `localhost:9042` → `${HCD_HOST:-localhost}:${HCD_PORT:-9042}`
-- ✅ **Kafka** : `localhost:9092` → `${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}`
+- ✅ **HCD/Cassandra** : `localhost:9102` → `${HCD_HOST:-localhost}:${HCD_PORT:-9102}`
+- ✅ **Kafka** : `localhost:9192` → `${KAFKA_BOOTSTRAP_SERVERS:-localhost:9192}`
 - ✅ **Zookeeper** : `localhost:2181` → `${KAFKA_ZOOKEEPER_CONNECT:-localhost:2181}`
 
-### Patterns Corrigés
+### Patterns Corrigés (Priorité 2)
 
 #### Scripts Shell
 
-- `localhost:9042` → `${HCD_HOST:-localhost}:${HCD_PORT:-9042}`
-- `localhost:9092` → `${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}`
+- `localhost:9102` → `${HCD_HOST:-localhost}:${HCD_PORT:-9102}`
+- `localhost:9192` → `${KAFKA_BOOTSTRAP_SERVERS:-localhost:9192}`
 - `localhost:2181` → `${KAFKA_ZOOKEEPER_CONNECT:-localhost:2181}`
 
 #### Scripts Scala
 
-- `localhost:9092` → `sys.env.getOrElse("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")`
-- `localhost:9042` → `sys.env.getOrElse("HCD_HOST", "localhost") + ":" + sys.env.getOrElse("HCD_PORT", "9042")`
+- `localhost:9192` → `sys.env.getOrElse("KAFKA_BOOTSTRAP_SERVERS", "localhost:9192")`
+- `localhost:9102` → `sys.env.getOrElse("HCD_HOST", "localhost") + ":" + sys.env.getOrElse("HCD_PORT", "9042")`
 
-### Fichiers Principaux Corrigés
+### Fichiers Principaux Corrigés (Priorité 2)
 
 - `scripts/setup/05_setup_kafka_hcd_streaming.sh`
 - `scripts/setup/06_test_kafka_hcd_streaming.sh`
@@ -93,7 +93,7 @@ Remplacer les références hardcodées à `localhost:PORT` par des variables d'e
 
 ## 🔴 Priorité 3 : Suppression des Fichiers Étranges
 
-### Objectif
+### Objectif (Priorité 3)
 
 Supprimer les fichiers avec des noms invalides créés par erreur.
 
@@ -215,7 +215,7 @@ cqlsh localhost 9042
 
 ```bash
 INSTALL_DIR="${ARKEA_HOME}"
-cqlsh ${HCD_HOST:-localhost} ${HCD_PORT:-9042}
+cqlsh ${HCD_HOST:-localhost} ${HCD_PORT:-9102}
 ```
 
 ---
