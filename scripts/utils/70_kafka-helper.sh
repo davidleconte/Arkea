@@ -37,7 +37,8 @@ if [ -z "${JAVA_HOME:-}" ]; then
         export JAVA_HOME="${HOMEBREW_PREFIX}/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home"
         export PATH="$JAVA_HOME/bin:$PATH"
     elif command -v jenv &> /dev/null && jenv versions | grep -q "17"; then
-        export JAVA_HOME=$(jenv prefix 17)
+        JAVA_HOME="$(jenv prefix 17)"
+        export JAVA_HOME
         export PATH="$JAVA_HOME/bin:$PATH"
     elif [ -d "${ARKEA_HOME}/binaire/java" ]; then
         export JAVA_HOME="${ARKEA_HOME}/binaire/java"
@@ -53,9 +54,11 @@ if [ $# -eq 0 ]; then
     echo "Usage: ./kafka-helper.sh <commande-kafka> [arguments...]"
     echo ""
     echo "Exemples:"
-    echo "  ./kafka-helper.sh kafka-topics.sh --list --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS:-${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}}"
-    echo "  ./kafka-helper.sh kafka-console-producer.sh --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS:-${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}} --topic test-topic"
+    echo "  ./kafka-helper.sh kafka-topics.sh --list --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS:-localhost:9192}"
+    echo "  ./kafka-helper.sh kafka-console-producer.sh --bootstrap-server ${KAFKA_BOOTSTRAP_SERVERS:-localhost:9192} --topic test-topic"
     exit 1
 fi
 
-"$KAFKA_HOME/libexec/bin/$@"
+kafka_cmd="$1"
+shift
+"$KAFKA_HOME/libexec/bin/$kafka_cmd" "$@"

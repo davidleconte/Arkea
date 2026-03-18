@@ -285,18 +285,20 @@ Error: Could not find or load main class org.apache.spark.deploy.SparkSubmit
 ls -la $SPARK_HOME/bin/spark-shell
 ```
 
-2. **Vérifier Java** :
+2. **Vérifier Java (selon le leg)** :
 
 ```bash
 java -version
-# Doit être Java 11
+# Podman (OSS 5.0): Java 17
+# Binary legacy: Java 11
 ```
 
 3. **Vérifier JAVA_HOME** :
 
 ```bash
 echo $JAVA_HOME
-export JAVA_HOME=$(/usr/libexec/java_home -v 11)
+# Charger la configuration pour récupérer le bon contexte
+source .poc-config.sh
 ```
 
 ---

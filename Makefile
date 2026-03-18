@@ -326,7 +326,8 @@ audit-active: ## Audit active docs/config for stale legacy markers
 	@$(MAKE) check-ports
 	@echo "🔍 Checking stale markers in ACTIVE docs..."
 	@rg -n "localhost:9042|localhost:9092|Java 11|Kafka 4\.1\.1" \
-		README.md AGENTS.md docs/README.md docs/ARCHITECTURE.md docs/DEPLOYMENT.md docs/TROUBLESHOOTING.md docs/CONFIGURATION_ENVIRONNEMENT.md docs/GUIDE_DEPENDENCIES.md docs/API.md tests/README.md || true
+		README.md AGENTS.md docs/README.md docs/ARCHITECTURE.md docs/DEPLOYMENT.md docs/TROUBLESHOOTING.md docs/CONFIGURATION_ENVIRONNEMENT.md docs/GUIDE_DEPENDENCIES.md docs/API.md tests/README.md \
+		| grep -vE "HISTORICAL DOCUMENTATION|podman exec|docker exec" || true
 	@echo "🔍 ARKEA_LEG configuration snapshot..."
 	@bash -c 'source .poc-config.sh && echo "ARKEA_LEG=$$ARKEA_LEG HCD_PORT=$$HCD_PORT KAFKA_PORT=$$KAFKA_PORT"'
 	@echo "✅ Active-scope audit complete."
