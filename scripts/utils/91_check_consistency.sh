@@ -90,7 +90,12 @@ in_scope() {
     fi
 
     case "$path" in
-        "$ARKEA_HOME/.git/"*|"$ARKEA_HOME/binaire/"*|"$ARKEA_HOME/software/"*|"$ARKEA_HOME/logs/"*|"$ARKEA_HOME/.venv/"*|"$ARKEA_HOME/docs/archive/"*|"$ARKEA_HOME/inputs-clients/"*|"$ARKEA_HOME/inputs-ibm/"*|"$ARKEA_HOME/poc-design/"*)
+        "$ARKEA_HOME/.git/"*|"$ARKEA_HOME/binaire/"*|"$ARKEA_HOME/software/"*|"$ARKEA_HOME/logs/"*|"$ARKEA_HOME/.venv/"*|"$ARKEA_HOME/docs/archive/"*|"$ARKEA_HOME/inputs-clients/"*|"$ARKEA_HOME/inputs-ibm/"*)
+            return 1
+            ;;
+        "$ARKEA_HOME/poc-design/"*)
+            # Include active OSS5.0 POCs in active scope, exclude legacy POCs
+            [[ "$path" == *"OSS5.0_"* ]] && return 0
             return 1
             ;;
         *)

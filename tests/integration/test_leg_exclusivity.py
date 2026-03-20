@@ -54,3 +54,17 @@ def test_stop_all_sanitizes_ports():
     assert rc == 0, f"stop-all failed: {out}\n{err}"
     assert not is_port_open("localhost", 9042), "Port 9042 should be closed after stop-all."
     assert not is_port_open("localhost", 9102), "Port 9102 should be closed after stop-all."
+
+
+def test_direct_binary_script_blocked_under_podman_policy():
+    """
+    Direct binary startup script must be blocked when podman leg policy is active.
+    """
+    rc, out, err = run_cmd("ARKEA_LEG=podman ./scripts/setup/03_start_hcd.sh")
+    combined = f"{out}\n{err}"
+    assert rc != 0, "Direct binary script execution should fail under podman policy."
+    assert (
+        "ARKEA_ENABLE_BINARY_LEG=1" in combined
+        or "disabled by policy" in combined
+        or "ERROR" in combined
+    )

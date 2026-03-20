@@ -100,6 +100,7 @@ enforce-single-leg: ## Ensure only one leg is active to avoid conflicts
 	'
 
 start: ## Start selected leg (asks each time) with conflict prevention
+	@$(MAKE) stop-all
 	@echo "🚀 Starting services..."
 	@$(MAKE) select-leg
 	@LEG=$$(cat .arkea-leg 2>/dev/null || echo "$${ARKEA_LEG:-podman}"); $(MAKE) enforce-single-leg ARKEA_LEG=$$LEG
