@@ -153,12 +153,22 @@ start-kafka: ## Start Kafka according to selected leg
 		exit 1 \
 	'
 
-stop: ## Stop all services gracefully (both legs)
-	@echo "🛑 Stopping services..."
-	@podman-compose -f podman-compose.yml down 2>/dev/null || true
-	@pkill -f "kafka.Kafka" 2>/dev/null || true
-	@pkill -f "cassandra" 2>/dev/null || true
-	@echo "✅ Services stopped"
+stop: stop-all ## Alias for full exclusivity-safe shutdown
+
+stop-all: ## Brute-force stop of ALL runtime artifacts (Binary + Podman)
+	@echo "🧹 Sanitizing environment (full stop)..."
+	@if command -v podman-compose >/dev/null 2>&1; then \
+		podman-compose -f podman-compose.yml --profile full down 2>/dev/null || true; \
+	fi
+	@if command -v podman >/dev/null 2>&1; then \
+		ids=$$(podman ps -aq --filter label=project=arkea 2>/dev/null); \
+		if [ -n "$$ids" ]; then \
+			podman stop $$ids 2>/dev/null || true; \
+			podman rm -f $$ids 2>/dev/null || true; \
+		fi; \
+	fi
+	@pkill -9 -f "cassandra|hcd|kafka.Kafka|QuorumPeerMain" 2>/dev/null || true
+	@echo "✅ Environment sanitized."
 
 restart: stop start ## Restart all services
 

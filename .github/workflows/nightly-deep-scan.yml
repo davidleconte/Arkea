@@ -13,6 +13,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Sanitize environment
+        run: make stop-all
+
       - name: Security checks
         run: make security
 

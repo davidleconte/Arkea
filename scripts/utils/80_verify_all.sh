@@ -157,6 +157,10 @@ if [[ "$DRY_RUN" == true ]]; then
 else
     if [ "${ARKEA_LEG:-podman}" = "podman" ]; then
         info "Vérification leg [podman] (host 9102 -> container 9042)"
+        if lsof -Pi :9042 -sTCP:LISTEN -t >/dev/null 2>&1; then
+            error "CONFLIT DÉTECTÉ: port binaire 9042 ouvert alors que ARKEA_LEG=podman"
+            exit 1
+        fi
         if lsof -Pi :9102 -sTCP:LISTEN -t >/dev/null 2>&1; then
             info "HCD/Cassandra est accessible sur localhost:9102"
         else

@@ -144,14 +144,12 @@ pip install -r requirements-dev.txt
 ./scripts/setup/02_install_spark_kafka.sh
 ```
 
-### 4. Démarrage des Services
+### 4. Démarrage des Services (Recommandé)
+
+Le `Makefile` applique l'exclusivité des legs (HCD binaire vs Cassandra OSS Podman) et évite les conflits.
 
 ```bash
-# Démarrer HCD
-./scripts/setup/03_start_hcd.sh background
-
-# Démarrer Kafka
-./scripts/setup/04_start_kafka.sh background
+make start
 ```
 
 ### 5. Configuration et Test

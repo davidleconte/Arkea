@@ -109,8 +109,8 @@ else
 fi
 
 # Vérifier si Kafka est déjà en cours d'exécution (fonction portable)
-if check_port "${KAFKA_PORT:-9092}"; then
-    echo "⚠️  Kafka est déjà en cours d'exécution (port ${KAFKA_PORT:-9092} utilisé)"
+if check_port "${KAFKA_PORT:-9192}"; then
+    echo "⚠️  Kafka est déjà en cours d'exécution (port ${KAFKA_PORT:-9192} utilisé)"
     echo "Pour arrêter: kill_process kafka.Kafka"
     exit 1
 fi

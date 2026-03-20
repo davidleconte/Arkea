@@ -18,6 +18,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Sanitize environment
+        run: make stop-all
+
       - name: Active documentation/runtime guardrails
         run: |
           make check-ports
