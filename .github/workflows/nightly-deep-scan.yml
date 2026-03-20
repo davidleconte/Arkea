@@ -1,0 +1,23 @@
+name: Nightly Deep Scan
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+jobs:
+  deep-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Security checks
+        run: make security
+
+      - name: Full consistency (includes legacy surfaces)
+        run: make check-consistency-full
+
+      - name: Active audit snapshot
+        run: make audit-active

@@ -111,6 +111,8 @@ Arkea/
 
 ## 🚀 Démarrage Rapide
 
+> 🏁 **Nouveau sur le projet ?** Commencez par [START_HERE.md](docs/START_HERE.md) pour comprendre le runtime actif, le dual-leg, et le mapping des ports.
+
 ### 1. Configuration de l'Environnement
 
 ```bash

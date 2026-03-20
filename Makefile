@@ -335,13 +335,22 @@ audit-active: ## Audit active docs/config for stale legacy markers
 check: lint security check-ports test-unit ## Run all checks (lint + security + port-guard + unit tests)
 	@echo "✅ All checks passed"
 
-check-consistency: ## Check project consistency
-	@echo "🔍 Checking project consistency..."
+check-consistency: ## Check consistency (default SCOPE=active)
+	@echo "🔍 Checking project consistency... (scope: $(or $(SCOPE),active))"
 	@if [ -x ./scripts/utils/91_check_consistency.sh ]; then \
-		./scripts/utils/91_check_consistency.sh; \
+		./scripts/utils/91_check_consistency.sh --scope $(or $(SCOPE),active); \
 	else \
 		echo "⚠️  Consistency script not found"; \
 	fi
+
+check-consistency-full: ## Exhaustive consistency check (includes legacy surfaces)
+	@$(MAKE) check-consistency SCOPE=full
+
+check-consistency-active: ## Fast consistency check for active surfaces only
+	@$(MAKE) check-consistency SCOPE=active
+
+test-runtime-policy: ## Run leg-aware runtime policy integration tests
+	@pytest tests/integration/test_runtime_policy.py -v
 
 # =============================================================================
 # DOCUMENTATION

@@ -1,0 +1,27 @@
+name: PR Quick Gate
+
+on:
+  pull_request:
+    paths:
+      - "scripts/**"
+      - "lib/**"
+      - "docs/**"
+      - "tests/**"
+      - "Makefile"
+      - ".poc-config.sh"
+
+jobs:
+  quick-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Active documentation/runtime guardrails
+        run: |
+          make check-ports
+          make audit-active
+
+      - name: Active-scope consistency
+        run: make check-consistency-active

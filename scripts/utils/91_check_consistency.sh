@@ -30,6 +30,9 @@ CHECK_SCRIPTS=false
 CHECK_DOCS=false
 GENERATE_REPORT=false
 REPORT_FILE=""
+SCOPE="active"
+JSON_OUTPUT=false
+JSON_ISSUES=""
 
 # Compteurs
 TOTAL_ISSUES=0
@@ -48,10 +51,52 @@ print_help() {
     echo "  --check-hardcoded-paths : Vérifier les chemins hardcodés"
     echo "  --check-scripts         : Vérifier les scripts (set -euo pipefail)"
     echo "  --check-docs            : Vérifier la documentation (liens, références)"
+    echo "  --scope active|full     : Portée de scan (défaut: active)"
+    echo "  --json                  : Sortie JSON structurée en fin d'exécution"
     echo "  --report                : Générer un rapport (fichier .md)"
     echo "  --help                  : Affiche ce message d'aide"
     echo ""
     echo "Si aucune option n'est spécifiée, toutes les vérifications sont effectuées."
+}
+
+json_escape() {
+    local s="$1"
+    s="${s//\\/\\\\}"
+    s="${s//\"/\\\"}"
+    s="${s//$'\n'/ }"
+    printf '%s' "$s"
+}
+
+append_json_issue() {
+    local issue_type="$1"
+    local issue_path="$2"
+    local issue_detail="$3"
+
+    local entry
+    entry="{\"type\":\"$(json_escape "$issue_type")\",\"path\":\"$(json_escape "$issue_path")\",\"detail\":\"$(json_escape "$issue_detail")\"}"
+
+    if [ -z "$JSON_ISSUES" ]; then
+        JSON_ISSUES="$entry"
+    else
+        JSON_ISSUES="${JSON_ISSUES},${entry}"
+    fi
+}
+
+in_scope() {
+    local path="$1"
+
+    if [ "$SCOPE" = "full" ]; then
+        return 0
+    fi
+
+    case "$path" in
+        "$ARKEA_HOME/.git/"*|"$ARKEA_HOME/binaire/"*|"$ARKEA_HOME/software/"*|"$ARKEA_HOME/logs/"*|"$ARKEA_HOME/.venv/"*|"$ARKEA_HOME/docs/archive/"*|"$ARKEA_HOME/inputs-clients/"*|"$ARKEA_HOME/inputs-ibm/"*|"$ARKEA_HOME/poc-design/"*)
+            return 1
+            ;;
+        *)
+            return 0
+            ;;
+    esac
 }
 
 while [[ "$#" -gt 0 ]]; do
@@ -64,6 +109,17 @@ while [[ "$#" -gt 0 ]]; do
             ;;
         --check-docs)
             CHECK_DOCS=true
+            ;;
+        --scope)
+            if [ "${2:-}" != "active" ] && [ "${2:-}" != "full" ]; then
+                error "Valeur invalide pour --scope: ${2:-<vide>} (attendu: active|full)"
+                exit 1
+            fi
+            SCOPE="$2"
+            shift
+            ;;
+        --json)
+            JSON_OUTPUT=true
             ;;
         --report)
             GENERATE_REPORT=true
@@ -110,7 +166,7 @@ check_hardcoded_paths() {
     # Rechercher dans les fichiers (exclure .git, binaire, software)
     for pattern in "${patterns[@]}"; do
         while IFS= read -r file; do
-            if [ -f "$file" ]; then
+            if [ -f "$file" ] && in_scope "$file"; then
                 if grep -q "$pattern" "$file" 2>/dev/null; then
                     files_with_hardcoded+=("$file")
                     count=$((count + 1))
@@ -124,9 +180,11 @@ check_hardcoded_paths() {
             \( -name "*.sh" -o -name "*.md" -o -name "*.py" \) 2>/dev/null)
     done
 
-    # Dédupliquer
-    local unique_files
-    readarray -t unique_files < <(printf '%s\n' "${files_with_hardcoded[@]}" | sort -u)
+    # Dédupliquer (portable Bash 3+)
+    local unique_files=()
+    while IFS= read -r uniq_file; do
+        [ -n "$uniq_file" ] && unique_files+=("$uniq_file")
+    done < <(printf '%s\n' "${files_with_hardcoded[@]}" | sort -u)
 
     if [ ${#unique_files[@]} -eq 0 ]; then
         info "✅ Aucun chemin hardcodé détecté"
@@ -135,6 +193,7 @@ check_hardcoded_paths() {
         for file in "${unique_files[@]}"; do
             local rel_path="${file#$ARKEA_HOME/}"
             echo "  ⚠️  $rel_path"
+            append_json_issue "hardcoded_path" "$rel_path" "Pattern hardcodé détecté"
         done
         HARDCODED_PATHS_COUNT=${#unique_files[@]}
         TOTAL_ISSUES=$((TOTAL_ISSUES + ${#unique_files[@]}))
@@ -153,7 +212,7 @@ check_scripts() {
 
     # Rechercher les scripts sans set -euo pipefail
     while IFS= read -r script; do
-        if [ -f "$script" ]; then
+        if [ -f "$script" ] && in_scope "$script"; then
             # Vérifier si le script a set -euo pipefail dans les 5 premières lignes
             if ! head -5 "$script" | grep -q "set -euo pipefail"; then
                 scripts_without_standards+=("$script")
@@ -174,6 +233,7 @@ check_scripts() {
         for script in "${scripts_without_standards[@]}"; do
             local rel_path="${script#$ARKEA_HOME/}"
             echo "  ⚠️  $rel_path"
+            append_json_issue "script_standard" "$rel_path" "Absence de set -euo pipefail"
         done
         SCRIPTS_WITHOUT_STANDARDS_COUNT=${#scripts_without_standards[@]}
         TOTAL_ISSUES=$((TOTAL_ISSUES + ${#scripts_without_standards[@]}))
@@ -192,7 +252,7 @@ check_docs() {
 
     # Vérifier les liens relatifs dans les fichiers .md
     while IFS= read -r doc_file; do
-        if [ -f "$doc_file" ]; then
+        if [ -f "$doc_file" ] && in_scope "$doc_file"; then
             # Rechercher les liens relatifs potentiellement cassés
             while IFS= read -r line; do
                 local md_link_regex='\[.*\]\(([^)]+)\)'
@@ -207,6 +267,7 @@ check_docs() {
                         target_file="$(cd "$doc_dir" && realpath -m "$link" 2>/dev/null || echo "")"
                         if [ ! -f "$target_file" ]; then
                             docs_issues+=("$doc_file: Lien cassé: $link")
+                            append_json_issue "doc_link" "${doc_file#$ARKEA_HOME/}" "Lien cassé: $link"
                             count=$((count + 1))
                         fi
                     fi
@@ -332,10 +393,23 @@ fi
 
 section "✅ Vérification terminée"
 
+EXIT_CODE=0
 if [ $TOTAL_ISSUES -eq 0 ]; then
     info "✅ Aucun problème détecté !"
-    exit 0
 else
     warn "$TOTAL_ISSUES problème(s) détecté(s)"
-    exit 1
+    EXIT_CODE=1
 fi
+
+if [ "$JSON_OUTPUT" = true ]; then
+    printf '{"timestamp":"%s","scope":"%s","total_issues":%s,"hardcoded_paths":%s,"scripts_without_standards":%s,"docs_issues":%s,"issues":[%s]}\n' \
+        "$(date +%Y-%m-%dT%H:%M:%S%z)" \
+        "$SCOPE" \
+        "$TOTAL_ISSUES" \
+        "$HARDCODED_PATHS_COUNT" \
+        "$SCRIPTS_WITHOUT_STANDARDS_COUNT" \
+        "$DOCS_ISSUES_COUNT" \
+        "$JSON_ISSUES"
+fi
+
+exit $EXIT_CODE

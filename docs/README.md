@@ -16,6 +16,8 @@
 
 ## 2) Setup / Run / Ops
 
+- [START_HERE.md](START_HERE.md) — 3-step onboarding & runtime mapping
+- [COMMON_MISTAKES.md](COMMON_MISTAKES.md) — Do/Don't and frequent errors
 - [CONFIGURATION_ENVIRONNEMENT.md](CONFIGURATION_ENVIRONNEMENT.md) — Environment configuration
 - [DEPLOYMENT.md](DEPLOYMENT.md) — Deployment guide
 - [TROUBLESHOOTING.md](TROUBLESHOOTING.md) — Troubleshooting guide
