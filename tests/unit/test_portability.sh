@@ -119,6 +119,10 @@ if [ -n "${ARKEA_HOME:-}" ]; then
     # Note: Use a temp file to avoid exit code issues with grep in set -e mode
     TEMP_FILE=$(mktemp)
     find "$ARKEA_HOME/scripts" -name "*.sh" -type f 2>/dev/null | while read -r file; do
+        # Exclude the consistency checker itself: it intentionally embeds hardcoded-path patterns
+        if [[ "$file" == *"scripts/utils/91_check_consistency.sh" ]]; then
+            continue
+        fi
         grep -E "/Users/|/home/[a-z]" "$file" 2>/dev/null | grep -v "regex\|pattern\|example\|template" >> "$TEMP_FILE" || true
     done
     HARDCODED_IN_SCRIPTS=$(wc -l < "$TEMP_FILE" | tr -d '[:space:]')

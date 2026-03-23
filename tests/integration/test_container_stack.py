@@ -8,6 +8,8 @@ import time
 
 import pytest
 
+pytestmark = [pytest.mark.integration]
+
 
 def run_cmd(cmd):
     """Run a shell command and return output."""

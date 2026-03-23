@@ -44,10 +44,21 @@ flowchart LR
 
 ---
 
-## 4) Commandes utiles
+## 4) Politique de test (A+)
+
+- ✅ PR quick gate : `make check-ports`, `make audit-active`, `make check-consistency-active`, `make test-all`
+- ✅ Active gate strict : `make check`, `make audit-active`, `make test-runtime-policy-strict` avec stack Podman démarrée
+- ✅ Local dev : `make test-runtime-policy` autorise le skip du smoke port si la stack n'est pas lancée
+- ✅ Objectif CI : aucun skip inattendu sur le gate actif strict
+
+---
+
+## 5) Commandes utiles
 
 ```bash
 make check-consistency-active
 make check-ports
 make test-runtime-policy
+make test-runtime-policy-strict
+make test-all
 ```

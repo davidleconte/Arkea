@@ -9,6 +9,7 @@ on:
       - "tests/**"
       - "Makefile"
       - ".poc-config.sh"
+      - "pytest.ini"
 
 jobs:
   quick-checks:
@@ -17,6 +18,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Sanitize environment
         run: make stop-all
@@ -28,3 +39,6 @@ jobs:
 
       - name: Active-scope consistency
         run: make check-consistency-active
+
+      - name: Unified core tests (unit + runtime policy, optional local stack)
+        run: make test-all

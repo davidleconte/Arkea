@@ -14,9 +14,10 @@ jobs:
   active-leg-gate:
     name: Active Path Quality Gate
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     env:
       ARKEA_LEG: podman
+      ARKEA_STRICT_RUNTIME_POLICY: "1"
 
     steps:
       - name: Checkout code
@@ -42,12 +43,23 @@ jobs:
         run: |
           make check-env ARKEA_LEG=podman
 
-      - name: Run quality gate
+      - name: Pre-pull Podman profile images
+        run: |
+          podman --version
+          podman-compose -f podman-compose.yml --profile full pull || true
+
+      - name: Bootstrap active runtime stack
+        run: |
+          make podman-up ARKEA_LEG=podman
+          make status ARKEA_LEG=podman
+
+      - name: Run quality gate (strict runtime policy + exclusivity)
         run: |
           make check ARKEA_LEG=podman
           make audit-active ARKEA_LEG=podman
+          make test-runtime-policy-strict ARKEA_LEG=podman
+          make test-leg-exclusivity ARKEA_LEG=podman
 
       - name: Podman profile smoke check (hcd-only)
         run: |
-          podman --version
           podman-compose -f podman-compose.yml --profile hcd-only config --services

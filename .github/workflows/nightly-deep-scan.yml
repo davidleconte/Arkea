@@ -24,3 +24,9 @@ jobs:
 
       - name: Active audit snapshot
         run: make audit-active
+
+      - name: A+ roadmap status snapshot
+        run: |
+          rg -n "M1 — Active Path CI Gate" A_PLUS_ROADMAP.md
+          rg -n "\| A2 \|.*\| IN_PROGRESS \|" A_PLUS_ROADMAP.md
+          rg -n "\| A4 \|.*\| DONE \|" A_PLUS_ROADMAP.md

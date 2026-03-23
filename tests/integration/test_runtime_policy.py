@@ -2,10 +2,14 @@
 Runtime policy integration tests for ARKEA active leg behavior.
 """
 
+import os
 import socket
 import subprocess
+import time
 
 import pytest
+
+pytestmark = [pytest.mark.integration, pytest.mark.runtime_policy]
 
 
 def run_cmd(cmd: str):
@@ -22,6 +26,15 @@ def is_port_open(host: str, port: int, timeout: float = 1.5) -> bool:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.settimeout(timeout)
         return sock.connect_ex((host, port)) == 0
+
+
+def wait_for_ports(host: str, ports: list[int], retries: int = 15, delay_s: float = 2.0) -> bool:
+    """Wait until all required ports are reachable."""
+    for _ in range(retries):
+        if all(is_port_open(host, port) for port in ports):
+            return True
+        time.sleep(delay_s)
+    return all(is_port_open(host, port) for port in ports)
 
 
 def test_binary_leg_blocked_by_default():
@@ -47,9 +60,19 @@ def test_active_port_mapping_from_config_snapshot():
     assert values[2] == "9192"
 
 
-def test_active_host_ports_smoke_if_stack_running():
-    """If stack is up, host-side active ports should be reachable."""
-    if not is_port_open("localhost", 9102) and not is_port_open("localhost", 9192):
-        pytest.skip("Active stack not running on host ports 9102/9192; skipping runtime smoke.")
-    assert is_port_open("localhost", 9102), "Expected host port 9102 (CQL) to be reachable."
-    assert is_port_open("localhost", 9192), "Expected host port 9192 (Kafka) to be reachable."
+def test_active_host_ports_smoke():
+    """Verify active host ports; strict in CI, optional in local dev."""
+    strict_mode = os.environ.get("ARKEA_STRICT_RUNTIME_POLICY", "0") == "1"
+
+    if strict_mode:
+        ready = wait_for_ports("localhost", [9102, 9192], retries=20, delay_s=2.0)
+        assert ready, "Expected host ports 9102/9192 to be reachable in strict runtime policy mode."
+
+    hcd_up = is_port_open("localhost", 9102)
+    kafka_up = is_port_open("localhost", 9192)
+
+    if not strict_mode and not hcd_up and not kafka_up:
+        pytest.skip("Local run without active stack on 9102/9192; skipping runtime smoke.")
+
+    assert hcd_up, "Expected host port 9102 (CQL) to be reachable."
+    assert kafka_up, "Expected host port 9192 (Kafka) to be reachable."

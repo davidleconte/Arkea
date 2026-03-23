@@ -8,7 +8,8 @@
 # Usage : make [target]
 # =============================================================================
 
-.PHONY: help setup start stop status test test-unit test-integration test-e2e \
+.PHONY: help setup start stop status test test-unit test-integration test-runtime-policy \
+        test-runtime-policy-strict test-leg-exclusivity test-all test-e2e \
         clean docs check fmt lint security check-consistency \
         poc-bic poc-domirama2 poc-domiramaCatOps
 
@@ -261,6 +262,18 @@ test-integration: ## Run integration tests
 	@echo "🧪 Running integration tests..."
 	@./tests/run_integration_tests.sh
 
+test-runtime-policy: ## Run runtime policy tests (optional stack in local dev)
+	@pytest -m runtime_policy tests/integration -v
+
+test-runtime-policy-strict: ## Run runtime policy tests in strict mode (no skip fallback)
+	@ARKEA_STRICT_RUNTIME_POLICY=1 pytest -m runtime_policy tests/integration -v
+
+test-leg-exclusivity: ## Run dual-leg exclusivity integration tests
+	@pytest tests/integration/test_leg_exclusivity.py -v
+
+test-all: test-unit test-runtime-policy ## Unified core test gate (unit + runtime policy)
+	@echo "✅ Unified core tests completed"
+
 test-e2e: ## Run end-to-end tests
 	@echo "🧪 Running E2E tests..."
 	@./tests/run_e2e_tests.sh
@@ -343,7 +356,7 @@ audit-active: ## Audit active docs/config for stale legacy markers
 	@bash -c 'source .poc-config.sh && echo "ARKEA_LEG=$$ARKEA_LEG HCD_PORT=$$HCD_PORT KAFKA_PORT=$$KAFKA_PORT"'
 	@echo "✅ Active-scope audit complete."
 
-check: lint security check-ports test-unit ## Run all checks (lint + security + port-guard + unit tests)
+check: lint security check-ports test-all ## Run all checks (lint + security + port-guard + unified core tests)
 	@echo "✅ All checks passed"
 
 check-consistency: ## Check consistency (default SCOPE=active)
@@ -359,9 +372,6 @@ check-consistency-full: ## Exhaustive consistency check (includes legacy surface
 
 check-consistency-active: ## Fast consistency check for active surfaces only
 	@$(MAKE) check-consistency SCOPE=active
-
-test-runtime-policy: ## Run leg-aware runtime policy integration tests
-	@pytest tests/integration/test_runtime_policy.py -v
 
 # =============================================================================
 # DOCUMENTATION

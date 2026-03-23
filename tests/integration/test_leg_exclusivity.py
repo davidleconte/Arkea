@@ -6,6 +6,10 @@ Integration tests for strict dual-leg exclusivity:
 import socket
 import subprocess
 
+import pytest
+
+pytestmark = [pytest.mark.integration]
+
 
 def run_cmd(cmd: str):
     """Run a shell command and return (rc, stdout, stderr)."""

@@ -19,7 +19,7 @@
 
 | Milestone | Target Date | Success Criteria |
 |---|---:|---|
-| M1 — Active Path CI Gate | 2026-03-24 | CI blocks merges unless `make check`, `make audit-active`, and podman smoke checks pass |
+| M1 — Active Path CI Gate ✅ DONE | 2026-03-24 | CI blocks merges unless `make check`, `make audit-active`, and podman smoke checks pass |
 | M2 — Leg-Aware Script/Test Parity | 2026-03-27 | Critical setup/verify/tests are leg-aware or explicitly legacy-blocked |
 | M3 — Documentation Finalization | 2026-03-31 | Canonical matrix published; legacy docs archived/bannered; no contradictory active guidance |
 | M4 — Validation Evidence Pack | 2026-04-02 | Repeatable validation report committed (commands, outputs, status snapshots) |
@@ -31,7 +31,7 @@
 | ID | Action | Owner | Effort | Priority | Status | Acceptance Criteria |
 |---|---|---|---|---|---|---|
 | A1 | Create canonical runtime matrix (`docs/CANONICAL_RUNTIME_MATRIX.md`) | TL/Architect | S | P0 | TODO | Ports/versions/leg behavior/java matrix published and linked from README + docs index |
-| A2 | Add mandatory CI gate for active path (`ARKEA_LEG=podman`) | DevOps | M | P0 | TODO | PR blocked unless active checks pass |
+| A2 | Add mandatory CI gate for active path (`ARKEA_LEG=podman`) | DevOps | M | P0 | IN_PROGRESS | PR blocked unless active checks pass |
 | A3 | Complete leg-aware parity audit for setup/utils scripts | Platform Eng | M | P0 | TODO | Scripts either leg-aware or policy-blocked with explicit message |
 | A4 | Add/extend guardrails for host-side legacy ports in active docs/tests | Platform Eng | S | P0 | DONE | `check-ports` + `audit-active` operational and green |
 | A5 | Normalize integration/e2e test bootstrap to `.poc-config.sh` | QA/Platform | M | P1 | IN_PROGRESS | Podman lane stable; flaky/brittle port literals removed in active tests |
