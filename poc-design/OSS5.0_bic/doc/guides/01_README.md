@@ -164,7 +164,7 @@ bic/
 └── archive/              # Archives
 ```
 
-Voir [`../README.md`](../README.md) pour la structure complète.
+Voir [`../../README.md`](../../README.md) pour la structure complète.
 
 ---
 
@@ -212,7 +212,7 @@ cqlsh $HCD_HOST $HCD_PORT -f schemas/03_create_bic_indexes.cql
 - **Guide Setup** : [`02_GUIDE_SETUP.md`](02_GUIDE_SETUP.md)
 - **Guide Ingestion** : [`03_GUIDE_INGESTION.md`](03_GUIDE_INGESTION.md)
 - **Guide Recherche** : [`04_GUIDE_RECHERCHE.md`](04_GUIDE_RECHERCHE.md)
-- **Architecture** : [`../design/02_ARCHITECTURE.md`](../design/02_ARCHITECTURE.md)
+- **Architecture** : [Architecture Globale](../../../../docs/ARCHITECTURE.md)
 
 ---
 

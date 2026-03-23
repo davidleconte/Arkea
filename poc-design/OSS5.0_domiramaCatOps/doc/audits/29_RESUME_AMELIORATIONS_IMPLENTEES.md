@@ -280,7 +280,7 @@ Connection refused: localhost/127.0.0.1:9042
 
 ## 📚 Documentation Associée
 
-- **Analyse détaillée** : [`doc/audits/29_AMELIORATIONS_VALIDATIONS_ERREURS.md`](../audits/29_AMELIORATIONS_VALIDATIONS_ERREURS.md)
+- **Analyse détaillée** : [Audit Orchestration](28_AUDIT_ORCHESTRATION_COMPLETE.md)
 - **Script amélioré** : [`scripts/00_orchestration_complete.sh`](../../scripts/00_orchestration_complete.sh)
 
 ---

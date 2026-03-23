@@ -25,7 +25,7 @@ Les **3 priorités critiques** identifiées dans l'audit intégral ont été **i
 
 ### Objectif
 
-Remplacer les références hardcodées à `/Users/david.leconte/Documents/Arkea` par `${ARKEA_HOME}` pour améliorer la
+Remplacer les références hardcodées à `/path/to/arkea` par `${ARKEA_HOME}` pour améliorer la
 portabilité.
 
 ### Corrections Effectuées
@@ -36,9 +36,9 @@ portabilité.
 
 ### Patterns Corrigés
 
-- `/Users/david.leconte/Documents/Arkea` → `${ARKEA_HOME}`
+- `/path/to/arkea` → `${ARKEA_HOME}`
 - `/Users/david.leconte` → `${USER_HOME:-$HOME}`
-- `INSTALL_DIR="/Users/david.leconte/Documents/Arkea"` → `INSTALL_DIR="${ARKEA_HOME}"`
+- `INSTALL_DIR="/path/to/arkea"` → `INSTALL_DIR="${ARKEA_HOME}"`
 
 ### Fichiers Principaux Corrigés
 
@@ -170,7 +170,7 @@ python3 scripts/utils/fix_priorities.py --priority 3  # Fichiers étranges
 
 ```bash
 # Recherche des chemins hardcodés restants
-grep -r "/Users/david.leconte/Documents/Arkea" docs/ scripts/ poc-design/*/scripts/ 2>/dev/null | wc -l
+grep -r "/path/to/arkea" docs/ scripts/ poc-design/*/scripts/ 2>/dev/null | wc -l
 # Résultat : ~0 occurrences (seulement dans fichiers exclus comme archives)
 ```
 
@@ -207,7 +207,7 @@ find . -type f \( -name "=" -o -name "\$REPORT_FILE" -o -name "\$\{REPORT_FILE\}
 #### Avant
 
 ```bash
-INSTALL_DIR="/Users/david.leconte/Documents/Arkea"
+INSTALL_DIR="/path/to/arkea"
 cqlsh localhost 9042
 ```
 

@@ -11,15 +11,15 @@
 
 ### Scripts de Configuration
 
-- [`17_add_e5_embedding_column.sh`](../scripts/17_add_e5_embedding_column.sh) - Ajouter la colonne e5-large et créer l'index
-- [`16_generate_relevant_test_data.sh`](../scripts/16_generate_relevant_test_data.sh) - Générer des données de test pertinentes
-- [`18_generate_embeddings_e5_auto.sh`](../scripts/18_generate_embeddings_e5_auto.sh) - Générer les embeddings e5-large
-- [`19_test_embeddings_comparison.sh`](../scripts/19_test_embeddings_comparison.sh) - Comparer ByteT5 vs e5-large
+- [`17_add_e5_embedding_column.sh`](../../scripts/17_add_e5_embedding_column.sh) - Ajouter la colonne e5-large et créer l'index
+- [`16_generate_relevant_test_data.sh`](../../scripts/16_generate_relevant_test_data.sh) - Générer des données de test pertinentes
+- [`18_generate_embeddings_e5_auto.sh`](../../scripts/18_generate_embeddings_e5_auto.sh) - Générer les embeddings e5-large
+- [`19_test_embeddings_comparison.sh`](../../scripts/19_test_embeddings_comparison.sh) - Comparer ByteT5 vs e5-large
 
 ### Scripts de Test
 
-- [`16_test_fuzzy_search.sh`](../scripts/16_test_fuzzy_search.sh) - Tests de recherche fuzzy avec ByteT5
-- [`18_test_hybrid_search.sh`](../scripts/18_test_hybrid_search.sh) - Tests de recherche hybride (full-text + vector)
+- [`16_test_fuzzy_search.sh`](../../scripts/16_test_fuzzy_search.sh) - Tests de recherche fuzzy avec ByteT5
+- [`18_test_hybrid_search.sh`](../../scripts/18_test_hybrid_search.sh) - Tests de recherche hybride (full-text + vector)
 
 ### Documentation Associée
 

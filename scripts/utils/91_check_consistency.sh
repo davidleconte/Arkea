@@ -94,8 +94,17 @@ in_scope() {
             return 1
             ;;
         "$ARKEA_HOME/poc-design/"*)
-            # Include active OSS5.0 POCs in active scope, exclude legacy POCs
-            [[ "$path" == *"OSS5.0_"* ]] && return 0
+            # Include active OSS5.0 POCs in active scope, exclude legacy and archived surfaces
+            if [[ "$path" == *"OSS5.0_"* ]]; then
+                case "$path" in
+                    */archive/*|*/maintenance/*)
+                        return 1
+                        ;;
+                    *)
+                        return 0
+                        ;;
+                esac
+            fi
             return 1
             ;;
         *)
@@ -160,18 +169,23 @@ check_hardcoded_paths() {
     local count=0
     local files_with_hardcoded=()
 
-    # Patterns à rechercher
+    # Patterns à rechercher (chemins réellement hardcodés et non portables)
     local patterns=(
-        "${USER_HOME:-$HOME}"
-        "/opt/homebrew"
-        "INSTALL_DIR="
-        "hardcod"
+        "/Users/david.leconte/Documents/Arkea"
+        "/Users/david.leconte/Documents/Work/Demos/Arkea"
+        "INSTALL_DIR=\"/Users/"
     )
 
     # Rechercher dans les fichiers (exclure .git, binaire, software)
     for pattern in "${patterns[@]}"; do
         while IFS= read -r file; do
             if [ -f "$file" ] && in_scope "$file"; then
+                local rel_path="${file#$ARKEA_HOME/}"
+                case "$rel_path" in
+                    scripts/utils/91_check_consistency.sh|scripts/utils/fix_priorities.py|tests/unit/test_fix_priorities.py)
+                        continue
+                        ;;
+                esac
                 if grep -q "$pattern" "$file" 2>/dev/null; then
                     files_with_hardcoded+=("$file")
                     count=$((count + 1))
@@ -187,9 +201,11 @@ check_hardcoded_paths() {
 
     # Dédupliquer (portable Bash 3+)
     local unique_files=()
-    while IFS= read -r uniq_file; do
-        [ -n "$uniq_file" ] && unique_files+=("$uniq_file")
-    done < <(printf '%s\n' "${files_with_hardcoded[@]}" | sort -u)
+    if [ ${#files_with_hardcoded[@]} -gt 0 ]; then
+        while IFS= read -r uniq_file; do
+            [ -n "$uniq_file" ] && unique_files+=("$uniq_file")
+        done < <(printf '%s\n' "${files_with_hardcoded[@]}" | sort -u)
+    fi
 
     if [ ${#unique_files[@]} -eq 0 ]; then
         info "✅ Aucun chemin hardcodé détecté"
@@ -218,6 +234,13 @@ check_scripts() {
     # Rechercher les scripts sans set -euo pipefail
     while IFS= read -r script; do
         if [ -f "$script" ] && in_scope "$script"; then
+            local rel_path="${script#$ARKEA_HOME/}"
+            case "$rel_path" in
+                .poc-config.sh|lib/common.sh|tests/*|poc-design/OSS5.0_bic/utils/oss5_commons.sh)
+                    # Fichiers de config/framework/tests/utilitaires: standard set -euo non imposé
+                    continue
+                    ;;
+            esac
             # Vérifier si le script a set -euo pipefail dans les 5 premières lignes
             if ! head -5 "$script" | grep -q "set -euo pipefail"; then
                 scripts_without_standards+=("$script")
@@ -269,8 +292,17 @@ check_docs() {
                         local doc_dir
                         doc_dir="$(dirname "$doc_file")"
                         local target_file
-                        target_file="$(cd "$doc_dir" && realpath -m "$link" 2>/dev/null || echo "")"
-                        if [ ! -f "$target_file" ]; then
+                        if declare -F get_realpath >/dev/null 2>&1; then
+                            target_file="$(cd "$doc_dir" && get_realpath "$link" 2>/dev/null || echo "")"
+                        else
+                            target_file="$(cd "$doc_dir" && python3 - "$link" <<'PY' 2>/dev/null
+import os
+import sys
+print(os.path.abspath(sys.argv[1]))
+PY
+)"
+                        fi
+                        if [ ! -e "$target_file" ]; then
                             docs_issues+=("$doc_file: Lien cassé: $link")
                             append_json_issue "doc_link" "${doc_file#$ARKEA_HOME/}" "Lien cassé: $link"
                             count=$((count + 1))

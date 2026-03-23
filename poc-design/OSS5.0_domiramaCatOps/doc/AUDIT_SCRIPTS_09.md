@@ -444,7 +444,7 @@ if 'accepted' in r.get('query', '') or 'accepted_at' in r.get('query', ''):
     report += "- accepted_at = date de la décision client (acceptation OU refus)\n"
     report += "- Si accepted = false, accepted_at = date du refus (cohérent)\n"
     report += "- Si accepted = true, accepted_at = date de l'acceptation\n"
-    report += "- Voir [doc/ANALYSE_COHERENCE_ACCEPTED_AT.md](../ANALYSE_COHERENCE_ACCEPTED_AT.md) pour plus de détails\n\n"
+    report += "- Voir [doc/ANALYSE_COHERENCE_ACCEPTED_AT.md](ANALYSE_COHERENCE_ACCEPTED_AT.md) pour plus de détails\n\n"
 ```
 
 ---
