@@ -40,6 +40,12 @@ This release stabilizes the **OSS 5.0 Podman path** as the default operating mod
 5. `0f0d5b5` — **docs(roadmap): add A+ execution board with milestones and acceptance criteria**
    - Adds `A_PLUS_ROADMAP.md` with milestone plan, owners, priorities, risks, and exit checklist
 
+6. `4f36a0f` — **fix: harden dual-leg streaming ports and integration test reliability**
+   - Replaces hardcoded host-side legacy ports in setup/test scripts with config-driven host ports (`9102`/`9192`)
+   - Adds timeout guards to integration command helpers and improves test diagnostics
+   - Adds Cassandra readiness retry in container-stack integration tests
+   - Aligns Windows and Kafka/HCD result docs with active host port mapping
+
 ---
 
 ## Operational Impact
