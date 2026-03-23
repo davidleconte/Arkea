@@ -35,9 +35,13 @@ fi
 
 cd "${ARKEA_HOME}"
 
+HCD_PORT="${HCD_PORT:-9102}"
+KAFKA_PORT="${KAFKA_PORT:-9192}"
+KAFKA_BOOTSTRAP="${KAFKA_BOOTSTRAP_SERVERS:-localhost:${KAFKA_PORT}}"
+
 # 1. Vérifier que Kafka est démarré
 info "🔍 Vérification de Kafka..."
-if lsof -Pi :9092 -sTCP:LISTEN -t >/dev/null 2>&1 ; then
+if lsof -Pi :"${KAFKA_PORT}" -sTCP:LISTEN -t >/dev/null 2>&1 ; then
     info "✅ Kafka est démarré"
 else
     error "❌ Kafka n'est pas démarré. Démarrez avec: ./start_kafka.sh"
@@ -46,7 +50,7 @@ fi
 
 # 2. Vérifier que HCD est démarré
 info "🔍 Vérification de HCD..."
-if lsof -Pi :9042 -sTCP:LISTEN -t >/dev/null 2>&1 ; then
+if lsof -Pi :"${HCD_PORT}" -sTCP:LISTEN -t >/dev/null 2>&1 ; then
     info "✅ HCD est démarré"
 else
     error "❌ HCD n'est pas démarré. Démarrez avec: ./start_hcd.sh"
@@ -55,7 +59,7 @@ fi
 
 # 3. Vérifier que le topic existe
 info "🔍 Vérification du topic Kafka..."
-KAFKA_BOOTSTRAP="${KAFKA_BOOTSTRAP_SERVERS:-${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}}"
+KAFKA_BOOTSTRAP="${KAFKA_BOOTSTRAP_SERVERS:-localhost:${KAFKA_PORT}}"
 if ./kafka-helper.sh kafka-topics.sh --list --bootstrap-server "$KAFKA_BOOTSTRAP" 2>&1 | grep -q "test-topic"; then
     info "✅ Topic test-topic existe"
 else
@@ -69,13 +73,13 @@ info "🧹 Nettoyage des données précédentes dans HCD..."
 cd binaire/hcd-1.2.3
 jenv local 11
 eval "$(jenv init -)"
-./bin/cqlsh localhost 9042 -e "USE poc_hbase_migration; TRUNCATE kafka_events;" 2>&1 | grep -v "Warnings" || true
+./bin/cqlsh localhost "${HCD_PORT}" -e "USE poc_hbase_migration; TRUNCATE kafka_events;" 2>&1 | grep -v "Warnings" || true
 cd ..
 info "✅ Données nettoyées"
 
 # 5. Produire des messages de test dans Kafka
 info "📤 Production de messages de test dans Kafka..."
-KAFKA_BOOTSTRAP="${KAFKA_BOOTSTRAP_SERVERS:-${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}}"
+KAFKA_BOOTSTRAP="${KAFKA_BOOTSTRAP_SERVERS:-localhost:${KAFKA_PORT}}"
 echo "Message test 1" | ./kafka-helper.sh kafka-console-producer.sh --bootstrap-server "$KAFKA_BOOTSTRAP" --topic test-topic 2>&1 | grep -v "Warnings" || true
 sleep 1
 echo "Message test 2" | ./kafka-helper.sh kafka-console-producer.sh --bootstrap-server "$KAFKA_BOOTSTRAP" --topic test-topic 2>&1 | grep -v "Warnings" || true
@@ -87,8 +91,9 @@ info "✅ 4 messages produits dans Kafka"
 
 # 6. Lancer le job Spark Streaming en arrière-plan
 info "🚀 Lancement du job Spark Streaming..."
-export SPARK_HOME=$(pwd)/binaire/spark-3.5.1
-export PATH=$SPARK_HOME/bin:$PATH
+SPARK_HOME="$(pwd)/binaire/spark-3.5.1"
+export SPARK_HOME
+export PATH="$SPARK_HOME/bin:$PATH"
 jenv local 11
 eval "$(jenv init -)"
 
@@ -100,7 +105,7 @@ import org.apache.spark.sql.functions._
 val spark = SparkSession.builder()
   .appName("Kafka to HCD Test")
   .config("spark.cassandra.connection.host", "localhost")
-  .config("spark.cassandra.connection.port", "9042")
+  .config("spark.cassandra.connection.port", scala.sys.env.getOrElse("HCD_PORT", "9102"))
   .config("spark.sql.extensions", "com.datastax.spark.connector.CassandraSparkExtensions")
   .getOrCreate()
 
@@ -110,7 +115,7 @@ println("✅ Spark Session créée")
 val kafkaDF = spark
   .read
   .format("kafka")
-  .option("kafka.bootstrap.servers", "${KAFKA_BOOTSTRAP_SERVERS:-${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}}")
+  .option("kafka.bootstrap.servers", scala.sys.env.getOrElse("KAFKA_BOOTSTRAP_SERVERS", "localhost:" + scala.sys.env.getOrElse("KAFKA_PORT", "9192")))
   .option("subscribe", "test-topic")
   .option("startingOffsets", "earliest")
   .option("endingOffsets", "latest")
@@ -160,7 +165,7 @@ EOF
 $SPARK_HOME/bin/spark-shell \
   --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1,com.datastax.spark:spark-cassandra-connector_2.12:3.5.0 \
   --conf spark.cassandra.connection.host=localhost \
-  --conf spark.cassandra.connection.port=9042 \
+  --conf spark.cassandra.connection.port="${HCD_PORT}" \
   --conf spark.sql.extensions=com.datastax.spark.connector.CassandraSparkExtensions \
   -i /tmp/test_kafka_hcd_batch.scala 2>&1 | tee /tmp/spark_test_output.log
 
@@ -177,11 +182,11 @@ echo ""
 echo "=========================================="
 echo "Données dans HCD (poc_hbase_migration.kafka_events):"
 echo "=========================================="
-./bin/cqlsh localhost 9042 -e "USE poc_hbase_migration; SELECT COUNT(*) FROM kafka_events;" 2>&1 | grep -v "Warnings" | grep -E "count|^[0-9]" || true
+./bin/cqlsh localhost "${HCD_PORT}" -e "USE poc_hbase_migration; SELECT COUNT(*) FROM kafka_events;" 2>&1 | grep -v "Warnings" | grep -E "count|^[0-9]" || true
 
 echo ""
 echo "Aperçu des données:"
-./bin/cqlsh localhost 9042 -e "USE poc_hbase_migration; SELECT topic, partition, offset, key, value FROM kafka_events LIMIT 5;" 2>&1 | grep -v "Warnings" | tail -10
+./bin/cqlsh localhost "${HCD_PORT}" -e "USE poc_hbase_migration; SELECT topic, partition, offset, key, value FROM kafka_events LIMIT 5;" 2>&1 | grep -v "Warnings" | tail -10
 
 cd ..
 

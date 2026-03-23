@@ -320,7 +320,7 @@ netstat -an | findstr "9192"
 
 ```bash
 # Depuis WSL2
-cqlsh localhost 9042
+cqlsh localhost 9102
 ```
 
 **Kafka** :
@@ -446,8 +446,8 @@ wsl
 
 ```bash
 # Dans WSL2, vérifier les ports
-ss -tuln | grep 9042
-ss -tuln | grep 9092
+ss -tuln | grep 9102
+ss -tuln | grep 9192
 
 # Tuer les processus
 pkill -f cassandra

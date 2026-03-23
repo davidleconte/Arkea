@@ -43,11 +43,11 @@ eval "$(jenv init -)"
 
 # Créer le keyspace et la table via fichier CQL
 if [ -f "../create_kafka_schema.cql" ]; then
-    ./bin/cqlsh localhost 9042 -f ../create_kafka_schema.cql 2>&1 | grep -v "Warnings" || true
+    ./bin/cqlsh "${HCD_HOST:-localhost}" "${HCD_PORT:-9102}" -f ../create_kafka_schema.cql 2>&1 | grep -v "Warnings" || true
     info "✅ Keyspace poc_hbase_migration et table kafka_events créés"
 else
     warn "⚠️  Fichier create_kafka_schema.cql non trouvé, création manuelle..."
-    ./bin/cqlsh localhost 9042 <<EOF 2>&1 | grep -v "Warnings" || true
+    ./bin/cqlsh "${HCD_HOST:-localhost}" "${HCD_PORT:-9102}" <<EOF 2>&1 | grep -v "Warnings" || true
 CREATE KEYSPACE IF NOT EXISTS poc_hbase_migration WITH REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': 1};
 USE poc_hbase_migration;
 CREATE TABLE IF NOT EXISTS kafka_events (id UUID PRIMARY KEY, timestamp timestamp, topic text, partition int, offset bigint, key text, value text, processed_at timestamp);
@@ -57,18 +57,18 @@ fi
 
 # 3. Vérifier que Kafka est démarré
 info "🔍 Vérification de Kafka..."
-if lsof -Pi :9092 -sTCP:LISTEN -t >/dev/null 2>&1 ; then
-    info "✅ Kafka est démarré (port 9092)"
+if lsof -Pi :"${KAFKA_PORT:-9192}" -sTCP:LISTEN -t >/dev/null 2>&1 ; then
+    info "✅ Kafka est démarré (port ${KAFKA_PORT:-9192})"
 else
-    warn "⚠️  Kafka n'est pas démarré. Démarrez avec: ./start_kafka.sh"
+    warn "⚠️  Kafka n'est pas démarré. Démarrez avec: make start"
 fi
 
 # 4. Vérifier que HCD est démarré
 info "🔍 Vérification de HCD..."
-if lsof -Pi :9042 -sTCP:LISTEN -t >/dev/null 2>&1 ; then
-    info "✅ HCD est démarré (port 9042)"
+if lsof -Pi :"${HCD_PORT:-9102}" -sTCP:LISTEN -t >/dev/null 2>&1 ; then
+    info "✅ HCD est démarré (port ${HCD_PORT:-9102})"
 else
-    warn "⚠️  HCD n'est pas démarré. Démarrez avec: ./start_hcd.sh"
+    warn "⚠️  HCD n'est pas démarré. Démarrez avec: make start"
 fi
 
 echo ""

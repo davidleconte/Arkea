@@ -10,7 +10,9 @@ import subprocess
 def run_cmd(cmd: str):
     """Run a shell command and return (rc, stdout, stderr)."""
     # nosec B602: shell=True required for Make/bash composition
-    result = subprocess.run(cmd, shell=True, capture_output=True, text=True)  # nosec B602
+    result = subprocess.run(
+        cmd, shell=True, capture_output=True, text=True, timeout=45
+    )  # nosec B602
     return result.returncode, result.stdout, result.stderr
 
 

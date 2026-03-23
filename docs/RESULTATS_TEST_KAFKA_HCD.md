@@ -145,7 +145,7 @@ CREATE TABLE poc_hbase_migration.kafka_events (
 cd ${ARKEA_HOME}/hcd-1.2.3
 jenv local 11
 eval "$(jenv init -)"
-./bin/cqlsh localhost 9042
+./bin/cqlsh localhost 9102
 ```
 
 Puis dans cqlsh :
